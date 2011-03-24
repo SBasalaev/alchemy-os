@@ -1,5 +1,6 @@
 package alchemy.core;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -17,5 +18,5 @@ public interface LibBuilder {
 	 * @param c   context in which this library is loaded
 	 * @param in  input stream
 	 */
-	Library build(Context c, InputStream in);
+	Library build(Context c, InputStream in) throws IOException, InstantiationException;
 }
