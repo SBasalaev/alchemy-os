@@ -123,82 +123,79 @@ class CoreFunction extends Function {
 			case 38: //setenv
 				c.setEnv(((String)args[0]), (String)args[2]);
 				return null;
-			case 39: //resetenv
-				c.setEnv(((String)args[0]), null);
-				return null;
-			case 40: //utfbytes
+			case 39: //utfbytes
 				return Util.utfEncode(((String)args[0]));
-			case 41: //datestr
+			case 40: //datestr
 				return new Date(lval(args[0])).toString();
-			case 42: { //year
+			case 41: { //year
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.YEAR));
 			}
-			case 43: { //month
+			case 42: { //month
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.MONTH));
 			}
-			case 44: { //day
+			case 43: { //day
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.DAY_OF_MONTH));
 			}
-			case 45: { //dow
+			case 44: { //dow
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.DAY_OF_WEEK));
 			}
-			case 46: { //hour
+			case 45: { //hour
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.HOUR_OF_DAY));
 			}
-			case 47: { //minute
+			case 46: { //minute
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.MINUTE));
 			}
-			case 48: { //second
+			case 47: { //second
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.SECOND));
 			}
-			case 49: //sb_append
-				return ((StringBuffer) args[0]).append(args[1]);
-			case 50: //sb_addch
-				return ((StringBuffer) args[0]).append((char)ival(args[1]));
-			case 51: //sb_delete
-				return ((StringBuffer) args[0]).delete(ival(args[1]), ival(args[2]));
-			case 52: //sb_delch
-				return ((StringBuffer) args[0]).deleteCharAt(ival(args[1]));
-			case 53: //sb_insert
-				return ((StringBuffer) args[0]).insert(ival(args[1]), args[2]);
-			case 54: //sb_insch
-				return ((StringBuffer) args[0]).insert(ival(args[1]), (char)ival(args[2]));
-			case 55: //sb_setch
-				((StringBuffer) args[0]).setCharAt(ival(args[1]), (char)ival(args[2]));
+			case 48: //sb_append
+				return ((StringBuffer)args[0]).append(args[1]);
+			case 49: //sb_addch
+				return ((StringBuffer)args[0]).append((char)ival(args[1]));
+			case 50: //sb_delete
+				return ((StringBuffer)args[0]).delete(ival(args[1]), ival(args[2]));
+			case 51: //sb_delch
+				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
+			case 52: //sb_insert
+				return ((StringBuffer)args[0]).insert(ival(args[1]), args[2]);
+			case 53: //sb_insch
+				return ((StringBuffer)args[0]).insert(ival(args[1]), (char)ival(args[2]));
+			case 54: //sb_setch
+				((StringBuffer)args[0]).setCharAt(ival(args[1]), (char)ival(args[2]));
 				return args[0];
-			case 56: //sb_len
-				return Ival(((StringBuffer) args[0]).length());
-			case 57: //millis
+			case 55: //sb_len
+				return Ival(((StringBuffer)args[0]).length());
+			case 56: //millis
 				return Ival((int)(lval(args[0]) % 1000));
-			case 58: //systime
+			case 57: //systime
 				return Lval(System.currentTimeMillis());
-			case 59: //get_cwd
+			case 58: //get_cwd
 				return c.getCurDir();
-			case 60: //space_total
+			case 59: //space_total
 				return Lval(c.fs().spaceTotal());
-			case 61: //space_free
+			case 60: //space_free
 				return Lval(c.fs().spaceFree());
-			case 62: //space_used
+			case 61: //space_used
 				return Lval(c.fs().spaceUsed());
-			case 63: //to_str
+			case 62: //to_str
 				return String.valueOf(args[0]);
-			case 64: //new_sb
+			case 63: //new_sb
 				return new StringBuffer();
-			case 65: //close
+			case 64: //close
 				if (args[0] instanceof InputStream) {
 					((InputStream)args[0]).close();
 					return null;
@@ -208,24 +205,24 @@ class CoreFunction extends Function {
 				} else {
 					throw new ClassCastException();
 				}
-			case 66: //read
+			case 65: //read
 				return Ival(((InputStream)args[0]).read());
-			case 67: //readarray
+			case 66: //readarray
 				return Ival(((InputStream)args[0]).read((byte[])args[1], ival(args[2]), ival(args[3])));
-			case 68: //available
+			case 67: //available
 				return Ival(((InputStream)args[0]).available());
-			case 69: //skip
+			case 68: //skip
 				return Lval(((InputStream)args[0]).skip(lval(args[1])));
-			case 70: //write
+			case 69: //write
 				((OutputStream)args[0]).write(ival(args[1]));
 				return null;
-			case 71: //writearray
+			case 70: //writearray
 				((OutputStream)args[0]).write((byte[])args[1], ival(args[2]), ival(args[3]));
 				return null;
-			case 72: //flush
+			case 71: //flush
 				((OutputStream)args[0]).flush();
 				return null;
-			case 73: { //exec
+			case 72: { //exec
 				String prog = (String)args[0];
 				Object[] oargs = (Object[])args[1];
 				Context cc = new Context(c);
@@ -235,7 +232,7 @@ class CoreFunction extends Function {
 				}
 				return Ival(cc.startAndWait(prog, sargs));
 			}
-			case 74: { //fork
+			case 73: { //fork
 				String prog = (String)args[0];
 				Object[] oargs = (Object[])args[1];
 				Context cc = new Context(c);
@@ -246,159 +243,159 @@ class CoreFunction extends Function {
 				cc.start(prog, sargs);
 				return null;
 			}
-			case 75: //new_ba
+			case 74: //new_ba
 				return new byte[ival(args[0])];
-			case 76: //new_ca
+			case 75: //new_ca
 				return new char[ival(args[0])];
-			case 77: //new_ia
+			case 76: //new_ia
 				return new int[ival(args[0])];
-			case 78: //new_la
+			case 77: //new_la
 				return new long[ival(args[0])];
-			case 79: //new_fa
+			case 78: //new_fa
 				return new float[ival(args[0])];
-			case 80: //new_da
+			case 79: //new_da
 				return new double[ival(args[0])];
-			case 81: //new_oa
+			case 80: //new_aa
 				return new Object[ival(args[0])];
-			case 82: //baload
+			case 81: //baload
 				return Ival(((byte[])args[0])[ival(args[1])]);
-			case 83: //caload
+			case 82: //caload
 				return Ival(((char[])args[0])[ival(args[1])]);
-			case 84: //iaload
+			case 83: //iaload
 				return Ival(((int[])args[0])[ival(args[1])]);
-			case 85: //laload
+			case 84: //laload
 				return Lval(((long[])args[0])[ival(args[1])]);
-			case 86: //faload
+			case 85: //faload
 				return Fval(((float[])args[0])[ival(args[1])]);
-			case 87: //daload
+			case 86: //daload
 				return Dval(((double[])args[0])[ival(args[1])]);
-			case 88: //oaload
+			case 87: //aaload
 				return ((Object[])args[0])[ival(args[1])];
-			case 89: //bastore
+			case 88: //bastore
 				((byte[])args[0])[ival(args[1])] = (byte)ival(args[2]);
 				return null;
-			case 90: //castore
+			case 89: //castore
 				((char[])args[0])[ival(args[1])] = (char)ival(args[2]);
 				return null;
-			case 91: //iastore
+			case 90: //iastore
 				((int[])args[0])[ival(args[1])] = ival(args[2]);
 				return null;
-			case 92: //lastore
+			case 91: //lastore
 				((long[])args[0])[ival(args[1])] = lval(args[2]);
 				return null;
-			case 93: //fastore
+			case 92: //fastore
 				((float[])args[0])[ival(args[1])] = fval(args[2]);
 				return null;
-			case 94: //dastore
+			case 93: //dastore
 				((double[])args[0])[ival(args[1])] = dval(args[2]);
 				return null;
-			case 95: //oastore
+			case 94: //aastore
 				((Object[])args[0])[ival(args[1])] = args[2];
 				return null;
-			case 96: //balen
+			case 95: //balen
 				return Ival(((byte[])args[0]).length);
-			case 97: //calen
+			case 96: //calen
 				return Ival(((char[])args[0]).length);
-			case 98: //ialen
+			case 97: //ialen
 				return Ival(((int[])args[0]).length);
-			case 99: //lalen
+			case 98: //lalen
 				return Ival(((long[])args[0]).length);
-			case 100: //falen
+			case 99: //falen
 				return Ival(((float[])args[0]).length);
-			case 101: //dalen
+			case 100: //dalen
 				return Ival(((double[])args[0]).length);
-			case 102: //oalen
+			case 101: //aalen
 				return Ival(((Object[])args[0]).length);
-			case 103: //bacopy
-			case 104: //cacopy
-			case 105: //iacopy
-			case 106: //lacopy
-			case 107: //facopy
-			case 108: //dacopy
-			case 109: //oacopy
+			case 102: //bacopy
+			case 103: //cacopy
+			case 104: //iacopy
+			case 105: //lacopy
+			case 106: //facopy
+			case 107: //dacopy
+			case 108: //aacopy
 				System.arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
-			case 110: //print
+			case 109: //print
 				((OutputStream)args[0]).write(Util.utfEncode(String.valueOf(args[1])));
 				return args[0];
-			case 111: //println
+			case 110: //println
 				((OutputStream)args[0]).write(Util.utfEncode(String.valueOf(args[1]).concat("\n")));
 				return args[0];
-			case 112: //stdin
+			case 111: //stdin
 				return c.stdin;
-			case 113: //stdout
+			case 112: //stdout
 				return c.stdout;
-			case 114: //stderr
+			case 113: //stderr
 				return c.stderr;
-			case 115: //setin
+			case 114: //setin
 				c.stdin = (InputStream)args[0];
 				return null;
-			case 116: //setout
+			case 115: //setout
 				c.stdout = new PrintStream((OutputStream)args[0]);
 				return null;
-			case 117: //seterr
+			case 116: //seterr
 				c.stderr = new PrintStream((OutputStream)args[0]);
 				return null;
-			case 118: //pi
+			case 117: //pi
 				return Dval(Math.PI);
-			case 119: //abs
+			case 118: //abs
 				return Dval(Math.abs(dval(args[0])));
-			case 120: //sin
+			case 119: //sin
 				return Dval(Math.sin(dval(args[0])));
-			case 121: //cos
+			case 120: //cos
 				return Dval(Math.cos(dval(args[0])));
-			case 122: //tan
+			case 121: //tan
 				return Dval(Math.tan(dval(args[0])));
-			case 123: //sqrt
+			case 122: //sqrt
 				return Dval(Math.sqrt(dval(args[0])));
-			case 124: //ipow
+			case 123: //ipow
 				return Dval(CoreLibrary.ipow(dval(args[0]), ival(args[1])));
-			case 125: //exp
+			case 124: //exp
 				return Dval(CoreLibrary.exp(dval(args[0])));
-			case 126: //log
+			case 125: //log
 				return Dval(CoreLibrary.log(dval(args[0])));
-			case 127: //asin
+			case 126: //asin
 				return Dval(CoreLibrary.asin(dval(args[0])));
-			case 128: //acos
+			case 127: //acos
 				return Dval(CoreLibrary.acos(dval(args[0])));
-			case 129: //atan
+			case 128: //atan
 				return Dval(CoreLibrary.atan(dval(args[0])));
-			case 130: //ca2str
+			case 129: //ca2str
 				return new String((char[])args[0]);
-			case 131: //ba2utf
+			case 130: //ba2utf
 				return Util.utfDecode((byte[])args[0]);
-			case 132: //ibits2f
+			case 131: //ibits2f
 				return Fval(Float.intBitsToFloat(ival(args[0])));
-			case 133: //f2ibits
+			case 132: //f2ibits
 				return Ival(Float.floatToIntBits(fval(args[0])));
-			case 134: //lbits2d
+			case 133: //lbits2d
 				return Dval(Double.longBitsToDouble(lval(args[0])));
-			case 135: //d2lbits
+			case 134: //d2lbits
 				return Lval(Double.doubleToLongBits(dval(args[0])));
-			case 136: //new_ht
+			case 135: //new_ht
 				return new Hashtable();
-			case 137: //ht_put
+			case 136: //ht_put
 				return ((Hashtable)args[0]).put(args[1], args[2]);
-			case 138: //ht_get
+			case 137: //ht_get
 				return ((Hashtable)args[0]).get(args[1]);
-			case 139: //ht_rm
+			case 138: //ht_rm
 				return ((Hashtable)args[0]).remove(args[1]);
-			case 140: //hash
+			case 139: //hash
 				return Ival(args[0].hashCode());
-			case 141: //randomize
+			case 140: //randomize
 				rnd = new Random(lval(args[0]));
 				return null;
-			case 142: //rnd
+			case 141: //rnd
 				return Ival(rnd.nextInt(ival(args[0])));
-			case 143: //rndint
+			case 142: //rndint
 				return Ival(rnd.nextInt());
-			case 144: //rndlong
+			case 143: //rndlong
 				return Lval(rnd.nextLong());
-			case 145: //rndfloat
+			case 144: //rndfloat
 				return Fval(rnd.nextFloat());
-			case 146: //rnddouble
+			case 145: //rnddouble
 				return Dval(rnd.nextDouble());
-			case 147: { //netread
+			case 146: { //netread
 				String addr = args[0].toString();
 				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
 					throw new IOException("Unknown protocol in netread()");
