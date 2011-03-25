@@ -79,8 +79,10 @@ public class Context {
 	private Thread thread;
 	/** State of the context. */
 	private int state = NEW;
-	/** Lock for methods that affect changing context's state. */
-	private final Object stateLock = new Object();
+//	/** Lock for methods that affect changing context's state. */
+//	private final Object stateLock = new Object();
+	/** Result returned by a program. */
+	private int result = -1;
 
 	/* CONSTRUCTORS */
 
@@ -155,6 +157,16 @@ public class Context {
 	 */
 	public int getState() {
 		return state;
+	}
+
+	public int startAndWait(String progname, String[] cmdArgs) throws IOException, InstantiationException {
+		start(progname, cmdArgs);
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			//return RESULT_INT
+		}
+		return result;
 	}
 
 	/**
@@ -300,7 +312,8 @@ public class Context {
 
 		public void run() {
 			try {
-				main.call(Context.this, cmdArgs);
+				Integer r = (Integer)main.call(Context.this, cmdArgs);
+				result = r.intValue();
 			} catch (Throwable t) {
 				//TODO: exception handler
 			}
