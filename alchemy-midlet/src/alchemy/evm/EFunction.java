@@ -17,16 +17,16 @@
  *
  */
 
-package alchemy.e2.vm;
+package alchemy.evm;
 
 import alchemy.core.Context;
 import alchemy.core.Function;
 
 /**
- * E2 virtual machine.
+ * Embedded Virtual Machine.
  * @author Sergey Basalaev
  */
-class E2Function extends Function {
+class EFunction extends Function {
 
 	private final int stacksize;
 	private final int localsize;
@@ -34,7 +34,7 @@ class E2Function extends Function {
 	private final Object[] cpool;
 	private final String libname;
 
-	public E2Function(String libname,
+	public EFunction(String libname,
 			          String funcname,
 					  Object[] cpool,
 					  int stacksize,

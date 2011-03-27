@@ -17,7 +17,7 @@
  *
  */
 
-package alchemy.e2.vm;
+package alchemy.evm;
 
 import alchemy.core.Context;
 import alchemy.core.Function;
@@ -29,10 +29,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Library builder for E2 virtual machine.
+ * Library builder for Embedded Virtual Machine.
  * @author Sergey Basalaev
  */
-public class E2LibBuilder implements LibBuilder {
+public class ELibBuilder implements LibBuilder {
 
 	/**
 	 * Version of library file format.
@@ -125,7 +125,7 @@ public class E2LibBuilder implements LibBuilder {
 						data.skipBytes(relcount << 1);
 					}
 					//constructing function
-					Function func = new E2Function(libname, (String)cpool[nameref], cpool, stacksize, localsize, code);
+					Function func = new EFunction(libname, (String)cpool[nameref], cpool, stacksize, localsize, code);
 					cpool[cindex] = func;
 					if (ctype == 'P') lib.putFunc(func);
 				} break;
