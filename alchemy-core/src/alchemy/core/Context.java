@@ -20,6 +20,7 @@ package alchemy.core;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -218,6 +219,14 @@ public class Context {
 			int magic = (in.read() << 8) | in.read();
 			if (magic < 0)
 				throw new InstantiationException("Unknown library format");
+			//parsing link
+			if (magic == (short)(('#'<<8)|'=')) {
+				String fname = new UTFReader(in).readLine();
+				if (fname.charAt(0) != '/') {
+					fname = libfile.parent().path()+'/'+fname;
+				}
+				return loadLibForPath(fname, pathlist);
+			}
 			LibBuilder builder = art.builders.get((short)magic);
 			if (builder == null)
 				throw new InstantiationException("Unknown library format");
