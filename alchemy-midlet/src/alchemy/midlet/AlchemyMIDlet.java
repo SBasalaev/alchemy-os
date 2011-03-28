@@ -1,0 +1,118 @@
+/*
+ * This file is a part of Alchemy OS project.
+ *  Copyright (C) 2011  Sergey Basalaev <sbasalaev@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+package alchemy.midlet;
+
+import alchemy.core.Art;
+import alchemy.core.Context;
+import alchemy.evm.ELibBuilder;
+import alchemy.fs.File;
+import alchemy.nlib.NativeLibBuilder;
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Display;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.midlet.MIDlet;
+import javax.microedition.midlet.MIDletStateChangeException;
+
+/**
+ * Alchemy MIDlet.
+ * @author Sergey Basalaev
+ */
+public class AlchemyMIDlet extends MIDlet implements CommandListener {
+
+	public static Display display;
+
+	private final Command cmdQuit = new Command("Quit", Command.EXIT, 1);
+	private final Command cmdStart = new Command("Start", Command.OK, 1);
+	private Art runtime;
+
+	private Displayable current;
+
+	public AlchemyMIDlet() {
+		display = Display.getDisplay(this);
+		try {
+			if (!InstallInfo.exists()) {
+				kernelPanic("Alchemy is not installed.");
+				return;
+			}
+			//setting up environment
+			runtime = new Art(InstallInfo.getFilesystem());
+			runtime.setLibBuilder((short)0xEBEF, new ELibBuilder());
+			runtime.setLibBuilder((short)(('#'<<8)|'@'), new NativeLibBuilder());
+			Context root = runtime.rootContext();
+			root.setEnv("PATH", "/bin");
+			root.setEnv("LIBPATH", "/lib");
+			root.setCurDir(new File("/home"));
+			//preloading core library
+			root.loadLibrary("/lib/libcore");
+		} catch (Throwable t) {
+			kernelPanic(t.toString());
+		}
+	}
+
+	protected void startApp() throws MIDletStateChangeException {
+		display.setCurrent(current);
+	}
+
+	protected void pauseApp() {
+		current = display.getCurrent();
+	}
+
+	protected void destroyApp(boolean unconditional) {
+		notifyDestroyed();
+	}
+
+	public void commandAction(Command c, Displayable d) {
+		if (c == cmdQuit) {
+			destroyApp(true);
+		} else if (c == cmdStart) {
+			new FinalizerThread().start();
+		}
+	}
+
+	private void kernelPanic(String message) {
+		Alert alert = new Alert("Kernel panic");
+		alert.setCommandListener(this);
+		alert.addCommand(cmdQuit);
+		alert.setString(message);
+		alert.setTimeout(Alert.FOREVER);
+		alert.setType(AlertType.ERROR);
+		display.setCurrent(alert);
+	}
+
+	/** A thread that closes MIDlet after root context has finished. */
+	private class FinalizerThread extends Thread {
+
+		public FinalizerThread() {
+			super("FinalizerThread");
+		}
+
+		public void run() {
+			try {
+				runtime.rootContext().startAndWait("/bin/sh", null);
+				destroyApp(true);
+			} catch (Throwable t) {
+				kernelPanic(t.toString());
+			}
+		}
+	}
+}

@@ -354,6 +354,9 @@
         <ant target="jar" inheritall="false" antfile="${project.alchemy-core}/build.xml">
             <property name="config.active" value=""/>
         </ant>
+        <ant target="jar" inheritall="false" antfile="${project.alchemy-fs-jsr75}/build.xml">
+            <property name="config.active" value=""/>
+        </ant>
     </target>
     <!--preprocess-->
     <target name="pre-preprocess"/>
