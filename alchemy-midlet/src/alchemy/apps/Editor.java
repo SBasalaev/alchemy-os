@@ -27,8 +27,6 @@ import alchemy.util.Util;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.TextBox;
 import javax.microedition.lcdui.TextField;
 
@@ -60,8 +58,8 @@ public class Editor extends NativeApp {
 		}
 		File docfile = c.toFile(args[0]);
 		TextBox box = new TextBox("Editor", null, 65536, TextField.ANY);
-		final EditorListener el = new EditorListener();
-		box.setCommandListener(el);
+		final NotifyListener l = new NotifyListener();
+		box.setCommandListener(l);
 		//reading file
 		try {
 			if (c.fs().exists(docfile)) {
@@ -78,12 +76,12 @@ public class Editor extends NativeApp {
 			c.stderr.println(e);
 			return 1;
 		}
-		AlchemyMIDlet.display.setCurrent(box);
+		AlchemyMIDlet.getInstance().pushScreen(box);
 		try {
 			while (true) {
-				synchronized (el) { el.wait(); }
-				if (el.result == cmdQuit) return 0;
-				else if (el.result == cmdSave) {
+				synchronized (l) { l.wait(); }
+				if (l.result == cmdQuit) return 0;
+				else if (l.result == cmdSave) {
 					OutputStream out = c.fs().write(docfile);
 					byte[] data = Util.utfEncode(box.getString());
 					out.write(data);
@@ -93,18 +91,8 @@ public class Editor extends NativeApp {
 		} catch (Exception e) {
 			c.stderr.println(e);
 			return 1;
-		}
-	}
-
-	private class EditorListener implements CommandListener {
-
-		public Command result;
-
-		public EditorListener() { }
-
-		public void commandAction(Command c, Displayable d) {
-			result = c;
-			synchronized (this) { notify(); }
+		} finally {
+			AlchemyMIDlet.getInstance().popScreen();
 		}
 	}
 }

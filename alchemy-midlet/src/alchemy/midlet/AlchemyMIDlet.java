@@ -24,6 +24,7 @@ import alchemy.core.Context;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
 import alchemy.nlib.NativeLibBuilder;
+import java.util.Stack;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
@@ -39,7 +40,14 @@ import javax.microedition.midlet.MIDletStateChangeException;
  */
 public class AlchemyMIDlet extends MIDlet implements CommandListener {
 
-	public static Display display;
+	private static AlchemyMIDlet instance;
+
+	/** Returns MIDlet instance. */
+	public static AlchemyMIDlet getInstance() {
+		return instance;
+	}
+
+	private Display display;
 
 	private final Command cmdQuit = new Command("Quit", Command.EXIT, 1);
 	private final Command cmdStart = new Command("Start", Command.OK, 1);
@@ -47,7 +55,10 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 
 	private Displayable current;
 
+	private Stack screens = new Stack();
+
 	public AlchemyMIDlet() {
+		instance = this;
 		display = Display.getDisplay(this);
 		try {
 			if (!InstallInfo.exists()) {
@@ -64,9 +75,21 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 			root.setCurDir(new File("/home"));
 			//preloading core library
 			root.loadLibrary("/lib/libcore");
+			runApp();
 		} catch (Throwable t) {
 			kernelPanic(t.toString());
 		}
+	}
+
+	private void runApp() {
+		Alert alert = new Alert("Alchemy");
+		alert.setTimeout(Alert.FOREVER);
+		alert.setString("Start application?");
+		alert.addCommand(cmdQuit);
+		alert.addCommand(cmdStart);
+		alert.setCommandListener(this);
+		alert.setType(AlertType.CONFIRMATION);
+		current = alert;
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
@@ -86,6 +109,25 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 			destroyApp(true);
 		} else if (c == cmdStart) {
 			new FinalizerThread().start();
+		}
+	}
+
+	/**
+	 * Pushes screen on the top of screen stack.
+	 */
+	public void pushScreen(Displayable d) {
+		screens.push(d);
+		display.setCurrent(d);
+	}
+
+	/**
+	 * Removes top screen from the stack and shows
+	 * screen next to it.
+	 */
+	public void popScreen() {
+		screens.pop();
+		if (!screens.empty()) {
+			display.setCurrent((Displayable)screens.peek());
 		}
 	}
 

@@ -17,43 +17,28 @@
  *
  */
 
-package alchemy.nlib;
+package alchemy.apps;
 
-import alchemy.core.Context;
-import alchemy.core.Function;
-import alchemy.core.Library;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
 
 /**
- * Skeleton for native application.
- * <p/>
- * NOTE: To be loaded through the native interface
- * subclass must define public constructor without
- * parameters.
+ * Command listener that notifies awaiting thread.
+ *
  * @author Sergey Basalaev
  */
-public abstract class NativeApp extends Library {
+class NotifyListener implements CommandListener {
 
-	private Function main;
+	public Command result;
+	
+	public NotifyListener() { }
 
-	/** Constructor for subclasses. */
-	public NativeApp() {
-		main = new MainFunction();
-	}
-
-	public abstract int main(Context c, String[] args) throws Exception;
-
-	public final Function getFunc(String sig) {
-		return "main".equals(sig) ? main : null;
-	}
-
-	private class MainFunction extends Function {
-
-		public MainFunction() {
-			super("main");
-		}
-
-		protected Object exec(Context c, Object[] args) throws Exception {
-			return Ival(main(c, (String[])args[0]));
+	public void commandAction(Command c, Displayable d) {
+		synchronized (this) {
+			result = c;
+			notify();
 		}
 	}
+
 }
