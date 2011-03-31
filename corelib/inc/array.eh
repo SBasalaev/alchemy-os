@@ -1,6 +1,4 @@
 // array operations
-// NOTE: this header is temporary
-//  until compiler supports arrays
 
 type BArray;
 type CArray;
