@@ -183,7 +183,7 @@ public class Context {
 	public void start(String progname, String[] cmdArgs) throws IOException, InstantiationException {
 		if (state != NEW) throw new IllegalStateException();
 		Library prog = loadLibForPath(progname, getEnv("PATH"));
-		Function main = prog.getFunc(progname);
+		Function main = prog.getFunc("main");
 		if (main == null) throw new InstantiationException("No 'main' function");
 		thread = new ContextThread(progname, main, cmdArgs);
 		state = RUNNING;
@@ -321,9 +321,10 @@ public class Context {
 
 		public void run() {
 			try {
-				Integer r = (Integer)main.call(Context.this, cmdArgs);
+				Integer r = (Integer)main.call(Context.this, new Object[] {cmdArgs});
 				result = r.intValue();
 			} catch (Throwable t) {
+				t.printStackTrace();
 				//TODO: exception handler
 			}
 			state = ENDED;

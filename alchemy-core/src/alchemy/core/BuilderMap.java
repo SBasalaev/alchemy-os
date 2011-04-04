@@ -58,6 +58,7 @@ class BuilderMap {
 		if (index == magics.length) grow();
 		magics[index] = magic;
 		builders[index] = builder;
+		if (index == len) len++;
 	}
 
 	/**

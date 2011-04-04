@@ -43,6 +43,7 @@ class LibCache {
 	 */
 	public synchronized Library getLibrary(File file, long tstamp) {
 		LibCacheEntry entry = (LibCacheEntry)cache.get(file);
+		if (entry == null) return null;
 		if (entry.tstamp < tstamp) return null;
 		return (Library)entry.lib.get();
 		/*
