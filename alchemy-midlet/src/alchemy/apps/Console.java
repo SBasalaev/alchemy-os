@@ -93,6 +93,7 @@ public class Console extends NativeApp {
 		} catch (Exception e) {
 			form.print(e.toString());
 			form.print(child.dumpCallStack());
+			e.printStackTrace();
 			return 1;
 		} finally {
 			AlchemyMIDlet.getInstance().popScreen();

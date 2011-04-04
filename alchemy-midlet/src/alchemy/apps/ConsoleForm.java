@@ -39,8 +39,8 @@ import javax.microedition.lcdui.TextField;
  */
 class ConsoleForm extends Form implements ItemCommandListener {
 
-	public final InputStream in = new ConsoleInputStream();
-	public final PrintStream out = new PrintStream(new ConsoleOutputStream());
+	final InputStream in = new ConsoleInputStream();
+	final PrintStream out = new PrintStream(new ConsoleOutputStream());
 
 	private final TextField input = new TextField(">", null, 1024, TextField.ANY);
 	private final Command cmdInput = new Command("Input", Command.OK, 1);
@@ -72,7 +72,8 @@ class ConsoleForm extends Form implements ItemCommandListener {
 			} catch (InterruptedException ie) {
 				print("interrupt");
 			}
-			delete(size());
+			delete(size()-1);
+			append(new StringItem(input.getLabel(), input.getString()+'\n'));
 			inputvisible = false;
 			return input.getString();
 		}
@@ -123,11 +124,20 @@ class ConsoleForm extends Form implements ItemCommandListener {
 		}
 	}
 
-	private class ConsoleInputStream extends InputStream {
+	public class ConsoleInputStream extends InputStream {
 
 		private ByteArrayInputStream buf = null;
 
 		public ConsoleInputStream() { }
+
+		public void setPrompt(String prompt) {
+			input.setLabel(prompt);
+		}
+
+		public synchronized void clearScreen() {
+			deleteAll();
+			if (inputvisible) append(input);
+		}
 
 		public int read() throws IOException {
 			if (buf == null) {

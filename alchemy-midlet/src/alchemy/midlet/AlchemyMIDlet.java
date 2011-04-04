@@ -131,6 +131,11 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 		}
 	}
 
+	public void alert(String title, String text, AlertType type) {
+		Alert a = new Alert(title, text, null, type);
+		display.setCurrent(a);
+	}
+
 	private void kernelPanic(String message) {
 		Alert alert = new Alert("Kernel panic");
 		alert.setCommandListener(this);
@@ -150,7 +155,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 
 		public void run() {
 			try {
-				runtime.rootContext().startAndWait("/bin/sh", null);
+				runtime.rootContext().startAndWait("con", new String[] {"sh"});
 				destroyApp(true);
 			} catch (Throwable t) {
 				kernelPanic(t.toString());

@@ -26,6 +26,7 @@ import alchemy.nlib.NativeApp;
 import alchemy.util.Util;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.TextBox;
 import javax.microedition.lcdui.TextField;
@@ -36,7 +37,7 @@ import javax.microedition.lcdui.TextField;
  */
 public class Editor extends NativeApp {
 
-	private static final String HELP = "Usage: ned <filename>\n";
+	private static final String HELP = "Usage: ed <filename>\n";
 	private static final String VERSION = "native editor v1.0\n";
 	
 	private static final Command cmdSave = new Command("Save", Command.OK, 1);
@@ -44,7 +45,7 @@ public class Editor extends NativeApp {
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			c.stderr.print("ned: no file specified\n");
+			c.stderr.print("ed: no file specified\n");
 			c.stderr.print(HELP);
 			return 1;
 		}
@@ -58,6 +59,8 @@ public class Editor extends NativeApp {
 		}
 		File docfile = c.toFile(args[0]);
 		TextBox box = new TextBox("Editor", null, 65536, TextField.ANY);
+		box.addCommand(cmdSave);
+		box.addCommand(cmdQuit);
 		final NotifyListener l = new NotifyListener();
 		box.setCommandListener(l);
 		//reading file
@@ -86,6 +89,7 @@ public class Editor extends NativeApp {
 					byte[] data = Util.utfEncode(box.getString());
 					out.write(data);
 					out.close();
+					AlchemyMIDlet.getInstance().alert("Editor", "File saved", AlertType.INFO);
 				}
 			}
 		} catch (Exception e) {

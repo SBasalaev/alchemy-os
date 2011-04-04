@@ -104,6 +104,7 @@ class InstallInfo {
 		if (props == null) return;
 		try {
 			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, true);
+			if (rs.getNextRecordID() == 1) rs.addRecord(null, 0, 0);
 			byte[] data = Util.utfEncode(props.toString());
 			rs.setRecord(1, data, 0, data.length);
 			rs.closeRecordStore();
