@@ -102,6 +102,7 @@ public class Context {
 	 */
 	public Context(Context parent) {
 		if (parent == null) throw new IllegalArgumentException();
+		this.parent = parent;
 		art = parent.art;
 		stdin = parent.stdin;
 		stdout = parent.stdout;
@@ -182,6 +183,7 @@ public class Context {
 	 */
 	public void start(String progname, String[] cmdArgs) throws IOException, InstantiationException {
 		if (state != NEW) throw new IllegalStateException();
+		if (cmdArgs == null) cmdArgs = new String[0];
 		Library prog = loadLibForPath(progname, getEnv("PATH"));
 		Function main = prog.getFunc("main");
 		if (main == null) throw new InstantiationException("No 'main' function");
