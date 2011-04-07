@@ -133,19 +133,21 @@ public class Shell extends NativeApp {
 			if (line.charAt(0) == '\'') {
 				end = line.indexOf('\'', 1);
 				if (end < 0) throw new IllegalArgumentException("Unclosed '");
-				token = line.substring(1,end-1);
+				token = line.substring(1,end);
+				line = line.substring(end+1).trim();
 				if (mode == MODE_ARG) mode = MODE_QARG;
 			} else if (line.charAt(0) == '"') {
 				end = line.indexOf('"', 1);
 				if (end < 0) throw new IllegalArgumentException("Unclosed \"");
-				token = line.substring(1, end-1);
+				token = line.substring(1, end);
+				line = line.substring(end+1).trim();
 				if (mode == MODE_ARG) mode = MODE_QARG;
 			} else {
 				end = line.indexOf(' ');
 				if (end < 0) end = line.length();
 				token = line.substring(0,end);
+				line = line.substring(end).trim();
 			}
-			line = line.substring(end).trim();
 			if (token.length() == 0) continue;
 			switch (mode) {
 				case MODE_CMD:

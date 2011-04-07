@@ -132,14 +132,14 @@ class InstallInfo {
 	 * Returns null if Alchemy is not installed
 	 */
 	public static Filesystem getFilesystem() throws IOException {
-		if (!exists()) return null;
+		if (props == null && !exists()) return null;
 		if (props == null) read();
 		String fstype = props.get(FS_TYPE);
 		String fsinit = props.get(FS_INIT);
-		if (fstype.equals("RMS")) return new RSFilesystem(fsinit);
+		if (fstype.equals("rms")) return new RSFilesystem(fsinit);
 		//#ifdef JSR75
-		if (fstype.equals("JSR75")) return new JSR75Filesystem(fsinit);
+		if (fstype.equals("jsr75")) return new JSR75Filesystem(fsinit);
 		//#endif
-		throw new RuntimeException(FS_TYPE+'='+fstype);
+		throw new RuntimeException("Unknown FS: "+FS_TYPE+'='+fstype);
 	}
 }
