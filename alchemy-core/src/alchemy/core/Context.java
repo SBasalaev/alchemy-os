@@ -29,6 +29,67 @@ import java.util.Stack;
 
 /**
  * Program execution context.
+ * Context inherits program environment, input/output
+ * streams and program thread.
+ * <h3><a name="ContextStates">Context states</a></h3>
+ * <ul>
+ * <li>
+ * <code>NEW</code><br/>
+ * This is the state of newly created context. Context, created by
+ * {@link #Context(Context) Context(parent)} constructor inherits
+ * environment from its parent, though it can be changed.
+ * <li>
+ * <code>RUNNING</code><br/>
+ * This is the state of context which executes program in separate
+ * thread. Context becomes <code>RUNNING</code> after executing one
+ * of methods {@link #start(String, String[]) start()}
+ * or {@link #startAndWait(String, String[]) startAndWait()}.
+ * Either of these methods can be called only in <code>NEW</code>
+ * state. If program fails to be loaded then exception is thrown
+ * and context remains in <code>NEW</code> state.
+ * <li>
+ * <code>ENDED</code><br/>
+ * The <code>RUNNING</code> context becomes <code>ENDED</code>
+ * when program thread dies. In this state program exit code
+ * can be examined with {@link #getExitCode()} method and
+ * if program has ended by throwing an exception that exception
+ * can be obtained with {@link #getError()} method.
+ * </ul>
+ * <h3><a name="LibraryLoading">Loading of programs and libraries</a></h3>
+ * Methods that load libraries are <code>start</code>, <code>startAndWait</code>
+ * and <code>loadLibrary</code>. The first two are used on <code>NEW</code>
+ * context to start program while the latter can be called in any context state.
+ * Loading of library consists of the following steps:
+ * <ol>
+ * <li>
+ * Library file is resolved from given string argument and
+ * searched in a set of paths. If file can not be found then
+ * <code>IOException</code> is thrown.
+ *   <ul>
+ *   <li>
+ *   If argument starts with <code>'/'</code> character, then it is regarded
+ *   as absolute path.
+ *   <li>
+ *   If argument contains </code>'/'</code> but not starts with it then it
+ *   is regarded as path relative to the {@link #getCurDir() current directory}.
+ *   <li>
+ *   If argument does not contain any slashes then search is performed in a
+ *   set of paths defined in an environment variables. Methods <code>start</code>
+ *   and <code>startAndWait</code> read paths from <code>PATH</code> variable
+ *   and <code>readLibrary</code> method reads them from <code>LIBPATH</code>.
+ *   These variables should contain colon-separated list of paths.
+ *   </ul>
+ * <li>
+ * Library cache is checked whether it already has library loaded from
+ * obtained file. If file contents has not been changed since that load
+ * then cached library is returned.
+ * <li>
+ * If cache has no library or has older version of library then file is
+ * used to construct new library instance. The first two bytes are read
+ * to determine file type and call appropriate <code>LibBuilder</code>.
+ * If there is no builder for the given file type then
+ * <code>InstantiationException</code> is thrown.
+ * </ol>
  *
  * @author Sergey Basalaev
  */
@@ -36,11 +97,20 @@ public class Context {
 
 	/* CONTEXT STATES */
 
-	/** State of the newly created context. */
+	/**
+	 * State of the newly created context.
+	 * @see <a href="#ContextStates">Context states</a>
+	 */
 	public static final int NEW = 0;
-	/** State of the running context. */
+	/**
+	 * State of the running context.
+	 * @see <a href="#ContextStates">Context states</a>
+	 */
 	public static final int RUNNING = 1;
-	/** State of the context that has ended its execution. */
+	/**
+	 * State of the context that has ended its execution.
+	 * @see <a href="#ContextStates">Context states</a>
+	 */
 	public static final int ENDED = 5;
 
 	/* PUBLIC FIELDS */
@@ -83,7 +153,9 @@ public class Context {
 //	/** Lock for methods that affect changing context's state. */
 //	private final Object stateLock = new Object();
 	/** Result returned by a program. */
-	private int result = -1;
+	private int exitcode = -1;
+	/** Error thrown by a program. */
+	private Throwable error;
 
 	/* CONSTRUCTORS */
 
@@ -116,6 +188,8 @@ public class Context {
 	 * Returns value of environment variable.
 	 * If variable is not defined then empty
 	 * string is returned.
+	 *
+	 * @see #setEnv(String, String)
 	 */
 	public String getEnv(String key) {
 		if (env != null) {
@@ -130,6 +204,7 @@ public class Context {
 
 	/**
 	 * Sets value to the environment variable.
+	 * @see #getEnv(String)
 	 */
 	public void setEnv(String key, String value) {
 		if (env == null) env = new Hashtable();
@@ -138,6 +213,7 @@ public class Context {
 
 	/**
 	 * Returns current directory of context.
+	 * @see #setCurDir(File)
 	 */
 	public File getCurDir() {
 		return curdir;
@@ -148,6 +224,7 @@ public class Context {
 	 * @throws IOException
 	 *   if given file does not represent existing
 	 *   directory or if I/O error occurs
+	 * @see #getCurDir() 
 	 */
 	public void setCurDir(File newdir) throws IOException {
 		if (!art.fs.isDirectory(newdir)) throw new IOException("Not a directory: "+newdir);
@@ -161,14 +238,49 @@ public class Context {
 		return state;
 	}
 
-	public int startAndWait(String progname, String[] cmdArgs) throws IOException, InstantiationException {
+	/**
+	 * Returns program exit code.
+	 */
+	public int getExitCode() {
+		return exitcode;
+	}
+
+	/**
+	 * If state is <code>ENDED</code> and program execution
+	 * resulted in exception this method returns it.
+	 */
+	public Throwable getError() {
+		return error;
+	}
+
+	/**
+	 * Starts program in this context, blocks while
+	 * it executes and returns program exit code.
+	 * This method should be called when context is
+	 * in <code>NEW</code> state.
+	 *
+	 * @param progname  program name
+	 * @param cmdArgs   command line arguments
+	 * @return program exit code
+	 * @throws IOException
+	 *    if an I/O error occurs while loading program
+	 * @throws InstantiationException
+	 *   if no program can be loaded from the file resolved from
+	 *   given program name
+	 * @throws IllegalStateException
+	 *   if context is not in <code>NEW</code> state
+	 *
+	 * @see <a href="#LibraryLoading">How programs are loaded</a>
+	 */
+	public int startAndWait(String progname, String[] cmdArgs)
+			throws IOException, InstantiationException, IllegalStateException {
 		start(progname, cmdArgs);
 		try {
 			thread.join();
 		} catch (InterruptedException e) {
 			//return RESULT_INT
 		}
-		return result;
+		return exitcode;
 	}
 
 	/**
@@ -180,8 +292,19 @@ public class Context {
 	 *
 	 * @param progname  program name or path
 	 * @param cmdArgs   command-line arguments, may be null
+	 *
+	 * @throws IOException
+	 *    if an I/O error occurs while loading program
+	 * @throws InstantiationException
+	 *   if program cannot be loaded from the file resolved from
+	 *   given program name
+	 * @throws IllegalStateException
+	 *   if context is not in <code>NEW</code> state
+	 *
+	 * @see <a href="#LibraryLoading">How programs are loaded</a>
 	 */
-	public void start(String progname, String[] cmdArgs) throws IOException, InstantiationException {
+	public void start(String progname, String[] cmdArgs)
+			throws IOException, InstantiationException, IllegalStateException {
 		if (state != NEW) throw new IllegalStateException();
 		if (cmdArgs == null) cmdArgs = new String[0];
 		Library prog = loadLibForPath(progname, getEnv("PATH"));
@@ -192,6 +315,19 @@ public class Context {
 		thread.start();
 	}
 
+	/**
+	 * Loads library with given name.
+	 *
+	 * @param libname  library name or path
+	 * @return <code>Library</code> instance
+	 * @throws IOException
+	 *   if an I/O error occurs while loading library
+	 * @throws InstantiationException
+	 *   if library cannot be loaded from the file resolved from
+	 *   given library name
+	 *
+	 * @see <a href="#LibraryLoading">How libraries are loaded</a>
+	 */
 	public Library loadLibrary(String libname) throws IOException, InstantiationException {
 		return loadLibForPath(libname, getEnv("LIBPATH"));
 	}
@@ -324,10 +460,10 @@ public class Context {
 		public void run() {
 			try {
 				Integer r = (Integer)main.call(Context.this, new Object[] {cmdArgs});
-				result = r.intValue();
+				exitcode = r.intValue();
 			} catch (Throwable t) {
 				t.printStackTrace();
-				//TODO: exception handler
+				error = t;
 			}
 			state = ENDED;
 		}
