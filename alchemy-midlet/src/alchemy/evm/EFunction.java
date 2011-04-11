@@ -58,6 +58,11 @@ class EFunction extends Function {
 		System.arraycopy(args, 0, locals, 0, args.length);
 		int ct = 0;
 		while (true) {
+System.err.print("Stack:");
+for (int i=0; i<=head; i++) {
+System.err.print(" "+stack[i]);
+}
+System.err.println();
 			int opcode = code[ct++];
 			switch (opcode) {
 			// CONSTANTS

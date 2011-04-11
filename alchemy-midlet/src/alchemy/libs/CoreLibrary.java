@@ -61,7 +61,7 @@ public class CoreLibrary extends Library {
 			String name;
 			int index = 0;
 			while ((name = r.readLine()) != null) {
-				functions.put(name, new CoreFunction(name, index));
+				table.put(name, new CoreFunction(name, index));
 				index++;
 			}
 		}

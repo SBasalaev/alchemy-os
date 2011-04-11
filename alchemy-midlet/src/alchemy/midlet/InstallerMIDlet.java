@@ -135,28 +135,35 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		installCfg.put(InstallInfo.FS_TYPE, selectedfs);
 		installCfg.put(InstallInfo.FS_INIT, fsinit);
 		Filesystem fs = InstallInfo.getFilesystem();
-		//installing base.arh
-		DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/base.arh"));
-		messages.append("Installing base.arh\n");
-		while (datastream.available() > 0) {
-			String fname = datastream.readUTF();
-			File f = new File('/'+fname);
-			datastream.skip(8); //timestamp
-			int attrs = datastream.readUnsignedByte();
-			if ((attrs & 16) != 0) { //directory
-				if (!fs.exists(f)) fs.mkdir(f);
-			} else {
-				if (!fs.exists(f)) fs.create(f);
-				byte[] data = new byte[datastream.readInt()];
-				datastream.readFully(data);
-				OutputStream out = fs.write(f);
-				out.write(data);
-				out.close();
+		//installing archives
+		String[] archives = split(setupCfg.get("install.archives"));
+		for (int i=0; i<archives.length; i++) {
+			String arh = archives[i];
+			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
+			messages.append("Installing"+arh+'\n');
+			while (datastream.available() > 0) {
+				String fname = datastream.readUTF();
+				File f = new File('/'+fname);
+				datastream.skip(8); //timestamp
+				int attrs = datastream.readUnsignedByte();
+				if ((attrs & 16) != 0) { //directory
+					if (!fs.exists(f)) fs.mkdir(f);
+				} else {
+					if (!fs.exists(f)) fs.create(f);
+					byte[] data = new byte[datastream.readInt()];
+					datastream.readFully(data);
+					OutputStream out = fs.write(f);
+					out.write(data);
+					out.close();
+				}
+				fs.setRead(f, (attrs & 4) != 0);
+				fs.setWrite(f, (attrs & 2) != 0);
+				fs.setExec(f, (attrs & 1) != 0);
 			}
-			fs.setRead(f, (attrs & 4) != 0);
-			fs.setWrite(f, (attrs & 2) != 0);
-			fs.setExec(f, (attrs & 1) != 0);
 		}
+		//saving some fields that might be used in future releases
+		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
+		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
 		//writing install config
 		messages.append("Saving configuration...\n");
 		InstallInfo.save();

@@ -101,6 +101,11 @@ public class Shell extends NativeApp {
 						}
 					}
 					child.startAndWait(cc.cmd, cc.args);
+					Throwable err = child.getError();
+					if (err != null) {
+						c.stderr.println(err);
+						c.stderr.println(c.dumpCallStack());
+					}
 				}
 			} catch (Throwable t) {
 				String msg = t.getMessage();

@@ -59,8 +59,8 @@ class ConsoleForm extends Form implements ItemCommandListener {
 	}
 
 	/**
-	 * Blocks current thread until some text put
-	 * into text field and "input" button pressed.
+	 * Blocks current thread until some text is put
+	 * into text field and "input" button is pressed.
 	 */
 	private String waitForInput() {
 		synchronized (input) {
@@ -109,10 +109,10 @@ class ConsoleForm extends Form implements ItemCommandListener {
 				flushmark--;
 			}
 			if (flushmark >= off) {
-				buf.write(b, off, flushmark);
+				buf.write(b, off, off+flushmark+1);
 				flush();
 				len -= flushmark-off+1;
-				off += flushmark-off+1;
+				off = flushmark+1;
 			}
 			buf.write(b, off, len);
 		}

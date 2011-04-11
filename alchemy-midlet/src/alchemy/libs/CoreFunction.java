@@ -121,7 +121,7 @@ class CoreFunction extends Function {
 			case 37: //getenv
 				return c.getEnv(((String)args[0]));
 			case 38: //setenv
-				c.setEnv(((String)args[0]), (String)args[2]);
+				c.setEnv(((String)args[0]), (String)args[1]);
 				return null;
 			case 39: //utfbytes
 				return Util.utfEncode(((String)args[0]));
