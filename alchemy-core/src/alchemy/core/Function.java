@@ -70,13 +70,13 @@ public abstract class Function {
 	 * @throws Exception if an exception occurs during execution of function
 	 */
 	public final Object call(Context c, Object[] args) throws Exception {
-		synchronized (c.callStack) {
-			c.callStack.push(this);
-		}
+		//synchronized (c.callStack) {
+		c.callStack.push(this);
+		//}
 		Object result = exec(c, args);
-		synchronized (c.callStack) {
-			c.callStack.pop();
-		}
+		//synchronized (c.callStack) {
+		c.callStack.pop();
+		//}
 		return result;
 	}
 

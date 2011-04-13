@@ -438,11 +438,11 @@ public class Context {
 	 */
 	public String dumpCallStack() {
 		StringBuffer sb = new StringBuffer();
-		synchronized (callStack) {
-			for (int i=callStack.size()-1; i>=0; i--) {
-				sb.append('@').append(callStack.elementAt(i)).append('\n');
-			}
+		//synchronized (callStack) {
+		for (int i=callStack.size()-1; i>=0; i--) {
+			sb.append('@').append(callStack.elementAt(i)).append('\n');
 		}
+		//}
 		return sb.toString();
 	}
 
@@ -462,7 +462,6 @@ public class Context {
 				Integer r = (Integer)main.call(Context.this, new Object[] {cmdArgs});
 				exitcode = r.intValue();
 			} catch (Throwable t) {
-				t.printStackTrace();
 				error = t;
 			}
 			state = ENDED;
