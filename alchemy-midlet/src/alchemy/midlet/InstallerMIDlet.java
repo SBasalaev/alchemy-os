@@ -140,7 +140,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
-			messages.append("Installing"+arh+'\n');
+			messages.append("Installing "+arh+'\n');
 			while (datastream.available() > 0) {
 				String fname = datastream.readUTF();
 				File f = new File('/'+fname);

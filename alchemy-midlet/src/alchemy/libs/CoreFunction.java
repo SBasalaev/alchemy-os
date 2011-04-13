@@ -406,6 +406,6 @@ class CoreFunction extends Function {
 	}
 	
 	public String toString() {
-		return "core:"+signature;
+		return "libcore:"+signature;
 	}
 }

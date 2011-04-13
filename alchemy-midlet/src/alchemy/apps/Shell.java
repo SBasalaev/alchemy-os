@@ -53,11 +53,12 @@ public class Shell extends NativeApp {
 				line = line.trim();
 				if (line.length() == 0) continue;
 				if (line.charAt(0) == '#') continue;
-				ShellCommand cc;
+				ShellCommand cc = null;
 				try { cc = split(line); }
 				catch (IllegalArgumentException e) {
-					c.stderr.println(r.lineNumber()+':'+e.toString());
-					return 1;
+					c.stderr.println(r.lineNumber()+":"+e.getMessage());
+					if (c.stdin instanceof ConsoleInputStream) continue;
+					else return 1;
 				}
 				if (cc.cmd.equals("exit")) {
 					int ret = 0;
@@ -104,7 +105,7 @@ public class Shell extends NativeApp {
 					Throwable err = child.getError();
 					if (err != null) {
 						c.stderr.println(err);
-						c.stderr.println(c.dumpCallStack());
+						c.stderr.println(child.dumpCallStack());
 					}
 				}
 			} catch (Throwable t) {
