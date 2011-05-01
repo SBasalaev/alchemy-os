@@ -35,7 +35,7 @@ def is_dir(f: File): Bool;
 def fread(f: File): IStream;
 def fwrite(f: File): OStream;
 def fappend(f: File): OStream;
-def flist(f: File): AArray;
+def flist(f: File): Array;
 def fmodified(f: File): Long;
 def fsize(f: File): Int;
 
