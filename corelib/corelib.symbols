@@ -72,8 +72,8 @@ writearray
 flush
 exec
 fork
-new_ba
-new_ca
+new_bar
+new_car
 newarray
 baload
 caload
