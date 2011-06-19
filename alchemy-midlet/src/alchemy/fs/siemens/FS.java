@@ -17,41 +17,37 @@
  *
  */
 
-package alchemy.fs.jsr75;
+package alchemy.fs.siemens;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.util.Initable;
+import com.siemens.mp.io.file.FileConnection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
 
 /**
- * Filesystem using JSR75 specification.
- *
+ * Siemens file system.
  * @author Sergey Basalaev
  */
-public class JSR75Filesystem extends Filesystem {
+public final class FS extends Filesystem implements Initable {
 
-	private final String root;
+	private String root;
 
-	/**
-	 * Creates new <code>JSR75Filesystem</code> using
-	 * given directory as root directory.
-	 * @param root root directory
-	 */
-	public JSR75Filesystem(String root) {
-		this.root = "file:///"+root;
+	public FS() { }
+
+	public void init(Object root) {
+		this.root = "file:///"+String.valueOf(root);
 	}
+
 
 	public OutputStream append(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			if (!fc.exists()) fc.create();
 			return fc.openOutputStream(fc.fileSize());
 		} finally {
@@ -62,8 +58,6 @@ public class JSR75Filesystem extends Filesystem {
 	public OutputStream write(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			if (!fc.exists()) fc.create();
 			fc.truncate(0);
 			return fc.openOutputStream();
@@ -75,8 +69,7 @@ public class JSR75Filesystem extends Filesystem {
 	public InputStream read(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
-			return fc.openInputStream();
+			return new SiemensInputStream(fc.openInputStream());
 		} finally {
 			fc.close();
 		}
@@ -115,8 +108,6 @@ public class JSR75Filesystem extends Filesystem {
 	public void create(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			fc.create();
 		} finally {
 			fc.close();
@@ -126,8 +117,6 @@ public class JSR75Filesystem extends Filesystem {
 	public void mkdir(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path()+'/', Connector.READ_WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			fc.mkdir();
 		} finally {
 			fc.close();
@@ -137,7 +126,6 @@ public class JSR75Filesystem extends Filesystem {
 	public void remove(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			if (file.path().length() == 0) throw new SecurityException("Cannot delete root directory.");
 			fc.delete();
 		} finally {
@@ -174,7 +162,6 @@ public class JSR75Filesystem extends Filesystem {
 	public int size(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			if (fc.isDirectory()) return 0;
 			else {
 				long size = fc.fileSize();
@@ -189,7 +176,6 @@ public class JSR75Filesystem extends Filesystem {
 	public long lastModified(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			return fc.lastModified();
 		} finally {
 			fc.close();
@@ -199,7 +185,6 @@ public class JSR75Filesystem extends Filesystem {
 	public String[] list(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			Enumeration e = fc.list("*", true);
 			Vector v = new Vector();
 			while (e.hasMoreElements()) v.addElement(e.nextElement());
@@ -221,7 +206,6 @@ public class JSR75Filesystem extends Filesystem {
 	public void setRead(File file, boolean on) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			fc.setReadable(on);
 		} finally {
 			fc.close();
@@ -231,7 +215,6 @@ public class JSR75Filesystem extends Filesystem {
 	public void setWrite(File file, boolean on) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			fc.setWritable(on);
 		} finally {
 			fc.close();

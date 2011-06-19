@@ -350,7 +350,11 @@
         <antcall target="do-clean" inheritall="true" inheritrefs="true"/>
     </target>
     <!--deps-jar-->
-    <target name="deps-jar" depends="conditional-clean" unless="no.deps"/>
+    <target name="deps-jar" depends="conditional-clean" unless="no.deps">
+        <ant target="jar" inheritall="false" antfile="${project.stubs-for-3rd-party-api}/build.xml">
+            <property name="config.active" value=""/>
+        </ant>
+    </target>
     <!--preprocess-->
     <target name="pre-preprocess"/>
     <target name="do-preprocess" unless="no.preprocess">

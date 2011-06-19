@@ -21,6 +21,7 @@ package alchemy.fs.rms;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.util.Initable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -36,7 +37,7 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  * rather slow.
  * @author Sergey Basalaev
  */
-public final class RSFilesystem extends Filesystem {
+public final class FS extends Filesystem implements Initable {
 
 	static private final String ERR_DENIED = "Access denied to ";
 	static private final String ERR_CLOSED = "File is closed: ";
@@ -51,17 +52,25 @@ public final class RSFilesystem extends Filesystem {
 	static private int F_EXEC = 1;
 
 	/** <code>RecordStore</code> to use as filesystem. */
-	private final RecordStore store;
+	private RecordStore store;
+
+	/**
+	 * Constructor to load through the reflection.
+	 * <code>init()</code> should be called before
+	 * filesystem can be used.
+	 */
+	public FS() { }
 
 	/**
 	 * Creates new <code>RSFilesystem</code> that uses
 	 * record store with given name.
-	 * @param storename    name of the record store to use
-	 * @throws IOException
+	 * @param name    name of the record store to use
+	 * @throws RuntimeException
 	 *   if an error occurs within record storage system
 	 */
-	public RSFilesystem(String storename) throws IOException {
+	public void init(Object name) {
 		RecordStore rs = null;
+		String storename = String.valueOf(name);
 		try {
 			try {
 				rs = RecordStore.openRecordStore(storename, false);
@@ -70,7 +79,7 @@ public final class RSFilesystem extends Filesystem {
 				rs.addRecord(new byte[] {0,0,0,0,0,0,0,0,0,0,0,0}, 0, 12);
 			}
 		} catch (RecordStoreException rse) {
-			throw new IOException(rse.toString());
+			throw new RuntimeException(rse.toString());
 		}
 		this.store = rs;
 	}

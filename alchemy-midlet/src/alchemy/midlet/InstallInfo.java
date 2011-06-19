@@ -20,10 +20,7 @@
 package alchemy.midlet;
 
 import alchemy.fs.Filesystem;
-import alchemy.fs.rms.RSFilesystem;
-//#ifdef JSR75
-import alchemy.fs.jsr75.JSR75Filesystem;
-//#endif
+import alchemy.util.Initable;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import alchemy.util.Util;
@@ -136,10 +133,17 @@ class InstallInfo {
 		if (props == null) read();
 		String fstype = props.get(FS_TYPE);
 		String fsinit = props.get(FS_INIT);
-		if (fstype.equals("rms")) return new RSFilesystem(fsinit);
-		//#ifdef JSR75
-		if (fstype.equals("jsr75")) return new JSR75Filesystem(fsinit);
-		//#endif
-		throw new RuntimeException("Unknown FS: "+FS_TYPE+'='+fstype);
+		try {
+			Class fsclass = Class.forName("org.alchemy.fs."+fstype+".FS");
+			Filesystem fs = (Filesystem)fsclass.newInstance();
+			if (fs instanceof Initable) {
+				((Initable)fs).init(fsinit);
+			}
+			return fs;
+		} catch (ClassNotFoundException cnfe) {
+			throw new RuntimeException("FS module not found for "+FS_TYPE+'='+fstype);
+		} catch (Throwable t) {
+			throw new RuntimeException("Error while creating FS: "+t);
+		}
 	}
 }
