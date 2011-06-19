@@ -127,6 +127,7 @@ public abstract class Function {
 
 	/** Unboxing method for Integer values. */
 	protected static final int ival(Object obj) {
+		if (obj == null) return 0;
 		return ((Integer)obj).intValue();
 	}
 
@@ -135,21 +136,25 @@ public abstract class Function {
 	 * is <code>Integer(0)</code>.
 	 */
 	protected static final boolean bval(Object obj) {
+		if (obj == null) return false;
 		return ((Integer)obj).intValue() != 0;
 	}
 
 	/** Unboxing method for Long values. */
 	protected static final long lval(Object obj) {
+		if (obj == null) return 0l;
 		return ((Long)obj).longValue();
 	}
 
 	/** Unboxing method for Float values. */
 	protected static final float fval(Object obj) {
+		if (obj == null) return 0f;
 		return ((Float)obj).floatValue();
 	}
 
 	/** Unboxing method for Double values. */
 	protected static final double dval(Object obj) {
+		if (obj == null) return 0d;
 		return ((Double)obj).doubleValue();
 	}
 }
