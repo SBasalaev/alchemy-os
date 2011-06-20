@@ -134,7 +134,7 @@ class InstallInfo {
 		String fstype = props.get(FS_TYPE);
 		String fsinit = props.get(FS_INIT);
 		try {
-			Class fsclass = Class.forName("org.alchemy.fs."+fstype+".FS");
+			Class fsclass = Class.forName("alchemy.fs."+fstype+".FS");
 			Filesystem fs = (Filesystem)fsclass.newInstance();
 			if (fs instanceof Initable) {
 				((Initable)fs).init(fsinit);
