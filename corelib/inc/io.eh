@@ -1,7 +1,5 @@
 // IO operations
 
-use "array";
-
 type File;
 type IStream;
 type OStream;

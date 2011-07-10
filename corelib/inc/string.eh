@@ -1,8 +1,6 @@
 // operations on strings
 // and string buffers
 
-use "array";
-
 type StrBuf;
 
 def to_str(a: Any): String;
