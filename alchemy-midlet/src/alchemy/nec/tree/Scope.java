@@ -16,14 +16,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.util;
+package alchemy.nec.tree;
+
+import alchemy.nec.ParseException;
 
 /**
- * Initialization for objects that are loaded through
- * <code>Class.newInstance()</code> method.
- *
+ * 
  * @author Sergey Basalaev
  */
-public interface Initable {
-	public void init(Object cfg);
+public interface Scope {
+	/**
+	 * Returns type by its alias.
+	 * Returns <code>null</code> if alias is not defined.
+	 */
+	Type getType(String alias);
+
+	/**
+	 * Returns variable for given identifier.
+	 * Returns <code>null</code> if variable is not defined.
+	 */
+	Var getVar(String id);
+
+	/**
+	 * Adds variable to the current scope.
+	 * @throws ParseException
+	 *   if variable can't be added to this scope for some reason
+	 * @return
+	 *   <code>true</code> if variable overrides some previous
+	 *   values in this scope, <code>false</code> if it is new variable
+	 */
+	boolean addVar(Var v) throws ParseException;
+
+	/**
+	 * Returns true if variable is defined and is local.
+	 */
+	boolean isLocal(String id);
 }

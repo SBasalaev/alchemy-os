@@ -16,43 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
-
-import alchemy.core.Context;
-import alchemy.core.Function;
-import alchemy.core.Library;
+package alchemy.nec.tree;
 
 /**
- * Skeleton for native application.
- * <p/>
- * NOTE: To be loaded through the native interface
- * subclass must define public constructor without
- * parameters.
+ * Cast expression.
+ * <pre><b>cast (</b><i>type</i><b>)</b> <i>expr</i></pre>.
+ * This does not include primitive casts and produces no code.
  * @author Sergey Basalaev
  */
-public abstract class NativeApp extends Library {
+public class CastExpr extends Expr {
+	public Type toType;
+	public Expr expr;
 
-	private Function main;
-
-	/** Constructor for subclasses. */
-	public NativeApp() {
-		main = new MainFunction();
+	public CastExpr(Type toType, Expr expr) {
+		this.toType = toType;
+		this.expr = expr;
 	}
 
-	public abstract int main(Context c, String[] args) throws Exception;
-
-	public final Function getFunc(String sig) {
-		return "main".equals(sig) ? main : null;
+	public Type rettype() {
+		return toType;
 	}
 
-	private class MainFunction extends Function {
-
-		public MainFunction() {
-			super("main");
-		}
-
-		protected Object exec(Context c, Object[] args) throws Exception {
-			return Ival(main(c, (String[])args[0]));
-		}
+	public void accept(ExprVisitor v, Object data) {
+		v.visitCast(this, data);
 	}
 }

@@ -16,14 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.util;
+package alchemy.nec.tree;
 
 /**
- * Initialization for objects that are loaded through
- * <code>Class.newInstance()</code> method.
- *
+ * An expression.
  * @author Sergey Basalaev
  */
-public interface Initable {
-	public void init(Object cfg);
+public abstract class Expr {
+
+	/** Type that this expression returns. */
+	public abstract Type rettype();
+
+	public abstract void accept(ExprVisitor v, Object data);
 }

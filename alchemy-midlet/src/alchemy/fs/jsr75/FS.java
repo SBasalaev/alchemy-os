@@ -14,7 +14,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 package alchemy.fs.jsr75;
@@ -205,7 +204,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public String[] list(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(root+file.path()+'/', Connector.READ);
 		try {
 			if (!fc.exists()) throw new IOException("File not found: "+file);
 			Enumeration e = fc.list("*", true);

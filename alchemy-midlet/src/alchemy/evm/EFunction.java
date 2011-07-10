@@ -14,7 +14,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 package alchemy.evm;
@@ -58,8 +57,8 @@ class EFunction extends Function {
 		System.arraycopy(args, 0, locals, 0, args.length);
 		int ct = 0;
 		while (true) {
-			int opcode = code[ct++];
-			switch (opcode) {
+			int instr = code[ct++];
+			switch (instr) {
 			// CONSTANTS
 				case (byte) 0x01: { // aconst_null
 					stack[++head] = null;
@@ -385,7 +384,7 @@ class EFunction extends Function {
 				case (byte) 0x55: // load_5
 				case (byte) 0x56: // load_6
 				case (byte) 0x57: // load_7
-					stack[++head] = locals[opcode & 7]; break;
+					stack[++head] = locals[instr & 7]; break;
 				//variable savers
 				case (byte) 0x58: // store_0
 				case (byte) 0x59: // store_1
@@ -395,7 +394,7 @@ class EFunction extends Function {
 				case (byte) 0x5D: // store_5
 				case (byte) 0x5E: // store_6
 				case (byte) 0x5F: // store_7
-					locals[opcode & 7] = stack[head--]; break;
+					locals[instr & 7] = stack[head]; break;
 
 			//BRANCHING
 				case (byte) 0x61: { //ifeq <short>
@@ -433,49 +432,54 @@ class EFunction extends Function {
 					ct += itmp;
 					break;
 				}
-				case (byte) 0x68: { //ifnul <short>
+				case (byte) 0x68: { //ifnull <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
 					if (stack[head--] == null) ct += itmp;
 					break;
 				}
-				case (byte) 0x69: { //ifnnul <short>
+				case (byte) 0x69: { //ifnnull <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
 					if (stack[head--] != null) ct += itmp;
 					break;
 				}
 
 			//FUNCTION CALLS
-				case (byte) 0x70: // call0
-				case (byte) 0x71: // call1
-				case (byte) 0x72: // call2
-				case (byte) 0x73: // call3
-				case (byte) 0x74: // call4
-				case (byte) 0x75: // call5
-				case (byte) 0x76: // call6
-				case (byte) 0x77: // call7
-				case (byte) 0x78: // calv0
-				case (byte) 0x79: // calv1
-				case (byte) 0x7A: // calv2
-				case (byte) 0x7B: // calv3
-				case (byte) 0x7C: // calv4
-				case (byte) 0x7D: // calv5
-				case (byte) 0x7E: // calv6
-				case (byte) 0x7F: {//calv7
-					int paramlen = opcode & 7;
+				case (byte) 0x70: // call_0
+				case (byte) 0x71: // call_1
+				case (byte) 0x72: // call_2
+				case (byte) 0x73: // call_3
+				case (byte) 0x74: // call_4
+				case (byte) 0x75: // call_5
+				case (byte) 0x76: // call_6
+				case (byte) 0x77: // call_7
+				case (byte) 0x78: // calv_0
+				case (byte) 0x79: // calv_1
+				case (byte) 0x7A: // calv_2
+				case (byte) 0x7B: // calv_3
+				case (byte) 0x7C: // calv_4
+				case (byte) 0x7D: // calv_5
+				case (byte) 0x7E: // calv_6
+				case (byte) 0x7F: {//calv_7
+					int paramlen = instr & 7;
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
 					stack[head] = ((Function)stack[head]).call(c, params);
-					if ((opcode & 8) != 0) head--;
+					if ((instr & 8) != 0) head--;
 					break;
 				}
 
 			//OTHERS
+				case (byte) 0x4F: {// acmp
+					boolean btmp = stack[head] == null ? stack[head-1] == null : stack[head-1].equals(stack[head]);
+					stack[--head] = Ival(!btmp);
+					break;
+				}
 				case (byte) 0x1D: // throw
 					throw (Exception)stack[head];
-				case (byte) 0x1E: // ret_nul
+				case (byte) 0x1E: // ret_null
 					return null;
-				case (byte) 0x1F: // ret
+				case (byte) 0x1F: // return
 					return stack[head];
 				case (byte) 0x2D: //dup
 					stack[++head] = stack[head]; break;
@@ -494,7 +498,7 @@ class EFunction extends Function {
 					break;
 				}
 				case (byte) 0x3E: { //store <ubyte>
-					locals[code[ct++] & 0xff] = stack[head--];
+					locals[code[ct++] & 0xff] = stack[head];
 					break;
 				}
 				case (byte) 0x3F: { //ldc <ushort>

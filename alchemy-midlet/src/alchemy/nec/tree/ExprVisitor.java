@@ -16,14 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.util;
+package alchemy.nec.tree;
 
 /**
- * Initialization for objects that are loaded through
- * <code>Class.newInstance()</code> method.
- *
+ * Visitor for expression trees.
  * @author Sergey Basalaev
  */
-public interface Initable {
-	public void init(Object cfg);
+public interface ExprVisitor {
+	void visitAssign(AssignExpr assign, Object data);
+	void visitBinary(BinaryExpr binary, Object data);
+	void visitBlock(BlockExpr block, Object data);
+	void visitCast(CastExpr cast, Object data);
+	void visitCastPrimitive(CastPrimitiveExpr cast, Object data);
+	void visitComparison(ComparisonExpr comp, Object data);
+	void visitConst(ConstExpr cexpr, Object data);
+	void visitDiscard(DiscardExpr disc, Object data);
+	void visitFCall(FCallExpr fcall, Object data);
+	void visitIf(IfExpr ifexpr, Object data);
+	void visitNone(NoneExpr none, Object data);
+	void visitUnary(UnaryExpr expr, Object data);
+	void visitVar(VarExpr vexpr, Object data);
+	void visitWhile(WhileExpr wexpr, Object data);
 }

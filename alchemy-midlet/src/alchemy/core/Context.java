@@ -212,7 +212,7 @@ public class Context {
 	}
 
 	/**
-	 * Returns current directory of context.
+	 * Returns current working directory of context.
 	 * @see #setCurDir(File)
 	 */
 	public File getCurDir() {
@@ -220,7 +220,7 @@ public class Context {
 	}
 
 	/**
-	 * Sets new current directory to this context.
+	 * Sets new current working directory to this context.
 	 * @throws IOException
 	 *   if given file does not represent existing
 	 *   directory or if I/O error occurs
@@ -385,7 +385,7 @@ public class Context {
 	 * @return file that exists in a file system
 	 * @throws IOException  if file is not found
 	 */
-	private File resolveFile(String name, String pathlist) throws IOException {
+	public File resolveFile(String name, String pathlist) throws IOException {
 		File f;
 		if (name.indexOf('/') >= 0) {
 			f = toFile(name);
@@ -460,9 +460,10 @@ public class Context {
 		public void run() {
 			try {
 				Integer r = (Integer)main.call(Context.this, new Object[] {cmdArgs});
-				exitcode = r.intValue();
+				exitcode = r == null ? 0 : r.intValue();
 			} catch (Throwable t) {
 				error = t;
+				t.printStackTrace();
 			}
 			state = ENDED;
 		}

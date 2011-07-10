@@ -16,43 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
-
-import alchemy.core.Context;
-import alchemy.core.Function;
-import alchemy.core.Library;
+package alchemy.nec.tree;
 
 /**
- * Skeleton for native application.
- * <p/>
- * NOTE: To be loaded through the native interface
- * subclass must define public constructor without
- * parameters.
+ *
  * @author Sergey Basalaev
  */
-public abstract class NativeApp extends Library {
+public class ScalarType extends Type {
 
-	private Function main;
+	private final String name;
 
-	/** Constructor for subclasses. */
-	public NativeApp() {
-		main = new MainFunction();
+	public ScalarType(String name) {
+		this.name = name;
 	}
 
-	public abstract int main(Context c, String[] args) throws Exception;
-
-	public final Function getFunc(String sig) {
-		return "main".equals(sig) ? main : null;
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (!(obj instanceof ScalarType)) return false;
+		ScalarType other = (ScalarType)obj;
+		return this.name.equals(other.name);
 	}
 
-	private class MainFunction extends Function {
-
-		public MainFunction() {
-			super("main");
-		}
-
-		protected Object exec(Context c, Object[] args) throws Exception {
-			return Ival(main(c, (String[])args[0]));
-		}
+	public String toString() {
+		return name;
 	}
 }

@@ -16,43 +16,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
-
-import alchemy.core.Context;
-import alchemy.core.Function;
-import alchemy.core.Library;
+package alchemy.nec.tree;
 
 /**
- * Skeleton for native application.
- * <p/>
- * NOTE: To be loaded through the native interface
- * subclass must define public constructor without
- * parameters.
+ *
  * @author Sergey Basalaev
  */
-public abstract class NativeApp extends Library {
+public class FunctionType extends Type {
+	public Type rettype;
+	public Type[] args;
 
-	private Function main;
-
-	/** Constructor for subclasses. */
-	public NativeApp() {
-		main = new MainFunction();
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (!(obj instanceof FunctionType)) return false;
+		final FunctionType other = (FunctionType)obj;
+		if (!this.rettype.equals(other.rettype)) return false;
+		for (int i=0; i<args.length; i++) {
+			if (!this.args[i].equals(other.args[i])) return false;
+		}
+		return true;
 	}
 
-	public abstract int main(Context c, String[] args) throws Exception;
-
-	public final Function getFunc(String sig) {
-		return "main".equals(sig) ? main : null;
-	}
-
-	private class MainFunction extends Function {
-
-		public MainFunction() {
-			super("main");
+	public String toString() {
+		StringBuffer buf = new StringBuffer().append('(');
+		for (int i=0; i<args.length; i++) {
+			if (i != 0) buf.append(',');
+			buf.append(args[i]);
 		}
-
-		protected Object exec(Context c, Object[] args) throws Exception {
-			return Ival(main(c, (String[])args[0]));
+		buf.append(')');
+		if (!rettype.equals(BuiltinType.typeNone)) {
+			buf.append(':').append(rettype);
 		}
+		return buf.toString();
 	}
 }

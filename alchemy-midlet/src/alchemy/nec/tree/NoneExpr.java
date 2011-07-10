@@ -16,43 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
-
-import alchemy.core.Context;
-import alchemy.core.Function;
-import alchemy.core.Library;
+package alchemy.nec.tree;
 
 /**
- * Skeleton for native application.
- * <p/>
- * NOTE: To be loaded through the native interface
- * subclass must define public constructor without
- * parameters.
+ * Expression of type 'none'.
+ * <pre>()</pre>
+ * 
  * @author Sergey Basalaev
  */
-public abstract class NativeApp extends Library {
+public class NoneExpr extends Expr {
 
-	private Function main;
-
-	/** Constructor for subclasses. */
-	public NativeApp() {
-		main = new MainFunction();
+	public Type rettype() {
+		return BuiltinType.typeNone;
 	}
 
-	public abstract int main(Context c, String[] args) throws Exception;
-
-	public final Function getFunc(String sig) {
-		return "main".equals(sig) ? main : null;
-	}
-
-	private class MainFunction extends Function {
-
-		public MainFunction() {
-			super("main");
-		}
-
-		protected Object exec(Context c, Object[] args) throws Exception {
-			return Ival(main(c, (String[])args[0]));
-		}
+	public void accept(ExprVisitor v, Object data) {
+		v.visitNone(this, data);
 	}
 }

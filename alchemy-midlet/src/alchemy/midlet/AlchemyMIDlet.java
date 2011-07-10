@@ -14,7 +14,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 package alchemy.midlet;
@@ -25,12 +24,7 @@ import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
 import alchemy.nlib.NativeLibBuilder;
 import java.util.Stack;
-import javax.microedition.lcdui.Alert;
-import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Display;
-import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
@@ -67,7 +61,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 			}
 			//setting up environment
 			runtime = new Art(InstallInfo.getFilesystem());
-			runtime.setLibBuilder((short)0xEBEF, new ELibBuilder());
+			runtime.setLibBuilder((short)0xC0DE, new ELibBuilder());
 			runtime.setLibBuilder((short)(('#'<<8)|'@'), new NativeLibBuilder());
 			Context root = runtime.rootContext();
 			root.setEnv("PATH", "/bin");
