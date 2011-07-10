@@ -10,7 +10,7 @@ def main(args : Array) {
   var len = alen(args);
   var i = 0;
   while (i < len) {
-    if (i != 0) print(stdout(), " ") else {}
+    if (i != 0) print(stdout(), " ");
     print(stdout(), aload(args,i));
     i = i+1;
   }

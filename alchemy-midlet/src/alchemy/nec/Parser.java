@@ -502,9 +502,13 @@ public class Parser {
 					Expr cond = parseExpr(scope);
 					expect(')');
 					Expr ifexpr = parseExpr(scope);
-					if (t.nextToken() != Tokenizer.TT_KEYWORD || !t.svalue.equals("else"))
-						throw new ParseException(t+" unexpected here");
-					Expr elseexpr = parseExpr(scope);
+					Expr elseexpr;
+					if (t.nextToken() != Tokenizer.TT_KEYWORD || !t.svalue.equals("else")) {
+						t.pushBack();
+						elseexpr = new NoneExpr();
+					} else {
+						elseexpr = parseExpr(scope);
+					}
 					Type btype = binaryCastType(ifexpr.rettype(), elseexpr.rettype());
 					return new IfExpr(cond, cast(ifexpr,btype), cast(elseexpr,btype));
 				} else if (t.svalue.equals("var")) {
