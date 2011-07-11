@@ -23,9 +23,12 @@ import alchemy.fs.Filesystem;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.Vector;
 
 /**
  * Program execution context.
@@ -156,6 +159,8 @@ public class Context {
 	private int exitcode = -1;
 	/** Error thrown by a program. */
 	private Throwable error;
+	/** Streams opened by process. */
+	private Vector streams = new Vector();
 
 	/* CONSTRUCTORS */
 
@@ -433,6 +438,28 @@ public class Context {
 	}
 
 	/**
+	 * Adds input or output stream to this context.
+	 * All streams owned by context are automatically flushed
+	 * and closed when context turns to <code>ENDED</code> state.
+	 * @param stream  <code>InputStream</code> or <code>OutputStream</code>
+	 */
+	public void addStream(Object stream) {
+		if ((stream instanceof InputStream) || (stream instanceof OutputStream)) {
+			streams.addElement(stream);
+		}
+	}
+
+	/**
+	 * Removes stream from owning by this context.
+	 *
+	 * @param stream  <code>InputStream</code> or <code>OutputStream</code>
+	 * @see #addStream(Object)
+	 */
+	public void removeStream(Object stream) {
+		streams.removeElement(stream);
+	}
+
+	/**
 	 * Dumps stack of function calls.
 	 * @return newline separated list of function calls
 	 */
@@ -466,6 +493,21 @@ public class Context {
 				t.printStackTrace();
 			}
 			state = ENDED;
+			for (Enumeration e = streams.elements(); e.hasMoreElements(); ) {
+				Object stream = e.nextElement();
+				if (stream instanceof InputStream) {
+					try {
+						((InputStream)stream).close();
+					} catch (IOException ioe) { }
+				} else if (stream instanceof OutputStream) {
+					try {
+						((OutputStream)stream).flush();
+					} catch (IOException ioe) { }
+					try {
+						((OutputStream)stream).close();
+					} catch (IOException ioe) { }
+				}
+			}
 		}
 	}
 }

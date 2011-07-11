@@ -88,12 +88,21 @@ class CoreFunction extends Function {
 				return Ival(c.fs().exists((File)args[0]));
 			case 15: //is_dir
 				return Ival(c.fs().isDirectory((File)args[0]));
-			case 16: //fread
-				return c.fs().read((File)args[0]);
-			case 17: //fwrite
-				return c.fs().write((File)args[0]);
-			case 18: //fappend
-				return c.fs().append((File)args[0]);
+			case 16: { //fread
+				InputStream stream = c.fs().read((File)args[0]);
+				c.addStream(stream);
+				return stream;
+			}
+			case 17: { //fwrite
+				OutputStream stream = c.fs().write((File)args[0]);
+				c.addStream(stream);
+				return stream;
+			}
+			case 18: { //fappend
+				OutputStream stream = c.fs().append((File)args[0]);
+				c.addStream(stream);
+				return stream;
+			}
 			case 19: //flist
 				return c.fs().list((File)args[0]);
 			case 20: //fmodified
@@ -211,9 +220,11 @@ class CoreFunction extends Function {
 			case 64: //close
 				if (args[0] instanceof InputStream) {
 					((InputStream)args[0]).close();
+					c.removeStream(args[0]);
 					return null;
 				} else if (args[0] instanceof OutputStream) {
 					((OutputStream)args[0]).close();
+					c.removeStream(args[0]);
 					return null;
 				} else {
 					throw new ClassCastException();
@@ -372,7 +383,9 @@ class CoreFunction extends Function {
 				String addr = args[0].toString();
 				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
 					throw new IOException("Unknown protocol in netread()");
-				return Connector.openInputStream(addr);
+				InputStream stream = Connector.openInputStream(addr);
+				c.addStream(stream);
+				return stream;
 			}
 		}
 		return null;
