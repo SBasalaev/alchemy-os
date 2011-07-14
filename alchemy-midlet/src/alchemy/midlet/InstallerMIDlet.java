@@ -28,6 +28,8 @@ import java.util.Vector;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
+import javax.microedition.rms.RecordStore;
+import javax.microedition.rms.RecordStoreException;
 
 /**
  * MIDlet to install Alchemy.
@@ -42,6 +44,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	private final Command cmdQuit = new Command("Quit", Command.EXIT, 10);
 	private final Command cmdInstall = new Command("Install", Command.OK, 1);
+	private final Command cmdUpdate = new Command("Update", Command.OK, 2);
 	private final Command cmdUninstall = new Command("Uninstall", Command.OK, 5);
 	private final Command cmdOk = new Command("Ok", Command.OK, 1);
 
@@ -82,6 +85,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			new InstallerThread(1).start();
 		} else if (c == cmdUninstall) {
 			new InstallerThread(2).start();
+		} else if (c == cmdUpdate) {
+			new InstallerThread(3).start();
 		} else {
 			synchronized (waitForAction) {
 				waitForAction.notify();
@@ -91,8 +96,17 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	private void check() {
 		if (InstallInfo.exists()) {
-			messages.append("Install config found\n");
+			Properties instCfg = InstallInfo.read();
+			messages.append("Installed version: "+instCfg.get("alchemy.version")+'\n');
 			messages.addCommand(cmdUninstall);
+			String[] curVersion = split(instCfg.get("alchemy.version"), '.');
+			String[] newVersion = split(setupCfg.get("alchemy.version"), '.');
+			int vcmp = curVersion[0].compareTo(newVersion[0]);
+			if (vcmp == 0) vcmp = curVersion[1].compareTo(newVersion[1]);
+			if (vcmp > 0) {
+				messages.append("Can be updated to "+setupCfg.get("alchemy.version")+'\n');
+				messages.addCommand(cmdUpdate);
+			}
 		} else {
 			messages.append("Not installed\n");
 			messages.addCommand(cmdInstall);
@@ -102,7 +116,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private void install() throws Exception {
 		Properties instCfg = InstallInfo.read();
 		//choosing filesystem
-		String[] filesystems = split(setupCfg.get("install.fs"));
+		String[] filesystems = split(setupCfg.get("install.fs"), ' ');
 		List fschoice = new List("Choose filesystem", Choice.EXCLUSIVE);
 		for (int i=0; i<filesystems.length; i++) {
 			fschoice.append(setupCfg.get("install.fs."+filesystems[i]+".name"), null);
@@ -130,12 +144,45 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		}
 		display.setCurrent(messages);
 		//initializing fs
-		Properties installCfg = InstallInfo.read();
-		installCfg.put(InstallInfo.FS_TYPE, selectedfs);
-		installCfg.put(InstallInfo.FS_INIT, fsinit);
-		Filesystem fs = InstallInfo.getFilesystem();
+		instCfg.put(InstallInfo.FS_TYPE, selectedfs);
+		instCfg.put(InstallInfo.FS_INIT, fsinit);
 		//installing archives
-		String[] archives = split(setupCfg.get("install.archives"));
+		installArchives();
+		//writing configuration data
+		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
+		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
+		//writing install config
+		messages.append("Saving configuration...\n");
+		InstallInfo.save();
+		messages.append("Installed successfully\n");
+		messages.addCommand(cmdUninstall);
+	}
+
+	private void uninstall() throws Exception {
+		messages.deleteAll();
+		messages.append("Uninstalling...\n");
+		//purging filesystem
+		try {
+			RecordStore.deleteRecordStore("rsfiles");
+		} catch (RecordStoreException rse) { }
+		//removing config
+		InstallInfo.remove();
+		messages.append("Uninstalled successfully.\n");
+		messages.addCommand(cmdInstall);
+	}
+
+	private void update() throws Exception {
+		installArchives();
+		Properties instCfg = InstallInfo.read();
+		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
+		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
+		messages.append("Updated successfully\n");
+		messages.addCommand(cmdUninstall);
+	}
+
+	private void installArchives() throws Exception {
+		Filesystem fs = InstallInfo.getFilesystem();
+		String[] archives = split(setupCfg.get("install.archives"), ' ');
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
@@ -160,30 +207,13 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 				fs.setExec(f, (attrs & 1) != 0);
 			}
 		}
-		//saving some fields that might be used in future releases
-		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
-		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
-		//writing install config
-		messages.append("Saving configuration...\n");
-		InstallInfo.save();
-		messages.append("Installed successfully\n");
-		messages.addCommand(cmdUninstall);
-	}
-
-	private void uninstall() throws Exception {
-		messages.deleteAll();
-		messages.append("Uninstalling...\n");
-		//removing config
-		InstallInfo.remove();
-		messages.append("Uninstalled successfully.\n");
-		messages.addCommand(cmdInstall);
 	}
 	
-	private String[] split(String str) {
+	private String[] split(String str, char ch) {
 		Vector v = new Vector();
 		str = str.trim();
 		while (true) {
-			int sp = str.indexOf(' ');
+			int sp = str.indexOf(ch);
 			if (sp < 0) {
 				v.addElement(str);
 				break;
@@ -206,6 +236,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		 *   0 - check
 		 *   1 - install
 		 *   2 - uninstall
+		 *   3 - update
 		 */
 		private final int action;
 
@@ -222,6 +253,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 					case 0: check(); break;
 					case 1: install(); break;
 					case 2: uninstall(); break;
+					case 3: update(); break;
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
