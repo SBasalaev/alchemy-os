@@ -42,7 +42,7 @@ public class Console extends NativeApp {
 			return 1;
 		}
 		if (args[0].equals("-v")) {
-			c.stdout.print("Native console v1.0\n");
+			c.stdout.print("Native console v1.1\n");
 			return 0;
 		}
 		if (args[0].equals("-h")) {

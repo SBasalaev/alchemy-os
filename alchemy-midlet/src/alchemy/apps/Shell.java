@@ -47,8 +47,12 @@ public class Shell extends NativeApp {
 				((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 			}
 			UTFReader r = new UTFReader(scriptinput);
-			String line;
-			while ((line = r.readLine()) != null) try {
+			while (true) try {
+				String line = r.readLine();
+				if (line == null) {
+					if (c.stdin instanceof ConsoleInputStream) continue;
+					else break;
+				}
 				line = line.trim();
 				if (line.length() == 0) continue;
 				if (line.charAt(0) == '#') continue;
@@ -85,7 +89,7 @@ public class Shell extends NativeApp {
 						child.stdin = c.fs().read(c.toFile(cc.in));
 					}
 					if (cc.out != null) {
-						File outfile = new File(cc.out);
+						File outfile = c.toFile(cc.out);
 						if (cc.appendout) {
 							child.stdout = new PrintStream(c.fs().append(outfile));
 						} else {
@@ -93,7 +97,7 @@ public class Shell extends NativeApp {
 						}
 					}
 					if (cc.err != null) {
-						File outfile = new File(cc.out);
+						File outfile = c.toFile(cc.out);
 						if (cc.appendout) {
 							child.stdout = new PrintStream(c.fs().append(outfile));
 						} else {
@@ -108,8 +112,7 @@ public class Shell extends NativeApp {
 					}
 				}
 			} catch (Throwable t) {
-				String msg = t.getMessage();
-				c.stderr.println(msg == null ? t.toString() : msg);
+				c.stderr.println(t);
 			}
 			return 0;
 		} catch (Exception e) {
@@ -147,6 +150,8 @@ public class Shell extends NativeApp {
 				token = line.substring(1, end);
 				line = line.substring(end+1).trim();
 				if (mode == MODE_ARG) mode = MODE_QARG;
+			} else if (line.charAt(0) == '#') {
+				break;
 			} else {
 				end = line.indexOf(' ');
 				if (end < 0) end = line.length();
@@ -193,6 +198,7 @@ public class Shell extends NativeApp {
 					break;
 				case MODE_QARG:
 					argv.addElement(token);
+					mode = MODE_ARG;
 			}
 		}
 		String[] args = new String[argv.size()];

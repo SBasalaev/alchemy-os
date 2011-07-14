@@ -101,8 +101,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.addCommand(cmdUninstall);
 			String[] curVersion = split(instCfg.get("alchemy.version"), '.');
 			String[] newVersion = split(setupCfg.get("alchemy.version"), '.');
-			int vcmp = curVersion[0].compareTo(newVersion[0]);
-			if (vcmp == 0) vcmp = curVersion[1].compareTo(newVersion[1]);
+			int vcmp = newVersion[0].compareTo(curVersion[0]);
+			if (vcmp == 0) vcmp = newVersion[1].compareTo(curVersion[1]);
 			if (vcmp > 0) {
 				messages.append("Can be updated to "+setupCfg.get("alchemy.version")+'\n');
 				messages.addCommand(cmdUpdate);

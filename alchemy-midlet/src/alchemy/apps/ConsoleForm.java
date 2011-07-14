@@ -74,7 +74,7 @@ class ConsoleForm extends Form implements ItemCommandListener {
 			delete(size()-1);
 			append(new StringItem(input.getLabel(), input.getString()+'\n'));
 			inputvisible = false;
-			return input.getString();
+			return input.getString()+'\n';
 		}
 	}
 
@@ -136,6 +136,11 @@ class ConsoleForm extends Form implements ItemCommandListener {
 		public synchronized void clearScreen() {
 			deleteAll();
 			if (inputvisible) append(input);
+		}
+
+		public int available() throws IOException {
+			if (buf == null) return 0;
+			return buf.available();
 		}
 
 		public int read() throws IOException {
