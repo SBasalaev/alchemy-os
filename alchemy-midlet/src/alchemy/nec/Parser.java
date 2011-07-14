@@ -491,6 +491,8 @@ public class Parser {
 			case Tokenizer.TT_KEYWORD:
 				if (t.svalue.equals("cast")) {
 					return parseCast(scope);
+				} else if (t.svalue.equals("null")) {
+					return new ConstExpr(null);
 				} else if (t.svalue.equals("while")) {
 					expect('(');
 					Expr cond = parseExpr(scope);
@@ -610,6 +612,9 @@ public class Parser {
 		}
 		if (toType instanceof BuiltinType) {
 			return castPrimitive(expr, toType);
+		}
+		if (expr instanceof ConstExpr && ((ConstExpr)expr).value == null) {
+			return new CastExpr(toType, expr);
 		}
 		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
 	}

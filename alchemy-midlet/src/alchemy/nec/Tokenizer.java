@@ -300,7 +300,8 @@ class Tokenizer {
 				return ttype = TT_BOOL;
 			if (id.equals("def") || id.equals("if") || id.equals("else") ||
 			    id.equals("use") || id.equals("do") || id.equals("while")||
-				id.equals("cast")|| id.equals("var")|| id.equals("type"))
+				id.equals("cast")|| id.equals("var")|| id.equals("type") ||
+				id.equals("null"))
 				return ttype = TT_KEYWORD;
 			return ttype = TT_IDENTIFIER;
 		}
