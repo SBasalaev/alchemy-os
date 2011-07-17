@@ -134,7 +134,7 @@ public class Parser {
 							if (t.nextToken() != Tokenizer.TT_QUOTED)
 								throw new ParseException("String literal expected after 'use'");
 							File next = resolveFile(t.svalue);
-							expect(';');
+							if (t.nextToken() != ';') t.pushBack();
 							parseFile(next);
 						} else if (t.svalue.equals("type")) {
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
@@ -148,7 +148,7 @@ public class Parser {
 									break;
 								case '=':
 									unit.putType(alias, parseType(unit));
-									expect(';');
+									if (t.nextToken() != ';') t.pushBack();
 									break;
 								default:
 									throw new ParseException(t+" unexpected here");
@@ -540,6 +540,8 @@ public class Parser {
 						Expr value = parseExpr(scope);
 						if (vartype == null) {
 							vartype = value.rettype();
+							if (vartype.equals(BuiltinType.typeNone))
+								throw new ParseException("Cannot convert from none to Any");
 						} else {
 							value = cast(value, vartype);
 						}

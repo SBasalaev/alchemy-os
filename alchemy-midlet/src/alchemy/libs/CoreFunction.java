@@ -274,7 +274,7 @@ class CoreFunction extends Function {
 			case 76: //newarray
 				return new Object[ival(args[0])];
 			case 77: //baload
-				return Ival(((byte[])args[0])[ival(args[1])]);
+				return Ival(((byte[])args[0])[ival(args[1])] & 0xff);
 			case 78: //caload
 				return Ival(((char[])args[0])[ival(args[1])]);
 			case 79: //aload

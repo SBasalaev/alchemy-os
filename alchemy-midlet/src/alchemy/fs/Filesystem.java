@@ -212,9 +212,10 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 * @throws IOException
-	 *   if an I/O error occurs during moving
+	 *   if <code>dest</code> exists or if an I/O error occurs during moving
 	 */
 	public void move(File source, File dest) throws IOException {
+		if (exists(dest)) throw new IOException("Cannot move "+source+" to "+dest+", file already exists");
 		copy(source, dest);
 		remove(source);
 	}

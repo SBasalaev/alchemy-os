@@ -113,11 +113,6 @@ class Tokenizer {
 	}
 
 	public int nextToken() throws IOException, ParseException {
-		int ret = nextTokenDBG();
-		return ret;
-	}
-
-	public int nextTokenDBG() throws IOException, ParseException {
 		if (pushedBack) {
 			pushedBack = false;
 			return ttype;
