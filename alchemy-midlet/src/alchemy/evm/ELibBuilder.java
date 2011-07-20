@@ -47,7 +47,13 @@ public class ELibBuilder implements LibBuilder {
 	 * version must be equal to or less than this value.
 	 * </ul>
 	 */
-	static public final int VERSION = 0x0100;
+	static public final int VERSION = 0x0101;
+
+	/*
+	 * New in format 1.1
+	 *  Instructions: call calv newarray aload astore alen newba
+	 *                baload bastore balen newca caload castore calen
+	 */
 
 	/** Determines whether this library has dependencies. */
 	static private final int LFLAG_DEPS = 1;
@@ -62,7 +68,7 @@ public class ELibBuilder implements LibBuilder {
 		HashLibrary lib = new HashLibrary();
 		//reading format version
 		int ver = data.readUnsignedShort();
-		if (!(ver >= VERSION && ver <= (VERSION|0xff)))
+		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) >= (VERSION&0xff))
 			throw new InstantiationException("Incompatible file format");
 		//reading flags
 		int lflags = data.readUnsignedByte();

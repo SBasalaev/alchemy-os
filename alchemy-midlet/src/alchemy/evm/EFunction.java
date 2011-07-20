@@ -385,6 +385,10 @@ class EFunction extends Function {
 				case (byte) 0x56: // load_6
 				case (byte) 0x57: // load_7
 					stack[++head] = locals[instr & 7]; break;
+				case (byte) 0x3D: { //load <ubyte>
+					stack[++head] = locals[code[ct++] & 0xff];
+					break;
+				}
 				//variable savers
 				case (byte) 0x58: // store_0
 				case (byte) 0x59: // store_1
@@ -395,6 +399,10 @@ class EFunction extends Function {
 				case (byte) 0x5E: // store_6
 				case (byte) 0x5F: // store_7
 					locals[instr & 7] = stack[head]; break;
+				case (byte) 0x3E: { //store <ubyte>
+					locals[code[ct++] & 0xff] = stack[head];
+					break;
+				}
 
 			//BRANCHING
 				case (byte) 0x61: { //ifeq <short>
@@ -468,6 +476,94 @@ class EFunction extends Function {
 					if ((instr & 8) != 0) head--;
 					break;
 				}
+				case (byte) 0x4D: {//call <ubyte>
+					int paramlen = code[ct++] & 0xff;
+					Object[] params = new Object[paramlen];
+					head -= paramlen;
+					System.arraycopy(stack, head+1, params, 0, paramlen);
+					stack[head] = ((Function)stack[head]).call(c, params);
+					break;
+				}
+				case (byte) 0x4E: {//calv <ubyte>
+					int paramlen = code[ct++] & 0xff;
+					Object[] params = new Object[paramlen];
+					head -= paramlen;
+					System.arraycopy(stack, head+1, params, 0, paramlen);
+					((Function)stack[head]).call(c, params);
+					head--;
+					break;
+				}
+
+			//ARRAY INSTRUCTIONS
+				case (byte) 0xF0: {// newarray
+					stack[head] = new Object[ival(stack[head])];
+					break;
+				}
+				case (byte) 0xF1: {// aload
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = ((Object[])stack[head])[at];
+					break;
+				}
+				case (byte) 0xF2: {// astore
+					Object val = stack[head];
+					head--;
+					int at = ival(stack[head]);
+					head--;
+					((Object[])stack[head])[at] = val;
+					stack[head] = val;
+					break;
+				}
+				case (byte) 0xF3: {// alen
+					stack[head] = Ival(((Object[])stack[head]).length);
+					break;
+				}
+				case (byte) 0xF4: {// newba
+					stack[head] = new byte[ival(stack[head])];
+					break;
+				}
+				case (byte) 0xF5: {// baload
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Ival( ((byte[])stack[head])[at] & 0xff );
+					break;
+				}
+				case (byte) 0xF6: {// bastore
+					int val = ival(stack[head]);
+					head--;
+					int at = ival(stack[head]);
+					head--;
+					((byte[])stack[head])[at] = (byte)val;
+					stack[head] = Ival(val & 0xff);
+					break;
+				}
+				case (byte) 0xF7: {// balen
+					stack[head] = Ival(((byte[])stack[head]).length);
+					break;
+				}
+				case (byte) 0xF8: {// newca
+					stack[head] = new char[ival(stack[head])];
+					break;
+				}
+				case (byte) 0xF9: {// caload
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Ival( ((char[])stack[head])[at] );
+					break;
+				}
+				case (byte) 0xFA: {// castore
+					int val = ival(stack[head]);
+					head--;
+					int at = ival(stack[head]);
+					head--;
+					((char[])stack[head])[at] = (char)val;
+					stack[head] = Ival(val & 0xffff);
+					break;
+				}
+				case (byte) 0xFB: {// calen
+					stack[head] = Ival(((char[])stack[head]).length);
+					break;
+				}
 
 			//OTHERS
 				case (byte) 0x4F: {// acmp
@@ -491,14 +587,6 @@ class EFunction extends Function {
 					Object atmp = stack[head-1];
 					stack[head-1] = stack[head];
 					stack[head] = atmp;
-					break;
-				}
-				case (byte) 0x3D: { //load <ubyte>
-					stack[++head] = locals[code[ct++] & 0xff];
-					break;
-				}
-				case (byte) 0x3E: { //store <ubyte>
-					locals[code[ct++] & 0xff] = stack[head];
 					break;
 				}
 				case (byte) 0x3F: { //ldc <ushort>
