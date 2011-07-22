@@ -344,8 +344,6 @@ public class Parser {
 	 * Parses sequence of expressions delimitered with operators.
 	 */
 	private Expr parseExpr(Scope scope) throws ParseException, IOException {
-		if (t.nextToken() == '{') return parseBlock(scope);
-		t.pushBack();
 		Vector exprs = new Vector();
 		Vector operators = new Vector();
 		while (true) {
