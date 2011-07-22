@@ -84,7 +84,8 @@ public class NEC extends NativeApp {
 		Parser parser = new Parser(c);
 		Unit unit = parser.parse(c.toFile(fname));
 		if (unit == null) return -1;
-		//TODO: optimizing
+		//optimizing
+		new Optimizer().visitUnit(unit);
 		//writing object code
 		CodeWriter wr = new CodeWriter(c, unit);
 		try {
