@@ -450,13 +450,16 @@ public class Parser {
 				return new NoneExpr();
 			case '!':
 				return new UnaryExpr(ttype, cast(parseExprNoop(scope), BuiltinType.typeBool));
-//			case '~': {
-//				Expr sub = parseExprNoop(scope);
-//				Type type = sub.rettype();
-//				if (!type.equals(BuiltinType.typeInt) && !type.equals(BuiltinType.typeLong))
-//					throw new ParseException("Operator ~ cannot be applied to "+type);
-//				return new UnaryExpr(ttype, sub);
-//			}
+			case '~': {
+				Expr sub = parseExprNoop(scope);
+				Type type = sub.rettype();
+				if (type.equals(BuiltinType.typeInt))
+					return new BinaryExpr(sub, '^', new ConstExpr(new Integer(-1)));
+				else if (type.equals(BuiltinType.typeLong))
+					return new BinaryExpr(sub, '^', new ConstExpr(new Long(-1l)));
+				else
+					throw new ParseException("Operator ~ cannot be applied to "+type);
+			}
 			case '-': {
 				Expr sub = parseExprNoop(scope);
 				Type type = sub.rettype();
