@@ -30,9 +30,9 @@ class Tokenizer {
 	static private final int NO_CHAR = -2;
 
 	/** Type of <i>end of stream</i> token. */
-	static public final int TT_EOF        = -1;
+	static public final int TT_EOF = -1;
 	/** Type of <i>integer literal</i> token. */
-	static public final int TT_INT        = -2;
+	static public final int TT_INT = -2;
 	/** Type of <i>long literal</i> token. */
 	static public final int TT_LONG = -3;
 	/** Type of <i>float literal</i> token. */
@@ -62,6 +62,10 @@ class Tokenizer {
 	static public final int TT_GTGT = -25;
 	/** Type of <tt>'&gt;&gt;&gt;'</tt> token. */
 	static public final int TT_GTGTGT = -26;
+	/** Type of <tt>'&amp;&amp;'</tt> token. */
+	static public final int TT_AMPAMP = -27;
+	/** Type of <tt>'||'</tt> token. */
+	static public final int TT_BARBAR = -28;
 
 	private UTFReader r;
 	private boolean pushedBack;
@@ -319,6 +323,8 @@ class Tokenizer {
 					}
 				}
 				if (ch == '!' && ch2 == '=') return ttype = TT_NOTEQ;
+				if (ch == '&' && ch2 == '&') return ttype = TT_AMPAMP;
+				if (ch == '|' && ch2 == '|') return ttype = TT_BARBAR;
 				//line comment
 				if (ch == '/' && ch2 == '/') {
 					do ch = readChar();

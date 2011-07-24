@@ -322,9 +322,9 @@ public class Parser {
 	private static int[] priorops = {
 			// if word operators are to appear they have the lowest priority
 			Tokenizer.TT_KEYWORD, Tokenizer.TT_IDENTIFIER, 0, 0,
-			'|', 0, 0, 0,
 			'^', 0, 0, 0,
-			'&', 0, 0, 0,
+			Tokenizer.TT_BARBAR, '|', 0, 0,
+			Tokenizer.TT_AMPAMP, '&', 0, 0,
 			Tokenizer.TT_LTEQ, Tokenizer.TT_GTEQ, '<', '>',
 			Tokenizer.TT_EQEQ, Tokenizer.TT_NOTEQ, 0, 0,
 			Tokenizer.TT_LTLT, Tokenizer.TT_GTGT, 0, 0,
@@ -350,10 +350,7 @@ public class Parser {
 			exprs.addElement(parsePostfix(scope, parseExprNoop(scope)));
 			int opchar = t.nextToken();
 			if (opchar == ';') break;
-			if ("+-*/%^&|<>".indexOf(opchar) >= 0 | opchar == Tokenizer.TT_GTGTGT
-			    | opchar == Tokenizer.TT_EQEQ | opchar == Tokenizer.TT_NOTEQ
-				| opchar == Tokenizer.TT_GTEQ | opchar == Tokenizer.TT_LTEQ
-				| opchar == Tokenizer.TT_GTGT | opchar == Tokenizer.TT_LTLT) {
+			if ("+-*/%^&|<>".indexOf(opchar) >= 0 || opchar <= -20) {
 				operators.addElement(new Integer(opchar));
 			} else {
 				t.pushBack();
@@ -382,14 +379,22 @@ public class Parser {
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new BinaryExpr(left, op, right);
 			} else if (op == '<' || op == '>' || op == Tokenizer.TT_LTEQ || op == Tokenizer.TT_GTEQ) {
-				if (!(ltype instanceof BuiltinType) | ((BuiltinType)ltype).numIndex() < 0
-				  | !(rtype instanceof BuiltinType) | ((BuiltinType)rtype).numIndex() < 0)
+				if (!(ltype instanceof BuiltinType) || ((BuiltinType)ltype).numIndex() < 0
+				  || !(rtype instanceof BuiltinType) || ((BuiltinType)rtype).numIndex() < 0)
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				Type btype = binaryCastType(ltype, rtype);
 				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
 			} else if (op == Tokenizer.TT_EQEQ || op == Tokenizer.TT_NOTEQ) {
 				Type btype = binaryCastType(ltype, rtype);
 				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
+			} else if (op == Tokenizer.TT_AMPAMP) {
+				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
+					throw new ParseException("Operator && cannot be applied to "+ltype+","+rtype);
+				newexpr = new IfExpr(left, right, new ConstExpr(Boolean.FALSE));
+			} else if (op == Tokenizer.TT_BARBAR) {
+				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
+					throw new ParseException("Operator || cannot be applied to "+ltype+","+rtype);
+				newexpr = new IfExpr(left, new ConstExpr(Boolean.TRUE), right);
 			} else if ("+-*/%".indexOf(op) >= 0) {
 				Type btype = binaryCastType(ltype, rtype);
 				newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
