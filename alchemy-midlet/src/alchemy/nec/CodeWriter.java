@@ -194,7 +194,7 @@ class CodeWriter implements ExprVisitor {
 		comp.rvalue.accept(this, data);
 		try {
 			DataOutputStream out = (DataOutputStream)data;
-			Type type = comp.rettype();
+			Type type = comp.lvalue.rettype();
 			if (type.equals(BuiltinType.typeBool) || type.equals(BuiltinType.typeInt))
 				out.writeByte(0x16); //icmp
 			else if (type.equals(BuiltinType.typeLong))

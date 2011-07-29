@@ -271,7 +271,7 @@ class Tokenizer {
 				} catch (NumberFormatException nfe) {
 					throw new ParseException("Integer number too large: "+number.toString());
 				}
-				return ttype = TT_INT;
+				return ttype = TT_LONG;
 			} else {
 				nextch = ch;
 				try {
