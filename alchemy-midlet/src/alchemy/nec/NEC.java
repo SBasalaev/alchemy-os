@@ -31,10 +31,16 @@ public class NEC extends NativeApp {
 
 	static private final String VERSION =
 			"Native E Compiler\n" +
-			"version 0.1";
+			"version 0.2";
 
 	static private final String HELP =
-			"Usage: ec <input> [-o <output>]";
+			"Usage: ec [options] <input> \n" +
+			"Options:\n" +
+			"-o <output>\n write to this file\n" +
+			"-t<target>\n compile for given target" +
+			"-O<level>\n choose optimization level" +
+			"-h\n print this help and exit\n" +
+			"-v\n print version and exit";
 
 	/**
 	 * Constructor without arguments.
@@ -47,6 +53,8 @@ public class NEC extends NativeApp {
 		String outname = null;
 		String fname = null;
 		boolean wait_outname = false;
+		int target = 0x0101;
+		boolean optimize = true;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
@@ -57,6 +65,17 @@ public class NEC extends NativeApp {
 				return 0;
 			} else if (arg.equals("-o")) {
 				wait_outname = true;
+			} else if (arg.startsWith("-t")) {
+				if (arg.equals("-t1.0")) target = 0x0100;
+				else if (arg.equals("-t1.1")) target = 0x0101;
+				else {
+					c.stderr.println("Unsupported target: "+arg.substring(2));
+					return 1;
+				}
+			} else if (arg.equals("-O1") || arg.equals("-O")) {
+				optimize = true;
+			} else if (arg.equals("-O0")) {
+				optimize = false;
 			} else if (arg.charAt(0) == '-') {
 				c.stderr.println("Unknown argument: "+arg);
 				c.stderr.println(HELP);
@@ -85,7 +104,7 @@ public class NEC extends NativeApp {
 		Unit unit = parser.parse(c.toFile(fname));
 		if (unit == null) return -1;
 		//optimizing
-		new Optimizer().visitUnit(unit);
+		if (optimize) new Optimizer().visitUnit(unit);
 		//writing object code
 		CodeWriter wr = new CodeWriter(c, unit);
 		try {
