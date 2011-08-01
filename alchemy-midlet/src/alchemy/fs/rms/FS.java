@@ -505,14 +505,14 @@ public final class FS extends Filesystem implements Initable {
 			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
 			if ((fd.attrs & F_WRITE) == 0) throw new IOException(ERR_DENIED+fd.file);
 			long stamp = System.currentTimeMillis();
-			buf[0] = (byte)(stamp);
-			buf[1] = (byte)(stamp >> 8);
-			buf[2] = (byte)(stamp >> 16);
-			buf[3] = (byte)(stamp >> 24);
-			buf[4] = (byte)(stamp >> 32);
-			buf[5] = (byte)(stamp >> 40);
-			buf[6] = (byte)(stamp >> 48);
-			buf[7] = (byte)(stamp >> 56);
+			buf[0] = (byte)(stamp >> 56);
+			buf[1] = (byte)(stamp >> 48);
+			buf[2] = (byte)(stamp >> 40);
+			buf[3] = (byte)(stamp >> 32);
+			buf[4] = (byte)(stamp >> 24);
+			buf[5] = (byte)(stamp >> 16);
+			buf[6] = (byte)(stamp >> 8);
+			buf[7] = (byte)(stamp);
 			try {
 				store.setRecord(fd.record, buf, 0, count);
 			} catch (RecordStoreException rse) {
