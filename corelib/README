@@ -1,0 +1,5 @@
+These are the symbols and headers for the Alchemy core library.
+
+File corelib.symbols is used by MIDlet to initialize library.
+Subdirectories lib/ and inc/ are to be installed in the user
+file system.

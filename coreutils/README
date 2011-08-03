@@ -1,0 +1,30 @@
+Basic system utilities for Alchemy.
+
+cat <file>
+  Print file on the output. If file is not specified then
+  standard input is used.
+
+cp <source> <destination>
+  Copy contents of one file to another.
+
+date
+  Print current date and time on the output.
+
+echo <messages>...
+  Print given messages on the output.
+
+env <key>=<value>... <command> <arguments>
+  Run program in a changed environment.
+
+ls <directory>
+  Print names of all files contained in given directory. If argument is
+  not specified then list contents of the current working directory.
+
+mkdir <directory>
+  Make new empty directory in the file system.
+
+mv <source> <destination>
+  Move/rename file.
+
+rm <files>...
+  Remove specified files.

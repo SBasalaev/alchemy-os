@@ -1,0 +1,25 @@
+Archiving utility similar to tar but producing more compact
+archives that can then be easily read with DataInputStream.
+
+To invoke arh utility from the command line use command
+
+    java -jar arh.jar  <command> <arh-file> [files...]
+
+Further the part "java -jar arh.jar" is simply referred as "arh".
+
+Commands:
+
+arh  c  <archive>  <files>...
+  Create archive containing specified files. Directories are added recursively.
+
+arh  t  <archive>
+  List names of all files contained in this archive.
+
+arh  x  <archive>
+  Extract all files from the archive in the current directory.
+
+arh  v
+  Print program version and exit.
+
+arh  h
+  Print short help message and exit.
