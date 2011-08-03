@@ -6,7 +6,7 @@ def newarray(len: Int): Array;
 
 def baload(ba: BArray, at: Int): Int;
 def caload(ca: CArray, at: Int): Int;
-def aload(ar: Array, at: Int): Int;
+def aload(ar: Array, at: Int): Any;
 
 def bastore(ba: BArray, at: Int, val: Int);
 def castore(ca: CArray, at: Int, val: Int);
