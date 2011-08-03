@@ -4,6 +4,10 @@ cat <file>
   Print file on the output. If file is not specified then
   standard input is used.
 
+chmod <modifiers> <files>...
+  Modify attributes on given files. Modifiers are: -r, +r,
+  -w, +w, -x, +x.
+
 cp <source> <destination>
   Copy contents of one file to another.
 
@@ -16,9 +20,14 @@ echo <messages>...
 env <key>=<value>... <command> <arguments>
   Run program in a changed environment.
 
+install <files>... <directory>
+  Copy files to the specified directory and set their
+  attributes.
+
 ls <directory>
-  Print names of all files contained in given directory. If argument is
-  not specified then list contents of the current working directory.
+  Print names of all files contained in given directory.
+  If argument is not specified then list contents of the
+  current working directory.
 
 mkdir <directory>
   Make new empty directory in the file system.

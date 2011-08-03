@@ -12,13 +12,13 @@ def main(args : Array) : Int {
   if (len == 0) {
     println(
       stderr(),
-      "cp: missing argument"
+      "mv: missing argument"
     );
     1;
   } else if (len == 1) {
     println(
       stderr(),
-      "cp: missing destination"
+      "mv: missing destination"
     );
     1;
   } else {

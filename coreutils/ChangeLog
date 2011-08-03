@@ -1,3 +1,10 @@
+2011-08-03  Sergey Basalaev <sbasalaev@gmail.com>
+
+	* new files:
+	  + utilities: chmod.e date.e install.e
+	  + build scripts: make.sh install.sh clean.sh
+	  + README
+
     == Alchemy coreutils 0.2 ==
 
 2011-07-03  Sergey Basalaev <sbasalaev@gmail.com>
