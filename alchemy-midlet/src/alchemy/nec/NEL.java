@@ -321,12 +321,18 @@ public class NEL extends NativeApp {
 		LibInfo info = new LibInfo();
 		Vector symbols = new Vector();
 		int lflags = data.readUnsignedByte();
-		if ((lflags & 1) != 0) { //linked
-			throw new Exception("Linkage with shared objects is not supported");
+		if ((lflags & 1) == 0) { //not linked
+			throw new Exception("Not shared object passed to -l");
 		}
 		if ((lflags & 4) != 0) { //has soname
 			info.soname = data.readUTF();
 		}
+		//skipping dependencies
+		int depsize = data.readUnsignedShort();
+		for (int i=0; i<depsize; i++) {
+			data.skipBytes(data.readUnsignedShort());
+		}
+		//reading pool
 		int poolsize = data.readUnsignedShort();
 		String[] symbolstr = new String[poolsize];
 		for (int i=0; i<poolsize; i++) {

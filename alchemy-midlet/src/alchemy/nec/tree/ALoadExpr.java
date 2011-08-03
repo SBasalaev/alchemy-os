@@ -19,26 +19,32 @@
 package alchemy.nec.tree;
 
 /**
- * Assignment expression.
- * <pre><i>var</i> = <i>expr</i></pre>
- *
+ * Array element loading expression.
+ * <pre><i>arrayexpr</i> [ <i>indexexpr</i> ]</pre>
  * @author Sergey Basalaev
  */
-public class AssignExpr extends Expr {
+public class ALoadExpr extends Expr {
 
-	public Var var;
-	public Expr expr;
+	public Expr arrayexpr;
+	public Expr indexexpr;
 
-	public AssignExpr(Var v, Expr e) {
-		this.var = v;
-		this.expr = e;
+	public ALoadExpr(Expr arrayexpr, Expr indexexpr) {
+		this.arrayexpr = arrayexpr;
+		this.indexexpr = indexexpr;
 	}
 
 	public Type rettype() {
-		return BuiltinType.typeNone;
+		Type arraytype = arrayexpr.rettype();
+		if (arraytype.equals(BuiltinType.typeBArray) || arraytype.equals(BuiltinType.typeCArray)) {
+			return BuiltinType.typeInt;
+		} else if (arraytype.equals(BuiltinType.typeArray)) {
+			return BuiltinType.typeAny;
+		} else {
+			return null;
+		}
 	}
 
 	public void accept(ExprVisitor v, Object data) {
-		v.visitAssign(this, data);
+		v.visitALoad(this, data);
 	}
 }

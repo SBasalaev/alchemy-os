@@ -24,7 +24,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Vector;
 
 /**
@@ -35,8 +34,6 @@ class CodeWriter implements ExprVisitor {
 
 	private final Context c;
 	private Vector objects = new Vector();
-	/** Func -> Integer */
-	private Hashtable funcIndices = new Hashtable();
 
 	/**
 	 * Address of instruction we currently write.
@@ -125,6 +122,45 @@ class CodeWriter implements ExprVisitor {
 	public void visitUndef(Func f, DataOutputStream out) throws IOException {
 		out.writeByte('U');
 		out.writeShort(objects.indexOf(f.asVar.name));
+	}
+
+	public void visitALoad(ALoadExpr aload, Object data) {
+		DataOutputStream out = (DataOutputStream)data;
+		aload.arrayexpr.accept(this, data);
+		aload.indexexpr.accept(this, data);
+		try {
+			Type type = aload.rettype();
+			if (type.equals(BuiltinType.typeBArray)) {
+				out.writeByte(0xf5); //baload
+			} else if (type.equals(BuiltinType.typeCArray)) {
+				out.writeByte(0xf9); //caload
+			} else {
+				out.write(0xf1); //aload
+			}
+			addr++;
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe.toString());
+		}
+	}
+
+	public void visitAStore(AStoreExpr astore, Object data) {
+		DataOutputStream out = (DataOutputStream)data;
+		astore.arrayexpr.accept(this, data);
+		astore.indexexpr.accept(this, data);
+		astore.assignexpr.accept(this, data);
+		try {
+			Type type = astore.rettype();
+			if (type.equals(BuiltinType.typeBArray)) {
+				out.writeByte(0xf6); //bastore
+			} else if (type.equals(BuiltinType.typeCArray)) {
+				out.writeByte(0xfa); //castore
+			} else {
+				out.write(0xf2); //astore
+			}
+			addr++;
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe.toString());
+		}
 	}
 
 	public void visitAssign(AssignExpr assign, Object outobj) {

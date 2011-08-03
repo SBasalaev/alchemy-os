@@ -397,10 +397,14 @@ class EFunction extends Function {
 				case (byte) 0x5C: // store_4
 				case (byte) 0x5D: // store_5
 				case (byte) 0x5E: // store_6
-				case (byte) 0x5F: // store_7
-					locals[instr & 7] = stack[head]; break;
+				case (byte) 0x5F:{// store_7
+					locals[instr & 7] = stack[head];
+					head--;
+					break;
+				}
 				case (byte) 0x3E: { //store <ubyte>
 					locals[code[ct++] & 0xff] = stack[head];
+					head--;
 					break;
 				}
 
@@ -507,11 +511,10 @@ class EFunction extends Function {
 				}
 				case (byte) 0xF2: {// astore
 					Object val = stack[head];
-					head--;
-					int at = ival(stack[head]);
-					head--;
-					((Object[])stack[head])[at] = val;
-					stack[head] = val;
+					int at = ival(stack[head-1]);
+					Object[] array = (Object[])stack[head-2];
+					array[at] = val;
+					head -= 3;
 					break;
 				}
 				case (byte) 0xF3: {// alen
@@ -530,11 +533,10 @@ class EFunction extends Function {
 				}
 				case (byte) 0xF6: {// bastore
 					int val = ival(stack[head]);
-					head--;
-					int at = ival(stack[head]);
-					head--;
-					((byte[])stack[head])[at] = (byte)val;
-					stack[head] = Ival(val & 0xff);
+					int at = ival(stack[head-1]);
+					byte[] array = (byte[])stack[head-2];
+					array[at] = (byte)val;
+					head -= 3;
 					break;
 				}
 				case (byte) 0xF7: {// balen
@@ -553,11 +555,10 @@ class EFunction extends Function {
 				}
 				case (byte) 0xFA: {// castore
 					int val = ival(stack[head]);
-					head--;
-					int at = ival(stack[head]);
-					head--;
-					((char[])stack[head])[at] = (char)val;
-					stack[head] = Ival(val & 0xffff);
+					int at = ival(stack[head-1]);
+					char[] array = (char[])stack[head-2];
+					array[at] = (char)val;
+					head -= 3;
 					break;
 				}
 				case (byte) 0xFB: {// calen

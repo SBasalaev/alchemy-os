@@ -39,6 +39,17 @@ class ConstCollector implements ExprVisitor {
 		}
 	}
 
+	public void visitALoad(ALoadExpr aload, Object data) {
+		aload.arrayexpr.accept(this, data);
+		aload.indexexpr.accept(this, data);
+	}
+
+	public void visitAStore(AStoreExpr astore, Object data) {
+		astore.arrayexpr.accept(this, data);
+		astore.indexexpr.accept(this, data);
+		astore.assignexpr.accept(this, data);
+	}
+
 	public void visitAssign(AssignExpr assign, Object data) {
 		assign.expr.accept(this, data);
 	}

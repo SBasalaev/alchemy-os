@@ -32,11 +32,8 @@ import java.util.Vector;
  */
 public class Parser {
 
-	private static Type typeArray = new ScalarType("Array");
-	private static Type typeBArray = new ScalarType("BArray");
-	private static Type typeCArray = new ScalarType("CArray");
-
-	private Context c;
+	private final Context c;
+	private final int target;
 
 	/** Files that are currently parsed. */
 	private Stack files = new Stack();
@@ -47,8 +44,9 @@ public class Parser {
 
 	private Unit unit;
 
-	public Parser(Context c) {
+	public Parser(Context c, int target) {
 		this.c = c;
+		this.target = target;
 	}
 
 	public Unit parse(File source) {
@@ -61,9 +59,9 @@ public class Parser {
 		unit.putType("Double", BuiltinType.typeDouble);
 		unit.putType("Bool", BuiltinType.typeBool);
 		unit.putType("String", BuiltinType.typeString);
-		unit.putType("Array", typeArray);
-		unit.putType("BArray", typeBArray);
-		unit.putType("CArray", typeCArray);
+		unit.putType("Array", BuiltinType.typeArray);
+		unit.putType("BArray", BuiltinType.typeBArray);
+		unit.putType("CArray", BuiltinType.typeCArray);
 		//parsing
 		try {
 			parseFile(source);
@@ -117,6 +115,10 @@ public class Parser {
 				sb.append("\n from ").append(files.elementAt(i));
 			}
 			throw new ParseException(sb.toString());
+		}
+		//warn about deprecated header
+		if (target > 0x0100 && file.path().equals("/inc/array.eh")) {
+			warn("Module 'array' is deprecated");
 		}
 		//push file in stack
 		Tokenizer oldt = t;
@@ -228,9 +230,9 @@ public class Parser {
 			rettype = BuiltinType.typeNone;
 		}
 		//checking arguments count
-		if (args.size() > 7) {
-			throw new ParseException("Too many arguments to "+fname+"\nEVM v1.0 supports at most 7 arguments in function calls");
-			//TODO: instructions with arbitrary number of arguments
+		if (target == 0x0100 && args.size() > 7) {
+			throw new ParseException("Too many arguments to "+fname+
+					"\ntarget 1.0 supports at most 7 arguments in function calls");
 		}
 		//populating fields
 		func.locals = args;
@@ -248,7 +250,7 @@ public class Parser {
 			}
 			if (args.size() > 0) {
 				Var arg0 = (Var)args.elementAt(0);
-				if (!arg0.type.equals(BuiltinType.typeAny) && !arg0.type.equals(typeArray)) {
+				if (!arg0.type.equals(BuiltinType.typeAny) && !arg0.type.equals(BuiltinType.typeArray)) {
 					warn("Incompatible argument type in main()");
 				}
 			}
@@ -415,7 +417,7 @@ public class Parser {
 	}
 
 	/**
-	 * Applies postfix operators () and . to expression.
+	 * Applies postfix operators (), [] and . to expression.
 	 */
 	private Expr parsePostfix(Scope scope, Expr expr) throws ParseException, IOException {
 		while (true) {
@@ -437,12 +439,37 @@ public class Parser {
 					args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
 				}
 				expr = new FCallExpr(expr, args);
+				continue;
+			} else if (ttype == '[') {
+				if (target == 0x0100) {
+					throw new ParseException("Array expressions are not supported in target 1.0");
+				}
+				Type arrtype = expr.rettype();
+				if (!arrtype.equals(BuiltinType.typeArray)
+				 && !arrtype.equals(BuiltinType.typeBArray)
+				 && !arrtype.equals(BuiltinType.typeCArray)) {
+					throw new ParseException("Applying [] to non-array expression");
+				}
+				Expr indexexpr = cast(parseExpr(scope), BuiltinType.typeInt);
+				expect(']');
+				if (t.nextToken() == '=') {
+					Expr assignexpr = parseExpr(scope);
+					if (!arrtype.equals(BuiltinType.typeArray)) {
+						assignexpr = cast(assignexpr, BuiltinType.typeInt);
+					} else {
+						assignexpr = cast(assignexpr, BuiltinType.typeAny);
+					}
+					expr = new AStoreExpr(expr, indexexpr, assignexpr);
+				} else {
+					t.pushBack();
+					expr = new ALoadExpr(expr, indexexpr);
+					continue;
+				}
 			} else {
 				t.pushBack();
-				break;
+				return expr;
 			}
 		}
-		return expr;
 	}
 
 	/**

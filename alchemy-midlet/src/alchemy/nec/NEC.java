@@ -53,7 +53,7 @@ public class NEC extends NativeApp {
 		String outname = null;
 		String fname = null;
 		boolean wait_outname = false;
-		int target = 0x0101;
+		int target = 0x0100;
 		boolean optimize = true;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
@@ -100,7 +100,7 @@ public class NEC extends NativeApp {
 				outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(c);
+		Parser parser = new Parser(c, target);
 		Unit unit = parser.parse(c.toFile(fname));
 		if (unit == null) return -1;
 		//optimizing

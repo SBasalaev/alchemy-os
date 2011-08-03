@@ -81,9 +81,9 @@ class CoreFunction extends Function {
 			case 11: //can_read
 				return Ival(c.fs().canRead((File)args[0]));
 			case 12: //can_write
-				return Ival(c.fs().canRead((File)args[0]));
+				return Ival(c.fs().canWrite((File)args[0]));
 			case 13: //can_exec
-				return Ival(c.fs().canRead((File)args[0]));
+				return Ival(c.fs().canExec((File)args[0]));
 			case 14: //exists
 				return Ival(c.fs().exists((File)args[0]));
 			case 15: //is_dir

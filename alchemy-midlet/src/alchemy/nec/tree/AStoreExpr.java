@@ -19,19 +19,20 @@
 package alchemy.nec.tree;
 
 /**
- * Assignment expression.
- * <pre><i>var</i> = <i>expr</i></pre>
- *
+ * Storing element in array.
+ * <pre><i>arrayexpr</i> [ <i>indexexpr</i> ] = <i>assignexpr</i></pre>
  * @author Sergey Basalaev
  */
-public class AssignExpr extends Expr {
+public class AStoreExpr extends Expr {
 
-	public Var var;
-	public Expr expr;
+	public Expr arrayexpr;
+	public Expr indexexpr;
+	public Expr assignexpr;
 
-	public AssignExpr(Var v, Expr e) {
-		this.var = v;
-		this.expr = e;
+	public AStoreExpr(Expr arrayexpr, Expr indexexpr, Expr assignexpr) {
+		this.arrayexpr = arrayexpr;
+		this.indexexpr = indexexpr;
+		this.assignexpr = assignexpr;
 	}
 
 	public Type rettype() {
@@ -39,6 +40,6 @@ public class AssignExpr extends Expr {
 	}
 
 	public void accept(ExprVisitor v, Object data) {
-		v.visitAssign(this, data);
+		v.visitAStore(this, data);
 	}
 }

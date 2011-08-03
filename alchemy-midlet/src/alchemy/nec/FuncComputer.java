@@ -49,6 +49,23 @@ class FuncComputer implements ExprVisitor {
 		return data;
 	}
 
+	public void visitALoad(ALoadExpr aload, Object data) {
+		FuncData fdata = (FuncData)data;
+		aload.arrayexpr.accept(this, data);
+		aload.indexexpr.accept(this, data);
+		fdata.codesize++;
+		fdata.stackhead--;
+	}
+
+	public void visitAStore(AStoreExpr astore, Object data) {
+		FuncData fdata = (FuncData)data;
+		astore.arrayexpr.accept(this, data);
+		astore.indexexpr.accept(this, data);
+		astore.assignexpr.accept(this, data);
+		fdata.codesize++;
+		fdata.stackhead -= 3;
+	}
+
 	public void visitAssign(AssignExpr assign, Object data) {
 		FuncData fdata = (FuncData)data;
 		assign.expr.accept(this, data);
@@ -57,6 +74,7 @@ class FuncComputer implements ExprVisitor {
 		} else {
 			fdata.codesize += 2;
 		}
+		fdata.stackhead--;
 	}
 
 	public void visitBinary(BinaryExpr binary, Object data) {

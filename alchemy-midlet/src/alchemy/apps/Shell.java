@@ -50,7 +50,7 @@ public class Shell extends NativeApp {
 			while (true) try {
 				String line = r.readLine();
 				if (line == null) {
-					if (c.stdin instanceof ConsoleInputStream) continue;
+					if (scriptinput instanceof ConsoleInputStream) continue;
 					else break;
 				}
 				line = line.trim();
@@ -60,7 +60,7 @@ public class Shell extends NativeApp {
 				try { cc = split(line); }
 				catch (IllegalArgumentException e) {
 					c.stderr.println(r.lineNumber()+":"+e.getMessage());
-					if (c.stdin instanceof ConsoleInputStream) continue;
+					if (scriptinput instanceof ConsoleInputStream) continue;
 					else return 1;
 				}
 				if (cc.cmd.equals("exit")) {

@@ -49,6 +49,9 @@ public class BuiltinType extends Type {
 	static public final BuiltinType typeDouble = new BuiltinType("Double", 4);
 	static public final BuiltinType typeString = new BuiltinType("String", -1);
 	static public final BuiltinType typeBool = new BuiltinType("Bool", -1);
+	static public final BuiltinType typeArray = new BuiltinType("Array", -1);
+	static public final BuiltinType typeBArray = new BuiltinType("BArray", -1);
+	static public final BuiltinType typeCArray = new BuiltinType("CArray", -1);
 	static public final BuiltinType typeAny = new BuiltinType("Any", -1);
 	static public final BuiltinType typeNone = new BuiltinType("none", -1);
 }
