@@ -49,6 +49,12 @@ class FuncComputer implements ExprVisitor {
 		return data;
 	}
 
+	public void visitALen(ALenExpr alen, Object data) {
+		FuncData fdata = (FuncData)data;
+		alen.arrayexpr.accept(this, data);
+		fdata.codesize++;
+	}
+
 	public void visitALoad(ALoadExpr aload, Object data) {
 		FuncData fdata = (FuncData)data;
 		aload.arrayexpr.accept(this, data);

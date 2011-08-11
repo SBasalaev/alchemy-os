@@ -19,7 +19,7 @@
 package alchemy.nec.tree;
 
 /**
- * Array element loading expression.
+ * Loading element from array.
  * <pre><i>arrayexpr</i> [ <i>indexexpr</i> ]</pre>
  * @author Sergey Basalaev
  */

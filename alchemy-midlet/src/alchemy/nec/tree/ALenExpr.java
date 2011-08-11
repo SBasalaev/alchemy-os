@@ -19,18 +19,24 @@
 package alchemy.nec.tree;
 
 /**
- * Expression of type 'none'.
- * <pre>{}</pre>
- * 
+ * Array length expression.
+ * <pre><i>array</i>.len</pre>
+ *
  * @author Sergey Basalaev
  */
-public class NoneExpr extends Expr {
+public class ALenExpr extends Expr {
+
+	public final Expr arrayexpr;
+
+	public ALenExpr(Expr arrayexpr) {
+		this.arrayexpr = arrayexpr;
+	}
 
 	public Type rettype() {
-		return BuiltinType.typeNone;
+		return BuiltinType.typeInt;
 	}
 
 	public void accept(ExprVisitor v, Object data) {
-		v.visitNone(this, data);
+		v.visitALen(this, data);
 	}
 }

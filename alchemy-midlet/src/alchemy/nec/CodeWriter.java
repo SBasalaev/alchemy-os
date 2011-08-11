@@ -124,12 +124,30 @@ class CodeWriter implements ExprVisitor {
 		out.writeShort(objects.indexOf(f.asVar.name));
 	}
 
+	public void visitALen(ALenExpr alen, Object data) {
+		DataOutputStream out = (DataOutputStream)data;
+		alen.arrayexpr.accept(this, data);
+		try {
+			Type type = alen.arrayexpr.rettype();
+			if (type.equals(BuiltinType.typeBArray)) {
+				out.writeByte(0xf7); //balen
+			} else if (type.equals(BuiltinType.typeCArray)) {
+				out.writeByte(0xfb); //calen
+			} else {
+				out.write(0xf3); //alen
+			}
+			addr++;
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe.toString());
+		}
+	}
+
 	public void visitALoad(ALoadExpr aload, Object data) {
 		DataOutputStream out = (DataOutputStream)data;
 		aload.arrayexpr.accept(this, data);
 		aload.indexexpr.accept(this, data);
 		try {
-			Type type = aload.rettype();
+			Type type = aload.arrayexpr.rettype();
 			if (type.equals(BuiltinType.typeBArray)) {
 				out.writeByte(0xf5); //baload
 			} else if (type.equals(BuiltinType.typeCArray)) {

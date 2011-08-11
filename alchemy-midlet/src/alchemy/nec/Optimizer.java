@@ -24,6 +24,11 @@ class Optimizer implements ExprVisitor {
 		}
 	}
 
+	public void visitALen(ALenExpr alen, Object data) {
+		alen.arrayexpr.accept(this, data);
+		optimized = null;
+	}
+
 	public void visitALoad(ALoadExpr aload, Object data) {
 		aload.arrayexpr.accept(this, data);
 		aload.indexexpr.accept(this, data);

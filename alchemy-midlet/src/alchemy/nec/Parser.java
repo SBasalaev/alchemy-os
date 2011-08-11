@@ -465,6 +465,20 @@ public class Parser {
 					expr = new ALoadExpr(expr, indexexpr);
 					continue;
 				}
+			} else if (ttype == '.') {
+				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+					throw new ParseException("Identifier expected after '.'");
+				String member = t.svalue;
+				Type type = expr.rettype();
+				if (type.equals(BuiltinType.typeArray)
+				 || type.equals(BuiltinType.typeBArray)
+				 || type.equals(BuiltinType.typeCArray)) {
+					if (member.equals("len")) {
+						expr = new ALenExpr(expr);
+						continue;
+					}
+				}
+				throw new ParseException("Type "+type+" has no member named "+member);
 			} else {
 				t.pushBack();
 				return expr;

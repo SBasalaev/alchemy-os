@@ -20,7 +20,7 @@ package alchemy.nec.tree;
 
 /**
  * Cast expression.
- * <pre><b>cast (</b><i>type</i><b>)</b> <i>expr</i></pre>.
+ * <pre><b>cast</b> (<i>type</i>) <i>expr</i></pre>.
  * This does not include primitive casts and produces no code.
  * @author Sergey Basalaev
  */
