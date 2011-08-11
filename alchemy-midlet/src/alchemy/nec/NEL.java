@@ -352,8 +352,7 @@ public class NEL extends NativeApp {
 					symbolstr[i] = data.readUTF();
 					break;
 				case 'E':
-					data.skipBytes(2);
-					data.skipBytes(data.readUnsignedShort());
+					data.skipBytes(4);
 					break;
 				case 'H':
 				case 'P': {
@@ -447,8 +446,6 @@ class InFunc extends NELFunc {
 	public InFunc(String name) {
 		super(name);
 	}
-
-public String toString() { return "P:"+super.toString(); }
 }
 
 /** External function. */
@@ -459,6 +456,4 @@ class ExFunc extends NELFunc {
 		super(name);
 		this.info = info;
 	}
-
-public String toString() { return "E:"+super.toString(); }
 }
