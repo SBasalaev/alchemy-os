@@ -3,12 +3,11 @@
  * Licensed under GPL v3
  */
 
-use "array";
 use "io";
 use "string";
 
 def main(args : Array) : Int {
-  var len = alen(args);
+  var len = args.len;
   if (len == 0) {
     println(
       stderr(),
@@ -22,8 +21,8 @@ def main(args : Array) : Int {
     );
     1;
   } else {
-    var src  = to_str(aload(args,0));
-    var dest = to_str(aload(args,1));
+    var src  = to_str(args[0]);
+    var dest = to_str(args[1]);
     fcopy(to_file(src), to_file(dest));
     0;
   }

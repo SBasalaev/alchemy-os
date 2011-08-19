@@ -3,17 +3,16 @@
  * Licensed under GPL v3
  */
 
-use "array";
 use "io";
 use "string";
 use "sys";
 
 def main(args : Array) : Int {
-  var len = alen(args);
+  var len = args.len;
   var ofs = 0;
   var envread = false;
   while (ofs < len & !envread) {
-    var arg = to_str(aload(args,ofs));
+    var arg = to_str(args[ofs]);
     var eqindex = strindex(arg,'=');
     if (eqindex < 0) {
       envread = true;
@@ -29,8 +28,8 @@ def main(args : Array) : Int {
     println(stderr(), "env: no command");
     1;
   } else {
-    var argbuf = newarray(len-ofs-1);
+    var argbuf = new Array(len-ofs-1);
     acopy(args,ofs+1,argbuf,0,len-ofs-1);
-    exec(to_str(aload(args,ofs)), argbuf);
+    exec(to_str(args[ofs], argbuf));
   }
 }

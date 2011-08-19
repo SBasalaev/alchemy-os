@@ -3,22 +3,21 @@
  * Licensed under GPL v3
  */
 
-use "array";
 use "io";
 use "string";
 
 def main(args : Array) {
   var dir : File =
-    if (alen(args) == 0) {
+    if (args.len == 0) {
       get_cwd();
     } else {
-      to_file(to_str(aload(args,0)));
+      to_file(to_str(args[0]));
     }
   var list = flist(dir);
-  var len = alen(list);
+  var len = list.len;
   var i = 0;
   while (i < len) {
-    println(stdout(),aload(list,i));
+    println(stdout(),list[i]);
     i = i+1;
   }
 }

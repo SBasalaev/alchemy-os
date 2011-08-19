@@ -3,12 +3,11 @@
  * Licensed under GPL v3
  */
 
-use "array";
 use "io";
 use "string";
 
 def main(args : Array) : Int {
-  var len = alen(args);
+  var len = args.len;
   if (len == 0) {
     println(
       stderr(),
@@ -18,8 +17,7 @@ def main(args : Array) : Int {
   } else {
     var i = 0;
     while (i < len) {
-      var dirname : String =
-        to_str(aload(args,i));
+      var dirname = to_str(args[i]);
       fremove(to_file(dirname));
       i = i+1;
     }

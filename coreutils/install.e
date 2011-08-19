@@ -3,12 +3,11 @@
  * Licensed under GPL v3
  */
 
-use "array";
 use "io";
 use "string";
 
 def main(args : Array) : Int {
-  var len = alen(args);
+  var len = args.len;
   if (len == 0) {
     println(stderr(),
       "install: missing argument");
@@ -19,12 +18,12 @@ def main(args : Array) : Int {
     1;
   } else {
     var destdir : String = concat(
-      fpath(to_file(to_str(aload(args,len-1)))),
+      fpath(to_file(to_str(args[len-1]))),
       "/"
     );
     var i = 0;
     while (i < len-1) {
-      var src = to_file(to_str(aload(args,i)));
+      var src = to_file(to_str(args[i]));
       var dest = to_file(concat(destdir, fname(src)));
       fcopy(src, dest);
       set_read(dest, can_read(src));

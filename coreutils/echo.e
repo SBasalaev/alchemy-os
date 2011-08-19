@@ -3,15 +3,14 @@
  * Licensed under GPL v3
  */
 
-use "array";
 use "io";
 
 def main(args : Array) {
-  var len = alen(args);
+  var len = args.len;
   var i = 0;
   while (i < len) {
     if (i != 0) print(stdout(), " ");
-    print(stdout(), aload(args,i));
+    print(stdout(), args[i]);
     i = i+1;
   }
   println(stdout(), "");

@@ -3,11 +3,11 @@
  * Licensed under GPL v3
  */
 
-use "array";
 use "io";
 
 def main(args : Array) {
-  var len = alen(args);
+  var len = args.len;
+  //flags:
   // -1 unset
   // 0  don't change
   // 1  set
@@ -17,7 +17,7 @@ def main(args : Array) {
   // processing options
   var i=0;
   while (i < len) {
-    var arg = to_str(aload(args,i));
+    var arg = to_str(args[i]);
     if (arg=="-r") readflag = -1
     else if (arg=="+r") readflag = 1
     else if (arg=="-w") writeflag = -1
@@ -29,7 +29,7 @@ def main(args : Array) {
   // setting attributes
   i = 0;
   while (i < len) {
-    var arg = to_str(aload(args,i));
+    var arg = to_str(args[i]);
     var first = strchr(arg,0);
     if (first != '-' && first != '+') {
       var file = to_file(arg);
