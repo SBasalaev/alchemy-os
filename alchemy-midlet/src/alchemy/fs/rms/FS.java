@@ -44,6 +44,7 @@ public final class FS extends Filesystem implements Initable {
 	static private final String ERR_IS_DIR = "Is a directory: ";
 	static private final String ERR_EXISTS = "File already exists: ";
 	static private final String ERR_NOT_FOUND = "File is not found: ";
+	static private final String ERR_NOT_EMPTY = "Directory not empty: ";
 
 	static private int F_DIR = 16;
 	static private int F_READ = 4;
@@ -142,6 +143,11 @@ public final class FS extends Filesystem implements Initable {
 		RSDirectory dir = new RSDirectory(parentfd);
 		int index = dir.getIndex(file.name());
 		if (index < 0) return;
+		if ((dir.nodes[index].attrs & F_DIR) != 0) {
+			RSDirectory toRemove = new RSDirectory(dir.nodes[index]);
+			if (toRemove.count > 0)
+				throw new IOException(ERR_NOT_EMPTY+dir.nodes[index].file);
+		}
 		try {
 			store.deleteRecord(dir.nodes[index].record);
 		} catch (RecordStoreException rse) {
