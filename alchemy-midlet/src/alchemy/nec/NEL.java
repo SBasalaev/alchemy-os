@@ -46,7 +46,7 @@ public class NEL extends NativeApp {
 
 	static private final String VERSION =
 			"Native E linker\n" +
-			"version 1.0";
+			"version 1.1";
 
 	static private final String HELP =
 			"Usage: el [options] <input>...\nOptions:\n" +
@@ -65,7 +65,7 @@ public class NEL extends NativeApp {
 		String soname = null;
 		Vector infiles = new Vector();
 		Vector linklibs = new Vector();
-		linklibs.addElement("libcore"); //always link with libcore
+		linklibs.addElement("libcore.so"); //always link with libcore
 		boolean wait_outname = false;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
@@ -79,7 +79,7 @@ public class NEL extends NativeApp {
 				wait_outname = true;
 			} else if (arg.startsWith("-l") && arg.length() > 2) {
 				if (arg.indexOf('/') < 0) {
-					linklibs.addElement("lib"+arg.substring(2));
+					linklibs.addElement("lib"+arg.substring(2)+".so");
 				} else {
 					linklibs.addElement(arg.substring(2));
 				}
@@ -230,7 +230,7 @@ public class NEL extends NativeApp {
 			//writing output
 			File outfile = c.toFile(outname);
 			DataOutputStream out = new DataOutputStream(c.fs().write(outfile));
-			out.writeInt(0xC0DE0100);
+			out.writeInt(0xC0DE0101);
 			if (soname != null) {
 				out.writeByte(5);
 				out.writeUTF(soname);

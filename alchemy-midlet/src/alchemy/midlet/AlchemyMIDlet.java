@@ -68,7 +68,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 			root.setEnv("LIBPATH", "/lib");
 			root.setCurDir(new File("/home"));
 			//preloading core library
-			root.loadLibrary("/lib/libcore");
+			root.loadLibrary("/lib/libcore.so");
 			runApp();
 		} catch (Throwable t) {
 			kernelPanic(t.toString());

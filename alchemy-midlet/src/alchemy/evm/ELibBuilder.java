@@ -68,7 +68,7 @@ public class ELibBuilder implements LibBuilder {
 		HashLibrary lib = new HashLibrary();
 		//reading format version
 		int ver = data.readUnsignedShort();
-		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) >= (VERSION&0xff))
+		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
 			throw new InstantiationException("Incompatible file format");
 		//reading flags
 		int lflags = data.readUnsignedByte();
