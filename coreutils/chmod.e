@@ -4,6 +4,7 @@
  */
 
 use "io";
+use "string";
 
 def main(args : Array) {
   var len = args.len;

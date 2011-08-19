@@ -7,5 +7,5 @@ use "io";
 use "time";
 
 def main(args : Any) {
-  println(stdout(), datestr());
+  println(stdout(), datestr(systime()));
 }

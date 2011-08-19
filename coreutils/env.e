@@ -30,6 +30,6 @@ def main(args : Array) : Int {
   } else {
     var argbuf = new Array(len-ofs-1);
     acopy(args,ofs+1,argbuf,0,len-ofs-1);
-    exec(to_str(args[ofs], argbuf));
+    exec(to_str(args[ofs]), argbuf);
   }
 }

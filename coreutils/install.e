@@ -17,14 +17,14 @@ def main(args : Array) : Int {
       "install: missing destination");
     1;
   } else {
-    var destdir : String = concat(
+    var destdir : String = strcat(
       fpath(to_file(to_str(args[len-1]))),
       "/"
     );
     var i = 0;
     while (i < len-1) {
       var src = to_file(to_str(args[i]));
-      var dest = to_file(concat(destdir, fname(src)));
+      var dest = to_file(strcat(destdir, fname(src)));
       fcopy(src, dest);
       set_read(dest, can_read(src));
       set_write(dest, can_write(src));

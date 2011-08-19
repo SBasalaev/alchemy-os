@@ -23,4 +23,3 @@ el ls.o -o ls
 el mkdir.o -o mkdir
 el mv.o -o mv
 el rm.o -o rm
-
