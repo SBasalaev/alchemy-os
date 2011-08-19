@@ -135,10 +135,10 @@ class Tokenizer {
 		//character literal
 		if (ch == '\'') {
 			ch = readChar();
-			if (ch == '\\') ch = readEscape();
 			if (ch == '\n' || ch == EOF_CHAR) {
 				throw new ParseException("Unclosed character literal");
 			}
+			if (ch == '\\') ch = readEscape();
 			ivalue = ch;
 			ch = readChar();
 			if (ch != '\'') {
@@ -300,7 +300,7 @@ class Tokenizer {
 			if (id.equals("def") || id.equals("if") || id.equals("else") ||
 			    id.equals("use") || id.equals("do") || id.equals("while")||
 				id.equals("cast")|| id.equals("var")|| id.equals("type") ||
-				id.equals("null"))
+				id.equals("null")|| id.equals("new"))
 				return ttype = TT_KEYWORD;
 			return ttype = TT_IDENTIFIER;
 		}

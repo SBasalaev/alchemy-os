@@ -19,27 +19,25 @@
 package alchemy.nec.tree;
 
 /**
- * Loading element from array or structure.
- * <pre><i>arrayexpr</i> [ <i>indexexpr</i> ]</pre>
+ * Type of composite structure.
  * @author Sergey Basalaev
  */
-public class ALoadExpr extends Expr {
+public class StructureType extends Type {
 
-	public final Type returnType;
-	public Expr arrayexpr;
-	public Expr indexexpr;
+	private final String name;
+	public Var[] fields;
 
-	public ALoadExpr(Expr arrayexpr, Expr indexexpr, Type type) {
-		this.arrayexpr = arrayexpr;
-		this.indexexpr = indexexpr;
-		this.returnType = type;
+	public StructureType(String name) {
+		this.name = name;
 	}
 
-	public Type rettype() {
-		return returnType;
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (obj.getClass() != StructureType.class) return false;
+		return ((StructureType)obj).name.equals(name);
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitALoad(this, data);
+	public String toString() {
+		return name;
 	}
 }

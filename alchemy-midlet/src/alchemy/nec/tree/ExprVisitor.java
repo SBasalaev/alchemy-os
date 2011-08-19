@@ -36,6 +36,7 @@ public interface ExprVisitor {
 	void visitDiscard(DiscardExpr disc, Object data);
 	void visitFCall(FCallExpr fcall, Object data);
 	void visitIf(IfExpr ifexpr, Object data);
+	void visitNewArray(NewArrayExpr newarray, Object data);
 	void visitNone(NoneExpr none, Object data);
 	void visitUnary(UnaryExpr expr, Object data);
 	void visitVar(VarExpr vexpr, Object data);

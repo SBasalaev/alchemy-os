@@ -167,7 +167,7 @@ class CodeWriter implements ExprVisitor {
 		astore.indexexpr.accept(this, data);
 		astore.assignexpr.accept(this, data);
 		try {
-			Type type = astore.rettype();
+			Type type = astore.arrayexpr.rettype();
 			if (type.equals(BuiltinType.typeBArray)) {
 				out.writeByte(0xf6); //bastore
 			} else if (type.equals(BuiltinType.typeCArray)) {
@@ -418,6 +418,24 @@ class CodeWriter implements ExprVisitor {
 			out.writeShort(elsesize);
 			addr += 3;
 			ifexpr.elseexpr.accept(this, data);
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe.toString());
+		}
+	}
+
+	public void visitNewArray(NewArrayExpr newarray, Object data) {
+		newarray.lengthexpr.accept(this, data);
+		try {
+			DataOutputStream out = (DataOutputStream)data;
+			Type type = newarray.rettype();
+			if (type.equals(BuiltinType.typeBArray)) {
+				out.writeByte(0xf4); //newba
+			} else if (type.equals(BuiltinType.typeCArray)) {
+				out.writeByte(0xf8); //newca
+			} else {
+				out.write(0xf0); //newarray
+			}
+			addr++;
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}

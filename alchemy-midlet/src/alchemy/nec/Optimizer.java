@@ -70,10 +70,20 @@ class Optimizer implements ExprVisitor {
 						lval = new Integer(((Integer)lval).intValue() * ((Integer)rval).intValue());
 						break;
 					case '/':
-						lval = new Integer(((Integer)lval).intValue() / ((Integer)rval).intValue());
+						if (((Integer)rval).intValue() != 0) {
+							lval = new Integer(((Integer)lval).intValue() / ((Integer)rval).intValue());
+						} else {
+							optimized = null;
+							return;
+						}
 						break;
 					case '%':
-						lval = new Integer(((Integer)lval).intValue() % ((Integer)rval).intValue());
+						if (((Integer)rval).intValue() != 0) {
+							lval = new Integer(((Integer)lval).intValue() % ((Integer)rval).intValue());
+						} else {
+							optimized = null;
+							return;
+						}
 						break;
 					case '&':
 						lval = new Integer(((Integer)lval).intValue() & ((Integer)rval).intValue());
@@ -106,10 +116,20 @@ class Optimizer implements ExprVisitor {
 						lval = new Long(((Long)lval).longValue() * ((Long)rval).longValue());
 						break;
 					case '/':
-						lval = new Long(((Long)lval).longValue() / ((Long)rval).longValue());
+						if (((Long)rval).longValue() != 0) {
+							lval = new Long(((Long)lval).longValue() / ((Long)rval).longValue());
+						} else {
+							optimized = null;
+							return;
+						}
 						break;
 					case '%':
-						lval = new Long(((Long)lval).longValue() % ((Long)rval).longValue());
+						if (((Long)rval).longValue() != 0) {
+							lval = new Long(((Long)lval).longValue() % ((Long)rval).longValue());
+						} else {
+							optimized = null;
+							return;
+						}
 						break;
 					case '&':
 						lval = new Long(((Long)lval).longValue() & ((Long)rval).longValue());
@@ -396,8 +416,8 @@ class Optimizer implements ExprVisitor {
 
 	/**
 	 * DCE:
-	 *   if(true)  expr1 else expr2   =>   expr1
-	 *   if(false) expr1 else expr2   =>   expr2
+	 *   if (true)  expr1 else expr2   =>   expr1
+	 *   if (false) expr1 else expr2   =>   expr2
 	 */
 	public void visitIf(IfExpr expr, Object data) {
 		//optimize children
@@ -418,6 +438,12 @@ class Optimizer implements ExprVisitor {
 				return;
 			}
 		}
+		optimized = null;
+	}
+
+	public void visitNewArray(NewArrayExpr newarray, Object data) {
+		newarray.lengthexpr.accept(this, data);
+		if (optimized != null) newarray.lengthexpr = optimized;
 		optimized = null;
 	}
 

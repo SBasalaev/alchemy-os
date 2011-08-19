@@ -126,6 +126,10 @@ class ConstCollector implements ExprVisitor {
 		ifexpr.elseexpr.accept(this, data);
 	}
 
+	public void visitNewArray(NewArrayExpr newarray, Object data) {
+		newarray.lengthexpr.accept(this, data);
+	}
+
 	public void visitNone(NoneExpr none, Object vector) {
 	}
 

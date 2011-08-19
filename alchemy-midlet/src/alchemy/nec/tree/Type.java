@@ -20,6 +20,9 @@ package alchemy.nec.tree;
 
 /**
  * Abstract type.
+ * Subclasses need to implement <code>equals()</code>
+ * and provide sane <code>toString()</code> which
+ * will be used in error messages.
  * @author Sergey Basalaev
  */
 public abstract class Type {

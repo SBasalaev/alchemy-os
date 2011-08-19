@@ -53,7 +53,7 @@ public class NEC extends NativeApp {
 		String outname = null;
 		String fname = null;
 		boolean wait_outname = false;
-		int target = 0x0100;
+		int target = 0x0101;
 		boolean optimize = true;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
@@ -66,8 +66,7 @@ public class NEC extends NativeApp {
 			} else if (arg.equals("-o")) {
 				wait_outname = true;
 			} else if (arg.startsWith("-t")) {
-				if (arg.equals("-t1.0")) target = 0x0100;
-				else if (arg.equals("-t1.1")) target = 0x0101;
+				if (arg.equals("-t1.1")) target = 0x0101;
 				else {
 					c.stderr.println("Unsupported target: "+arg.substring(2));
 					return 1;

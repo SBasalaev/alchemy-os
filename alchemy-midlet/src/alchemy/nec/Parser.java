@@ -152,6 +152,28 @@ public class Parser {
 									unit.putType(alias, parseType(unit));
 									if (t.nextToken() != ';') t.pushBack();
 									break;
+								case '{': {
+									StructureType struct = new StructureType(alias);
+									Vector fields = new Vector();
+									while (t.nextToken() != '}') {
+										t.pushBack();
+										if (!fields.isEmpty()) expect(',');
+										if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+											throw new ParseException("Field name expected, got"+t);
+										String fieldname = t.svalue;
+										expect(':');
+										Type vartype = parseType(unit);
+										Var var = new Var(fieldname, vartype);
+										var.index = fields.size();
+										fields.addElement(var);
+									}
+									struct.fields = new Var[fields.size()];
+									for (int i=fields.size()-1; i>=0; i--) {
+										struct.fields[i] = ((Var)fields.elementAt(i));
+									}
+									unit.putType(alias, struct);
+									break;
+								}
 								default:
 									throw new ParseException(t+" unexpected here");
 							}
@@ -462,7 +484,11 @@ public class Parser {
 					expr = new AStoreExpr(expr, indexexpr, assignexpr);
 				} else {
 					t.pushBack();
-					expr = new ALoadExpr(expr, indexexpr);
+					if (arrtype.equals(BuiltinType.typeArray)) {
+						expr = new ALoadExpr(expr, indexexpr, BuiltinType.typeAny);
+					} else {
+						expr = new ALoadExpr(expr, indexexpr, BuiltinType.typeInt);
+					}
 					continue;
 				}
 			} else if (ttype == '.') {
@@ -476,6 +502,27 @@ public class Parser {
 					if (member.equals("len")) {
 						expr = new ALenExpr(expr);
 						continue;
+					}
+				} else if (type instanceof StructureType) {
+					Var[] fields = ((StructureType)type).fields;
+					int index = -1;
+					for (int i=0; i<fields.length; i++) {
+						if (fields[i].name.equals(member)) {
+							index = i;
+							break;
+						}
+					}
+					if (index >= 0) {
+						ConstExpr indexexpr = new ConstExpr(new Integer(index));
+						if (t.nextToken() == '=') {
+							Expr assignexpr = cast(parseExpr(scope), fields[index].type);
+							expr = new AStoreExpr(expr, indexexpr, assignexpr);
+							continue;
+						} else {
+							t.pushBack();
+							expr = new ALoadExpr(expr, indexexpr, fields[index].type);
+							continue;
+						}
 					}
 				}
 				throw new ParseException("Type "+type+" has no member named "+member);
@@ -599,6 +646,23 @@ public class Parser {
 						return new AssignExpr(v, value);
 					} else {
 						throw new ParseException(t+" unexpected here");
+					}
+				} else if (t.svalue.equals("new")) {
+					Type type = parseType(scope);
+					if (type instanceof StructureType) {
+						expect('(');
+						expect(')');
+						int len = ((StructureType)type).fields.length;
+						return new NewArrayExpr(type, new ConstExpr(new Integer(len)));
+					} else if (type.equals(BuiltinType.typeArray)
+					        || type.equals(BuiltinType.typeBArray)
+							|| type.equals(BuiltinType.typeCArray)) {
+						expect('(');
+						Expr lenexpr = cast(parseExpr(scope), BuiltinType.typeInt);
+						expect(')');
+						return new NewArrayExpr(type, lenexpr);
+					} else {
+						throw new ParseException("Applying 'new' to neither array nor structure");
 					}
 				} else {
 					throw new ParseException(t+" unexpected here");

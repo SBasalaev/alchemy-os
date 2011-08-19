@@ -201,6 +201,12 @@ class FuncComputer implements ExprVisitor {
 		ifexpr.elseexpr.accept(this, data);
 	}
 
+	public void visitNewArray(NewArrayExpr newarray, Object data) {
+		FuncData fdata = (FuncData)data;
+		newarray.lengthexpr.accept(this, data);
+		fdata.codesize++;
+	}
+
 	public void visitNone(NoneExpr none, Object data) {
 	}
 

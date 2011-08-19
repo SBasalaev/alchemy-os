@@ -87,6 +87,7 @@ public class Shell extends NativeApp {
 					Context child = new Context(c);
 					if (cc.in != null) {
 						child.stdin = c.fs().read(c.toFile(cc.in));
+						child.addStream(child.stdin);
 					}
 					if (cc.out != null) {
 						File outfile = c.toFile(cc.out);
@@ -95,14 +96,16 @@ public class Shell extends NativeApp {
 						} else {
 							child.stdout = new PrintStream(c.fs().write(outfile));
 						}
+						child.addStream(child.stdout);
 					}
 					if (cc.err != null) {
-						File outfile = c.toFile(cc.out);
-						if (cc.appendout) {
-							child.stdout = new PrintStream(c.fs().append(outfile));
+						File errfile = c.toFile(cc.err);
+						if (cc.appenderr) {
+							child.stderr = new PrintStream(c.fs().append(errfile));
 						} else {
-							child.stdout = new PrintStream(c.fs().write(outfile));
+							child.stderr = new PrintStream(c.fs().write(errfile));
 						}
+						child.addStream(child.stderr);
 					}
 					child.startAndWait(cc.cmd, cc.args);
 					Throwable err = child.getError();
