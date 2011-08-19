@@ -267,126 +267,105 @@ class CoreFunction extends Function {
 				cc.start(prog, sargs);
 				return null;
 			}
-			case 74: //new_ba
-				return new byte[ival(args[0])];
-			case 75: //new_ca
-				return new char[ival(args[0])];
-			case 76: //newarray
-				return new Object[ival(args[0])];
-			case 77: //baload
-				return Ival(((byte[])args[0])[ival(args[1])] & 0xff);
-			case 78: //caload
-				return Ival(((char[])args[0])[ival(args[1])]);
-			case 79: //aload
-				return ((Object[])args[0])[ival(args[1])];
-			case 80: //bastore
-				((byte[])args[0])[ival(args[1])] = (byte)ival(args[2]);
-				return null;
-			case 81: //castore
-				((char[])args[0])[ival(args[1])] = (char)ival(args[2]);
-				return null;
-			case 82: //astore
-				((Object[])args[0])[ival(args[1])] = args[2];
-				return null;
-			case 83: //balen
-				return Ival(((byte[])args[0]).length);
-			case 84: //calen
-				return Ival(((char[])args[0]).length);
-			case 85: //alen
-				return Ival(((Object[])args[0]).length);
-			case 86: //bacopy
-			case 87: //cacopy
-			case 88: //acopy
+			case 74: //bacopy
+			case 75: //cacopy
+			case 76: //acopy
 				System.arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
-			case 89: //print
+			case 77: //print
 				((OutputStream)args[0]).write(Util.utfEncode(String.valueOf(args[1])));
 				return args[0];
-			case 90: //println
+			case 78: //println
 				((OutputStream)args[0]).write(Util.utfEncode(String.valueOf(args[1]).concat("\n")));
 				return args[0];
-			case 91: //stdin
+			case 79: //stdin
 				return c.stdin;
-			case 92: //stdout
+			case 80: //stdout
 				return c.stdout;
-			case 93: //stderr
+			case 81: //stderr
 				return c.stderr;
-			case 94: //setin
+			case 82: //setin
 				c.stdin = (InputStream)args[0];
 				return null;
-			case 95: //setout
+			case 83: //setout
 				c.stdout = new PrintStream((OutputStream)args[0]);
 				return null;
-			case 96: //seterr
+			case 84: //seterr
 				c.stderr = new PrintStream((OutputStream)args[0]);
 				return null;
-			case 97: //pi
+			case 85: //pi
 				return Dval(Math.PI);
-			case 98: //abs
+			case 86: //abs
 				return Dval(Math.abs(dval(args[0])));
-			case 99: //sin
+			case 87: //sin
 				return Dval(Math.sin(dval(args[0])));
-			case 100: //cos
+			case 88: //cos
 				return Dval(Math.cos(dval(args[0])));
-			case 101: //tan
+			case 89: //tan
 				return Dval(Math.tan(dval(args[0])));
-			case 102: //sqrt
+			case 90: //sqrt
 				return Dval(Math.sqrt(dval(args[0])));
-			case 103: //ipow
+			case 91: //ipow
 				return Dval(CoreLibrary.ipow(dval(args[0]), ival(args[1])));
-			case 104: //exp
+			case 92: //exp
 				return Dval(CoreLibrary.exp(dval(args[0])));
-			case 105: //log
+			case 93: //log
 				return Dval(CoreLibrary.log(dval(args[0])));
-			case 106: //asin
+			case 94: //asin
 				return Dval(CoreLibrary.asin(dval(args[0])));
-			case 107: //acos
+			case 95: //acos
 				return Dval(CoreLibrary.acos(dval(args[0])));
-			case 108: //atan
+			case 96: //atan
 				return Dval(CoreLibrary.atan(dval(args[0])));
-			case 109: //ca2str
+			case 97: //ca2str
 				return new String((char[])args[0]);
-			case 110: //ba2utf
+			case 98: //ba2utf
 				return Util.utfDecode((byte[])args[0]);
-			case 111: //ibits2f
+			case 99: //ibits2f
 				return Fval(Float.intBitsToFloat(ival(args[0])));
-			case 112: //f2ibits
+			case 100: //f2ibits
 				return Ival(Float.floatToIntBits(fval(args[0])));
-			case 113: //lbits2d
+			case 101: //lbits2d
 				return Dval(Double.longBitsToDouble(lval(args[0])));
-			case 114: //d2lbits
+			case 102: //d2lbits
 				return Lval(Double.doubleToLongBits(dval(args[0])));
-			case 115: //new_ht
+			case 103: //new_ht
 				return new Hashtable();
-			case 116: //ht_put
+			case 104: //ht_put
 				return ((Hashtable)args[0]).put(args[1], args[2]);
-			case 117: //ht_get
+			case 105: //ht_get
 				return ((Hashtable)args[0]).get(args[1]);
-			case 118: //ht_rm
+			case 106: //ht_rm
 				return ((Hashtable)args[0]).remove(args[1]);
-			case 119: //hash
+			case 107: //hash
 				return Ival(args[0].hashCode());
-			case 120: //randomize
-				rnd = new Random(lval(args[0]));
-				return null;
-			case 121: //rnd
+			case 108: //rnd
 				return Ival(rnd.nextInt(ival(args[0])));
-			case 122: //rndint
+			case 109: //rndint
 				return Ival(rnd.nextInt());
-			case 123: //rndlong
+			case 110: //rndlong
 				return Lval(rnd.nextLong());
-			case 124: //rndfloat
+			case 111: //rndfloat
 				return Fval(rnd.nextFloat());
-			case 125: //rnddouble
+			case 112: //rnddouble
 				return Dval(rnd.nextDouble());
-			case 126: { //netread
-				String addr = args[0].toString();
+			case 113: { //netread
+				String addr = (String)args[0];
 				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
 					throw new IOException("Unknown protocol in netread()");
 				InputStream stream = Connector.openInputStream(addr);
 				c.addStream(stream);
 				return stream;
 			}
+			case 114: { //readresource
+				InputStream stream = Object.class.getResourceAsStream((String)args[0]);
+				if (input != null) c.addStream(stream);
+				return stream;
+			}
+			case 115: //loadlibrary
+				return c.loadLibrary((String)args[0]);
+			case 116: //loadfunc
+				return ((Library)args[0]).getFunc((String)args[1]);
 		}
 		return null;
 	}

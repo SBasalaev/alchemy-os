@@ -42,7 +42,7 @@ public class NEL extends NativeApp {
 	/** Highest supported library file format version.
 	 * @see ELibBuilder#VERSION
 	 */
-	static private final int SUPPORTED = 0x0100;
+	static private final int SUPPORTED = 0x0101;
 
 	static private final String VERSION =
 			"Native E linker\n" +
@@ -121,7 +121,7 @@ public class NEL extends NativeApp {
 				offset = count;
 				File infile = c.toFile(infiles.elementAt(fi).toString());
 				DataInputStream data = new DataInputStream(c.fs().read(infile));
-				if (data.readInt() != 0xC0DE0100)
+				if (data.readInt() != 0xC0DE0101)
 					throw new Exception("Unsupported object format in "+infile);
 				int lflags = data.readUnsignedByte();
 				if (lflags != 0)
