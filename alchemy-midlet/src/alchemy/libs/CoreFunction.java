@@ -20,6 +20,7 @@ package alchemy.libs;
 
 import alchemy.core.Context;
 import alchemy.core.Function;
+import alchemy.core.Library;
 import alchemy.fs.File;
 import alchemy.util.Util;
 import java.io.IOException;
@@ -359,7 +360,7 @@ class CoreFunction extends Function {
 			}
 			case 114: { //readresource
 				InputStream stream = Object.class.getResourceAsStream((String)args[0]);
-				if (input != null) c.addStream(stream);
+				if (stream != null) c.addStream(stream);
 				return stream;
 			}
 			case 115: //loadlibrary

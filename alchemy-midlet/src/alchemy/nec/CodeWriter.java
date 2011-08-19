@@ -59,7 +59,7 @@ class CodeWriter implements ExprVisitor {
 
 	public void write(OutputStream outstream) throws Exception {
 		DataOutputStream out = new DataOutputStream(outstream);
-		out.writeInt(0xC0DE0100);
+		out.writeInt(0xC0DE0101);
 		out.writeByte(0);
 		int size = objects.size();
 		out.writeShort(size);

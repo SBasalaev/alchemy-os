@@ -116,10 +116,6 @@ public class Parser {
 			}
 			throw new ParseException(sb.toString());
 		}
-		//warn about deprecated header
-		if (target > 0x0100 && file.path().equals("/inc/array.eh")) {
-			warn("Module 'array' is deprecated");
-		}
 		//push file in stack
 		Tokenizer oldt = t;
 		File olddir = c.getCurDir();
@@ -250,11 +246,6 @@ public class Parser {
 		} else {
 			t.pushBack();
 			rettype = BuiltinType.typeNone;
-		}
-		//checking arguments count
-		if (target == 0x0100 && args.size() > 7) {
-			throw new ParseException("Too many arguments to "+fname+
-					"\ntarget 1.0 supports at most 7 arguments in function calls");
 		}
 		//populating fields
 		func.locals = args;
@@ -463,9 +454,6 @@ public class Parser {
 				expr = new FCallExpr(expr, args);
 				continue;
 			} else if (ttype == '[') {
-				if (target == 0x0100) {
-					throw new ParseException("Array expressions are not supported in target 1.0");
-				}
 				Type arrtype = expr.rettype();
 				if (!arrtype.equals(BuiltinType.typeArray)
 				 && !arrtype.equals(BuiltinType.typeBArray)
