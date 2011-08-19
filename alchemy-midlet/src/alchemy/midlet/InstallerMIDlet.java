@@ -146,8 +146,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		//initializing fs
 		instCfg.put(InstallInfo.FS_TYPE, selectedfs);
 		instCfg.put(InstallInfo.FS_INIT, fsinit);
-		//installing archives
+		//installing files
 		installArchives();
+		installCfg();
 		//writing configuration data
 		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
 		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
@@ -172,7 +173,14 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	}
 
 	private void update() throws Exception {
+		//removing libcore.0
+		Filesystem fs = InstallInfo.getFilesystem();
+		fs.remove(new File("/lib/libcore"));
+		fs.remove(new File("/lib/libcore.0"));
+		fs.remove(new File("/lib/libcore.0.0"));
+		//installing new files
 		installArchives();
+		installCfg();
 		Properties instCfg = InstallInfo.read();
 		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
 		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
@@ -208,7 +216,22 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			}
 		}
 	}
-	
+
+	private void installCfg() throws Exception {
+		//writing current locale
+		Filesystem fs = InstallInfo.getFilesystem();
+		File localeFile = new File("/cfg/locale");
+		if (!fs.exists(localeFile)) {
+			String locale = System.getProperty("microedition.locale");
+			if (locale == null) locale = "en_US";
+			else locale = locale.replace('-', '_');
+			OutputStream out = fs.write(localeFile);
+			out.write(locale.getBytes());
+			out.flush();
+			out.close();
+		}
+	}
+
 	private String[] split(String str, char ch) {
 		Vector v = new Vector();
 		str = str.trim();
