@@ -104,7 +104,7 @@ public class ELibBuilder implements LibBuilder {
 					cpool[cindex] = new Float(data.readFloat());
 					break;
 				case 'd': //double
-					cpool[cindex] = new Float(data.readDouble());
+					cpool[cindex] = new Double(data.readDouble());
 					break;
 				case 'S': //string
 					cpool[cindex] = data.readUTF();

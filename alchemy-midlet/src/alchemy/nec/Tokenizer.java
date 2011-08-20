@@ -214,6 +214,7 @@ class Tokenizer {
 					if (ch >= '0' && ch <= '9') {
 						number.append(readDecimal());
 					}
+					dotseen = true;
 				} else {
 					nextch = ch;
 				}

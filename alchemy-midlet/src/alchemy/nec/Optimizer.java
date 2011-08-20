@@ -244,6 +244,11 @@ class Optimizer implements ExprVisitor {
 	public void visitCast(CastExpr cast, Object data) {
 		cast.expr.accept(this, data);
 		if (optimized != null) cast.expr = optimized;
+		if (cast.expr instanceof CastExpr) {
+			optimized = new CastExpr(cast.toType, ((CastExpr)cast.expr).expr);
+			return;
+		}
+		optimized = null;
 	}
 
 	/**
@@ -293,6 +298,7 @@ class Optimizer implements ExprVisitor {
 					break;
 			}
 			optimized = new ConstExpr(cnst);
+			return;
 		}
 		optimized = null;
 	}
