@@ -144,9 +144,8 @@ public class FS extends Filesystem implements Initable {
 	public void remove(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			if (file.path().length() == 0) throw new SecurityException("Cannot delete root directory.");
-			fc.delete();
+			if (fc.exists()) fc.delete();
 		} finally {
 			fc.close();
 		}
