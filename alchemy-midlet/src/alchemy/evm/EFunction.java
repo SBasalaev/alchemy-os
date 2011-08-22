@@ -528,7 +528,7 @@ class EFunction extends Function {
 				case (byte) 0xF5: {// baload
 					int at = ival(stack[head]);
 					head--;
-					stack[head] = Ival( ((byte[])stack[head])[at] & 0xff );
+					stack[head] = Ival( ((byte[])stack[head])[at] );
 					break;
 				}
 				case (byte) 0xF6: {// bastore

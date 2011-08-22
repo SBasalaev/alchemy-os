@@ -19,21 +19,22 @@
 package alchemy.nec.tree;
 
 /**
- *
+ * Abstract type is a type which was declared
+ * but not described.
  * @author Sergey Basalaev
  */
-public class ScalarType extends Type {
+public class AbstractType extends Type {
 
 	private final String name;
 
-	public ScalarType(String name) {
+	public AbstractType(String name) {
 		this.name = name;
 	}
 
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
-		if (!(obj instanceof ScalarType)) return false;
-		ScalarType other = (ScalarType)obj;
+		if (!(obj instanceof AbstractType)) return false;
+		AbstractType other = (AbstractType)obj;
 		return this.name.equals(other.name);
 	}
 

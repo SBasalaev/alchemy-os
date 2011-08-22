@@ -115,3 +115,4 @@ netread
 readresource
 loadlibrary
 loadfunc
+clone

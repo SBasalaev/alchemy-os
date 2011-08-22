@@ -138,17 +138,20 @@ public class Parser {
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
 								throw new ParseException("Type name expected after 'type'");
 							String alias = t.svalue;
-							if (unit.getType(alias) != null)
+							Type type = unit.getType(alias);
+							if (type == null) {
+								unit.putType(alias, new AbstractType(alias));
+							} else if (!(type instanceof AbstractType)) {
 								throw new ParseException("Type "+alias+" is already defined");
+							}
 							switch (t.nextToken()) {
-								case ';':
-									unit.putType(alias, new ScalarType(alias));
+								case ';': // forward declaration
 									break;
-								case '=':
+								case '=': // type alias
 									unit.putType(alias, parseType(unit));
 									if (t.nextToken() != ';') t.pushBack();
 									break;
-								case '{': {
+								case '{': { // structure type
 									StructureType struct = new StructureType(alias);
 									Vector fields = new Vector();
 									while (t.nextToken() != '}') {

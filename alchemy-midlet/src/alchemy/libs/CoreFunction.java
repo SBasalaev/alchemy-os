@@ -367,6 +367,12 @@ class CoreFunction extends Function {
 				return c.loadLibrary((String)args[0]);
 			case 116: //loadfunc
 				return ((Library)args[0]).getFunc((String)args[1]);
+			case 117: {//clone
+				Object[] struct = (Object[])args[0];
+				Object[] clone = new Object[struct.length];
+				System.arraycopy(struct, 0, clone, 0, struct.length);
+				return clone;
+			}
 		}
 		return null;
 	}

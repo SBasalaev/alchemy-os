@@ -19,7 +19,7 @@
 package alchemy.nec.tree;
 
 /**
- * Abstract type.
+ * Expression type.
  * Subclasses need to implement <code>equals()</code>
  * and provide sane <code>toString()</code> which
  * will be used in error messages.
