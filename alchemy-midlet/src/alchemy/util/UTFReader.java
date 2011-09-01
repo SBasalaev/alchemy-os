@@ -18,6 +18,7 @@
 
 package alchemy.util;
 
+import alchemy.l10n.I18N;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -40,23 +41,23 @@ public class UTFReader extends Reader {
 	}
 
 	public synchronized int read() throws IOException {
-		if (input == null) throw new IOException("Stream is closed");
+		if (input == null) throw new IOException(I18N._("Stream is closed"));
 		int b1 = input.read();
 		if (b1 < 0) return -1;
 		if (b1 <= 0x7f) {
 			if (b1 == '\n') linenum++;
 			return b1;
 		}
-		if (b1 < 0xC0) throw new UTFDataFormatException("Mailformed UTF");
+		if (b1 < 0xC0) throw new UTFDataFormatException(I18N._("Malformed UTF"));
 		int b2 = input.read();
-		if (b2 < 0) throw new UTFDataFormatException("Unended UTF char at EOF");
-		if ((b2 & 0xC0) != 0x80) throw new UTFDataFormatException("Mailformed UTF");
+		if (b2 < 0) throw new UTFDataFormatException(I18N._("Unfinished UTF char at EOF"));
+		if ((b2 & 0xC0) != 0x80) throw new UTFDataFormatException(I18N._("Malformed UTF"));
 		if (b1 < 0xE0) {
 			return ((b1 & 0x1f) << 6) | (b2 & 0x3f);
 		}
 		int b3 = input.read();
-		if (b3 < 0) throw new UTFDataFormatException("Unended UTF char at EOF");
-		if ((b3 & 0xC0) != 0x80) throw new UTFDataFormatException("Mailformed UTF");
+		if (b3 < 0) throw new UTFDataFormatException(I18N._("Unfinished UTF char at EOF"));
+		if ((b3 & 0xC0) != 0x80) throw new UTFDataFormatException(I18N._("Malformed UTF"));
 		return ((b1 & 0x0f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f);
 	}
 

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Vector;
 import alchemy.apps.ConsoleForm.ConsoleInputStream;
+import alchemy.l10n.I18N;
 
 /**
  * Native shell.
@@ -59,7 +60,7 @@ public class Shell extends NativeApp {
 				ShellCommand cc = null;
 				try { cc = split(line); }
 				catch (IllegalArgumentException e) {
-					c.stderr.println(r.lineNumber()+":"+e.getMessage());
+					c.stderr.println(r.lineNumber()+':'+e.getMessage());
 					if (scriptinput instanceof ConsoleInputStream) continue;
 					else return 1;
 				}
@@ -77,7 +78,7 @@ public class Shell extends NativeApp {
 							((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 						}
 					} else {
-						c.stderr.println("cd: no directory specified");
+						c.stderr.println(I18N._("cd: no directory specified"));
 					}
 				} else if (cc.cmd.equals("cls")) {
 					if (c.stdin instanceof ConsoleInputStream) {
@@ -143,13 +144,13 @@ public class Shell extends NativeApp {
 			String token;
 			if (line.charAt(0) == '\'') {
 				end = line.indexOf('\'', 1);
-				if (end < 0) throw new IllegalArgumentException("Unclosed '");
+				if (end < 0) throw new IllegalArgumentException(I18N._("Unclosed '"));
 				token = line.substring(1,end);
 				line = line.substring(end+1).trim();
 				if (mode == MODE_ARG) mode = MODE_QARG;
 			} else if (line.charAt(0) == '"') {
 				end = line.indexOf('"', 1);
-				if (end < 0) throw new IllegalArgumentException("Unclosed \"");
+				if (end < 0) throw new IllegalArgumentException(I18N._("Unclosed \""));
 				token = line.substring(1, end);
 				line = line.substring(end+1).trim();
 				if (mode == MODE_ARG) mode = MODE_QARG;

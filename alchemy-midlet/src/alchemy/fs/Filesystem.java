@@ -18,6 +18,7 @@
 
 package alchemy.fs;
 
+import alchemy.l10n.I18N;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -215,7 +216,7 @@ public abstract class Filesystem {
 	 *   if <code>dest</code> exists or if an I/O error occurs during moving
 	 */
 	public void move(File source, File dest) throws IOException {
-		if (exists(dest)) throw new IOException("Cannot move "+source+" to "+dest+", file already exists");
+		if (exists(dest)) throw new IOException(I18N._("Cannot move {0} to {1}, file already exists", source, dest));
 		copy(source, dest);
 		remove(source);
 	}

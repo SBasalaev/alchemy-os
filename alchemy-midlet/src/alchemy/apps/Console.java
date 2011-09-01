@@ -19,6 +19,7 @@
 package alchemy.apps;
 
 import alchemy.core.Context;
+import alchemy.l10n.I18N;
 import alchemy.midlet.AlchemyMIDlet;
 import alchemy.nlib.NativeApp;
 import javax.microedition.lcdui.Command;
@@ -30,32 +31,32 @@ import javax.microedition.lcdui.Command;
  */
 public class Console extends NativeApp {
 
-	private static final String HELP = "Usage: con [-k] <command> <args>...\n";
-	private static final Command cmdClose = new Command("Close", Command.EXIT, 4);
+	private static final String HELP = I18N._("Usage: terminal [-k] <command> <args>...");
+	private static final Command cmdClose = new Command(I18N._("Close"), Command.EXIT, 4);
 
 	public Console() { }
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			c.stderr.print("con: no command given\n");
-			c.stderr.print(HELP);
+			c.stderr.println(I18N._("terminal: no command given"));
+			c.stderr.println(HELP);
 			return 1;
 		}
 		if (args[0].equals("-v")) {
-			c.stdout.print("Native console v1.1\n");
+			c.stdout.println(I18N._("Native terminal v1.1"));
 			return 0;
 		}
 		if (args[0].equals("-h")) {
-			c.stdout.print("con - run command in a console\n");
-			c.stdout.print(HELP);
+			c.stdout.println(I18N._("terminal - run command in the new terminal"));
+			c.stdout.println(HELP);
 			return 0;
 		}
 		boolean keep = false;
 		if (args[0].equals("-k")) {
 			keep = true;
 			if (args.length == 1) {
-				c.stderr.print("con: no command given\n");
-				c.stderr.print(HELP);
+				c.stderr.println(I18N._("terminal: no command given"));
+				c.stderr.println(HELP);
 				return 1;
 			}
 		}
@@ -80,6 +81,7 @@ public class Console extends NativeApp {
 					System.arraycopy(args, 1, childArgs, 0, args.length-1);
 				}
 			}
+			form.setTitle(childCmd+" - "+I18N._("Terminal"));
 			child.stdin = form.in;
 			child.stdout = form.out;
 			child.stderr = form.out;

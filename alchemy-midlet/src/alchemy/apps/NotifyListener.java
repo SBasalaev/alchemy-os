@@ -39,5 +39,4 @@ class NotifyListener implements CommandListener {
 			notify();
 		}
 	}
-
 }

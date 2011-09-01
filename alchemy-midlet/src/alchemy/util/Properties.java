@@ -18,6 +18,7 @@
 
 package alchemy.util;
 
+import alchemy.l10n.I18N;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -47,7 +48,7 @@ public class Properties {
 			if (line.length() == 0) continue;
 			if (line.charAt(0) == '#') continue;
 			int eqindex = line.indexOf('=');
-			if (eqindex < 0) throw new IOException("Cannot parse: "+line);
+			if (eqindex < 0) throw new IOException(I18N._("Cannot parse:")+' '+line);
 			p.props.put(
 					line.substring(0,eqindex).trim(),
 					line.substring(eqindex+1).trim());
@@ -62,7 +63,7 @@ public class Properties {
 
 	public void put(String key, String value) {
 		if (key.indexOf('=') >= 0)
-			throw new IllegalArgumentException("Key must not contain '='");
+			throw new IllegalArgumentException(I18N._("Key must not contain '='"));
 		props.put(key, value);
 	}
 

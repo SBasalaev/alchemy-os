@@ -43,7 +43,7 @@ public final class FS extends Filesystem implements Initable {
 	static private final String ERR_NOT_DIR = "Not a directory: ";
 	static private final String ERR_IS_DIR = "Is a directory: ";
 	static private final String ERR_EXISTS = "File already exists: ";
-	static private final String ERR_NOT_FOUND = "File is not found: ";
+	static private final String ERR_NOT_FOUND = "File not found: ";
 	static private final String ERR_NOT_EMPTY = "Directory not empty: ";
 
 	static private int F_DIR = 16;

@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
+import alchemy.l10n.I18N;
 import alchemy.nec.tree.Unit;
 import alchemy.nlib.NativeApp;
 import java.io.OutputStream;
@@ -30,8 +31,7 @@ import java.io.OutputStream;
 public class NEC extends NativeApp {
 
 	static private final String VERSION =
-			"Native E Compiler\n" +
-			"version 0.2";
+			I18N._("Native E Compiler version 0.2");
 
 	static private final String HELP =
 			"Usage: ec [options] <input> \n" +
@@ -68,7 +68,7 @@ public class NEC extends NativeApp {
 			} else if (arg.startsWith("-t")) {
 				if (arg.equals("-t1.1")) target = 0x0101;
 				else {
-					c.stderr.println("Unsupported target: "+arg.substring(2));
+					c.stderr.println(I18N._("Unsupported target: {0}", arg.substring(2)));
 					return 1;
 				}
 			} else if (arg.equals("-O1") || arg.equals("-O")) {
@@ -76,7 +76,7 @@ public class NEC extends NativeApp {
 			} else if (arg.equals("-O0")) {
 				optimize = false;
 			} else if (arg.charAt(0) == '-') {
-				c.stderr.println("Unknown argument: "+arg);
+				c.stderr.println(I18N._("Unknown argument: {0}", arg));
 				c.stderr.println(HELP);
 				return 1;
 			} else if (wait_outname) {
@@ -84,7 +84,7 @@ public class NEC extends NativeApp {
 				wait_outname = false;
 			} else {
 				if (fname != null) {
-					c.stderr.println("Excess parameter: "+fname);
+					c.stderr.println(I18N._("Excess parameter: {0}", fname));
 					c.stderr.println(HELP);
 					return 1;
 				}
@@ -111,7 +111,7 @@ public class NEC extends NativeApp {
 			wr.write(out);
 			out.close();
 		} catch (Exception e) {
-			c.stderr.println("Error: "+e.toString());
+			c.stderr.println(I18N._("Error: {0}", e));
 			return -1;
 		}
 		return 0;

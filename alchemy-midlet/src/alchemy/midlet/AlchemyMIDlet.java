@@ -22,6 +22,7 @@ import alchemy.core.Art;
 import alchemy.core.Context;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
+import alchemy.l10n.I18N;
 import alchemy.nlib.NativeLibBuilder;
 import java.util.Stack;
 import javax.microedition.lcdui.*;
@@ -43,8 +44,8 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 
 	private Display display;
 
-	private final Command cmdQuit = new Command("Quit", Command.EXIT, 1);
-	private final Command cmdStart = new Command("Start", Command.OK, 1);
+	private final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 1);
+	private final Command cmdStart = new Command(I18N._("Start"), Command.OK, 1);
 	private Art runtime;
 
 	private Displayable current;
@@ -56,7 +57,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 		display = Display.getDisplay(this);
 		try {
 			if (!InstallInfo.exists()) {
-				kernelPanic("Alchemy is not installed.");
+				kernelPanic(I18N._("Alchemy is not installed."));
 				return;
 			}
 			//setting up environment
@@ -78,7 +79,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 	private void runApp() {
 		Alert alert = new Alert("Alchemy");
 		alert.setTimeout(Alert.FOREVER);
-		alert.setString("Start application?");
+		alert.setString(I18N._("Start application?"));
 		alert.addCommand(cmdQuit);
 		alert.addCommand(cmdStart);
 		alert.setCommandListener(this);
@@ -149,7 +150,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 
 		public void run() {
 			try {
-				runtime.rootContext().startAndWait("con", new String[] {"sh"});
+				runtime.rootContext().startAndWait("terminal", new String[] {"sh"});
 				destroyApp(true);
 			} catch (Throwable t) {
 				kernelPanic(t.toString());

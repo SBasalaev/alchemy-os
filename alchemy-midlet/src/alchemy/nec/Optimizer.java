@@ -3,7 +3,7 @@ package alchemy.nec;
 import alchemy.nec.tree.*;
 
 /**
- * Optimizer.
+ * Simple optimizer.
  * Folds constants and eliminates dead code.
  * @author Sergey Basalaev
  */

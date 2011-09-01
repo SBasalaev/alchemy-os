@@ -22,6 +22,7 @@ import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
 import alchemy.fs.File;
+import alchemy.l10n.I18N;
 import alchemy.util.Util;
 import java.io.IOException;
 import java.io.InputStream;
@@ -353,7 +354,7 @@ class CoreFunction extends Function {
 			case 113: { // netread(url: String): IStream
 				String addr = (String)args[0];
 				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
-					throw new IOException("Unknown protocol in netread()");
+					throw new IOException(I18N._("Unknown protocol in netread()"));
 				InputStream stream = Connector.openInputStream(addr);
 				c.addStream(stream);
 				return stream;

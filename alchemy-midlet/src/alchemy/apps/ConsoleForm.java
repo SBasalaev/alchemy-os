@@ -18,6 +18,7 @@
 
 package alchemy.apps;
 
+import alchemy.l10n.I18N;
 import alchemy.util.Util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,11 +43,11 @@ class ConsoleForm extends Form implements ItemCommandListener {
 	final PrintStream out = new PrintStream(new ConsoleOutputStream());
 
 	private final TextField input = new TextField(">", null, 1024, TextField.ANY);
-	private final Command cmdInput = new Command("Input", Command.OK, 1);
+	private final Command cmdInput = new Command(I18N._("Input"), Command.OK, 1);
 	private boolean inputvisible = false;
 
 	public ConsoleForm() {
-		super("Console");
+		super(I18N._("Terminal"));
 		input.addCommand(cmdInput);
 		input.setItemCommandListener(this);
 	}
@@ -69,7 +70,7 @@ class ConsoleForm extends Form implements ItemCommandListener {
 			try {
 				input.wait();
 			} catch (InterruptedException ie) {
-				print("interrupt");
+				print(I18N._("interrupted"));
 			}
 			delete(size()-1);
 			append(new StringItem(input.getLabel(), input.getString()+'\n'));

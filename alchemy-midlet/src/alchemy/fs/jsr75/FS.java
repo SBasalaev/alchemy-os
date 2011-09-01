@@ -20,6 +20,7 @@ package alchemy.fs.jsr75;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.l10n.I18N;
 import alchemy.util.Initable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,7 +64,7 @@ public class FS extends Filesystem implements Initable {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
 			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
+			if (parent != null && !exists(parent)) throw new IOException(I18N._("File not found: {0}", parent));
 			if (!fc.exists()) fc.create();
 			return fc.openOutputStream(fc.fileSize());
 		} finally {
@@ -75,7 +76,7 @@ public class FS extends Filesystem implements Initable {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
 			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
+			if (parent != null && !exists(parent)) throw new IOException(I18N._("File not found: {0}", parent));
 			if (!fc.exists()) fc.create();
 			fc.truncate(0);
 			return fc.openOutputStream();
@@ -87,7 +88,7 @@ public class FS extends Filesystem implements Initable {
 	public InputStream read(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
+			if (!fc.exists()) throw new IOException(I18N._("File not found: {0}", file));
 			return fc.openInputStream();
 		} finally {
 			fc.close();
@@ -128,7 +129,7 @@ public class FS extends Filesystem implements Initable {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.WRITE);
 		try {
 			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
+			if (parent != null && !exists(parent)) throw new IOException(I18N._("File not found: {0}", parent));
 			fc.create();
 		} finally {
 			fc.close();
@@ -139,7 +140,7 @@ public class FS extends Filesystem implements Initable {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
 			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
+			if (parent != null && !exists(parent)) throw new IOException(I18N._("File not found: {0}", parent));
 			fc.mkdir();
 		} finally {
 			fc.close();
@@ -149,7 +150,7 @@ public class FS extends Filesystem implements Initable {
 	public void remove(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (file.path().length() == 0) throw new SecurityException("Cannot delete root directory.");
+			if (file.path().length() == 0) throw new SecurityException(I18N._("Cannot delete root directory"));
 			if (fc.exists()) fc.delete();
 		} finally {
 			fc.close();
@@ -185,7 +186,7 @@ public class FS extends Filesystem implements Initable {
 	public int size(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
+			if (!fc.exists()) throw new IOException(I18N._("File not found: {0}", file));
 			if (fc.isDirectory()) return 0;
 			else {
 				long size = fc.fileSize();
@@ -200,7 +201,7 @@ public class FS extends Filesystem implements Initable {
 	public long lastModified(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
+			if (!fc.exists()) throw new IOException(I18N._("File not found: {0}", file));
 			return fc.lastModified();
 		} finally {
 			fc.close();
@@ -210,7 +211,7 @@ public class FS extends Filesystem implements Initable {
 	public String[] list(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path()+'/', Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
+			if (!fc.exists()) throw new IOException(I18N._("File not found: {0}", file));
 			Enumeration e = fc.list("*", true);
 			Vector v = new Vector();
 			while (e.hasMoreElements()) v.addElement(e.nextElement());
@@ -232,7 +233,7 @@ public class FS extends Filesystem implements Initable {
 	public void setRead(File file, boolean on) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
+			if (!fc.exists()) throw new IOException(I18N._("File not found: {0}", file));
 			fc.setReadable(on);
 		} finally {
 			fc.close();
@@ -242,7 +243,7 @@ public class FS extends Filesystem implements Initable {
 	public void setWrite(File file, boolean on) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
+			if (!fc.exists()) throw new IOException(I18N._("File not found: {0}", file));
 			fc.setWritable(on);
 		} finally {
 			fc.close();

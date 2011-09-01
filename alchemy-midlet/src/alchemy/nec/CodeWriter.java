@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
+import alchemy.l10n.I18N;
 import alchemy.nec.tree.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -97,8 +98,7 @@ class CodeWriter implements ExprVisitor {
 	public void visitFunc(Func f, DataOutputStream out) throws Exception {
 		FuncData data = new FuncComputer(true).visitFunc(f);
 		if (data.stackmax > 255 || data.localmax > 255 || data.codesize > 65535)
-			throw new Exception("Function "+f.asVar.name
-					+" does not fit in frame. Consider refactoring.");
+			throw new Exception(I18N._("Function {0} can not be compiled, too complicated", f.asVar.name));
 		out.writeByte('P');
 		out.writeShort(objects.indexOf(f.asVar.name));
 		out.writeByte(1); //has relocations

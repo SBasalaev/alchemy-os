@@ -19,6 +19,7 @@
 package alchemy.midlet;
 
 import alchemy.fs.Filesystem;
+import alchemy.l10n.I18N;
 import alchemy.util.Initable;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
@@ -140,9 +141,9 @@ class InstallInfo {
 			}
 			return fs;
 		} catch (ClassNotFoundException cnfe) {
-			throw new RuntimeException("FS module not found for "+FS_TYPE+'='+fstype);
+			throw new RuntimeException(I18N._("FS module not found for ")+FS_TYPE+'='+fstype);
 		} catch (Throwable t) {
-			throw new RuntimeException("Error while creating FS: "+t);
+			throw new RuntimeException(I18N._("Error while creating FS: ")+t);
 		}
 	}
 }

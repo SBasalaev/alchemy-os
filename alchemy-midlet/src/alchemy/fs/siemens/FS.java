@@ -20,6 +20,7 @@ package alchemy.fs.siemens;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.l10n.I18N;
 import alchemy.util.Initable;
 import com.siemens.mp.io.file.FileConnection;
 import java.io.IOException;
@@ -40,7 +41,12 @@ public final class FS extends Filesystem implements Initable {
 	public FS() { }
 
 	public void init(Object root) {
-		this.root = "file:///"+String.valueOf(root);
+		//normalizing path
+		String path = String.valueOf(root);
+		if (path.startsWith("file:")) path = path.substring(5);
+		path = "/"+path+"/.";
+		path = new File(path).toString();
+		this.root = "file://"+path;
 	}
 
 
@@ -125,7 +131,7 @@ public final class FS extends Filesystem implements Initable {
 	public void remove(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
-			if (file.path().length() == 0) throw new SecurityException("Cannot delete root directory.");
+			if (file.path().length() == 0) throw new SecurityException(I18N._("Cannot delete root directory"));
 			if (fc.exists()) fc.delete();
 		} finally {
 			fc.close();

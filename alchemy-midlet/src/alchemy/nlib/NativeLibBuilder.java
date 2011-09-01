@@ -21,6 +21,7 @@ package alchemy.nlib;
 import alchemy.core.Context;
 import alchemy.core.LibBuilder;
 import alchemy.core.Library;
+import alchemy.l10n.I18N;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,11 +43,11 @@ public class NativeLibBuilder implements LibBuilder {
 		try {
 			return (Library)Class.forName(classname).newInstance();
 		} catch (ClassNotFoundException cnfe) {
-			throw new InstantiationException("Class not found: "+classname);
+			throw new InstantiationException(I18N._("Class not found: ")+classname);
 		} catch (IllegalAccessException iae) {
-			throw new InstantiationException("Class not accessible: "+classname);
+			throw new InstantiationException(I18N._("Class not accessible: ")+classname);
 		} catch (ClassCastException cce) {
-			throw new InstantiationException("Not a library: "+classname);
+			throw new InstantiationException(I18N._("Not a library: ")+classname);
 		}
 	}
 }

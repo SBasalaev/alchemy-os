@@ -18,6 +18,7 @@
 
 package alchemy.util;
 
+import alchemy.l10n.I18N;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UTFDataFormatException;
@@ -28,9 +29,9 @@ import java.io.UTFDataFormatException;
  */
 public final class Util {
 
-	private static final String ERR_END = "Incomplete character at the end";
-	private static final String ERR_WRONG = "Wrong code at byte ";
-	private static final String ERR_LONG = "Encoded string is too long";
+	private static final String ERR_END = I18N._("Incomplete character at the end");
+	private static final String ERR_WRONG = I18N._("Wrong code at byte ");
+	private static final String ERR_LONG = I18N._("Encoded string is too long");
 
 	private Util() { }
 
@@ -93,7 +94,8 @@ public final class Util {
 		//calculating byte count
 		for (int i=0; i<len; i++) {
 			ch = str.charAt(i);
-			if (ch < 0x80) count++;
+			if (ch == 0) count += 2;
+			else if (ch < 0x80) count++;
 			else if (ch < 0x0800) count += 2;
 			else count += 3;
 		}

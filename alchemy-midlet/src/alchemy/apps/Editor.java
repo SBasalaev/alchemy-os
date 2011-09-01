@@ -20,6 +20,7 @@ package alchemy.apps;
 
 import alchemy.core.Context;
 import alchemy.fs.File;
+import alchemy.l10n.I18N;
 import alchemy.midlet.AlchemyMIDlet;
 import alchemy.nlib.NativeApp;
 import alchemy.util.Util;
@@ -36,28 +37,28 @@ import javax.microedition.lcdui.TextField;
  */
 public class Editor extends NativeApp {
 
-	private static final String HELP = "Usage: ed <filename>\n";
-	private static final String VERSION = "native editor v1.0\n";
+	private static final String HELP = I18N._("Usage: edit <filename>");
+	private static final String VERSION = I18N._("native editor v1.0");
 	
-	private static final Command cmdSave = new Command("Save", Command.OK, 1);
-	private static final Command cmdQuit = new Command("Quit", Command.EXIT, 5);
+	private static final Command cmdSave = new Command(I18N._("Save"), Command.OK, 1);
+	private static final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 5);
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			c.stderr.print("ed: no file specified\n");
-			c.stderr.print(HELP);
+			c.stderr.println(I18N._("edit: no file specified"));
+			c.stderr.println(HELP);
 			return 1;
 		}
 		if (args[0].equals("-h")) {
-			c.stdout.print(HELP);
+			c.stdout.println(HELP);
 			return 0;
 		}
 		if (args[0].equals("-v")) {
-			c.stdout.print(VERSION);
+			c.stdout.println(VERSION);
 			return 0;
 		}
 		File docfile = c.toFile(args[0]);
-		TextBox box = new TextBox("Editor", null, 65536, TextField.ANY);
+		TextBox box = new TextBox(args[0]+" - "+I18N._("Editor"), null, 65536, TextField.ANY);
 		box.addCommand(cmdSave);
 		box.addCommand(cmdQuit);
 		final NotifyListener l = new NotifyListener();
@@ -69,7 +70,7 @@ public class Editor extends NativeApp {
 				byte[] data = Util.readFully(in);
 				in.close();
 				if (data.length > box.getMaxSize()) {
-					c.stderr.println("ned: File is too long");
+					c.stderr.println(I18N._("edit: file is too long"));
 					return 1;
 				}
 				box.setString(Util.utfDecode(data));
@@ -88,7 +89,7 @@ public class Editor extends NativeApp {
 					byte[] data = Util.utfEncode(box.getString());
 					out.write(data);
 					out.close();
-					AlchemyMIDlet.getInstance().alert("Editor", "File saved", AlertType.INFO);
+					AlchemyMIDlet.getInstance().alert(I18N._("Editor"), I18N._("File saved"), AlertType.INFO);
 				}
 			}
 		} catch (Exception e) {
