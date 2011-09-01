@@ -51,7 +51,12 @@ public class FS extends Filesystem implements Initable {
 	 * @param root root directory
 	 */
 	public void init(Object root) {
-		this.root = "file:///"+String.valueOf(root);
+		//normalizing path
+		String path = String.valueOf(root);
+		if (path.startsWith("file:")) path = path.substring(5);
+		path = "/"+path+"/.";
+		path = new File(path).toString();
+		this.root = "file://"+path;
 	}
 
 	public OutputStream append(File file) throws IOException {
@@ -131,7 +136,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public void mkdir(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path()+'/', Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
 		try {
 			File parent = file.parent();
 			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);

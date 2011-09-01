@@ -224,6 +224,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 					datastream.readFully(data);
 					OutputStream out = fs.write(f);
 					out.write(data);
+					out.flush();
 					out.close();
 				}
 				fs.setRead(f, (attrs & 4) != 0);
