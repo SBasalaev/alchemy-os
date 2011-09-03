@@ -48,7 +48,7 @@ public final class Util {
 		int ofs  = 0;                  //offset in byte array
 		int b1, b2, b3;                //bytes to compound symbols from
 
-		while (count < len) {
+		while (ofs < len) {
 			b1 = b[ofs++] & 0xff;
 			if (b1 < 0x80) {  // 0xxx xxxx
 				chars[count++]=(char)b1;
@@ -108,15 +108,18 @@ public final class Util {
 		//string encoding
 		for (int i=0; i<len; i++) {
 			ch = str.charAt(i);
-			if (ch < 0x80) {
+			if (ch == 0) {
+				bytes[ofs++] = (byte)0xc0;
+				bytes[ofs++] = (byte)0x80;
+			} else if (ch < 0x80) {
 				bytes[ofs++] = (byte)(ch);
 			} else if (ch < 0x800) {
-				bytes[ofs++] = (byte)(ch >> 6);
-				bytes[ofs++] = (byte)(ch);
+				bytes[ofs++] = (byte)((ch >> 6) | 0xc0);
+				bytes[ofs++] = (byte)(ch&0x3f | 0x80);
 			} else {
-				bytes[ofs++] = (byte)(ch >> 12);
-				bytes[ofs++] = (byte)(ch >> 6);
-				bytes[ofs++] = (byte)(ch);
+				bytes[ofs++] = (byte)((ch >> 12) | 0xe0);
+				bytes[ofs++] = (byte)((ch >> 6)&0x3f | 0x80);
+				bytes[ofs++] = (byte)(ch&0x3f | 0x80);
 			}
 		}
 
