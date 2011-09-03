@@ -38,14 +38,7 @@ import javax.microedition.rms.RecordStoreException;
  */
 public class InstallerMIDlet extends MIDlet implements CommandListener {
 
-	private static final String ABOUT_TEXT =
-			"Alchemy OS v1.1\n" +
-			"Copyright (c) 2011, Sergey Basalaev\n" +
-			"http://alchemy-os.googlecode.com\n" +
-			"\n" +
-			I18N._("This MIDlet is free software and is licensed under GNU GPL version 3")+'\n' +
-			I18N._("A copy of the GNU GPL may be found at http://www.gnu.org/licenses/")+'\n';
-
+	private static String ABOUT_TEXT;
 	private Displayable current;
 
 	private final Display display;
@@ -73,6 +66,13 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.append(I18N._("Fatal error: {0}", I18N._("cannot read setup.cfg")+'\n'+e+'\n'));
 			return;
 		}
+		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+'\n' +
+			"Copyright (c) 2011, Sergey Basalaev\n" +
+			"http://alchemy-os.googlecode.com\n" +
+			"\n" +
+			I18N._("This MIDlet is free software and is licensed under GNU GPL version 3")+'\n' +
+			I18N._("A copy of the GNU GPL may be found at http://www.gnu.org/licenses/")+'\n';
+
 		new InstallerThread(0).start();
 	}
 
