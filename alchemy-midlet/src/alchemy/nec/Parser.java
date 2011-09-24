@@ -755,6 +755,8 @@ public class Parser {
 	 *   <li>
 	 *     If types are the same then that type is returned.
 	 *   </li><li>
+	 *     if one of types is none then returned type is none
+	 *   </li><li>
 	 *     If both are numbers then returned type is first
 	 *     occured in the list: Double, Float, Long, Int.
 	 *   </li><li>
@@ -765,6 +767,8 @@ public class Parser {
 	private Type binaryCastType(Type ltype, Type rtype) {
 		if (ltype.equals(rtype)) return ltype;
 		if (ltype instanceof BuiltinType && rtype instanceof BuiltinType) {
+			if (ltype.equals(BuiltinType.typeNone) || rtype.equals(BuiltinType.typeNone))
+				return BuiltinType.typeNone;
 			int lindex = ((BuiltinType)ltype).numIndex();
 			int rindex = ((BuiltinType)rtype).numIndex();
 			if (lindex < 0 || rindex < 0) return BuiltinType.typeAny;
