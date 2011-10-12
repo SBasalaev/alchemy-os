@@ -1,0 +1,3 @@
+Usage: time [program] [args]...
+
+Run program and print time of its execution.

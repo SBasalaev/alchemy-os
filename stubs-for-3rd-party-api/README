@@ -1,4 +1,7 @@
 API stubs to link optional modules.
 
+These stubs are made from public API and do not contain
+any code that may be considered non-free.
+
 Contains:
  Siemens Filesystem API
