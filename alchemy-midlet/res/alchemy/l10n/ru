@@ -118,3 +118,4 @@ Editor=Редактор
 edit: file is too long=edit: слишком длинный файл
 File saved=Файл сохранён
 Unknown protocol in netread()=Неизвестный протокол в netread()
+Usage: sh -c <cmd> <args>...=Синтаксис: sh -c <кмд> <парам>...

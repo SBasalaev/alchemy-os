@@ -22,6 +22,8 @@ import alchemy.core.Context;
 import alchemy.fs.File;
 import alchemy.nlib.NativeApp;
 import alchemy.util.UTFReader;
+import alchemy.util.Util;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Vector;
@@ -34,6 +36,8 @@ import alchemy.l10n.I18N;
  */
 public class Shell extends NativeApp {
 
+	static private final String C_USAGE = I18N._("Usage: sh -c <cmd> <args>...");
+
 	public Shell() { }
 
 	public int main(Context c, String[] args) {
@@ -41,6 +45,16 @@ public class Shell extends NativeApp {
 			InputStream scriptinput;
 			if (args.length == 0) {
 				scriptinput = c.stdin;
+			} else if (args[0].equals("-c")) {
+				if (args.length < 2) {
+					c.stderr.println(C_USAGE);
+					return -1;
+				}
+				StringBuffer cmdline = new StringBuffer(args[1]);
+				for (int i=2; i<args.length; i++) {
+					cmdline.append(' ').append(args[i]);
+				}
+				scriptinput = new ByteArrayInputStream(Util.utfEncode(cmdline.toString()));
 			} else {
 				scriptinput = c.fs().read(c.toFile(args[0]));
 			}
