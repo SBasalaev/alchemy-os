@@ -1,0 +1,7 @@
+urlget - retrieve file from the internet.
+
+Usage: urlget url [file]
+
+url must start with http:// or https://
+If file is not specified then output is
+written to stdout.

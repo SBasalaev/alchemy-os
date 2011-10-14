@@ -1,1 +1,1 @@
-rm dataio.o textio.o libio.0.0.so
+rm dataio.o textio.o libio.0.so libio.so
