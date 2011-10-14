@@ -22,18 +22,13 @@ package alchemy.nec.tree;
  * Builtin types.
  * @author Sergey Basalaev
  */
-public class BuiltinType extends Type {
+public class BuiltinType extends NamedType {
 
-	private final String name;
 	private final int numindex;
 
 	private BuiltinType(String name, int numindex) {
-		this.name = name;
+		super(name);
 		this.numindex = numindex;
-	}
-
-	public String toString() {
-		return name;
 	}
 
 	/** Returns numeric index of this type.

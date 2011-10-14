@@ -141,8 +141,8 @@ public class Parser {
 							String alias = t.svalue;
 							Type type = unit.getType(alias);
 							if (type == null) {
-								unit.putType(alias, new AbstractType(alias));
-							} else if (!(type instanceof AbstractType)) {
+								unit.putType(alias, new NamedType(alias));
+							} else if (!(type instanceof NamedType)) {
 								throw new ParseException(I18N._("Type {0} is already defined", alias));
 							}
 							switch (t.nextToken()) {

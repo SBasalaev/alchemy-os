@@ -22,22 +22,11 @@ package alchemy.nec.tree;
  * Type of composite structure.
  * @author Sergey Basalaev
  */
-public class StructureType extends Type {
+public class StructureType extends NamedType {
 
-	private final String name;
 	public Var[] fields;
 
 	public StructureType(String name) {
-		this.name = name;
-	}
-
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj.getClass() != StructureType.class) return false;
-		return ((StructureType)obj).name.equals(name);
-	}
-
-	public String toString() {
-		return name;
+		super(name);
 	}
 }

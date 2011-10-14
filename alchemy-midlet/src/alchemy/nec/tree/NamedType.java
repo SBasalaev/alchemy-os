@@ -19,22 +19,22 @@
 package alchemy.nec.tree;
 
 /**
- * Abstract type is a type which was declared
- * but not described.
+ * Type is uniquely defined by its name.
+ * This does not include aliases.
  * @author Sergey Basalaev
  */
-public class AbstractType extends Type {
+public class NamedType extends Type {
 
 	private final String name;
 
-	public AbstractType(String name) {
+	public NamedType(String name) {
 		this.name = name;
 	}
 
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
-		if (!(obj instanceof AbstractType)) return false;
-		AbstractType other = (AbstractType)obj;
+		if (!(obj instanceof NamedType)) return false;
+		NamedType other = (NamedType)obj;
 		return this.name.equals(other.name);
 	}
 
