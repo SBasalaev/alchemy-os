@@ -142,7 +142,7 @@ public class Parser {
 							Type type = unit.getType(alias);
 							if (type == null) {
 								unit.putType(alias, new NamedType(alias));
-							} else if (!(type instanceof NamedType)) {
+							} else if (type.getClass() != NamedType.class) {
 								throw new ParseException(I18N._("Type {0} is already defined", alias));
 							}
 							switch (t.nextToken()) {
