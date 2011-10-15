@@ -8,7 +8,7 @@ def close(stream: Any);
 
 def read(s: IStream): Int;
 def readarray(s: IStream, buf: BArray, ofs: Int, len: Int): Int;
-def available(s: IStream);
+def available(s: IStream): Int;
 def skip(s: IStream, n: Long);
 
 def write(s: OStream, b: Int);
