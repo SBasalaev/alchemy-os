@@ -305,15 +305,15 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public long spaceTotal() {
-		try {
-			return spaceFree() + spaceUsed();
-		} catch (RecordStoreException rse) {
-			return -1;
-		}
+		return spaceFree() + spaceUsed();
 	}
 
 	public long spaceUsed() {
-		return store.getSize();
+		try {
+			return store.getSize();
+		} catch (RecordStoreException rse) {
+			return -1;
+		}
 	}
 
 	private RSFD root() {
