@@ -119,3 +119,4 @@ edit: file is too long=edit: слишком длинный файл
 File saved=Файл сохранён
 Unknown protocol in netread()=Неизвестный протокол в netread()
 Usage: sh -c <cmd> <args>...=Синтаксис: sh -c <кмд> <парам>...
+Variable {0} already exists in this scope=Переменная {0} уже определена в этой области видимости

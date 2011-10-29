@@ -18,6 +18,7 @@
 
 package alchemy.nec.tree;
 
+import alchemy.l10n.I18N;
 import alchemy.nec.ParseException;
 import java.util.Vector;
 
@@ -74,7 +75,7 @@ public class BlockExpr extends Expr implements Scope {
 		for (int i=locals.size()-1; i>=0; i--) {
 			Var var = (Var)locals.elementAt(i);
 			if (var.name.equals(v.name))
-				throw new ParseException("Variable "+v.name+" already exists in this scope");
+				throw new ParseException(I18N._("Variable {0} already exists in this scope", v.name));
 		}
 		locals.addElement(v);
 		return parent.getVar(v.name) != null;
