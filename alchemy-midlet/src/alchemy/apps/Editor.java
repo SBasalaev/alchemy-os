@@ -23,7 +23,7 @@ import alchemy.fs.File;
 import alchemy.l10n.I18N;
 import alchemy.midlet.AlchemyMIDlet;
 import alchemy.nlib.NativeApp;
-import alchemy.util.Util;
+import alchemy.util.IO;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.microedition.lcdui.AlertType;
@@ -45,16 +45,16 @@ public class Editor extends NativeApp {
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			c.stderr.println(I18N._("edit: no file specified"));
-			c.stderr.println(HELP);
+			IO.println(c.stderr, I18N._("edit: no file specified"));
+			IO.println(c.stderr, HELP);
 			return 1;
 		}
 		if (args[0].equals("-h")) {
-			c.stdout.println(HELP);
+			IO.println(c.stdout, HELP);
 			return 0;
 		}
 		if (args[0].equals("-v")) {
-			c.stdout.println(VERSION);
+			IO.println(c.stdout, VERSION);
 			return 0;
 		}
 		File docfile = c.toFile(args[0]);
@@ -67,16 +67,16 @@ public class Editor extends NativeApp {
 		try {
 			if (c.fs().exists(docfile)) {
 				InputStream in = c.fs().read(docfile);
-				byte[] data = Util.readFully(in);
+				byte[] data = IO.readFully(in);
 				in.close();
 				if (data.length > box.getMaxSize()) {
-					c.stderr.println(I18N._("edit: file is too long"));
+					IO.println(c.stderr, I18N._("edit: file is too long"));
 					return 1;
 				}
-				box.setString(Util.utfDecode(data));
+				box.setString(IO.utfDecode(data));
 			}
 		} catch (Exception e) {
-			c.stderr.println(e);
+			IO.println(c.stderr, e);
 			return 1;
 		}
 		AlchemyMIDlet.getInstance().pushScreen(box);
@@ -86,14 +86,14 @@ public class Editor extends NativeApp {
 				if (l.result == cmdQuit) return 0;
 				else if (l.result == cmdSave) {
 					OutputStream out = c.fs().write(docfile);
-					byte[] data = Util.utfEncode(box.getString());
+					byte[] data = IO.utfEncode(box.getString());
 					out.write(data);
 					out.close();
 					AlchemyMIDlet.getInstance().alert(I18N._("Editor"), I18N._("File saved"), AlertType.INFO);
 				}
 			}
 		} catch (Exception e) {
-			c.stderr.println(e);
+			IO.println(c.stderr, e);
 			return 1;
 		} finally {
 			AlchemyMIDlet.getInstance().popScreen();

@@ -25,7 +25,6 @@ import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
@@ -128,12 +127,12 @@ public class Context {
 	 * Standard output stream.
 	 * By default stream of parent context is used.
 	 */
-	public PrintStream stdout;
+	public OutputStream stdout;
 	/**
 	 * Standard error stream.
 	 * By default stream of parent context is used.
 	 */
-	public PrintStream stderr;
+	public OutputStream stderr;
 
 	/* PACKAGE PRIVATE FIELDS */
 

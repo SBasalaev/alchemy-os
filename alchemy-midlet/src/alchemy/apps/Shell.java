@@ -21,11 +21,11 @@ package alchemy.apps;
 import alchemy.core.Context;
 import alchemy.fs.File;
 import alchemy.nlib.NativeApp;
+import alchemy.util.IO;
 import alchemy.util.UTFReader;
-import alchemy.util.Util;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import java.util.Vector;
 import alchemy.apps.ConsoleForm.ConsoleInputStream;
 import alchemy.l10n.I18N;
@@ -47,14 +47,14 @@ public class Shell extends NativeApp {
 				scriptinput = c.stdin;
 			} else if (args[0].equals("-c")) {
 				if (args.length < 2) {
-					c.stderr.println(C_USAGE);
+					IO.println(c.stderr, C_USAGE);
 					return -1;
 				}
 				StringBuffer cmdline = new StringBuffer(args[1]);
 				for (int i=2; i<args.length; i++) {
 					cmdline.append(' ').append(args[i]);
 				}
-				scriptinput = new ByteArrayInputStream(Util.utfEncode(cmdline.toString()));
+				scriptinput = new ByteArrayInputStream(IO.utfEncode(cmdline.toString()));
 			} else {
 				scriptinput = c.fs().read(c.toFile(args[0]));
 			}
@@ -74,7 +74,7 @@ public class Shell extends NativeApp {
 				ShellCommand cc = null;
 				try { cc = split(line); }
 				catch (IllegalArgumentException e) {
-					c.stderr.println(r.lineNumber()+':'+e.getMessage());
+					IO.println(c.stderr, r.lineNumber()+':'+e.getMessage());
 					if (scriptinput instanceof ConsoleInputStream) continue;
 					else return 1;
 				}
@@ -92,7 +92,7 @@ public class Shell extends NativeApp {
 							((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 						}
 					} else {
-						c.stderr.println(I18N._("cd: no directory specified"));
+						IO.println(c.stderr, I18N._("cd: no directory specified"));
 					}
 				} else if (cc.cmd.equals("cls")) {
 					if (c.stdin instanceof ConsoleInputStream) {
@@ -107,35 +107,35 @@ public class Shell extends NativeApp {
 					if (cc.out != null) {
 						File outfile = c.toFile(cc.out);
 						if (cc.appendout) {
-							child.stdout = new PrintStream(c.fs().append(outfile));
+							child.stdout = c.fs().append(outfile);
 						} else {
-							child.stdout = new PrintStream(c.fs().write(outfile));
+							child.stdout = c.fs().write(outfile);
 						}
 						child.addStream(child.stdout);
 					}
 					if (cc.err != null) {
 						File errfile = c.toFile(cc.err);
 						if (cc.appenderr) {
-							child.stderr = new PrintStream(c.fs().append(errfile));
+							child.stderr = c.fs().append(errfile);
 						} else {
-							child.stderr = new PrintStream(c.fs().write(errfile));
+							child.stderr = c.fs().write(errfile);
 						}
 						child.addStream(child.stderr);
 					}
 					child.startAndWait(cc.cmd, cc.args);
 					Throwable err = child.getError();
 					if (err != null) {
-						c.stderr.println(err);
-						c.stderr.println(child.dumpCallStack());
+						IO.println(c.stderr, err);
+						IO.println(c.stderr, child.dumpCallStack());
 					}
 				}
 			} catch (Throwable t) {
-				c.stderr.println(t);
+				IO.println(c.stderr, t);
 			}
 			return 0;
 		} catch (Exception e) {
 			e.printStackTrace();
-			c.stderr.println(e);
+			IO.println(c.stderr, e);
 			return 1;
 		}
 	}

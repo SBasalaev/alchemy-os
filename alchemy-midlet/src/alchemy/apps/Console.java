@@ -22,6 +22,8 @@ import alchemy.core.Context;
 import alchemy.l10n.I18N;
 import alchemy.midlet.AlchemyMIDlet;
 import alchemy.nlib.NativeApp;
+import alchemy.util.IO;
+import java.io.OutputStream;
 import javax.microedition.lcdui.Command;
 
 /**
@@ -38,25 +40,25 @@ public class Console extends NativeApp {
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			c.stderr.println(I18N._("terminal: no command given"));
-			c.stderr.println(HELP);
+			IO.println(c.stderr, I18N._("terminal: no command given"));
+			IO.println(c.stderr, HELP);
 			return 1;
 		}
 		if (args[0].equals("-v")) {
-			c.stdout.println(I18N._("Native terminal v1.1"));
+			IO.println(c.stdout, I18N._("Native terminal v1.1"));
 			return 0;
 		}
 		if (args[0].equals("-h")) {
-			c.stdout.println(I18N._("terminal - run command in the new terminal"));
-			c.stdout.println(HELP);
+			IO.println(c.stdout, I18N._("terminal - run command in the new terminal"));
+			IO.println(c.stdout, HELP);
 			return 0;
 		}
 		boolean keep = false;
 		if (args[0].equals("-k")) {
 			keep = true;
 			if (args.length == 1) {
-				c.stderr.println(I18N._("terminal: no command given"));
-				c.stderr.println(HELP);
+				IO.println(c.stderr, I18N._("terminal: no command given"));
+				IO.println(c.stderr, HELP);
 				return 1;
 			}
 		}

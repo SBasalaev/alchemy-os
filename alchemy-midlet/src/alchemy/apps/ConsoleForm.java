@@ -19,7 +19,7 @@
 package alchemy.apps;
 
 import alchemy.l10n.I18N;
-import alchemy.util.Util;
+import alchemy.util.IO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -120,7 +120,7 @@ class ConsoleForm extends Form implements ItemCommandListener {
 		public synchronized void flush() throws IOException {
 			byte[] data = buf.toByteArray();
 			buf.reset();
-			print(Util.utfDecode(data));
+			print(IO.utfDecode(data));
 		}
 	}
 
@@ -147,7 +147,7 @@ class ConsoleForm extends Form implements ItemCommandListener {
 		public int read() throws IOException {
 			if (buf == null) {
 				String data = waitForInput();
-				buf = new ByteArrayInputStream(Util.utfEncode(data));
+				buf = new ByteArrayInputStream(IO.utfEncode(data));
 			}
 			int b = buf.read();
 			if (b == -1) buf = null;

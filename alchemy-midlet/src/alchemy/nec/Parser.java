@@ -22,6 +22,7 @@ import alchemy.core.Context;
 import alchemy.fs.File;
 import alchemy.l10n.I18N;
 import alchemy.nec.tree.*;
+import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.util.Stack;
@@ -70,7 +71,7 @@ public class Parser {
 			error(pe.getMessage());
 			return null;
 		} catch (IOException ioe) {
-			c.stderr.println(I18N._("I/O error: {0}", ioe));
+			IO.println(c.stderr, I18N._("I/O error: {0}", ioe));
 			return null;
 		}
 		//removing unused functions
@@ -806,13 +807,13 @@ public class Parser {
 
 	/** Prints error on stderr. */
 	private void error(String msg) {
-		c.stderr.println(files.peek().toString() + ':' + t.lineNumber()
+		IO.println(c.stderr, files.peek().toString() + ':' + t.lineNumber()
 				+ ": "+I18N._("[Error]")+"\n "+msg);
 	}
 
 	/** Prints warning on stderr. */
 	private void warn(String msg) {
-		c.stderr.println(files.peek().toString() + ':' + t.lineNumber()
+		IO.println(c.stderr, files.peek().toString() + ':' + t.lineNumber()
 				+ ": "+I18N._("[Warning]")+"\n "+msg);
 	}
 }

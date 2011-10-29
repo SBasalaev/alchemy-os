@@ -23,11 +23,10 @@ import alchemy.core.Function;
 import alchemy.core.Library;
 import alchemy.fs.File;
 import alchemy.l10n.I18N;
-import alchemy.util.Util;
+import alchemy.util.IO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
@@ -148,7 +147,7 @@ class CoreFunction extends Function {
 				c.setEnv(((String)args[0]), (String)args[1]);
 				return null;
 			case 39: // utfbytes(str: String): BArray
-				return Util.utfEncode((String)args[0]);
+				return IO.utfEncode((String)args[0]);
 			case 40: // datestr(date: Long): String
 				return new Date(lval(args[0])).toString();
 			case 41: { // year(date: Long): Int
@@ -275,10 +274,10 @@ class CoreFunction extends Function {
 				System.arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
 			case 77: // print(out: OStream, a: Any): OStream
-				((OutputStream)args[0]).write(Util.utfEncode(String.valueOf(args[1])));
+				IO.print((OutputStream)args[0], args[1]);
 				return args[0];
 			case 78: // println(out: OStream, a: Any): OStream
-				((OutputStream)args[0]).write(Util.utfEncode(String.valueOf(args[1]).concat("\n")));
+				IO.println((OutputStream)args[0], args[1]);
 				return args[0];
 			case 79: // stdin(): IStream
 				return c.stdin;
@@ -290,10 +289,10 @@ class CoreFunction extends Function {
 				c.stdin = (InputStream)args[0];
 				return null;
 			case 83: // setout(out: OStream)
-				c.stdout = new PrintStream((OutputStream)args[0]);
+				c.stdout = (OutputStream)args[0];
 				return null;
 			case 84: // seterr(out: OStream)
-				c.stderr = new PrintStream((OutputStream)args[0]);
+				c.stderr = (OutputStream)args[0];
 				return null;
 			case 85: // pi(): Double
 				return Dval(Math.PI);
@@ -322,7 +321,7 @@ class CoreFunction extends Function {
 			case 97: // ca2str(chars: CArray): String
 				return new String((char[])args[0]);
 			case 98: // ba2utf(bytes: BArray): String
-				return Util.utfDecode((byte[])args[0]);
+				return IO.utfDecode((byte[])args[0]);
 			case 99: // ibits2f(bits: Int): Float
 				return Fval(Float.intBitsToFloat(ival(args[0])));
 			case 100: // f2ibits(f: Float): Int

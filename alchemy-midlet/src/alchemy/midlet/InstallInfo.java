@@ -21,9 +21,9 @@ package alchemy.midlet;
 import alchemy.fs.Filesystem;
 import alchemy.l10n.I18N;
 import alchemy.util.Initable;
+import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
-import alchemy.util.Util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.microedition.rms.RecordStore;
@@ -102,7 +102,7 @@ class InstallInfo {
 		try {
 			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, true);
 			if (rs.getNextRecordID() == 1) rs.addRecord(null, 0, 0);
-			byte[] data = Util.utfEncode(props.toString());
+			byte[] data = IO.utfEncode(props.toString());
 			rs.setRecord(1, data, 0, data.length);
 			rs.closeRecordStore();
 		} catch (Exception e) {

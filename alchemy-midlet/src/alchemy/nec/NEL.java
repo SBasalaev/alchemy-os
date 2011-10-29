@@ -23,9 +23,9 @@ import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
 import alchemy.l10n.I18N;
 import alchemy.nlib.NativeApp;
+import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
-import alchemy.util.Util;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -70,10 +70,10 @@ public class NEL extends NativeApp {
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
-				c.stdout.println(HELP);
+				IO.println(c.stdout, HELP);
 				return 0;
 			} else if (arg.equals("-v")) {
-				c.stdout.println(VERSION);
+				IO.println(c.stdout, VERSION);
 				return 0;
 			} else if (arg.equals("-o")) {
 				wait_outname = true;
@@ -88,7 +88,7 @@ public class NEL extends NativeApp {
 			} else if (arg.startsWith("-s") && arg.length() > 2) {
 				soname = arg.substring(2);
 			} else if (arg.charAt(0) == '-') {
-				c.stderr.println(I18N._("Unknown argument: {0}", arg));
+				IO.println(c.stderr, I18N._("Unknown argument: {0}", arg));
 				return 1;
 			} else if (wait_outname) {
 				outname = arg;
@@ -98,7 +98,7 @@ public class NEL extends NativeApp {
 			}
 		}
 		if (infiles.isEmpty()) {
-			c.stderr.println(I18N._("No files to process"));
+			IO.println(c.stderr, I18N._("No files to process"));
 			return 1;
 		}
 		//loading symbols
@@ -284,7 +284,7 @@ public class NEL extends NativeApp {
 			out.close();
 			c.fs().setExec(outfile, true);
 		} catch (Exception e) {
-			c.stderr.println(I18N._("Error: {0}", e));
+			IO.println(c.stderr, I18N._("Error: {0}", e));
 			e.printStackTrace();
 			return 1;
 		}
@@ -300,9 +300,9 @@ public class NEL extends NativeApp {
 			in.close();
 			throw new Exception(I18N._("File is too short: {0}", libfile));
 		} else if (magic == ('#'<<8|'=')) {
-			byte[] buf = Util.readFully(in);
+			byte[] buf = IO.readFully(in);
 			in.close();
-			info = loadLibInfo(c, Util.utfDecode(buf).trim());
+			info = loadLibInfo(c, IO.utfDecode(buf).trim());
 		} else if (magic == 0xC0DE) {
 			info = loadFromECode(in);
 		} else if (magic == ('#'<<8|'@')) {

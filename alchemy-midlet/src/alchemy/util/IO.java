@@ -21,19 +21,20 @@ package alchemy.util;
 import alchemy.l10n.I18N;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 
 /**
- * Misc. utilities used in Alchemy.
+ * Miscellaneous I/O utilities used in Alchemy.
  * @author Sergey Basalaev
  */
-public final class Util {
+public final class IO {
 
 	private static final String ERR_END = I18N._("Incomplete character at the end");
 	private static final String ERR_WRONG = I18N._("Wrong code at byte ");
 	private static final String ERR_LONG = I18N._("Encoded string is too long");
 
-	private Util() { }
+	private IO() { }
 
 	/**
 	 * Decodes bytes to String using modified UTF format.
@@ -148,5 +149,19 @@ public final class Util {
 		byte[] ret = new byte[count];
 		System.arraycopy(buf, 0, ret, 0, count);
 		return ret;
+	}
+	
+	public static void print(OutputStream s, Object obj) {
+		try {
+			s.write(utfEncode(String.valueOf(obj)));
+		} catch (IOException ioe) { }
+	}
+	
+	public static void println(OutputStream s, Object obj) {
+		try {
+			s.write(utfEncode(String.valueOf(obj)));
+			s.write('\n');
+			s.flush();
+		} catch (IOException ioe) { }
 	}
 }
