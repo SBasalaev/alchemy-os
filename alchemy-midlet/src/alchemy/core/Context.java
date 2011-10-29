@@ -148,6 +148,8 @@ public class Context {
 	private Context parent;
 	/** Context environment, initialized on demand. */
 	private Hashtable env;
+	/** Context storage, initialized on demand. */
+	private Hashtable objects;
 	/** Current directory. */
 	private File curdir;
 	/** The thread of this context. */
@@ -458,6 +460,30 @@ public class Context {
 	 */
 	public void removeStream(Object stream) {
 		streams.removeElement(stream);
+	}
+	
+	/**
+	 * Returns object stored in context storage.
+	 * If there is no object for given name, returns <code>null</code>.
+	 */
+	public Object get(Object key) {
+		if (objects == null) return null;
+		return objects.get(key);
+	}
+	
+	/**
+	 * Saves object in storage.
+	 * If value is <code>null</code> removes key.
+	 */
+	public void set(Object key, Object value) {
+		if (objects == null) {
+			objects = new Hashtable();
+		}
+		if (value == null) {
+			objects.remove(key);
+		} else {
+			objects.put(key, value);
+		}
 	}
 
 	/**
