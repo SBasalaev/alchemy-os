@@ -48,5 +48,5 @@ public class BuiltinType extends NamedType {
 	static public final BuiltinType typeBArray = new BuiltinType("BArray", -1);
 	static public final BuiltinType typeCArray = new BuiltinType("CArray", -1);
 	static public final BuiltinType typeAny = new BuiltinType("Any", -1);
-	static public final BuiltinType typeNone = new BuiltinType("none", -1);
+	static public final BuiltinType typeNone = new BuiltinType("[none]", -1);
 }

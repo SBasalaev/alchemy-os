@@ -416,6 +416,8 @@ public class Parser {
 				newexpr = new IfExpr(left, new ConstExpr(Boolean.TRUE), right);
 			} else if ("+-*/%".indexOf(op) >= 0) {
 				Type btype = binaryCastType(ltype, rtype);
+				if (!(btype instanceof BuiltinType) || ((BuiltinType)btype).numIndex() < 0)
+					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
 				newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
 			} else if ("^&|".indexOf(op) >= 0) {
 				Type btype = binaryCastType(ltype, rtype);
@@ -534,9 +536,9 @@ public class Parser {
 			case ';':
 				return new NoneExpr();
 			case '!':
-				return new UnaryExpr(ttype, cast(parseExprNoop(scope), BuiltinType.typeBool));
+				return new UnaryExpr(ttype, cast(parsePostfix(scope, parseExprNoop(scope)), BuiltinType.typeBool));
 			case '~': {
-				Expr sub = parseExprNoop(scope);
+				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
 				if (type.equals(BuiltinType.typeInt))
 					return new BinaryExpr(sub, '^', new ConstExpr(new Integer(-1)));
@@ -546,7 +548,7 @@ public class Parser {
 					throw new ParseException(I18N._("Operator ~ cannot be applied to {0}", type));
 			}
 			case '-': {
-				Expr sub = parseExprNoop(scope);
+				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
 				if (!type.equals(BuiltinType.typeInt)
 				 && !type.equals(BuiltinType.typeLong)
