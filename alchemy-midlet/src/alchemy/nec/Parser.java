@@ -769,9 +769,9 @@ public class Parser {
 	 */
 	private Type binaryCastType(Type ltype, Type rtype) {
 		if (ltype.equals(rtype)) return ltype;
+		if (ltype.equals(BuiltinType.typeNone) || rtype.equals(BuiltinType.typeNone))
+			return BuiltinType.typeNone;
 		if (ltype instanceof BuiltinType && rtype instanceof BuiltinType) {
-			if (ltype.equals(BuiltinType.typeNone) || rtype.equals(BuiltinType.typeNone))
-				return BuiltinType.typeNone;
 			int lindex = ((BuiltinType)ltype).numIndex();
 			int rindex = ((BuiltinType)rtype).numIndex();
 			if (lindex < 0 || rindex < 0) return BuiltinType.typeAny;
