@@ -29,17 +29,12 @@ def v_get(v: Vector, at: Int): Any {
 }
 
 def v_set(v: Vector, at: Int, a: Any) {
-  if (at < 0 || at >= v.size) {
-    null
-  } else {
+  if (at >= 0 && at < v.size)
     v.data[at] = a
-  }
 }
 
 def v_remove(v: Vector, at: Int) {
-  if (at < 0 || at >= v.size) {
-    null
-  } else {
+  if (at >= 0 && at < v.size) {
     var n = v.size - at - 1
     if (n > 0) {
       acopy(v.data, at+1, v.data, at, n)
@@ -86,4 +81,21 @@ def v_lindexof(v: Vector, a: Any): Int {
     n = n - 1
   }
   n
+}
+
+// Added in API 0.1
+
+def v_clear(v: Vector) {
+  var n = v.size - 1
+  while (n >= 0) {
+    v.data[n] = null
+    n = n - 1
+  }
+  v.size = 0
+}
+
+def v_toarray(v: Vector): Array {
+  var a = new Array(v.size)
+  acopy(v.data, 0, a, 0, v.size)
+  a
 }

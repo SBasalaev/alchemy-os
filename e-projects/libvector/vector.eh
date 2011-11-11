@@ -14,3 +14,5 @@ def v_add(v: Vector, a: Any);
 def v_insert(v: Vector, at: Int, a: Any);
 def v_indexof(v: Vector, a: Any): Int;
 def v_lindexof(v: Vector, a: Any): Int;
+def v_clear(v: Vector);
+def v_toarray(v: Vector): Array;
