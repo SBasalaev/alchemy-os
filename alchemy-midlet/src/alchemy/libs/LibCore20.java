@@ -58,7 +58,7 @@ public class LibCore20 extends Library {
 	public static void init() throws IOException {
 		if (functions == null) {
 			Hashtable table = functions = new Hashtable();
-			UTFReader r = new UTFReader(table.getClass().getResourceAsStream("/corelib.symbols"));
+			UTFReader r = new UTFReader(table.getClass().getResourceAsStream("/libcore20.symbols"));
 			String name;
 			int index = 0;
 			while ((name = r.readLine()) != null) {

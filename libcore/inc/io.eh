@@ -27,10 +27,10 @@ def fprint(s: OStream, a: Any);
 def fprintln(s: OStream, a: Any);
 def fflush(s: OStream);
 
-def write(s: OStream, b: Int) = fwrite(stdout(), b);
-def writearray(s: OStream, buf: BArray, ofs: Int, len: Int) = fwritearray(stdout(), buf, ofs, len);
-def print(s: OStream, a: Any) = fprint(stdout(), a);
-def println(s: OStream, a: Any) = fprintln(stdout(), a);
+def write(b: Int) = fwrite(stdout(), b);
+def writearray(buf: BArray, ofs: Int, len: Int) = fwritearray(stdout(), buf, ofs, len);
+def print(a: Any) = fprint(stdout(), a);
+def println(a: Any) = fprintln(stdout(), a);
 def flush() = fflush(stdout());
 
 def to_file(path: String): File;
