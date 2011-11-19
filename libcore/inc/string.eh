@@ -16,11 +16,17 @@ def strlcase(s: String): String;
 def strcat(s1: String, s2: String): String;
 def strcmp(s1: String, s2: String): String;
 def strtrim(s: String): String;
+def strsplit(s: String, ch: Int): Array;
 
 def strchars(s1: String): CArray;
 def utfbytes(s: String): BArray;
 def ca2str(ca: CArray): String;
 def ba2utf(ba: BArray): String;
+
+def parsei(s: String): Int;
+def parsel(s: String): Long;
+def parsef(s: String): Float;
+def parsed(s: String): Double;
 
 def new_sb(): StrBuf;
 def sb_append(sb: StrBuf, a: Any): StrBuf;

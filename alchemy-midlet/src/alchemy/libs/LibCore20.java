@@ -25,6 +25,7 @@ import alchemy.fs.File;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Alchemy core runtime library.
@@ -33,8 +34,9 @@ import java.util.Hashtable;
  * context with {@link #init()} and remains in memory forever.
  * 
  * @author Sergey Basalaev
+ * @version 2.0
  */
-public class CoreLibrary extends Library {
+public class LibCore20 extends Library {
 
 	private static Hashtable functions;
 
@@ -44,7 +46,7 @@ public class CoreLibrary extends Library {
 	 * @throws IOException if I/O error occured while reading
 	 *         function definitions file
 	 */
-	public CoreLibrary() throws IOException {
+	public LibCore20() throws IOException {
 		init();
 	}
 
@@ -60,7 +62,7 @@ public class CoreLibrary extends Library {
 			String name;
 			int index = 0;
 			while ((name = r.readLine()) != null) {
-				table.put(name, new CoreFunction(name, index));
+				table.put(name, new LibCore20Func(name, index));
 				index++;
 			}
 		}

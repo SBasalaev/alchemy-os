@@ -37,12 +37,12 @@ import javax.microedition.io.Connector;
  * Core runtime function set.
  * @author Sergey Basalaev
  */
-class CoreFunction extends Function {
+class LibCore20Func extends Function {
 
 	private final int index;
 	private Random rnd = new Random(0);
 
-	public CoreFunction(String name, int index) {
+	public LibCore20Func(String name, int index) {
 		super(name);
 		this.index = index;
 	}
@@ -89,17 +89,17 @@ class CoreFunction extends Function {
 				return Ival(c.fs().exists((File)args[0]));
 			case 15: // is_dir(f: File): Bool
 				return Ival(c.fs().isDirectory((File)args[0]));
-			case 16: { // fread(f: File): IStream
+			case 16: { // fopen_r(f: File): IStream
 				InputStream stream = c.fs().read((File)args[0]);
 				c.addStream(stream);
 				return stream;
 			}
-			case 17: { // fwrite(f: File): OStream
+			case 17: { // fopen_w(f: File): OStream
 				OutputStream stream = c.fs().write((File)args[0]);
 				c.addStream(stream);
 				return stream;
 			}
-			case 18: { // fappend(f: File): OStream
+			case 18: { // fopen_a(f: File): OStream
 				OutputStream stream = c.fs().append((File)args[0]);
 				c.addStream(stream);
 				return stream;
@@ -218,7 +218,7 @@ class CoreFunction extends Function {
 				return String.valueOf(args[0]);
 			case 63: // new_sb(): StrBuf
 				return new StringBuffer();
-			case 64: // close(stream: Any)
+			case 64: // fclose(stream: Any)
 				if (args[0] instanceof InputStream) {
 					((InputStream)args[0]).close();
 					c.removeStream(args[0]);
@@ -230,24 +230,22 @@ class CoreFunction extends Function {
 				} else {
 					throw new ClassCastException();
 				}
-			case 65: // read(in: IStream): Int
+			case 65: // fread(in: IStream): Int
 				return Ival(((InputStream)args[0]).read());
-			case 66: // readarray(in: IStream, buf: BArray, ofs: Int, len: Int): Int
+			case 66: // freadarray(in: IStream, buf: BArray, ofs: Int, len: Int): Int
 				return Ival(((InputStream)args[0]).read((byte[])args[1], ival(args[2]), ival(args[3])));
-			case 67: // available(in: IStream): Int
-				return Ival(((InputStream)args[0]).available());
-			case 68: // skip(in: IStream, n: Long): Long
+			case 67: // fskip(in: IStream, n: Long): Long
 				return Lval(((InputStream)args[0]).skip(lval(args[1])));
-			case 69: // write(out: OStream, b: Int)
+			case 68: // fwrite(out: OStream, b: Int)
 				((OutputStream)args[0]).write(ival(args[1]));
 				return null;
-			case 70: // writearray(out: OStream, buf: BArray, ofs: Int, len: Int)
+			case 69: // fwritearray(out: OStream, buf: BArray, ofs: Int, len: Int)
 				((OutputStream)args[0]).write((byte[])args[1], ival(args[2]), ival(args[3]));
 				return null;
-			case 71: // flush(out: OStream)
+			case 70: // fflush(out: OStream)
 				((OutputStream)args[0]).flush();
 				return null;
-			case 72: { // exec(cmd: String, args: Array): Int
+			case 71: { // exec_wait(cmd: String, args: Array): Int
 				String prog = (String)args[0];
 				Object[] oargs = (Object[])args[1];
 				Context cc = new Context(c);
@@ -257,7 +255,7 @@ class CoreFunction extends Function {
 				}
 				return Ival(cc.startAndWait(prog, sargs));
 			}
-			case 73: { // fork(cmd: String, args: Array)
+			case 72: { // exec(cmd: String, args: Array)
 				String prog = (String)args[0];
 				Object[] oargs = (Object[])args[1];
 				Context cc = new Context(c);
@@ -268,89 +266,87 @@ class CoreFunction extends Function {
 				cc.start(prog, sargs);
 				return null;
 			}
-			case 74: // bacopy(src: BArray, sofs: Int, dest: BArray, dofs: Int, len: Int)
-			case 75: // cacopy(src: CArray, sofs: Int, dest: CArray, dofs: Int, len: Int)
-			case 76: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
+			case 73: // bacopy(src: BArray, sofs: Int, dest: BArray, dofs: Int, len: Int)
+			case 74: // cacopy(src: CArray, sofs: Int, dest: CArray, dofs: Int, len: Int)
+			case 75: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
 				System.arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
-			case 77: // print(out: OStream, a: Any): OStream
+			case 76: // fprint(out: OStream, a: Any): OStream
 				IO.print((OutputStream)args[0], args[1]);
 				return args[0];
-			case 78: // println(out: OStream, a: Any): OStream
+			case 77: // fprintln(out: OStream, a: Any): OStream
 				IO.println((OutputStream)args[0], args[1]);
 				return args[0];
-			case 79: // stdin(): IStream
+			case 78: // stdin(): IStream
 				return c.stdin;
-			case 80: // stdout(): OStream
+			case 79: // stdout(): OStream
 				return c.stdout;
-			case 81: // stderr(): OStream
+			case 80: // stderr(): OStream
 				return c.stderr;
-			case 82: // setin(in: IStream)
+			case 81: // setin(in: IStream)
 				c.stdin = (InputStream)args[0];
 				return null;
-			case 83: // setout(out: OStream)
+			case 82: // setout(out: OStream)
 				c.stdout = (OutputStream)args[0];
 				return null;
-			case 84: // seterr(out: OStream)
+			case 83: // seterr(out: OStream)
 				c.stderr = (OutputStream)args[0];
 				return null;
-			case 85: // pi(): Double
-				return Dval(Math.PI);
-			case 86: // abs(a: Double): Double
+			case 84: // abs(a: Double): Double
 				return Dval(Math.abs(dval(args[0])));
-			case 87: // sin(a: Double): Double
+			case 85: // sin(a: Double): Double
 				return Dval(Math.sin(dval(args[0])));
-			case 88: // cos(a: Double): Double
+			case 86: // cos(a: Double): Double
 				return Dval(Math.cos(dval(args[0])));
-			case 89: // tan(a: Double): Double
+			case 87: // tan(a: Double): Double
 				return Dval(Math.tan(dval(args[0])));
-			case 90: // sqrt(a: Double): Double
+			case 88: // sqrt(a: Double): Double
 				return Dval(Math.sqrt(dval(args[0])));
-			case 91: // ipow(a: Double, n: Int): Double
+			case 89: // ipow(a: Double, n: Int): Double
 				return Dval(CoreLibrary.ipow(dval(args[0]), ival(args[1])));
-			case 92: // exp(a: Double): Double
+			case 90: // exp(a: Double): Double
 				return Dval(CoreLibrary.exp(dval(args[0])));
-			case 93: // log(a: Double): Double
+			case 91: // log(a: Double): Double
 				return Dval(CoreLibrary.log(dval(args[0])));
-			case 94: // asin(a: Double): Double
+			case 92: // asin(a: Double): Double
 				return Dval(CoreLibrary.asin(dval(args[0])));
-			case 95: // acos(a: Double): Double
+			case 93: // acos(a: Double): Double
 				return Dval(CoreLibrary.acos(dval(args[0])));
-			case 96: // atan(a: Double): Double
+			case 94: // atan(a: Double): Double
 				return Dval(CoreLibrary.atan(dval(args[0])));
-			case 97: // ca2str(chars: CArray): String
+			case 95: // ca2str(chars: CArray): String
 				return new String((char[])args[0]);
-			case 98: // ba2utf(bytes: BArray): String
+			case 96: // ba2utf(bytes: BArray): String
 				return IO.utfDecode((byte[])args[0]);
-			case 99: // ibits2f(bits: Int): Float
+			case 97: // ibits2f(bits: Int): Float
 				return Fval(Float.intBitsToFloat(ival(args[0])));
-			case 100: // f2ibits(f: Float): Int
+			case 98: // f2ibits(f: Float): Int
 				return Ival(Float.floatToIntBits(fval(args[0])));
-			case 101: // lbits2d(bits: Long): Double
+			case 99: // lbits2d(bits: Long): Double
 				return Dval(Double.longBitsToDouble(lval(args[0])));
-			case 102: // d2lbits(d: Double): Long
+			case 100: // d2lbits(d: Double): Long
 				return Lval(Double.doubleToLongBits(dval(args[0])));
-			case 103: // new_ht(): Hashtable
+			case 101: // new_ht(): Hashtable
 				return new Hashtable();
-			case 104: // ht_put(ht: Hashtable, key: Any, value: Any): Any
+			case 102: // ht_put(ht: Hashtable, key: Any, value: Any): Any
 				return ((Hashtable)args[0]).put(args[1], args[2]);
-			case 105: // ht_get(ht: Hashtable, key: Any): Any
+			case 103: // ht_get(ht: Hashtable, key: Any): Any
 				return ((Hashtable)args[0]).get(args[1]);
-			case 106: // ht_rm(ht: Hashtable, key: Any): Any
+			case 104: // ht_rm(ht: Hashtable, key: Any): Any
 				return ((Hashtable)args[0]).remove(args[1]);
-			case 107: // hash(a: Any): Int
+			case 105: // hash(a: Any): Int
 				return Ival(args[0].hashCode());
-			case 108: // rnd(n: Int): Int
+			case 106: // rnd(n: Int): Int
 				return Ival(rnd.nextInt(ival(args[0])));
-			case 109: // rndint(): Int
+			case 107: // rndint(): Int
 				return Ival(rnd.nextInt());
-			case 110: // rndlong(): Long
+			case 108: // rndlong(): Long
 				return Lval(rnd.nextLong());
-			case 111: // rndfloat(): Float
+			case 109: // rndfloat(): Float
 				return Fval(rnd.nextFloat());
-			case 112: // rnddouble(): Double
+			case 110: // rnddouble(): Double
 				return Dval(rnd.nextDouble());
-			case 113: { // netread(url: String): IStream
+			case 111: { // netread(url: String): IStream
 				String addr = (String)args[0];
 				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
 					throw new IOException(I18N._("Unknown protocol in netread()"));
@@ -358,21 +354,36 @@ class CoreFunction extends Function {
 				c.addStream(stream);
 				return stream;
 			}
-			case 114: { // readresource(res: String): IStream
+			case 112: { // readresource(res: String): IStream
 				InputStream stream = Object.class.getResourceAsStream((String)args[0]);
 				if (stream != null) c.addStream(stream);
 				return stream;
 			}
-			case 115: //loadlibrary(name: String): Library
+			case 113: // loadlibrary(name: String): Library
 				return c.loadLibrary((String)args[0]);
-			case 116: //loadfunc(lib: Library, sig: String): Any
+			case 114: // loadfunc(lib: Library, sig: String): Any
 				return ((Library)args[0]).getFunc((String)args[1]);
-			case 117: {//clone(struct: Any): Any
+			case 115: {// clone(struct: Any): Any
 				Object[] struct = (Object[])args[0];
 				Object[] clone = new Object[struct.length];
 				System.arraycopy(struct, 0, clone, 0, struct.length);
 				return clone;
 			}
+			case 116: // strsplit(s: String): Array
+				return IO.split((String)args[0]);
+			case 117: // parsei(s: String): Int
+				return Integer.parseInt((String)args[0]);
+			case 118: // parsel(s: String): Long
+				return Long.parseLong((String)args[0]);
+			case 119: // parsef(s: String): Float
+				return Float.parseFloat((String)args[0]);
+			case 120: // parsed(s: String): Double
+				return Double.parseDouble((String)args[0]);
+			case 121: // static!get(key: Any): Any
+				return c.get(args[0]);
+			case 122: // static!set(key: Any, val: Any)
+				c.set(args[0], args[1]);
+				return null;
 			default:
 				return null;
 		}

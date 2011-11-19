@@ -164,4 +164,31 @@ public final class IO {
 			s.flush();
 		} catch (IOException ioe) { }
 	}
+	
+	/**
+	 * Splits specified string around given characters.
+	 * @param str  string to split
+	 * @param ch   delimiter characters
+	 * @return the array of strings computed by splitting the string
+	 *   around given character
+	 */
+	public static String[] split(String str, char ch) {
+		Vector strings = new Vector();
+		int len = str.length();
+		int beg = 0;
+		while (beg < len && str.charAt(beg) == ch) beg++;
+		if (beg == len) return new String[];
+		while (beg < len) {
+			int end = beg + 1;
+			while (end < len && str.charAt(end) != ch) end++;
+			strings.addElement(str.substring(beg,end));
+			beg = end + 1;
+			while (beg < len && str.charAt(beg) == ch) beg++;
+		}
+		String[] ret = new String[strings.size()];
+		for (int i=strings.size()-1; i>=0; i--) {
+			ret[i] = strings.elementAt(i).toString();
+		}
+		return ret;
+	}
 }
