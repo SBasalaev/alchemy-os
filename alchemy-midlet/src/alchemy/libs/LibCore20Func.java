@@ -114,7 +114,7 @@ class LibCore20Func extends Function {
 				c.setCurDir((File)args[0]);
 				return null;
 			case 23: // relpath(f: File): String
-				return CoreLibrary.relPath(c, (File)args[0]);
+				return LibCore20.relPath(c, (File)args[0]);
 			case 24: // strlen(str: String): Int
 				return Ival(((String)args[0]).length());
 			case 25: // strchr(str: String, at: Int): Int
@@ -303,17 +303,17 @@ class LibCore20Func extends Function {
 			case 88: // sqrt(a: Double): Double
 				return Dval(Math.sqrt(dval(args[0])));
 			case 89: // ipow(a: Double, n: Int): Double
-				return Dval(CoreLibrary.ipow(dval(args[0]), ival(args[1])));
+				return Dval(LibCore20.ipow(dval(args[0]), ival(args[1])));
 			case 90: // exp(a: Double): Double
-				return Dval(CoreLibrary.exp(dval(args[0])));
+				return Dval(LibCore20.exp(dval(args[0])));
 			case 91: // log(a: Double): Double
-				return Dval(CoreLibrary.log(dval(args[0])));
+				return Dval(LibCore20.log(dval(args[0])));
 			case 92: // asin(a: Double): Double
-				return Dval(CoreLibrary.asin(dval(args[0])));
+				return Dval(LibCore20.asin(dval(args[0])));
 			case 93: // acos(a: Double): Double
-				return Dval(CoreLibrary.acos(dval(args[0])));
+				return Dval(LibCore20.acos(dval(args[0])));
 			case 94: // atan(a: Double): Double
-				return Dval(CoreLibrary.atan(dval(args[0])));
+				return Dval(LibCore20.atan(dval(args[0])));
 			case 95: // ca2str(chars: CArray): String
 				return new String((char[])args[0]);
 			case 96: // ba2utf(bytes: BArray): String
@@ -370,15 +370,15 @@ class LibCore20Func extends Function {
 				return clone;
 			}
 			case 116: // strsplit(s: String): Array
-				return IO.split((String)args[0]);
+				return IO.split((String)args[0], (char)ival(args[1]));
 			case 117: // parsei(s: String): Int
-				return Integer.parseInt((String)args[0]);
+				return Ival(Integer.parseInt((String)args[0]));
 			case 118: // parsel(s: String): Long
-				return Long.parseLong((String)args[0]);
+				return Lval(Long.parseLong((String)args[0]));
 			case 119: // parsef(s: String): Float
-				return Float.parseFloat((String)args[0]);
+				return Fval(Float.parseFloat((String)args[0]));
 			case 120: // parsed(s: String): Double
-				return Double.parseDouble((String)args[0]);
+				return Dval(Double.parseDouble((String)args[0]));
 			case 121: // static!get(key: Any): Any
 				return c.get(args[0]);
 			case 122: // static!set(key: Any, val: Any)

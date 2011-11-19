@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
+import java.util.Vector;
 
 /**
  * Miscellaneous I/O utilities used in Alchemy.
@@ -177,7 +178,7 @@ public final class IO {
 		int len = str.length();
 		int beg = 0;
 		while (beg < len && str.charAt(beg) == ch) beg++;
-		if (beg == len) return new String[];
+		if (beg == len) return new String[0];
 		while (beg < len) {
 			int end = beg + 1;
 			while (end < len && str.charAt(end) != ch) end++;
