@@ -29,8 +29,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.Vector;
 import javax.microedition.io.Connector;
 
 /**
@@ -390,7 +392,7 @@ class LibCore20Func extends Function {
 				return IO.printf((String)args[0], (Object[])args[1]);
 			case 124: { // ht_keys(ht: Hashtable): Array
 				Vector keyv = new Vector();
-				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements()) {
+				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
 					keyv.addElement(e.nextElement());
 				}
 				Object[] keys = new Object[keyv.size()];
