@@ -17,21 +17,23 @@ def fread(s: IStream): Int;
 def freadarray(s: IStream, buf: BArray, ofs: Int, len: Int): Int;
 def fskip(s: IStream, n: Long): Long;
 
-def read(): Int = fread(stdin());
-def readarray(buf: BArray, ofs: Int, len: Int): Int = freadarray(stdin(), buf, ofs, len);
-def skip(n: Long) = fskip(stdin(), n);
+def read(): Int;
+def readarray(buf: BArray, ofs: Int, len: Int): Int;
+def skip(n: Long);
 
 def fwrite(s: OStream, b: Int);
 def fwritearray(s: OStream, buf: BArray, ofs: Int, len: Int);
 def fprint(s: OStream, a: Any);
 def fprintln(s: OStream, a: Any);
+def fprintf(s: OStream, fmt: String, args: Array);
 def fflush(s: OStream);
 
-def write(b: Int) = fwrite(stdout(), b);
-def writearray(buf: BArray, ofs: Int, len: Int) = fwritearray(stdout(), buf, ofs, len);
-def print(a: Any) = fprint(stdout(), a);
-def println(a: Any) = fprintln(stdout(), a);
-def flush() = fflush(stdout());
+def write(b: Int);
+def writearray(buf: BArray, ofs: Int, len: Int);
+def print(a: Any);
+def println(a: Any);
+def printf(fmt: String, args: Array);
+def flush();
 
 def to_file(path: String): File;
 def fname(f: File): String;

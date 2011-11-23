@@ -66,6 +66,7 @@ public class NEL extends NativeApp {
 		Vector infiles = new Vector();
 		Vector linklibs = new Vector();
 		linklibs.addElement("libcore.so"); //always link with libcore
+		linklibs.addElement("libcoree.so"); //always link with libcoree
 		boolean wait_outname = false;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];

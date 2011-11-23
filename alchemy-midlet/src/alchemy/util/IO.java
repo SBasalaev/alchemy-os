@@ -192,4 +192,36 @@ public final class IO {
 		}
 		return ret;
 	}
+	
+	/**
+	 * Returns formatted string using specified format string and arguments.
+	 * Format specifiers are substrings of form <code>%n</code> where
+	 * <code>n</code> is from 0 to 9. Each format specifier is substituted
+	 * with corresponding value from array <code>args</code>. Specifier
+	 * <code>%%</code> is substituted with percent character.
+	 * 
+	 * @param fmt   format string
+	 * @param args  arguments referenced by the format specifiers
+	 * @return  a formatted string
+	 */
+	public static String printf(String fmt, Object[] args) {
+		StringBuffer buf = new StringBuffer();
+		while (true) {
+			int index = fmt.indexOf('%');
+			if (index < 0 || index == fmt.length()-1) {
+				buf.append(fmt);
+				break;
+			} else {
+				buf.append(fmt.substring(0, index));
+				char param = fmt.charAt(index+1);
+				if (param >= '0' && param <= '9') {
+					buf.append(args[param-'0']);
+				} else {
+					buf.append(param);
+				}
+				fmt = fmt.substring(index+2);
+			}
+		}
+		return buf.toString();
+	}
 }

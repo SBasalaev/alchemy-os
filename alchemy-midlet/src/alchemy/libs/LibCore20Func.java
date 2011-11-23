@@ -328,12 +328,14 @@ class LibCore20Func extends Function {
 				return Lval(Double.doubleToLongBits(dval(args[0])));
 			case 101: // new_ht(): Hashtable
 				return new Hashtable();
-			case 102: // ht_put(ht: Hashtable, key: Any, value: Any): Any
-				return ((Hashtable)args[0]).put(args[1], args[2]);
+			case 102: // ht_put(ht: Hashtable, key: Any, value: Any)
+				((Hashtable)args[0]).put(args[1], args[2]);
+				return null;
 			case 103: // ht_get(ht: Hashtable, key: Any): Any
 				return ((Hashtable)args[0]).get(args[1]);
-			case 104: // ht_rm(ht: Hashtable, key: Any): Any
-				return ((Hashtable)args[0]).remove(args[1]);
+			case 104: // ht_rm(ht: Hashtable, key: Any)
+				((Hashtable)args[0]).remove(args[1]);
+				return null;
 			case 105: // hash(a: Any): Int
 				return Ival(args[0].hashCode());
 			case 106: // rnd(n: Int): Int
@@ -379,11 +381,24 @@ class LibCore20Func extends Function {
 				return Fval(Float.parseFloat((String)args[0]));
 			case 120: // parsed(s: String): Double
 				return Dval(Double.parseDouble((String)args[0]));
-			case 121: // static!get(key: Any): Any
+			case 121: // !getstatic(key: Any): Any
 				return c.get(args[0]);
-			case 122: // static!set(key: Any, val: Any)
+			case 122: // !setstatic(key: Any, val: Any)
 				c.set(args[0], args[1]);
 				return null;
+			case 123: // sprintf(fmt: String, args: Array): String
+				return IO.printf((String)args[0], (Object[])args[1]);
+			case 124: { // ht_keys(ht: Hashtable): Array
+				Vector keyv = new Vector();
+				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements()) {
+					keyv.addElement(e.nextElement());
+				}
+				Object[] keys = new Object[keyv.size()];
+				for (int i=keys.length-1; i>=0; i--) {
+					keys[i] = keyv.elementAt(i);
+				}
+				return keys;
+			}
 			default:
 				return null;
 		}
