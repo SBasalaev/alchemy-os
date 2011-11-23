@@ -1,4 +1,4 @@
-#!sh
+#!/bin/sh
 
 ec rm.e -o rm.o
 el rm.o -o rm

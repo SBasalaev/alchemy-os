@@ -3,44 +3,44 @@
  * Licensed under GPL v3
  */
 
-use "io";
-use "string";
+use "io"
+use "string"
 
-def main(args : Array) {
-  var len = args.len;
+def main(args: Array) {
+  var len = args.len
   //flags:
   // -1 unset
   // 0  don't change
   // 1  set
-  var readflag = 0;
-  var writeflag = 0;
-  var execflag = 0;
+  var readflag = 0
+  var writeflag = 0
+  var execflag = 0
   // processing options
-  var i=0;
+  var i=0
   while (i < len) {
-    var arg = to_str(args[i]);
+    var arg = to_str(args[i])
     if (arg=="-r") readflag = -1
     else if (arg=="+r") readflag = 1
     else if (arg=="-w") writeflag = -1
     else if (arg=="+w") writeflag = 1
-    else if (arg=="-x") writeflag = -1
-    else if (arg=="+x") writeflag = 1
-    i = i+1;
+    else if (arg=="-x") execflag = -1
+    else if (arg=="+x") execflag = 1
+    i = i+1
   }
   // setting attributes
-  i = 0;
+  i = 0
   while (i < len) {
-    var arg = to_str(args[i]);
-    var first = strchr(arg,0);
+    var arg = to_str(args[i])
+    var first = strchr(arg,0)
     if (first != '-' && first != '+') {
-      var file = to_file(arg);
+      var file = to_file(arg)
       if (readflag==1) set_read(file,true)
-      else if (readflag==-1) set_read(file,false);
+      else if (readflag==-1) set_read(file,false)
       if (writeflag==1) set_write(file,true)
-      else if (writeflag==-1) set_write(file,false);
+      else if (writeflag==-1) set_write(file,false)
       if (execflag==1) set_exec(file,true)
-      else if (execflag==-1) set_exec(file,false);
+      else if (execflag==-1) set_exec(file,false)
     }
-    i = i+1;
+    i = i+1
   }
 }

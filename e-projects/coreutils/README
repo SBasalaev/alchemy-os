@@ -1,15 +1,17 @@
 Basic system utilities for Alchemy.
 
-cat <file>
-  Print file on the output. If file is not specified then
-  standard input is used.
+cat <file>...
+  Print files on the output. If no files specified then
+  data is read from standard input.
 
 chmod <modifiers> <files>...
   Modify attributes on given files. Modifiers are: -r, +r,
   -w, +w, -x, +x.
 
 cp <source> <destination>
-  Copy contents of one file to another.
+cp <files>... <directory>
+  Copy contents of one file to another or copy multiple files
+  in given directory.
 
 date
   Print current date and time on the output.
@@ -33,7 +35,8 @@ mkdir <directory>
   Make new empty directory in the file system.
 
 mv <source> <destination>
-  Move/rename file.
+mv <files>... <directory>
+  Move/rename file or move multiple files in given directory.
 
 rm <files>...
   Remove specified files.

@@ -3,22 +3,27 @@
  * Licensed under GPL v3
  */
 
-use "io";
-use "string";
+use "io"
+use "string"
 
-def main(args : Array) {
-  var input : IStream =
-    if (args.len == 0) {
-      stdin();
-    } else {
-      var f = to_str(args[0]);
-      fread(to_file(f));
-    }
-  var buf = new BArray(256);
-  var len = readarray(input, buf, 0, 256);
+def _cat(buf: BArray) {
+  var len = readarray(buf, 0, 256)
   while (len > 0) {
-    writearray(stdout(), buf, 0, len);
-    len = readarray(input, buf, 0, 256);
+    writearray(buf, 0, len)
+    len = readarray(buf, 0, 256)
   }
-  flush(stdout());
+  flush()
+}
+
+def main(args: Array) {
+  var count = args.len
+  var buf = new BArray(256)
+  if (count == 0) {
+    _cat(buf)
+  } else while (count > 0) {
+    count = count-1
+    var f = to_str(args[0])
+    setin(fopen_r(to_file(f)))
+    _cat(buf)
+  }
 }

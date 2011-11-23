@@ -3,9 +3,7 @@
  * Licensed under GPL v3
  */
 
-use "io";
-use "time";
+use "io"
+use "time"
 
-def main(args : Any) {
-  println(stdout(), datestr(systime()));
-}
+def main(args: Any) = println(datestr(systime()))

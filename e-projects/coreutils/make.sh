@@ -1,4 +1,4 @@
-#!sh
+#!/bin/sh
 
 ec cat.e -o cat.o
 ec chmod.e -o chmod.o
