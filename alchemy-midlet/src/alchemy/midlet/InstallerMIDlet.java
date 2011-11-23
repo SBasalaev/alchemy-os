@@ -196,6 +196,10 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		fs.remove(new File("/inc/array.eh"));
 		//changes since 1.1
 		fs.remove(new File("/bin/con"));
+		//changes since 1.2 / 1.2.1
+		fs.remove(new File("/lib/libcore.1.1.so"));
+		fs.remove(new File("/lib/libcore.1.0.so"));
+		fs.remove(new File("/lib/libcore.1.so"));
 		//installing new files
 		installArchives();
 		installCfg();
