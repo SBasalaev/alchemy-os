@@ -32,14 +32,15 @@ import java.io.OutputStream;
 public class NEC extends NativeApp {
 
 	static private final String VERSION =
-			I18N._("Native E Compiler version 0.2");
+			I18N._("Native E Compiler version 0.3");
 
 	static private final String HELP =
 			"Usage: ec [options] <input> \n" +
 			"Options:\n" +
 			"-o <output>\n write to this file\n" +
-			"-t<target>\n compile for given target" +
-			"-O<level>\n choose optimization level" +
+			"-t<target>\n compile for given target\n" +
+			"-O<level>\n choose optimization level\n" +
+			"-I<path>\n add path to includes\n" +
 			"-h\n print this help and exit\n" +
 			"-v\n print version and exit";
 
@@ -76,6 +77,8 @@ public class NEC extends NativeApp {
 				optimize = true;
 			} else if (arg.equals("-O0")) {
 				optimize = false;
+			} else if (arg.startsWith("-I") && arg.length() > 2) {
+				c.setEnv("INCPATH", c.getEnv("INCPATH")+':'+arg);
 			} else if (arg.charAt(0) == '-') {
 				IO.println(c.stderr, I18N._("Unknown argument: {0}", arg));
 				IO.println(c.stderr, HELP);

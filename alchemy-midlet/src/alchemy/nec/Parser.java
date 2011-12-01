@@ -82,15 +82,15 @@ public class Parser {
 			}
 		}
 		return unit;
-	}
+	} 
 
 	/**
 	 * Finds file referenced in 'use' directive.
 	 * Checked files are (in that order):
 	 *   ./name
 	 *   ./name.eh
-	 *   /inc/name
-	 *   /inc/name.eh
+	 *   $INCPATH/name
+	 *   $INCPATH/name.eh
 	 */
 	private File resolveFile(String name) throws ParseException {
 		if (name.length() == 0) throw new ParseException(I18N._("Empty string in 'use'"));
@@ -99,10 +99,13 @@ public class Parser {
 		f = c.toFile(name+".eh");
 		if (c.fs().exists(f)) return f;
 		if (name.charAt(0) != '/') {
-			f = c.toFile("/inc/"+name);
-			if (c.fs().exists(f)) return f;
-			f = c.toFile("/inc/"+name+".eh");
-			if (c.fs().exists(f)) return f;
+			String[] incpath = IO.split(c.getEnv("INCPATH"), ':');
+			for (int i=0; i<incpath.length; i++) {
+				f = c.toFile(incpath[i]+'/'+name);
+				if (c.fs().exists(f)) return f;
+				f = c.toFile(incpath[i]+'/'+name+".eh");
+				if (c.fs().exists(f)) return f;
+			}
 		}
 		throw new ParseException(I18N._("Module not found: {0}", name));
 	}
