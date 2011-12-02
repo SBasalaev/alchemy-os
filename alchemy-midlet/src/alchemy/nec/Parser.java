@@ -66,6 +66,7 @@ public class Parser {
 		unit.putType("CArray", BuiltinType.typeCArray);
 		//parsing
 		try {
+			parseFile(new File("/res/nec/embed.eh"));
 			parseFile(source);
 		} catch (ParseException pe) {
 			error(pe.getMessage());
@@ -418,10 +419,22 @@ public class Parser {
 					throw new ParseException(I18N._("Operator || cannot be applied to {0},{1}", ltype, rtype));
 				newexpr = new IfExpr(left, new ConstExpr(Boolean.TRUE), right);
 			} else if ("+-*/%".indexOf(op) >= 0) {
-				Type btype = binaryCastType(ltype, rtype);
-				if (!(btype instanceof BuiltinType) || ((BuiltinType)btype).numIndex() < 0)
-					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
-				newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
+				if (ltype.equals(BuiltinType.typeString)) {
+					// string concatenation, does strcat(left, to_str(right))
+					if (!right.rettype().equals(BuiltinType.typeString)) {
+						Func to_str = unit.getFunc("to_str");
+						to_str.used = true;
+						right = new FCallExpr(new ConstExpr(to_str), new Expr[] { cast(right, BuiltinType.typeAny) });
+					}
+					Func strcat = unit.getFunc("strcat");
+					strcat.used = true;
+					newexpr = new FCallExpr(new ConstExpr(strcat), new Expr[] { left, right });
+				} else {
+					Type btype = binaryCastType(ltype, rtype);
+					if (!(btype instanceof BuiltinType) || ((BuiltinType)btype).numIndex() < 0)
+						throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
+					newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
+				}
 			} else if ("^&|".indexOf(op) >= 0) {
 				Type btype = binaryCastType(ltype, rtype);
 				if (!btype.equals(BuiltinType.typeBool) && !btype.equals(BuiltinType.typeInt) && !btype.equals(BuiltinType.typeLong))
@@ -531,7 +544,7 @@ public class Parser {
 	}
 
 	/**
-	 * Parses expression without binary and postfix operators.
+	 * Parses expression without binary operators.
 	 */
 	private Expr parseExprNoop(Scope scope) throws ParseException, IOException {
 		int ttype = t.nextToken();

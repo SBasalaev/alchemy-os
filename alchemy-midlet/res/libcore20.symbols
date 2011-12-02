@@ -119,7 +119,7 @@ parsei
 parsel
 parsef
 parsed
-!getstatic
-!setstatic
+getstatic
+setstatic
 sprintf
 ht_keys
