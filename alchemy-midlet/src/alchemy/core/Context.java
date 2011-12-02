@@ -21,6 +21,7 @@ package alchemy.core;
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
 import alchemy.l10n.I18N;
+import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,15 +41,15 @@ import java.util.Vector;
  * <code>NEW</code><br/>
  * This is the state of newly created context. Context, created by
  * {@link #Context(Context) Context(parent)} constructor inherits
- * environment from its parent, though it can be changed.
+ * environment from its parent, though it can be modified.
  * <li>
  * <code>RUNNING</code><br/>
  * This is the state of context which executes program in separate
  * thread. Context becomes <code>RUNNING</code> after executing one
  * of methods {@link #start(String, String[]) start()}
  * or {@link #startAndWait(String, String[]) startAndWait()}.
- * Either of these methods can be called only in <code>NEW</code>
- * state. If program fails to be loaded then exception is thrown
+ * These methods can be invoked only in <code>NEW</code> state.
+ * If program fails to be loaded then exception is thrown
  * and context remains in <code>NEW</code> state.
  * <li>
  * <code>ENDED</code><br/>
@@ -371,6 +372,15 @@ public class Context {
 					fname = libfile.parent().path()+'/'+fname;
 				}
 				return loadLibForPath(fname, pathlist);
+			} else if (magic == (short)(('#'<<8)|'!')) {
+				String[] args = IO.split(new UTFReader(in).readLine(), ' ');
+				String progname = args[0];
+				System.arraycopy(args, 1, args, 0, args.length-1);
+				args[args.length-1] = libfile.toString();
+				HashLibrary hl = new HashLibrary();
+				hl.putFunc(new ShebangFunction(progname, args));
+				hl.lock();
+				return hl;
 			}
 			LibBuilder builder = art.builders.get((short)magic);
 			if (builder == null)
@@ -534,6 +544,26 @@ public class Context {
 					} catch (IOException ioe) { }
 				}
 			}
+		}
+	}
+	
+	private static class ShebangFunction extends Function {
+	
+		private final String   progname;
+		private final String[] args;
+	
+		private ShebangFunction(String progname, String[] args) {
+			super("main");
+			this.progname = progname;
+			this.args = args;
+		}
+		
+		protected Object exec(Context c, Object[] params) throws Exception {
+			String[] givenargs = (String[])(params[0]);
+			String[] cmdargs = new String[args.length + givenargs.length];
+			System.arraycopy(args, 0, cmdargs, 0, args.length);
+			System.arraycopy(givenargs, 0, cmdargs, args.length, givenargs.length);
+			return new Context(c).startAndWait(progname, cmdargs);
 		}
 	}
 }
