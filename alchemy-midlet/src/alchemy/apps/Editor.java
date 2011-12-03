@@ -58,7 +58,7 @@ public class Editor extends NativeApp {
 			return 0;
 		}
 		File docfile = c.toFile(args[0]);
-		TextBox box = new TextBox(args[0]+" - "+I18N._("Editor"), null, 65536, TextField.ANY);
+		TextBox box = new TextBox(docfile.name()+" - "+I18N._("Editor"), null, 65536, TextField.ANY);
 		box.addCommand(cmdSave);
 		box.addCommand(cmdQuit);
 		final NotifyListener l = new NotifyListener();

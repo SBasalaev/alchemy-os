@@ -88,3 +88,9 @@ def v_lindexof(v: Vector, a: Any): Int {
   }
   n
 }
+
+def v_toarray(v: Vector): Array {
+  var ar = new Array(v.size)
+  acopy(v.data, 0, ar, 0, v.size)
+  ar
+}

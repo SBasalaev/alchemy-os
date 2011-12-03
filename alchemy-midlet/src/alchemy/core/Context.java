@@ -563,7 +563,7 @@ public class Context {
 			String[] cmdargs = new String[args.length + givenargs.length];
 			System.arraycopy(args, 0, cmdargs, 0, args.length);
 			System.arraycopy(givenargs, 0, cmdargs, args.length, givenargs.length);
-			return new Context(c).startAndWait(progname, cmdargs);
+			return Ival(new Context(c).startAndWait(progname, cmdargs));
 		}
 	}
 }
