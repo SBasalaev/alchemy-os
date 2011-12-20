@@ -39,16 +39,15 @@ class InstallInfo {
 
 	/**
 	 * Key for the property that identifies type of used filesystem.
-	 * Valid values:
-	 *   RMS    for RSFilesystem
-	 *   JSR75  for JSR75Filesystem
 	 */
 	static final String FS_TYPE = "fs.type";
 	/**
 	 * Property that contains initialization string for filesystem.
 	 * Value depends on the value for 'fs.type' property.
-	 *   For RMS it will be name of the used record store
-	 *   For JSR75 it will be path to the root directory
+	 * <ul>
+	 *   <li>For RMS it will be name of the used record store</li>
+	 *   <li>For JSR75 and SIEMENS it will be path to the root directory</li>
+	 * </ul>
 	 */
 	static final String FS_INIT = "fs.init";
 

@@ -31,7 +31,6 @@ public interface ExprVisitor {
 	void visitBlock(BlockExpr block, Object data);
 	void visitCast(CastExpr cast, Object data);
 	void visitCastPrimitive(CastPrimitiveExpr cast, Object data);
-	void visitComparison(ComparisonExpr comp, Object data);
 	void visitConst(ConstExpr cexpr, Object data);
 	void visitDiscard(DiscardExpr disc, Object data);
 	void visitFCall(FCallExpr fcall, Object data);

@@ -33,7 +33,6 @@ import java.util.Vector;
  */
 class CodeWriter implements ExprVisitor {
 
-	private final Context c;
 	private Vector objects = new Vector();
 
 	/**
@@ -45,7 +44,6 @@ class CodeWriter implements ExprVisitor {
 	private Vector relocs = new Vector();
 
 	public CodeWriter(Context c, Unit u) {
-		this.c = c;
 		objects = new Vector();
 		//collect constants
 		ConstCollector cc = new ConstCollector();
@@ -199,7 +197,7 @@ class CodeWriter implements ExprVisitor {
 	}
 
 	private static int[] binops
-			= {'+', '-', '*', '/', '%', 0, 0, Tokenizer.TT_LTLT,
+			= {'+', '-', '*', '/', '%', 0, '=', Tokenizer.TT_LTLT,
 			Tokenizer.TT_GTGT, Tokenizer.TT_GTGTGT, '&', '|', '^'};
 
 	public void visitBinary(BinaryExpr binary, Object data) {
@@ -208,12 +206,13 @@ class CodeWriter implements ExprVisitor {
 		try {
 			int opcode = 0;
 			while (binary.operator != binops[opcode]) opcode++;
-			Type type = binary.rettype();
+			Type type = binary.lvalue.rettype();
 			if (type.equals(BuiltinType.typeInt) || type.equals(BuiltinType.typeBool))
 				opcode += 0x10;
 			else if (type.equals(BuiltinType.typeLong)) opcode += 0x20;
 			else if (type.equals(BuiltinType.typeFloat)) opcode += 0x30;
 			else if (type.equals(BuiltinType.typeDouble)) opcode += 0x40;
+			else opcode = 0x4f; // acmp - the only operator with non-primitive types
 			DataOutputStream out = (DataOutputStream)data;
 			out.writeByte(opcode);
 			addr++;
@@ -238,48 +237,6 @@ class CodeWriter implements ExprVisitor {
 		try {
 			((DataOutputStream)out).writeByte(cast.casttype);
 			addr++;
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe.toString());
-		}
-	}
-
-	public void visitComparison(ComparisonExpr comp, Object data) {
-		comp.lvalue.accept(this, data);
-		comp.rvalue.accept(this, data);
-		try {
-			DataOutputStream out = (DataOutputStream)data;
-			Type type = comp.lvalue.rettype();
-			if (type.equals(BuiltinType.typeBool) || type.equals(BuiltinType.typeInt))
-				out.writeByte(0x16); //icmp
-			else if (type.equals(BuiltinType.typeLong))
-				out.writeByte(0x26); //lcmp
-			else if (type.equals(BuiltinType.typeFloat))
-				out.writeByte(0x36); //fcmp
-			else if (type.equals(BuiltinType.typeDouble))
-				out.writeByte(0x46); //dcmp
-			else
-				out.writeByte(0x4f); //acmp
-			switch (comp.operator) {
-				case Tokenizer.TT_NOTEQ:
-					out.writeLong(0x6100040467000103l);
-					break;
-				case Tokenizer.TT_EQEQ:
-					out.writeLong(0x6200040467000103l);
-					break;
-				case Tokenizer.TT_GTEQ:
-					out.writeLong(0x6300040467000103l);
-					break;
-				case '<':
-					out.writeLong(0x6400040467000103l);
-					break;
-				case Tokenizer.TT_LTEQ:
-					out.writeLong(0x6500040467000103l);
-					break;
-				case '>':
-					out.writeLong(0x6600040467000103l);
-					break;
-			}
-			addr += 9;
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
@@ -397,7 +354,7 @@ class CodeWriter implements ExprVisitor {
 
 	public void visitIf(IfExpr ifexpr, Object data) {
 		//  cond;
-		// ifeq +(ifexpr+3)
+		// if? +(ifexpr+3)
 		//  ifexpr;
 		// goto +(elseexpr)
 		//  elseexpr;
@@ -410,7 +367,34 @@ class CodeWriter implements ExprVisitor {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			ifexpr.condition.accept(this, data);
-			out.writeByte(0x61); //ifeq
+			switch (ifexpr.type) {
+				case IfExpr.NOTZERO:
+				case IfExpr.TRUE:
+					out.writeByte(0x61); //ifeq
+					break;
+				case IfExpr.ZERO:
+				case IfExpr.FALSE:
+					out.writeByte(0x62); //ifne
+					break;
+				case IfExpr.NOTNEG:
+					out.writeByte(0x63); //iflt
+					break;
+				case IfExpr.NEG:
+					out.writeByte(0x64); //ifge
+					break;
+				case IfExpr.NOTPOS:
+					out.writeByte(0x65); //ifgt
+					break;
+				case IfExpr.POS:
+					out.writeByte(0x66); //ifle
+					break;
+				case IfExpr.NOTNULL:
+					out.writeByte(0x68); //ifnull
+					break;
+				case IfExpr.NULL:
+					out.writeByte(0x69); //ifnnull
+					break;
+			}
 			out.writeShort(ifsize+3);
 			addr += 3;
 			ifexpr.ifexpr.accept(this, data);

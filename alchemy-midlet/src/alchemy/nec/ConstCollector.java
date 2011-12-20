@@ -77,10 +77,6 @@ class ConstCollector implements ExprVisitor {
 		cast.expr.accept(this, vector);
 	}
 
-	public void visitComparison(ComparisonExpr comp, Object data) {
-		visitBinary(comp, data);
-	}
-
 	public void visitConst(ConstExpr cexpr, Object vector) {
 		if (cexpr.rettype() instanceof BuiltinType) {
 			Object val = cexpr.value;

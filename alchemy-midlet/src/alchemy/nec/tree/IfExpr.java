@@ -26,15 +26,32 @@ package alchemy.nec.tree;
  * <b>else</b>
  *   <i>expr;</i>
  * </pre>
- *
+ * 
  * @author Sergey Basalaev
  */
 public class IfExpr extends Expr {
+	
+	// for these types condition returns Bool
+	public static final int FALSE = 0;
+	public static final int TRUE = 1;
+	// for these types condition returns Int
+	public static final int ZERO = 2;
+	public static final int NOTZERO = 3;
+	public static final int POS = 4;
+	public static final int NEG = 5;
+	public static final int NOTPOS = 6;
+	public static final int NOTNEG = 7;
+	// for these types condition returns Any
+	public static final int NULL = 8;
+	public static final int NOTNULL = 9;
+	
+	public int type;
 	public Expr condition;
 	public Expr ifexpr;
 	public Expr elseexpr;
 
-	public IfExpr(Expr condition, Expr ifexpr, Expr elseexpr) {
+	public IfExpr(Expr condition, int type, Expr ifexpr, Expr elseexpr) {
+		this.type = type;
 		this.condition = condition;
 		this.ifexpr = ifexpr;
 		this.elseexpr = elseexpr;

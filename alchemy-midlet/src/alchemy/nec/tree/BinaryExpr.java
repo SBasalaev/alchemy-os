@@ -20,8 +20,11 @@ package alchemy.nec.tree;
 
 /**
  * Expression with binary operator.
- * Does not include comparison operators, for that
- * ComparisonExpr is used.
+ * Valid binary operators are <code>+</code>,
+ * <code>-</code>, <code>*</code>, <code>/</code>,
+ * <code>%</code>, <code>&amp;</code>, <code>|</code>,
+ * <code>^</code>, <code>TT_LTLT</code>, <code>TT_GTGT</code>
+ * and <code>=</code> the latter being comparison operator.
  *
  * @author Sergey Basalaev
  */
@@ -38,7 +41,8 @@ public class BinaryExpr extends Expr {
 	}
 
 	public Type rettype() {
-		return lvalue.rettype();
+		if (operator == '=') return BuiltinType.typeInt;
+		else return lvalue.rettype();
 	}
 
 	public void accept(ExprVisitor v, Object data) {

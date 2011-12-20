@@ -116,19 +116,6 @@ class FuncComputer implements ExprVisitor {
 		((FuncData)data).codesize++;
 	}
 
-	public void visitComparison(ComparisonExpr comp, Object data) {
-		comp.lvalue.accept(this, data);
-		comp.rvalue.accept(this, data);
-		// ?cmp
-		// if?? +4
-		// iconst_0
-		// goto +1
-		// iconst_1
-		FuncData fdata = (FuncData)data;
-		fdata.codesize += 9;
-		fdata.stackhead--;
-	}
-
 	public void visitConst(ConstExpr cexpr, Object data) {
 		FuncData fdata = (FuncData)data;
 		Object value = cexpr.value;

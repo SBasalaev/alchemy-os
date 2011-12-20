@@ -85,6 +85,15 @@ class Optimizer implements ExprVisitor {
 							return;
 						}
 						break;
+					case '=':
+						if (lval.equals(rval)) {
+							lval = new Integer(0);
+						} else if (((Integer)lval).intValue() < ((Integer)rval).intValue()) {
+							lval = new Integer(-1);
+						} else {
+							lval = new Integer(1);
+						}
+						break;
 					case '&':
 						lval = new Integer(((Integer)lval).intValue() & ((Integer)rval).intValue());
 						break;
@@ -131,6 +140,15 @@ class Optimizer implements ExprVisitor {
 							return;
 						}
 						break;
+					case '=':
+						if (lval.equals(rval)) {
+							lval = new Integer(0);
+						} else if (((Long)lval).longValue() < ((Long)rval).longValue()) {
+							lval = new Integer(-1);
+						} else {
+							lval = new Integer(1);
+						}
+						break;
 					case '&':
 						lval = new Long(((Long)lval).longValue() & ((Long)rval).longValue());
 						break;
@@ -167,6 +185,15 @@ class Optimizer implements ExprVisitor {
 					case '%':
 						lval = new Float(((Float)lval).floatValue() % ((Float)rval).floatValue());
 						break;
+					case '=':
+						if (lval.equals(rval)) {
+							lval = new Integer(0);
+						} else if (((Float)lval).longValue() < ((Float)rval).longValue()) {
+							lval = new Integer(-1);
+						} else {
+							lval = new Integer(1);
+						}
+						break;
 				}
 			} else if (lval instanceof Double) {
 				switch (binary.operator) {
@@ -185,6 +212,15 @@ class Optimizer implements ExprVisitor {
 					case '%':
 						lval = new Double(((Double)lval).doubleValue() % ((Double)rval).doubleValue());
 						break;
+					case '=':
+						if (lval.equals(rval)) {
+							lval = new Integer(0);
+						} else if (((Long)lval).longValue() < ((Long)rval).longValue()) {
+							lval = new Integer(-1);
+						} else {
+							lval = new Integer(1);
+						}
+						break;
 				}
 			} else if (lval instanceof Boolean) {
 				switch (binary.operator) {
@@ -199,6 +235,13 @@ class Optimizer implements ExprVisitor {
 					case '^':
 						lval = (((Boolean)lval).booleanValue() ^ ((Boolean)rval).booleanValue()
 								? Boolean.TRUE : Boolean.FALSE);
+						break;
+					case '=':
+						if (lval.equals(rval)) {
+							lval = new Integer(0);
+						} else {
+							lval = new Integer(1);
+						}
 						break;
 				}
 			}
@@ -303,94 +346,6 @@ class Optimizer implements ExprVisitor {
 		optimized = null;
 	}
 
-	/**
-	 * CF:
-	 *   const <=> const   =>   const
-	 */
-	public void visitComparison(ComparisonExpr comp, Object data) {
-		comp.lvalue.accept(this, data);
-		if (optimized != null) comp.lvalue = optimized;
-		comp.rvalue.accept(this, data);
-		if (optimized != null) comp.rvalue = optimized;
-		if (comp.lvalue instanceof ConstExpr && comp.rvalue instanceof ConstExpr) {
-			Object lval = ((ConstExpr)comp.lvalue).value;
-			Object rval = ((ConstExpr)comp.rvalue).value;
-			switch (comp.operator) {
-				case Tokenizer.TT_EQEQ:
-					lval = (lval == null ? rval == null : lval.equals(rval))
-							? Boolean.TRUE : Boolean.FALSE;
-					break;
-				case Tokenizer.TT_NOTEQ:
-					lval = (lval == null ? rval == null : lval.equals(rval))
-							? Boolean.FALSE : Boolean.TRUE;
-					break;
-				case '<':
-					if (lval instanceof Integer) {
-						lval = (((Integer)lval).intValue() < ((Integer)rval).intValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Long)lval).longValue() < ((Long)rval).longValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Float) {
-						lval = (((Float)lval).floatValue() < ((Float)rval).floatValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Double)lval).doubleValue() < ((Double)rval).doubleValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					}
-					break;
-				case '>':
-					if (lval instanceof Integer) {
-						lval = (((Integer)lval).intValue() > ((Integer)rval).intValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Long)lval).longValue() > ((Long)rval).longValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Float) {
-						lval = (((Float)lval).floatValue() > ((Float)rval).floatValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Double)lval).doubleValue() > ((Double)rval).doubleValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					}
-					break;
-				case Tokenizer.TT_LTEQ:
-					if (lval instanceof Integer) {
-						lval = (((Integer)lval).intValue() <= ((Integer)rval).intValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Long)lval).longValue() <= ((Long)rval).longValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Float) {
-						lval = (((Float)lval).floatValue() <= ((Float)rval).floatValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Double)lval).doubleValue() <= ((Double)rval).doubleValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					}
-					break;
-				case Tokenizer.TT_GTEQ:
-					if (lval instanceof Integer) {
-						lval = (((Integer)lval).intValue() >= ((Integer)rval).intValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Long)lval).longValue() >= ((Long)rval).longValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Float) {
-						lval = (((Float)lval).floatValue() >= ((Float)rval).floatValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					} else if (lval instanceof Long) {
-						lval = (((Double)lval).doubleValue() >= ((Double)rval).doubleValue())
-								? Boolean.TRUE : Boolean.FALSE;
-					}
-					break;
-			}
-			optimized = new ConstExpr(lval);
-			return;
-		}
-		optimized = null;
-	}
-
 	public void visitConst(ConstExpr cexpr, Object data) {
 		optimized = null;
 	}
@@ -424,6 +379,9 @@ class Optimizer implements ExprVisitor {
 	 * DCE:
 	 *   if (true)  expr1 else expr2   =>   expr1
 	 *   if (false) expr1 else expr2   =>   expr2
+	 * CF:
+	 *   if (if? true else false) expr1 else expr2  =>  if? expr1 else expr2
+	 *   // the latter is common due to implementation of comparison
 	 */
 	public void visitIf(IfExpr expr, Object data) {
 		//optimize children
@@ -435,13 +393,97 @@ class Optimizer implements ExprVisitor {
 		if (optimized != null) expr.elseexpr = optimized;
 		//test condition
 		if (expr.condition instanceof ConstExpr) {
-			Object boolConst = ((ConstExpr)expr.condition).value;
-			if (boolConst.equals(Boolean.TRUE)) {
-				optimized = expr.ifexpr;
-				return;
-			} else if (boolConst.equals(Boolean.FALSE)) {
-				optimized = expr.elseexpr;
-				return;
+			Object cond = ((ConstExpr)expr.condition).value;
+			switch (expr.type) {
+				case IfExpr.TRUE:
+					if (Boolean.TRUE.equals(cond)) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.FALSE:
+					if (Boolean.FALSE.equals(cond)) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.NULL:
+					if (cond == null) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.NOTNULL:
+					if (cond != null) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.ZERO:
+					if (((Integer)cond).intValue() == 0) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.NOTZERO:
+					if (((Integer)cond).intValue() != 0) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.NEG:
+					if (((Integer)cond).intValue() < 0) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.NOTNEG:
+					if (((Integer)cond).intValue() >= 0) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.POS:
+					if (((Integer)cond).intValue() > 0) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+				case IfExpr.NOTPOS:
+					if (((Integer)cond).intValue() <= 0) {
+						optimized = expr.ifexpr;
+						return;
+					} else {
+						optimized = expr.elseexpr;
+						return;
+					}
+			}
+		} else if (expr.condition instanceof IfExpr) {
+			IfExpr innerif = (IfExpr)expr.condition;
+			if (innerif.ifexpr instanceof ConstExpr
+			 && ((ConstExpr)innerif.ifexpr).value == Boolean.TRUE
+			 && innerif.elseexpr instanceof ConstExpr
+			 && ((ConstExpr)innerif.elseexpr).value == Boolean.FALSE) {
+				expr.condition = innerif.condition;
+				expr.type = innerif.type;
 			}
 		}
 		optimized = null;

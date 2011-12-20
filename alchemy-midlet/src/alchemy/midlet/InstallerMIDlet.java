@@ -67,6 +67,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			return;
 		}
 		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+'\n' +
+			"Development branch\n\n" +
 			"Copyright (c) 2011, Sergey Basalaev\n" +
 			"http://alchemy-os.googlecode.com\n" +
 			"\n" +
@@ -118,6 +119,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			if (vcmp == 0) vcmp = newVersion[1].compareTo(curVersion[1]);
 			if (vcmp > 0) {
 				messages.append(I18N._("Can be updated to {0}", setupCfg.get("alchemy.version"))+'\n');
+				messages.addCommand(cmdUpdate);
+			} else { //always enable update in development build
 				messages.addCommand(cmdUpdate);
 			}
 		} else {

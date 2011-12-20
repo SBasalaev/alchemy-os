@@ -406,18 +406,30 @@ public class Parser {
 				  || !(rtype instanceof BuiltinType) || ((BuiltinType)rtype).numIndex() < 0)
 					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
 				Type btype = binaryCastType(ltype, rtype);
-				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
+				Expr cmpexpr = new BinaryExpr(cast(left,btype), '=', cast(right,btype));
+				int iftype;
+				switch (op) {
+					case '<':               iftype = IfExpr.NEG;    break;
+					case '>':               iftype = IfExpr.POS;    break;
+					case Tokenizer.TT_LTEQ: iftype = IfExpr.NOTPOS; break;
+					case Tokenizer.TT_GTEQ: iftype = IfExpr.NOTNEG; break;
+					default: iftype = -1;
+				}
+				newexpr = new IfExpr(cmpexpr, iftype, new ConstExpr(Boolean.TRUE), new ConstExpr(Boolean.FALSE));
 			} else if (op == Tokenizer.TT_EQEQ || op == Tokenizer.TT_NOTEQ) {
 				Type btype = binaryCastType(ltype, rtype);
-				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
+				newexpr = new IfExpr(
+						new BinaryExpr(cast(left,btype), '=', cast(right,btype)),
+						op == Tokenizer.TT_EQEQ ? IfExpr.ZERO : IfExpr.NOTZERO,
+						new ConstExpr(Boolean.TRUE), new ConstExpr(Boolean.FALSE));
 			} else if (op == Tokenizer.TT_AMPAMP) {
 				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
 					throw new ParseException(I18N._("Operator && cannot be applied to {0},{1}", ltype, rtype));
-				newexpr = new IfExpr(left, right, new ConstExpr(Boolean.FALSE));
+				newexpr = new IfExpr(left, IfExpr.TRUE, right, new ConstExpr(Boolean.FALSE));
 			} else if (op == Tokenizer.TT_BARBAR) {
 				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
 					throw new ParseException(I18N._("Operator || cannot be applied to {0},{1}", ltype, rtype));
-				newexpr = new IfExpr(left, new ConstExpr(Boolean.TRUE), right);
+				newexpr = new IfExpr(left, IfExpr.TRUE, new ConstExpr(Boolean.TRUE), right);
 			} else if ("+-*/%".indexOf(op) >= 0) {
 				if (ltype.equals(BuiltinType.typeString)) {
 					// string concatenation, does strcat(left, to_str(right))
@@ -599,13 +611,13 @@ public class Parser {
 					return new ConstExpr(null);
 				} else if (t.svalue.equals("while")) {
 					expect('(');
-					Expr cond = parseExpr(scope);
+					Expr cond = cast(parseExpr(scope), BuiltinType.typeBool);
 					expect(')');
 					Expr body = cast(parseExpr(scope), BuiltinType.typeNone);
 					return new WhileExpr(cond, body);
 				} else if (t.svalue.equals("if")) {
 					expect('(');
-					Expr cond = parseExpr(scope);
+					Expr cond = cast(parseExpr(scope), BuiltinType.typeBool);
 					expect(')');
 					Expr ifexpr = parseExpr(scope);
 					Expr elseexpr;
@@ -616,7 +628,7 @@ public class Parser {
 						elseexpr = parseExpr(scope);
 					}
 					Type btype = binaryCastType(ifexpr.rettype(), elseexpr.rettype());
-					return new IfExpr(cond, cast(ifexpr,btype), cast(elseexpr,btype));
+					return new IfExpr(cond, IfExpr.TRUE, cast(ifexpr,btype), cast(elseexpr,btype));
 				} else if (t.svalue.equals("var")) {
 					if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
 						throw new ParseException(I18N._("Identifier expected after var"));
