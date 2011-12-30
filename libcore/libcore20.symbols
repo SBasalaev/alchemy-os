@@ -1,6 +1,6 @@
-fname
-fpath
-fparent
+pathfile
+pathdir
+abspath
 fcreate
 fremove
 mkdir
@@ -34,7 +34,6 @@ strcat
 strcmp
 strchars
 strtrim
-to_file
 getenv
 setenv
 utfbytes

@@ -1,8 +1,4 @@
-These are the symbols and headers for the Alchemy core library.
-
-File corelib.symbols is used by MIDlet to initialize library.
-Subdirectories lib/ and inc/ are to be installed in the user
-file system.
+These are the symbols, sources and headers for the Alchemy core library.
 
 The core library is licensed under GPL v3 with the following exception:
 
