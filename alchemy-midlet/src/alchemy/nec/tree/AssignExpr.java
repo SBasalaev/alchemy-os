@@ -38,7 +38,7 @@ public class AssignExpr extends Expr {
 		return BuiltinType.typeNone;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitAssign(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitAssign(this, data);
 	}
 }

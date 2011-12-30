@@ -81,7 +81,7 @@ public class BlockExpr extends Expr implements Scope {
 		return parent.getVar(v.name) != null;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitBlock(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitBlock(this, data);
 	}
 }

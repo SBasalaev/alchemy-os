@@ -26,7 +26,7 @@ package alchemy.nec.tree;
  */
 public class ALenExpr extends Expr {
 
-	public final Expr arrayexpr;
+	public Expr arrayexpr;
 
 	public ALenExpr(Expr arrayexpr) {
 		this.arrayexpr = arrayexpr;
@@ -36,7 +36,7 @@ public class ALenExpr extends Expr {
 		return BuiltinType.typeInt;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitALen(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitALen(this, data);
 	}
 }

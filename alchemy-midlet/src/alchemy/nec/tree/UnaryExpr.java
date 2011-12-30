@@ -36,7 +36,7 @@ public class UnaryExpr extends Expr {
 		return expr.rettype();
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitUnary(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitUnary(this, data);
 	}
 }

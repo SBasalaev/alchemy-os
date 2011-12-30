@@ -39,105 +39,122 @@ class ConstCollector implements ExprVisitor {
 		}
 	}
 
-	public void visitALen(ALenExpr alen, Object data) {
+	public Object visitALen(ALenExpr alen, Object data) {
 		alen.arrayexpr.accept(this, data);
+		return null;
 	}
 
-	public void visitALoad(ALoadExpr aload, Object data) {
+	public Object visitALoad(ALoadExpr aload, Object data) {
 		aload.arrayexpr.accept(this, data);
 		aload.indexexpr.accept(this, data);
+		return null;
 	}
 
-	public void visitAStore(AStoreExpr astore, Object data) {
+	public Object visitAStore(AStoreExpr astore, Object data) {
 		astore.arrayexpr.accept(this, data);
 		astore.indexexpr.accept(this, data);
 		astore.assignexpr.accept(this, data);
+		return null;
 	}
 
-	public void visitAssign(AssignExpr assign, Object data) {
+	public Object visitAssign(AssignExpr assign, Object data) {
 		assign.expr.accept(this, data);
+		return null;
 	}
 
-	public void visitBinary(BinaryExpr binary, Object data) {
+	public Object visitBinary(BinaryExpr binary, Object data) {
 		binary.lvalue.accept(this, data);
 		binary.rvalue.accept(this, data);
+		return null;
 	}
 
-	public void visitBlock(BlockExpr block, Object vector) {
+	public Object visitBlock(BlockExpr block, Object data) {
 		for (Enumeration e = block.exprs.elements(); e.hasMoreElements(); ) {
-			((Expr)e.nextElement()).accept(this, vector);
+			((Expr)e.nextElement()).accept(this, data);
 		}
+		return null;
 	}
 
-	public void visitCast(CastExpr cast, Object vector) {
-		cast.expr.accept(this, vector);
+	public Object visitCast(CastExpr cast, Object data) {
+		cast.expr.accept(this, data);
+		return null;
 	}
 
-	public void visitCastPrimitive(CastPrimitiveExpr cast, Object vector) {
-		cast.expr.accept(this, vector);
+	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object data) {
+		cast.expr.accept(this, data);
+		return null;
 	}
 
-	public void visitConst(ConstExpr cexpr, Object vector) {
+	public Object visitConst(ConstExpr cexpr, Object data) {
 		if (cexpr.rettype() instanceof BuiltinType) {
 			Object val = cexpr.value;
 			// do not collect null and short numbers - will be inlined
-			if (val == null || val instanceof Boolean) return;
+			if (val == null || val instanceof Boolean) return null;
 			if (val instanceof Integer) {
 				int ival = ((Integer)val).intValue();
-				if (ival >= -0x8000 && ival < 0x8000) return;
+				if (ival >= -0x8000 && ival < 0x8000) return null;
 			}
 			if (val instanceof Long) {
 				long lval = ((Long)val).longValue();
-				if (lval == 0l || lval == 1l) return;
+				if (lval == 0l || lval == 1l) return null;
 			}
 			if (val instanceof Float) {
 				float fval = ((Float)val).floatValue();
-				if (fval == 0f || fval == 1f || fval == 2f) return;
+				if (fval == 0f || fval == 1f || fval == 2f) return null;
 			}
 			if (val instanceof Double) {
 				double dval = ((Double)val).doubleValue();
-				if (dval == 0d || dval == 1d) return;
+				if (dval == 0d || dval == 1d) return null;
 			}
-			Vector v = (Vector)vector;
+			Vector v = (Vector)data;
 			if (!v.contains(cexpr.value)) {
 				v.addElement(cexpr.value);
 			}
 		}
+		return null;
 	}
 
-	public void visitDiscard(DiscardExpr disc, Object data) {
+	public Object visitDiscard(DiscardExpr disc, Object data) {
 		disc.expr.accept(this, data);
+		return null;
 	}
 
-	public void visitFCall(FCallExpr fcall, Object data) {
+	public Object visitFCall(FCallExpr fcall, Object data) {
 		fcall.fload.accept(this, data);
 		for (int i=0; i<fcall.args.length; i++) {
 			fcall.args[i].accept(this, data);
 		}
+		return null;
 	}
 
-	public void visitIf(IfExpr ifexpr, Object data) {
+	public Object visitIf(IfExpr ifexpr, Object data) {
 		ifexpr.condition.accept(this, data);
 		ifexpr.ifexpr.accept(this, data);
 		ifexpr.elseexpr.accept(this, data);
+		return null;
 	}
 
-	public void visitNewArray(NewArrayExpr newarray, Object data) {
+	public Object visitNewArray(NewArrayExpr newarray, Object data) {
 		newarray.lengthexpr.accept(this, data);
+		return null;
 	}
 
-	public void visitNone(NoneExpr none, Object vector) {
+	public Object visitNone(NoneExpr none, Object data) {
+		return null;
 	}
 
-	public void visitUnary(UnaryExpr unary, Object data) {
+	public Object visitUnary(UnaryExpr unary, Object data) {
 		unary.expr.accept(this, data);
+		return null;
 	}
 
-	public void visitVar(VarExpr vexpr, Object data) {
+	public Object visitVar(VarExpr vexpr, Object data) {
+		return null;
 	}
 
-	public void visitWhile(WhileExpr wexpr, Object data) {
+	public Object visitWhile(WhileExpr wexpr, Object data) {
 		wexpr.condition.accept(this, data);
 		wexpr.body.accept(this, data);
+		return null;
 	}
 }

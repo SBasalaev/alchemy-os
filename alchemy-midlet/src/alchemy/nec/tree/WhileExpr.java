@@ -38,7 +38,7 @@ public class WhileExpr extends Expr {
 		return BuiltinType.typeNone;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitWhile(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitWhile(this, data);
 	}
 }

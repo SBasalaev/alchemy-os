@@ -45,7 +45,7 @@ public class BinaryExpr extends Expr {
 		else return lvalue.rettype();
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitBinary(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitBinary(this, data);
 	}
 }

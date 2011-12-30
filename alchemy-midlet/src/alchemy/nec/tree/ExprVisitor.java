@@ -23,21 +23,21 @@ package alchemy.nec.tree;
  * @author Sergey Basalaev
  */
 public interface ExprVisitor {
-	void visitALen(ALenExpr alen, Object data);
-	void visitALoad(ALoadExpr aload, Object data);
-	void visitAStore(AStoreExpr astore, Object data);
-	void visitAssign(AssignExpr assign, Object data);
-	void visitBinary(BinaryExpr binary, Object data);
-	void visitBlock(BlockExpr block, Object data);
-	void visitCast(CastExpr cast, Object data);
-	void visitCastPrimitive(CastPrimitiveExpr cast, Object data);
-	void visitConst(ConstExpr cexpr, Object data);
-	void visitDiscard(DiscardExpr disc, Object data);
-	void visitFCall(FCallExpr fcall, Object data);
-	void visitIf(IfExpr ifexpr, Object data);
-	void visitNewArray(NewArrayExpr newarray, Object data);
-	void visitNone(NoneExpr none, Object data);
-	void visitUnary(UnaryExpr expr, Object data);
-	void visitVar(VarExpr vexpr, Object data);
-	void visitWhile(WhileExpr wexpr, Object data);
+	Object visitALen(ALenExpr alen, Object data);
+	Object visitALoad(ALoadExpr aload, Object data);
+	Object visitAStore(AStoreExpr astore, Object data);
+	Object visitAssign(AssignExpr assign, Object data);
+	Object visitBinary(BinaryExpr binary, Object data);
+	Object visitBlock(BlockExpr block, Object data);
+	Object visitCast(CastExpr cast, Object data);
+	Object visitCastPrimitive(CastPrimitiveExpr cast, Object data);
+	Object visitConst(ConstExpr cexpr, Object data);
+	Object visitDiscard(DiscardExpr disc, Object data);
+	Object visitFCall(FCallExpr fcall, Object data);
+	Object visitIf(IfExpr ifexpr, Object data);
+	Object visitNewArray(NewArrayExpr newarray, Object data);
+	Object visitNone(NoneExpr none, Object data);
+	Object visitUnary(UnaryExpr expr, Object data);
+	Object visitVar(VarExpr vexpr, Object data);
+	Object visitWhile(WhileExpr wexpr, Object data);
 }

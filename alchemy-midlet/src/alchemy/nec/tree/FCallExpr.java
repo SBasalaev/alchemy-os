@@ -41,7 +41,7 @@ public class FCallExpr extends Expr {
 		return ftype.rettype;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitFCall(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitFCall(this, data);
 	}
 }

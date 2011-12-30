@@ -9,8 +9,6 @@ import alchemy.nec.tree.*;
  */
 class Optimizer implements ExprVisitor {
 
-	private Expr optimized = null;
-
 	public void visitUnit(Unit u) {
 		for (int i=0; i<u.funcs.size(); i++) {
 			visitFunc((Func)u.funcs.elementAt(i));
@@ -19,42 +17,40 @@ class Optimizer implements ExprVisitor {
 
 	public void visitFunc(Func f) {
 		if (f.body != null) {
-			f.body.accept(this, null);
-			if (optimized != null) f.body = optimized;
+			f.body = (Expr)f.body.accept(this, null);
 		}
 	}
 
-	public void visitALen(ALenExpr alen, Object data) {
-		alen.arrayexpr.accept(this, data);
-		optimized = null;
+	public Object visitALen(ALenExpr alen, Object data) {
+		alen.arrayexpr = (Expr)alen.arrayexpr.accept(this, data);
+		return alen;
 	}
 
-	public void visitALoad(ALoadExpr aload, Object data) {
-		aload.arrayexpr.accept(this, data);
-		aload.indexexpr.accept(this, data);
-		optimized = null;
+	public Object visitALoad(ALoadExpr aload, Object data) {
+		aload.arrayexpr = (Expr)aload.arrayexpr.accept(this, data);
+		aload.indexexpr = (Expr)aload.indexexpr.accept(this, data);
+		return aload;
 	}
 
-	public void visitAStore(AStoreExpr astore, Object data) {
-		astore.arrayexpr.accept(this, data);
-		astore.indexexpr.accept(this, data);
-		astore.assignexpr.accept(this, data);
+	public Object visitAStore(AStoreExpr astore, Object data) {
+		astore.arrayexpr = (Expr)astore.arrayexpr.accept(this, data);
+		astore.indexexpr = (Expr)astore.indexexpr.accept(this, data);
+		astore.assignexpr = (Expr)astore.assignexpr.accept(this, data);
+		return astore;
 	}
 
-	public void visitAssign(AssignExpr assign, Object data) {
-		assign.expr.accept(this, data);
-		optimized = null;
+	public Object visitAssign(AssignExpr assign, Object data) {
+		assign.expr = (Expr)assign.expr.accept(this, data);
+		return assign;
 	}
 
 	/**
 	 * CF:
 	 *   const op const   =>   const
 	 */
-	public void visitBinary(BinaryExpr binary, Object data) {
-		binary.lvalue.accept(this, data);
-		if (optimized != null) binary.lvalue = optimized;
-		binary.rvalue.accept(this, data);
-		if (optimized != null) binary.rvalue = optimized;
+	public Object visitBinary(BinaryExpr binary, Object data) {
+		binary.lvalue = (Expr)binary.lvalue.accept(this, data);
+		binary.rvalue = (Expr)binary.rvalue.accept(this, data);
 		if (binary.lvalue instanceof ConstExpr && binary.rvalue instanceof ConstExpr) {
 			Object lval = ((ConstExpr)binary.lvalue).value;
 			Object rval = ((ConstExpr)binary.rvalue).value;
@@ -73,16 +69,14 @@ class Optimizer implements ExprVisitor {
 						if (((Integer)rval).intValue() != 0) {
 							lval = new Integer(((Integer)lval).intValue() / ((Integer)rval).intValue());
 						} else {
-							optimized = null;
-							return;
+							return binary;
 						}
 						break;
 					case '%':
 						if (((Integer)rval).intValue() != 0) {
 							lval = new Integer(((Integer)lval).intValue() % ((Integer)rval).intValue());
 						} else {
-							optimized = null;
-							return;
+							return binary;
 						}
 						break;
 					case '=':
@@ -128,16 +122,14 @@ class Optimizer implements ExprVisitor {
 						if (((Long)rval).longValue() != 0) {
 							lval = new Long(((Long)lval).longValue() / ((Long)rval).longValue());
 						} else {
-							optimized = null;
-							return;
+							return binary;
 						}
 						break;
 					case '%':
 						if (((Long)rval).longValue() != 0) {
 							lval = new Long(((Long)lval).longValue() % ((Long)rval).longValue());
 						} else {
-							optimized = null;
-							return;
+							return binary;
 						}
 						break;
 					case '=':
@@ -245,10 +237,9 @@ class Optimizer implements ExprVisitor {
 						break;
 				}
 			}
-			optimized = new ConstExpr(lval);
-			return;
+			return new ConstExpr(lval);
 		}
-		optimized = null;
+		return binary;
 	}
 
 	/**
@@ -257,12 +248,11 @@ class Optimizer implements ExprVisitor {
 	 *   { expr }   =>   expr
 	 *   {}   =>   none
 	 */
-	public void visitBlock(BlockExpr block, Object data) {
+	public Object visitBlock(BlockExpr block, Object data) {
 		int i=0;
 		while (i < block.exprs.size()) {
 			Expr ex = (Expr)block.exprs.elementAt(i);
-			ex.accept(this, data);
-			if (optimized != null) ex = optimized;
+			ex = (Expr)ex.accept(this, data);
 			if (ex instanceof NoneExpr) {
 				block.exprs.removeElementAt(i);
 			} else {
@@ -272,33 +262,30 @@ class Optimizer implements ExprVisitor {
 		}
 		switch (block.exprs.size()) {
 			case 0:
-				optimized = new NoneExpr();
-				return;
+				return new NoneExpr();
 			case 1:
 				Expr e = (Expr)block.exprs.elementAt(0);
 				if (block.locals.isEmpty()) {
-					optimized = e;
-					return;
+					return e;
 				}
+			default:
+				return block;
 		}
-		optimized = null;
 	}
 
-	public void visitCast(CastExpr cast, Object data) {
-		cast.expr.accept(this, data);
-		if (optimized != null) cast.expr = optimized;
+	public Object visitCast(CastExpr cast, Object data) {
+		cast.expr = (Expr)cast.expr.accept(this, data);
 		if (cast.expr instanceof CastExpr) {
-			optimized = new CastExpr(cast.toType, ((CastExpr)cast.expr).expr);
-			return;
+			return new CastExpr(cast.toType, ((CastExpr)cast.expr).expr);
 		}
-		optimized = null;
+		return cast;
 	}
 
 	/**
 	 * CF:
 	 *   cast(type) number   =>   castednumber
 	 */
-	public void visitCastPrimitive(CastPrimitiveExpr cast, Object data) {
+	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object data) {
 		cast.expr.accept(this, data);
 		if (cast.expr instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)cast.expr).value;
@@ -340,14 +327,13 @@ class Optimizer implements ExprVisitor {
 					cnst = new Float(((Double)cnst).floatValue());
 					break;
 			}
-			optimized = new ConstExpr(cnst);
-			return;
+			return new ConstExpr(cnst);
 		}
-		optimized = null;
+		return cast;
 	}
 
-	public void visitConst(ConstExpr cexpr, Object data) {
-		optimized = null;
+	public Object visitConst(ConstExpr cexpr, Object data) {
+		return cexpr;
 	}
 
 	/**
@@ -355,24 +341,20 @@ class Optimizer implements ExprVisitor {
 	 *   const;   =>   none
 	 *   var;     =>   none
 	 */
-	public void visitDiscard(DiscardExpr disc, Object data) {
-		disc.expr.accept(this, data);
-		if (optimized != null) disc.expr = optimized;
+	public Object visitDiscard(DiscardExpr disc, Object data) {
+		disc.expr = (Expr)disc.expr.accept(this, data);
 		if (disc.expr instanceof ConstExpr || disc.expr instanceof VarExpr) {
-			optimized = new NoneExpr();
-			return;
+			return new NoneExpr();
 		}
-		optimized = null;
+		return disc;
 	}
 
-	public void visitFCall(FCallExpr fcall, Object data) {
-		fcall.fload.accept(this, data);
-		if (optimized != null) fcall.fload = optimized;
+	public Object visitFCall(FCallExpr fcall, Object data) {
+		fcall.fload = (Expr)fcall.fload.accept(this, data);
 		for (int i=0; i<fcall.args.length; i++) {
-			fcall.args[i].accept(this, data);
-			if (optimized != null) fcall.args[i] = optimized;
+			fcall.args[i] = (Expr)fcall.args[i].accept(this, data);
 		}
-		optimized = null;
+		return fcall;
 	}
 
 	/**
@@ -383,97 +365,74 @@ class Optimizer implements ExprVisitor {
 	 *   if (if? true else false) expr1 else expr2  =>  if? expr1 else expr2
 	 *   // the latter is common due to implementation of comparison
 	 */
-	public void visitIf(IfExpr expr, Object data) {
+	public Object visitIf(IfExpr expr, Object data) {
 		//optimize children
-		expr.condition.accept(this, data);
-		if (optimized != null) expr.condition = optimized;
-		expr.ifexpr.accept(this, data);
-		if (optimized != null) expr.ifexpr = optimized;
-		expr.elseexpr.accept(this, data);
-		if (optimized != null) expr.elseexpr = optimized;
+		expr.condition = (Expr)expr.condition.accept(this, data);
+		expr.ifexpr = (Expr)expr.ifexpr.accept(this, data);
+		expr.elseexpr = (Expr)expr.elseexpr.accept(this, data);
 		//test condition
 		if (expr.condition instanceof ConstExpr) {
 			Object cond = ((ConstExpr)expr.condition).value;
 			switch (expr.type) {
 				case IfExpr.TRUE:
 					if (Boolean.TRUE.equals(cond)) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.FALSE:
 					if (Boolean.FALSE.equals(cond)) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.NULL:
 					if (cond == null) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.NOTNULL:
 					if (cond != null) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.ZERO:
 					if (((Integer)cond).intValue() == 0) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.NOTZERO:
 					if (((Integer)cond).intValue() != 0) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.NEG:
 					if (((Integer)cond).intValue() < 0) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.NOTNEG:
 					if (((Integer)cond).intValue() >= 0) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.POS:
 					if (((Integer)cond).intValue() > 0) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 				case IfExpr.NOTPOS:
 					if (((Integer)cond).intValue() <= 0) {
-						optimized = expr.ifexpr;
-						return;
+						return expr.ifexpr;
 					} else {
-						optimized = expr.elseexpr;
-						return;
+						return expr.elseexpr;
 					}
 			}
 		} else if (expr.condition instanceof IfExpr) {
@@ -486,76 +445,66 @@ class Optimizer implements ExprVisitor {
 				expr.type = innerif.type;
 			}
 		}
-		optimized = null;
+		return expr;
 	}
 
-	public void visitNewArray(NewArrayExpr newarray, Object data) {
-		newarray.lengthexpr.accept(this, data);
-		if (optimized != null) newarray.lengthexpr = optimized;
-		optimized = null;
+	public Object visitNewArray(NewArrayExpr newarray, Object data) {
+		newarray.lengthexpr = (Expr)newarray.lengthexpr.accept(this, data);
+		return newarray;
 	}
 
-	public void visitNone(NoneExpr none, Object data) {
-		optimized = null;
+	public Object visitNone(NoneExpr none, Object data) {
+		return none;
 	}
 
 	/** CF:
 	 *   !const   =>   const
 	 *   -const   =>   const
 	 */
-	public void visitUnary(UnaryExpr unary, Object data) {
-		unary.expr.accept(this, data);
-		if (optimized != null) unary.expr = optimized;
+	public Object visitUnary(UnaryExpr unary, Object data) {
+		unary.expr = (Expr)unary.expr.accept(this, data);
 		if (unary.expr instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)unary.expr).value;
 			if (unary.operator == '!') {
-				optimized = new ConstExpr(cnst.equals(Boolean.TRUE) ? Boolean.FALSE : Boolean.TRUE);
-				return;
+				return new ConstExpr(cnst.equals(Boolean.TRUE) ? Boolean.FALSE : Boolean.TRUE);
 			} else if (unary.operator == '-') {
 				if (cnst instanceof Integer) {
 					int oldval = ((Integer)cnst).intValue();
-					optimized = new ConstExpr(new Integer(-oldval));
-					return;
+					return new ConstExpr(new Integer(-oldval));
 				} else if (cnst instanceof Long) {
 					long oldval = ((Long)cnst).longValue();
-					optimized = new ConstExpr(new Long(-oldval));
-					return;
+					return new ConstExpr(new Long(-oldval));
 				} else if (cnst instanceof Float) {
 					float oldval = ((Float)cnst).floatValue();
-					optimized = new ConstExpr(new Float(-oldval));
-					return;
+					return new ConstExpr(new Float(-oldval));
 				} else if (cnst instanceof Double) {
 					double oldval = ((Double)cnst).doubleValue();
-					optimized = new ConstExpr(new Double(-oldval));
-					return;
+					return new ConstExpr(new Double(-oldval));
 				}
 			}
 		}
-		optimized = null;
+		return unary;
 	}
 
-	public void visitVar(VarExpr vexpr, Object data) {
-		optimized = null;
+	public Object visitVar(VarExpr vexpr, Object data) {
+		return vexpr;
 	}
 
 	/**
 	 * DCE:
 	 *  while (false) expr;   =>   none
 	 */
-	public void visitWhile(WhileExpr wexpr, Object data) {
+	public Object visitWhile(WhileExpr wexpr, Object data) {
 		//optimize children
-		wexpr.condition.accept(this, data);
-		if (optimized != null) wexpr.condition = optimized;
-		wexpr.body.accept(this, data);
-		if (optimized != null) wexpr.body = optimized;
+		wexpr.condition = (Expr)wexpr.condition.accept(this, data);
+		wexpr.body = (Expr)wexpr.body.accept(this, data);
 		//test condition
 		if (wexpr.condition instanceof ConstExpr) {
 			ConstExpr boolConst = (ConstExpr)wexpr.condition;
 			if (boolConst.value.equals(Boolean.FALSE)) {
-				optimized = new NoneExpr();
-				return;
+				return new NoneExpr();
 			} //TODO: while(true) cycle
 		}
-		optimized = null;
+		return wexpr;
 	}
 }

@@ -61,7 +61,7 @@ public class IfExpr extends Expr {
 		return ifexpr.rettype();
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitIf(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitIf(this, data);
 	}
 }

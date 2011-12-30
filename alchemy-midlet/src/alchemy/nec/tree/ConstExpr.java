@@ -54,7 +54,7 @@ public class ConstExpr extends Expr {
 		}
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitConst(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitConst(this, data);
 	}
 }

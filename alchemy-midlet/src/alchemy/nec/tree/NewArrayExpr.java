@@ -18,7 +18,7 @@ public class NewArrayExpr extends Expr {
 		return type;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitNewArray(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitNewArray(this, data);
 	}
 }

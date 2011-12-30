@@ -34,7 +34,7 @@ public class VarExpr extends Expr {
 		return var.type;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitVar(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitVar(this, data);
 	}
 }

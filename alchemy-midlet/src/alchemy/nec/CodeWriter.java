@@ -122,7 +122,7 @@ class CodeWriter implements ExprVisitor {
 		out.writeShort(objects.indexOf(f.asVar.name));
 	}
 
-	public void visitALen(ALenExpr alen, Object data) {
+	public Object visitALen(ALenExpr alen, Object data) {
 		DataOutputStream out = (DataOutputStream)data;
 		alen.arrayexpr.accept(this, data);
 		try {
@@ -138,9 +138,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitALoad(ALoadExpr aload, Object data) {
+	public Object visitALoad(ALoadExpr aload, Object data) {
 		DataOutputStream out = (DataOutputStream)data;
 		aload.arrayexpr.accept(this, data);
 		aload.indexexpr.accept(this, data);
@@ -157,9 +158,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitAStore(AStoreExpr astore, Object data) {
+	public Object visitAStore(AStoreExpr astore, Object data) {
 		DataOutputStream out = (DataOutputStream)data;
 		astore.arrayexpr.accept(this, data);
 		astore.indexexpr.accept(this, data);
@@ -177,9 +179,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitAssign(AssignExpr assign, Object outobj) {
+	public Object visitAssign(AssignExpr assign, Object outobj) {
 		DataOutputStream out = (DataOutputStream)outobj;
 		assign.expr.accept(this, out);
 		try {
@@ -194,13 +197,14 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
 	private static int[] binops
 			= {'+', '-', '*', '/', '%', 0, '=', Tokenizer.TT_LTLT,
 			Tokenizer.TT_GTGT, Tokenizer.TT_GTGTGT, '&', '|', '^'};
 
-	public void visitBinary(BinaryExpr binary, Object data) {
+	public Object visitBinary(BinaryExpr binary, Object data) {
 		binary.lvalue.accept(this, data);
 		binary.rvalue.accept(this, data);
 		try {
@@ -219,20 +223,23 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitBlock(BlockExpr block, Object out) {
+	public Object visitBlock(BlockExpr block, Object out) {
 		for (Enumeration e = block.exprs.elements(); e.hasMoreElements(); ) {
 			Expr expr = (Expr)e.nextElement();
 			expr.accept(this, out);
 		}
+		return null;
 	}
 
-	public void visitCast(CastExpr cast, Object out) {
+	public Object visitCast(CastExpr cast, Object out) {
 		cast.expr.accept(this, out);
+		return null;
 	}
 
-	public void visitCastPrimitive(CastPrimitiveExpr cast, Object out) {
+	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object out) {
 		cast.expr.accept(this, out);
 		try {
 			((DataOutputStream)out).writeByte(cast.casttype);
@@ -240,9 +247,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitConst(ConstExpr cexpr, Object data) {
+	public Object visitConst(ConstExpr cexpr, Object data) {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			Object value = cexpr.value;
@@ -322,9 +330,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitDiscard(DiscardExpr disc, Object data) {
+	public Object visitDiscard(DiscardExpr disc, Object data) {
 		disc.expr.accept(this, data);
 		try {
 			((DataOutputStream)data).writeByte(0x60); //pop
@@ -332,9 +341,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitFCall(FCallExpr fcall, Object data) {
+	public Object visitFCall(FCallExpr fcall, Object data) {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			fcall.fload.accept(this, data);
@@ -350,9 +360,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitIf(IfExpr ifexpr, Object data) {
+	public Object visitIf(IfExpr ifexpr, Object data) {
 		//  cond;
 		// if? +(ifexpr+3)
 		//  ifexpr;
@@ -405,9 +416,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitNewArray(NewArrayExpr newarray, Object data) {
+	public Object visitNewArray(NewArrayExpr newarray, Object data) {
 		newarray.lengthexpr.accept(this, data);
 		try {
 			DataOutputStream out = (DataOutputStream)data;
@@ -423,13 +435,15 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitNone(NoneExpr none, Object out) {
+	public Object visitNone(NoneExpr none, Object out) {
 		//nothing to write
+		return null;
 	}
 
-	public void visitUnary(UnaryExpr unary, Object data) {
+	public Object visitUnary(UnaryExpr unary, Object data) {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			unary.expr.accept(this, data);
@@ -455,9 +469,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitVar(VarExpr vexpr, Object data) {
+	public Object visitVar(VarExpr vexpr, Object data) {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			if (vexpr.var.index < 8) {
@@ -471,9 +486,10 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 
-	public void visitWhile(WhileExpr wexpr, Object data) {
+	public Object visitWhile(WhileExpr wexpr, Object data) {
 		//calculating sizes
 		FuncComputer fc = new FuncComputer(false);
 		FuncData fdata;
@@ -498,5 +514,6 @@ class CodeWriter implements ExprVisitor {
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());
 		}
+		return null;
 	}
 }

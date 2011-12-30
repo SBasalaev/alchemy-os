@@ -49,30 +49,33 @@ class FuncComputer implements ExprVisitor {
 		return data;
 	}
 
-	public void visitALen(ALenExpr alen, Object data) {
+	public Object visitALen(ALenExpr alen, Object data) {
 		FuncData fdata = (FuncData)data;
 		alen.arrayexpr.accept(this, data);
 		fdata.codesize++;
+		return null;
 	}
 
-	public void visitALoad(ALoadExpr aload, Object data) {
+	public Object visitALoad(ALoadExpr aload, Object data) {
 		FuncData fdata = (FuncData)data;
 		aload.arrayexpr.accept(this, data);
 		aload.indexexpr.accept(this, data);
 		fdata.codesize++;
 		fdata.stackhead--;
+		return null;
 	}
 
-	public void visitAStore(AStoreExpr astore, Object data) {
+	public Object visitAStore(AStoreExpr astore, Object data) {
 		FuncData fdata = (FuncData)data;
 		astore.arrayexpr.accept(this, data);
 		astore.indexexpr.accept(this, data);
 		astore.assignexpr.accept(this, data);
 		fdata.codesize++;
 		fdata.stackhead -= 3;
+		return null;
 	}
 
-	public void visitAssign(AssignExpr assign, Object data) {
+	public Object visitAssign(AssignExpr assign, Object data) {
 		FuncData fdata = (FuncData)data;
 		assign.expr.accept(this, data);
 		if (assign.var.index < 8) {
@@ -81,17 +84,19 @@ class FuncComputer implements ExprVisitor {
 			fdata.codesize += 2;
 		}
 		fdata.stackhead--;
+		return null;
 	}
 
-	public void visitBinary(BinaryExpr binary, Object data) {
+	public Object visitBinary(BinaryExpr binary, Object data) {
 		binary.lvalue.accept(this, data);
 		binary.rvalue.accept(this, data);
 		FuncData fdata = (FuncData)data;
 		fdata.codesize++;
 		fdata.stackhead--;
+		return null;
 	}
 
-	public void visitBlock(BlockExpr block, Object data) {
+	public Object visitBlock(BlockExpr block, Object data) {
 		FuncData fdata = (FuncData)data;
 		if (calcVars)
 		for (int i=0; i < block.locals.size(); i++) {
@@ -105,18 +110,21 @@ class FuncComputer implements ExprVisitor {
 			sub.accept(this, data);
 		}
 		fdata.localcount -= block.locals.size();
+		return null;
 	}
 
-	public void visitCast(CastExpr cast, Object data) {
+	public Object visitCast(CastExpr cast, Object data) {
 		cast.expr.accept(this, data);
+		return null;
 	}
 
-	public void visitCastPrimitive(CastPrimitiveExpr cast, Object data) {
+	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object data) {
 		cast.expr.accept(this, data);
 		((FuncData)data).codesize++;
+		return null;
 	}
 
-	public void visitConst(ConstExpr cexpr, Object data) {
+	public Object visitConst(ConstExpr cexpr, Object data) {
 		FuncData fdata = (FuncData)data;
 		Object value = cexpr.value;
 		boolean inline = false;
@@ -156,16 +164,18 @@ class FuncComputer implements ExprVisitor {
 		}
 		fdata.stackhead++;
 		fdata.updateMax();
+		return null;
 	}
 
-	public void visitDiscard(DiscardExpr disc, Object data) {
+	public Object visitDiscard(DiscardExpr disc, Object data) {
 		disc.expr.accept(this, data);
 		FuncData fdata = (FuncData)data;
 		fdata.codesize++;
 		fdata.stackhead--;
+		return null;
 	}
 
-	public void visitFCall(FCallExpr fcall, Object data) {
+	public Object visitFCall(FCallExpr fcall, Object data) {
 		fcall.fload.accept(this, data);
 		for (int i=0; i<fcall.args.length; i++) {
 			fcall.args[i].accept(this, data);
@@ -176,9 +186,10 @@ class FuncComputer implements ExprVisitor {
 		if (fcall.rettype().equals(BuiltinType.typeNone)) {
 			fdata.stackhead--;
 		}
+		return null;
 	}
 
-	public void visitIf(IfExpr ifexpr, Object data) {
+	public Object visitIf(IfExpr ifexpr, Object data) {
 		FuncData fdata = (FuncData)data;
 		ifexpr.condition.accept(this, data);
 		fdata.codesize += 3;
@@ -186,18 +197,21 @@ class FuncComputer implements ExprVisitor {
 		ifexpr.ifexpr.accept(this, data);
 		fdata.codesize += 3;
 		ifexpr.elseexpr.accept(this, data);
+		return null;
 	}
 
-	public void visitNewArray(NewArrayExpr newarray, Object data) {
+	public Object visitNewArray(NewArrayExpr newarray, Object data) {
 		FuncData fdata = (FuncData)data;
 		newarray.lengthexpr.accept(this, data);
 		fdata.codesize++;
+		return null;
 	}
 
-	public void visitNone(NoneExpr none, Object data) {
+	public Object visitNone(NoneExpr none, Object data) {
+		return null;
 	}
 
-	public void visitUnary(UnaryExpr unary, Object data) {
+	public Object visitUnary(UnaryExpr unary, Object data) {
 		FuncData fdata = (FuncData)data;
 		unary.expr.accept(this, data);
 		if (unary.operator == '!') {
@@ -209,9 +223,10 @@ class FuncComputer implements ExprVisitor {
 		} else {
 			fdata.codesize++;
 		}
+		return null;
 	}
 
-	public void visitVar(VarExpr vexpr, Object data) {
+	public Object visitVar(VarExpr vexpr, Object data) {
 		FuncData fdata = (FuncData)data;
 		if (vexpr.var.index < 8) {
 			fdata.codesize++;
@@ -220,15 +235,17 @@ class FuncComputer implements ExprVisitor {
 		}
 		fdata.stackhead++;
 		fdata.updateMax();
+		return null;
 	}
 
-	public void visitWhile(WhileExpr wexpr, Object data) {
+	public Object visitWhile(WhileExpr wexpr, Object data) {
 		FuncData fdata = (FuncData)data;
 		wexpr.condition.accept(this, data);
 		fdata.codesize += 3; //ifeq
 		fdata.stackhead--;
 		wexpr.body.accept(this, data);
 		fdata.codesize += 3; //goto
+		return null;
 	}
 }
 

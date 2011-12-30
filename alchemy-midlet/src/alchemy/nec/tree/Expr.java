@@ -27,5 +27,5 @@ public abstract class Expr {
 	/** Type that this expression returns. */
 	public abstract Type rettype();
 
-	public abstract void accept(ExprVisitor v, Object data);
+	public abstract Object accept(ExprVisitor v, Object data);
 }

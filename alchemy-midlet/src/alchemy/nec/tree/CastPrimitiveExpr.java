@@ -68,7 +68,7 @@ public class CastPrimitiveExpr extends Expr {
 		}
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitCastPrimitive(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitCastPrimitive(this, data);
 	}
 }

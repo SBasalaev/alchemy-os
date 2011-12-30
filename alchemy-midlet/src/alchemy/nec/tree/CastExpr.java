@@ -37,7 +37,7 @@ public class CastExpr extends Expr {
 		return toType;
 	}
 
-	public void accept(ExprVisitor v, Object data) {
-		v.visitCast(this, data);
+	public Object accept(ExprVisitor v, Object data) {
+		return v.visitCast(this, data);
 	}
 }
