@@ -14,8 +14,7 @@ def main(args: Array): Int {
   } else {
     var i = 0
     while (i < len) {
-      var dirname = to_str(args[i])
-      mkdir(to_file(dirname))
+      mkdir(to_str(args[i]))
       i = i+1
     }
     0

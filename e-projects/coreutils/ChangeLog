@@ -1,8 +1,11 @@
 	== Alchemy coreutils 0.4 ==
 
-2011-10-23  Sergey Basalaev <sbasalaev@gmail.com>
+2011-12-30  Sergey Basalaev <sbasalaev@gmail.com>
 
 	* *.e: port to libcore 2.0
+
+2011-10-23  Sergey Basalaev <sbasalaev@gmail.com>
+
 	* cat: support multiple files on command line
 	* cp, mv: support copy/move of multiple files into directory
 	* ls: support multiple arguments and ordinary files

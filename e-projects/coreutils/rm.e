@@ -14,8 +14,7 @@ def main(args: Array): Int {
   } else {
     var i = 0
     while (i < len) {
-      var f = to_file(to_str(args[i]))
-      fremove(f)
+      fremove(to_str(args[i]))
       i = i+1
     }
     0

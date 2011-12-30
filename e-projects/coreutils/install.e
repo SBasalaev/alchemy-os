@@ -15,15 +15,15 @@ def main(args: Array): Int {
     fprintln(stderr(), "install: missing destination")
     1
   } else {
-    var destdir = to_file(to_str(args[len-1]))
+    var destdir = to_str(args[len-1])
     var i = 0
     while (i < len-1) {
-      var src = to_file(to_str(args[i]))
+      var src = to_str(args[i])
       var path = new_sb()
       sb_append(path, destdir)
       sb_addch(path, '/')
-      sb_append(path, fname(src))
-      var dest = to_file(to_str(path))
+      sb_append(path, pathfile(src))
+      var dest = to_str(path)
       fcopy(src, dest)
       set_read(dest, can_read(src))
       set_write(dest, can_write(src))

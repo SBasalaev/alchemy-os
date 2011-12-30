@@ -6,7 +6,7 @@
 use "io"
 use "string"
 
-def _ls(f: File) {
+def _ls(f: String) {
   if (is_dir(f)) {
     var list = flist(f)
     var i = 0
@@ -15,7 +15,7 @@ def _ls(f: File) {
       i = i + 1
     }
   } else {
-    println(fname(f))
+    println(pathfile(f))
   }
 }
 
@@ -25,7 +25,7 @@ def main(args: Array) {
   } else {
     var i = 0
     while (i < args.len) {
-      _ls(to_file(to_str(args[i])))
+      _ls(to_str(args[i]))
       i = i+1
     }
   }

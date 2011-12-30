@@ -30,10 +30,9 @@ def main(args: Array) {
   // setting attributes
   i = 0
   while (i < len) {
-    var arg = to_str(args[i])
-    var first = strchr(arg,0)
+    var file = to_str(args[i])
+    var first = strchr(file,0)
     if (first != '-' && first != '+') {
-      var file = to_file(arg)
       if (readflag==1) set_read(file,true)
       else if (readflag==-1) set_read(file,false)
       if (writeflag==1) set_write(file,true)

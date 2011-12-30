@@ -15,22 +15,22 @@ def main(args: Array): Int {
     fprintln(stderr(), "cp: missing destination")
     1
   } else {
-    var dest = to_file(to_str(args[len-1]))
+    var dest = to_str(args[len-1])
     if (is_dir(dest)) {
       var i = 0
       while (i < len-1) {
-        var srcfile = to_file(to_str(args[i]))
+        var srcfile = to_str(args[i])
         var path = new_sb()
         sb_append(path, dest)
         sb_addch(path, '/')
-        sb_append(path, fname(srcfile))
-        var destfile = to_file(to_str(path))
+        sb_append(path, pathfile(srcfile))
+        var destfile = to_str(path)
         fcopy(srcfile, destfile)
         i = i+1
       }
       0
     } else if (len == 2) {
-      var src = to_file(to_str(args[0]))
+      var src = to_str(args[0])
       fcopy(src, dest)
       0
     } else {

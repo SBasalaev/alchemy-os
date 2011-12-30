@@ -22,8 +22,7 @@ def main(args: Array) {
     _cat(buf)
   } else while (count > 0) {
     count = count-1
-    var f = to_str(args[0])
-    setin(fopen_r(to_file(f)))
+    setin(fopen_r(to_str(args[0])))
     _cat(buf)
   }
 }
