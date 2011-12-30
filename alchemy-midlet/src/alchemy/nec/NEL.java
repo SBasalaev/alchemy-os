@@ -46,7 +46,7 @@ public class NEL extends NativeApp {
 	static private final int SUPPORTED = 0x0101;
 
 	static private final String VERSION =
-			I18N._("Native E linker version 1.1");
+			I18N._("Native E linker version 1.2");
 
 	static private final String HELP =
 			"Usage: el [options] <input>...\nOptions:\n" +
@@ -102,17 +102,17 @@ public class NEL extends NativeApp {
 			IO.println(c.stderr, I18N._("No files to process"));
 			return 1;
 		}
-		//loading symbols
 		try {
+			//loading symbols from libraries
 			Hashtable symbols = new Hashtable();
+			Vector libinfos = new Vector();
 			for (int li=0; li < linklibs.size(); li++) {
 				String libname = linklibs.elementAt(li).toString();
 				LibInfo info = loadLibInfo(c, libname);
-				info.index = li;
+				libinfos.addElement(info);
 				for (Enumeration e = info.symbols.elements(); e.hasMoreElements();) {
 					symbols.put(e.nextElement(), info);
 				}
-				linklibs.setElementAt(info.soname, li);
 			}
 			//processing objects
 			Vector pool = new Vector();
@@ -154,7 +154,12 @@ public class NEL extends NativeApp {
 							int index = reloctable[offset+data.readUnsignedShort()];
 							String id = pool.elementAt(index).toString();
 							LibInfo info = (LibInfo)symbols.get(id);
-							obj = info != null ? new ExFunc(id, info) : new NELFunc(id);
+							if (info != null) {
+								obj = new ExFunc(id, info);
+								info.used = true;
+							} else {
+								obj = new NELFunc(id);
+							}
 							break;
 						}
 						case 'E':
@@ -228,6 +233,17 @@ public class NEL extends NativeApp {
 					throw new Exception(I18N._("Unresolved symbol: {0}", obj));
 				}
 			}
+			//indexing libraries, throwing out unused
+			int li = 0;
+			while (li < libinfos.size()) {
+				LibInfo info = (LibInfo)libinfos.elementAt(li);
+				if (info.used) {
+					info.index = li;
+					li++;
+				} else {
+					libinfos.removeElementAt(li);
+				}
+			}
 			//writing output
 			File outfile = c.toFile(outname);
 			DataOutputStream out = new DataOutputStream(c.fs().write(outfile));
@@ -238,9 +254,9 @@ public class NEL extends NativeApp {
 			} else {
 				out.writeByte(1);
 			}
-			out.writeShort(linklibs.size());
-			for (int i=0; i < linklibs.size(); i++) {
-				out.writeUTF(linklibs.elementAt(i).toString());
+			out.writeShort(libinfos.size());
+			for (int i=0; i < libinfos.size(); i++) {
+				out.writeUTF(((LibInfo)libinfos.elementAt(i)).soname);
 			}
 			out.writeShort(pool.size());
 			for (Enumeration e = pool.elements(); e.hasMoreElements(); ) {
@@ -413,6 +429,8 @@ class LibInfo {
 	Vector symbols;
 	/** Index assigned to this library by linker. */
 	int index;
+	/** Are symbols from this library actually used? */
+	boolean used;
 }
 
 /** Unknown function. */
