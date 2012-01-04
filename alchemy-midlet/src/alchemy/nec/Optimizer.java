@@ -274,11 +274,7 @@ class Optimizer implements ExprVisitor {
 	}
 
 	public Object visitCast(CastExpr cast, Object data) {
-		cast.expr = (Expr)cast.expr.accept(this, data);
-		if (cast.expr instanceof CastExpr) {
-			return new CastExpr(cast.toType, ((CastExpr)cast.expr).expr);
-		}
-		return cast;
+		return (Expr)cast.expr.accept(this, data);
 	}
 
 	/**
@@ -349,10 +345,31 @@ class Optimizer implements ExprVisitor {
 		return disc;
 	}
 
+	/**
+	 * CF:
+	 *   to_str(const)   =>   "const"
+	 *   strcat("str1", "str2")   =>   "str1str2"
+	 */
 	public Object visitFCall(FCallExpr fcall, Object data) {
 		fcall.fload = (Expr)fcall.fload.accept(this, data);
 		for (int i=0; i<fcall.args.length; i++) {
 			fcall.args[i] = (Expr)fcall.args[i].accept(this, data);
+		}
+		if (fcall.fload instanceof ConstExpr) {
+			Func f = (Func)((ConstExpr)fcall.fload).value;
+			if (f.asVar.name.equals("to_str")
+			 && fcall.args[0] instanceof ConstExpr) {
+				Object cnst = ((ConstExpr)fcall.args[0]).value;
+				if (cnst == null || cnst.getClass() != Func.class) {
+					return new ConstExpr(String.valueOf(cnst));
+				}
+			} else if (f.asVar.name.equals("strcat")
+			        && fcall.args[0] instanceof ConstExpr
+					&& fcall.args[1] instanceof ConstExpr) {
+				Object c1 = ((ConstExpr)fcall.args[0]).value;
+				Object c2 = ((ConstExpr)fcall.args[1]).value;
+				return new ConstExpr(String.valueOf(c1).concat(String.valueOf(c2)));
+			}
 		}
 		return fcall;
 	}
