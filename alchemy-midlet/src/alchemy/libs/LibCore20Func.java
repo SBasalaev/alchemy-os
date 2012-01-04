@@ -362,7 +362,11 @@ class LibCore20Func extends Function {
 				return stream;
 			}
 			case 112: // loadlibrary(name: String): Library
-				return c.loadLibrary((String)args[0]);
+				try {
+					return c.loadLibrary((String)args[0]);
+				} catch (Exception e) {
+					return null;
+				}
 			case 113: // loadfunc(lib: Library, sig: String): Any
 				return ((Library)args[0]).getFunc((String)args[1]);
 			case 114: {// clone(struct: Any): Any

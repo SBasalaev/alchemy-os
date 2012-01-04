@@ -15,18 +15,25 @@ type Writer {
   enc: WriteChar
 }
 
-def readch(r: Reader): Int;
-def readstr(r: Reader, len: Int): String;
-def readca(r: Reader, ca: CArray, ofs: Int, len: Int): Int;
-def readline(r: Reader): String;
+def freadch(r: Reader): Int;
+def freadstr(r: Reader, len: Int): String;
+def freadca(r: Reader, ca: CArray, ofs: Int, len: Int): Int;
+def freadline(r: Reader): String;
 
-def writech(w: Writer, ch: Int);
-def writestr(w: Writer, str: String);
-def writeca(w: Writer, ca: CArray, ofs: Int, len: Int);
+def fwritech(w: Writer, ch: Int);
+def fwritestr(w: Writer, str: String);
+def fwriteca(w: Writer, ca: CArray, ofs: Int, len: Int);
 
+/* UTF-8 encoding */
 def utfreader(in: IStream): Reader;
 def utfwriter(out: OStream): Writer;
 
-/* UTF-8 encoding */
-def readchUTF(in: IStream): Int;
-def writechUTF(out: OStream, ch: Int);
+def readch_utf8(in: IStream): Int;
+def writech_utf8(out: OStream, ch: Int);
+
+/* ISO 8859-1 encoding. */
+def latin1reader(in: IStream): Reader;
+def latin1writer(out: OStream): Writer;
+
+def readch_latin1(in: IStream): Int;
+def writech_latin1(out: OStream, ch: Int);

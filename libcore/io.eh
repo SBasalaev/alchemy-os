@@ -18,7 +18,7 @@ def fskip(s: IStream, n: Long): Long;
 
 def read(): Int;
 def readarray(buf: BArray, ofs: Int, len: Int): Int;
-def skip(n: Long);
+def skip(n: Long): Long;
 
 def fwrite(s: OStream, b: Int);
 def fwritearray(s: OStream, buf: BArray, ofs: Int, len: Int);
