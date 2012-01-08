@@ -10,37 +10,45 @@ import alchemy.nec.tree.*;
 class Optimizer implements ExprVisitor {
 
 	public void visitUnit(Unit u) {
+		//visiting all functions
 		for (int i=0; i<u.funcs.size(); i++) {
 			visitFunc((Func)u.funcs.elementAt(i));
+		}
+		//DCE: removing unused functions
+		for (int i=u.funcs.size()-1; i>=0; i--) {
+			Func f = (Func)u.funcs.elementAt(i);
+			if (f.hits == 0) {
+				u.funcs.removeElementAt(i);
+			}
 		}
 	}
 
 	public void visitFunc(Func f) {
 		if (f.body != null) {
-			f.body = (Expr)f.body.accept(this, null);
+			f.body = (Expr)f.body.accept(this, f);
 		}
 	}
 
-	public Object visitALen(ALenExpr alen, Object data) {
-		alen.arrayexpr = (Expr)alen.arrayexpr.accept(this, data);
+	public Object visitALen(ALenExpr alen, Object scope) {
+		alen.arrayexpr = (Expr)alen.arrayexpr.accept(this, scope);
 		return alen;
 	}
 
-	public Object visitALoad(ALoadExpr aload, Object data) {
-		aload.arrayexpr = (Expr)aload.arrayexpr.accept(this, data);
-		aload.indexexpr = (Expr)aload.indexexpr.accept(this, data);
+	public Object visitALoad(ALoadExpr aload, Object scope) {
+		aload.arrayexpr = (Expr)aload.arrayexpr.accept(this, scope);
+		aload.indexexpr = (Expr)aload.indexexpr.accept(this, scope);
 		return aload;
 	}
 
-	public Object visitAStore(AStoreExpr astore, Object data) {
-		astore.arrayexpr = (Expr)astore.arrayexpr.accept(this, data);
-		astore.indexexpr = (Expr)astore.indexexpr.accept(this, data);
-		astore.assignexpr = (Expr)astore.assignexpr.accept(this, data);
+	public Object visitAStore(AStoreExpr astore, Object scope) {
+		astore.arrayexpr = (Expr)astore.arrayexpr.accept(this, scope);
+		astore.indexexpr = (Expr)astore.indexexpr.accept(this, scope);
+		astore.assignexpr = (Expr)astore.assignexpr.accept(this, scope);
 		return astore;
 	}
 
-	public Object visitAssign(AssignExpr assign, Object data) {
-		assign.expr = (Expr)assign.expr.accept(this, data);
+	public Object visitAssign(AssignExpr assign, Object scope) {
+		assign.expr = (Expr)assign.expr.accept(this, scope);
 		return assign;
 	}
 
@@ -48,9 +56,9 @@ class Optimizer implements ExprVisitor {
 	 * CF:
 	 *   const op const   =>   const
 	 */
-	public Object visitBinary(BinaryExpr binary, Object data) {
-		binary.lvalue = (Expr)binary.lvalue.accept(this, data);
-		binary.rvalue = (Expr)binary.rvalue.accept(this, data);
+	public Object visitBinary(BinaryExpr binary, Object scope) {
+		binary.lvalue = (Expr)binary.lvalue.accept(this, scope);
+		binary.rvalue = (Expr)binary.rvalue.accept(this, scope);
 		if (binary.lvalue instanceof ConstExpr && binary.rvalue instanceof ConstExpr) {
 			Object lval = ((ConstExpr)binary.lvalue).value;
 			Object rval = ((ConstExpr)binary.rvalue).value;
@@ -248,11 +256,11 @@ class Optimizer implements ExprVisitor {
 	 *   { expr }   =>   expr
 	 *   {}   =>   none
 	 */
-	public Object visitBlock(BlockExpr block, Object data) {
+	public Object visitBlock(BlockExpr block, Object scope) {
 		int i=0;
 		while (i < block.exprs.size()) {
 			Expr ex = (Expr)block.exprs.elementAt(i);
-			ex = (Expr)ex.accept(this, data);
+			ex = (Expr)ex.accept(this, block);
 			if (ex instanceof NoneExpr) {
 				block.exprs.removeElementAt(i);
 			} else {
@@ -273,16 +281,16 @@ class Optimizer implements ExprVisitor {
 		}
 	}
 
-	public Object visitCast(CastExpr cast, Object data) {
-		return (Expr)cast.expr.accept(this, data);
+	public Object visitCast(CastExpr cast, Object scope) {
+		return cast.expr.accept(this, scope);
 	}
 
 	/**
 	 * CF:
 	 *   cast(type) number   =>   castednumber
 	 */
-	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object data) {
-		cast.expr.accept(this, data);
+	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object scope) {
+		cast.expr.accept(this, scope);
 		if (cast.expr instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)cast.expr).value;
 			switch (cast.casttype) {
@@ -328,7 +336,7 @@ class Optimizer implements ExprVisitor {
 		return cast;
 	}
 
-	public Object visitConst(ConstExpr cexpr, Object data) {
+	public Object visitConst(ConstExpr cexpr, Object scope) {
 		return cexpr;
 	}
 
@@ -337,8 +345,8 @@ class Optimizer implements ExprVisitor {
 	 *   const;   =>   none
 	 *   var;     =>   none
 	 */
-	public Object visitDiscard(DiscardExpr disc, Object data) {
-		disc.expr = (Expr)disc.expr.accept(this, data);
+	public Object visitDiscard(DiscardExpr disc, Object scope) {
+		disc.expr = (Expr)disc.expr.accept(this, scope);
 		if (disc.expr instanceof ConstExpr || disc.expr instanceof VarExpr) {
 			return new NoneExpr();
 		}
@@ -349,11 +357,12 @@ class Optimizer implements ExprVisitor {
 	 * CF:
 	 *   to_str(const)   =>   "const"
 	 *   strcat("str1", "str2")   =>   "str1str2"
+	 *   remove calls to constant/empty functions
 	 */
-	public Object visitFCall(FCallExpr fcall, Object data) {
-		fcall.fload = (Expr)fcall.fload.accept(this, data);
+	public Object visitFCall(FCallExpr fcall, Object scope) {
+		fcall.fload = (Expr)fcall.fload.accept(this, scope);
 		for (int i=0; i<fcall.args.length; i++) {
-			fcall.args[i] = (Expr)fcall.args[i].accept(this, data);
+			fcall.args[i] = (Expr)fcall.args[i].accept(this, scope);
 		}
 		if (fcall.fload instanceof ConstExpr) {
 			Func f = (Func)((ConstExpr)fcall.fload).value;
@@ -361,6 +370,7 @@ class Optimizer implements ExprVisitor {
 			 && fcall.args[0] instanceof ConstExpr) {
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
 				if (cnst == null || cnst.getClass() != Func.class) {
+					f.hits--;
 					return new ConstExpr(String.valueOf(cnst));
 				}
 			} else if (f.asVar.name.equals("strcat")
@@ -368,7 +378,18 @@ class Optimizer implements ExprVisitor {
 					&& fcall.args[1] instanceof ConstExpr) {
 				Object c1 = ((ConstExpr)fcall.args[0]).value;
 				Object c2 = ((ConstExpr)fcall.args[1]).value;
+				f.hits--;
 				return new ConstExpr(String.valueOf(c1).concat(String.valueOf(c2)));
+			} else if (f.body instanceof ConstExpr || f.body instanceof NoneExpr) {
+				// we don't need to call function but we still
+				// need to calculate its arguments
+				f.hits--;
+				BlockExpr block = new BlockExpr((Scope)scope);
+				for (int i=0; i<fcall.args.length; i++) {
+					block.exprs.addElement(new DiscardExpr(fcall.args[i]));
+				}
+				block.exprs.addElement(f.body);
+				return block.accept(this, scope);
 			}
 		}
 		return fcall;
@@ -382,11 +403,11 @@ class Optimizer implements ExprVisitor {
 	 *   if (if? true else false) expr1 else expr2  =>  if? expr1 else expr2
 	 *   // the latter is common due to implementation of comparison
 	 */
-	public Object visitIf(IfExpr expr, Object data) {
+	public Object visitIf(IfExpr expr, Object scope) {
 		//optimize children
-		expr.condition = (Expr)expr.condition.accept(this, data);
-		expr.ifexpr = (Expr)expr.ifexpr.accept(this, data);
-		expr.elseexpr = (Expr)expr.elseexpr.accept(this, data);
+		expr.condition = (Expr)expr.condition.accept(this, scope);
+		expr.ifexpr = (Expr)expr.ifexpr.accept(this, scope);
+		expr.elseexpr = (Expr)expr.elseexpr.accept(this, scope);
 		//test condition
 		if (expr.condition instanceof ConstExpr) {
 			Object cond = ((ConstExpr)expr.condition).value;
@@ -465,12 +486,12 @@ class Optimizer implements ExprVisitor {
 		return expr;
 	}
 
-	public Object visitNewArray(NewArrayExpr newarray, Object data) {
-		newarray.lengthexpr = (Expr)newarray.lengthexpr.accept(this, data);
+	public Object visitNewArray(NewArrayExpr newarray, Object scope) {
+		newarray.lengthexpr = (Expr)newarray.lengthexpr.accept(this, scope);
 		return newarray;
 	}
 
-	public Object visitNone(NoneExpr none, Object data) {
+	public Object visitNone(NoneExpr none, Object scope) {
 		return none;
 	}
 
@@ -478,8 +499,8 @@ class Optimizer implements ExprVisitor {
 	 *   !const   =>   const
 	 *   -const   =>   const
 	 */
-	public Object visitUnary(UnaryExpr unary, Object data) {
-		unary.expr = (Expr)unary.expr.accept(this, data);
+	public Object visitUnary(UnaryExpr unary, Object scope) {
+		unary.expr = (Expr)unary.expr.accept(this, scope);
 		if (unary.expr instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)unary.expr).value;
 			if (unary.operator == '!') {
@@ -503,7 +524,7 @@ class Optimizer implements ExprVisitor {
 		return unary;
 	}
 
-	public Object visitVar(VarExpr vexpr, Object data) {
+	public Object visitVar(VarExpr vexpr, Object scope) {
 		return vexpr;
 	}
 
@@ -511,10 +532,10 @@ class Optimizer implements ExprVisitor {
 	 * DCE:
 	 *  while (false) expr;   =>   none
 	 */
-	public Object visitWhile(WhileExpr wexpr, Object data) {
+	public Object visitWhile(WhileExpr wexpr, Object scope) {
 		//optimize children
-		wexpr.condition = (Expr)wexpr.condition.accept(this, data);
-		wexpr.body = (Expr)wexpr.body.accept(this, data);
+		wexpr.condition = (Expr)wexpr.condition.accept(this, scope);
+		wexpr.body = (Expr)wexpr.body.accept(this, scope);
 		//test condition
 		if (wexpr.condition instanceof ConstExpr) {
 			ConstExpr boolConst = (ConstExpr)wexpr.condition;

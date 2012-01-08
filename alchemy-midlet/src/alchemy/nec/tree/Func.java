@@ -34,9 +34,12 @@ public class Func implements Scope {
 	public Expr body;
 	/** Local variables. */
 	public Vector locals;
-	/** Determines whether this function is in use. */
-	public boolean used = false;
-
+	/** Number of times the function is used.
+	 * Public functions initially get 1.
+	 * Private and external functions initially get 0.
+	 */
+	public int hits;
+	
 	public Func(Unit u) {
 		this.unit = u;
 	}

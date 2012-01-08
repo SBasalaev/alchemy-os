@@ -75,10 +75,10 @@ public class Parser {
 			IO.println(c.stderr, I18N._("I/O error: {0}", ioe));
 			return null;
 		}
-		//removing unused functions
+		//removing unused imports
 		for (int i=unit.funcs.size()-1; i>=0; i--) {
 			Func f = (Func)unit.funcs.elementAt(i);
-			if (f.body == null && !f.used) {
+			if (f.body == null && f.hits == 0) {
 				unit.funcs.removeElementAt(i);
 			}
 		}
@@ -207,6 +207,8 @@ public class Parser {
 									}
 									Type rettype = ((FunctionType)fdef.asVar.type).rettype;
 									fdef.body = cast(body, rettype);
+									// if exported increase hits
+									if (fdef.asVar.name.charAt(0) != '_') fdef.hits++;
 									break;
 								default:
 									throw new ParseException(I18N._("{0} unexpected here", t));
@@ -435,11 +437,11 @@ public class Parser {
 					// string concatenation, does strcat(left, to_str(right))
 					if (!right.rettype().equals(BuiltinType.typeString)) {
 						Func to_str = unit.getFunc("to_str");
-						to_str.used = true;
+						to_str.hits++;
 						right = new FCallExpr(new ConstExpr(to_str), new Expr[] { cast(right, BuiltinType.typeAny) });
 					}
 					Func strcat = unit.getFunc("strcat");
-					strcat.used = true;
+					strcat.hits++;
 					newexpr = new FCallExpr(new ConstExpr(strcat), new Expr[] { left, right });
 				} else {
 					Type btype = binaryCastType(ltype, rtype);
@@ -706,7 +708,7 @@ public class Parser {
 							return new VarExpr(var);
 						} else {
 							Func f = unit.getFunc(str);
-							f.used = true;
+							f.hits++;
 							return new ConstExpr(f);
 						}
 					}
