@@ -23,7 +23,6 @@ import alchemy.l10n.I18N;
 import alchemy.midlet.AlchemyMIDlet;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
-import java.io.OutputStream;
 import javax.microedition.lcdui.Command;
 
 /**

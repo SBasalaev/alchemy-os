@@ -25,7 +25,6 @@ import alchemy.fs.File;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * Alchemy core runtime library.
@@ -65,6 +64,7 @@ public class LibCore20 extends Library {
 				table.put(name, new LibCore20Func(name, index));
 				index++;
 			}
+			r.close();
 		}
 	}
 

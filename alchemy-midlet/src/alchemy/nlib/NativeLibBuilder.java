@@ -29,7 +29,7 @@ import java.io.InputStream;
 /**
  * Builder for native libraries.
  * Native library starts with magic '#@' which
- * follows class name.
+ * is followed by class name.
  *
  * @author Sergey Basalaev
  */

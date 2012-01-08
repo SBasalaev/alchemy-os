@@ -25,7 +25,6 @@ import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Vector;
 import alchemy.apps.ConsoleForm.ConsoleInputStream;
 import alchemy.l10n.I18N;

@@ -21,7 +21,6 @@ package alchemy.libs;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
-import alchemy.fs.File;
 import alchemy.l10n.I18N;
 import alchemy.util.IO;
 import java.io.IOException;
@@ -41,8 +40,9 @@ import javax.microedition.io.Connector;
  */
 class LibCore20Func extends Function {
 
+	private static final Random rnd = new Random(0);
+	
 	private final int index;
-	private Random rnd = new Random(0);
 
 	public LibCore20Func(String name, int index) {
 		super(name);
