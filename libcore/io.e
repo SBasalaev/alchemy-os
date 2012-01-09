@@ -3,7 +3,7 @@ use "string"
 
 def read(): Int = fread(stdin());
 def readarray(buf: BArray, ofs: Int, len: Int): Int = freadarray(stdin(), buf, ofs, len);
-def skip(n: Long) = fskip(stdin(), n);
+def skip(n: Long): Long = fskip(stdin(), n);
 
 def write(b: Int) = fwrite(stdout(), b);
 def writearray(buf: BArray, ofs: Int, len: Int) = fwritearray(stdout(), buf, ofs, len);

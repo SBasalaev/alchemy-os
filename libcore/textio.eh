@@ -15,6 +15,9 @@ type Writer {
   enc: WriteChar
 }
 
+def new_reader(in: IStream, dec: ReadChar): Reader;
+def new_writer(out: OStream, enc: WriteChar): Writer;
+
 def freadch(r: Reader): Int;
 def freadstr(r: Reader, len: Int): String;
 def freadca(r: Reader, ca: CArray, ofs: Int, len: Int): Int;

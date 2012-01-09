@@ -7,6 +7,20 @@ use "textio.eh"
 use "string"
 use "sys"
 
+def new_reader(in: IStream, dec: ReadChar): Reader {
+  var r = new Reader()
+  r.in = in
+  r.dec = dec
+  r
+}
+
+def new_writer(out: OStream, enc: WriteChar): Writer {
+  var w = new Writer()
+  w.out = out
+  w.enc = enc
+  w
+}
+
 def freadch(r: Reader): Int = r.dec(r.in)
 
 def freadstr(r: Reader, len: Int): String {
