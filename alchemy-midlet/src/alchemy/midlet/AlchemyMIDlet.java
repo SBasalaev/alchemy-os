@@ -20,6 +20,7 @@ package alchemy.midlet;
 
 import alchemy.core.Art;
 import alchemy.core.Context;
+import alchemy.core.ContextListener;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
 import alchemy.l10n.I18N;
@@ -32,7 +33,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
  * Alchemy MIDlet.
  * @author Sergey Basalaev
  */
-public class AlchemyMIDlet extends MIDlet implements CommandListener {
+public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextListener {
 
 	private final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 1);
 	private final Command cmdStart = new Command(I18N._("Start"), Command.OK, 1);
@@ -87,8 +88,17 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 		if (c == cmdQuit) {
 			destroyApp(true);
 		} else if (c == cmdStart) {
-			new FinalizerThread().start();
+			runtime.rootContext().addContextListener(this);
+			try {
+				runtime.rootContext().start("terminal", new String[] {"sh"});
+			} catch (Throwable t) {
+				kernelPanic(t.toString());
+			}
 		}
+	}
+
+	public void contextEnded(Context c) {
+			destroyApp(true);
 	}
 
 	private void kernelPanic(String message) {
@@ -99,22 +109,5 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 		alert.setTimeout(Alert.FOREVER);
 		alert.setType(AlertType.ERROR);
 		Display.getDisplay(this).setCurrent(alert);
-	}
-
-	/** A thread that closes MIDlet after root context has finished. */
-	private class FinalizerThread extends Thread {
-
-		public FinalizerThread() {
-			super("FinalizerThread");
-		}
-
-		public void run() {
-			try {
-				runtime.rootContext().startAndWait("terminal", new String[] {"sh"});
-				destroyApp(true);
-			} catch (Throwable t) {
-				kernelPanic(t.toString());
-			}
-		}
 	}
 }

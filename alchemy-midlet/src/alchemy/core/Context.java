@@ -163,7 +163,9 @@ public class Context {
 	/** Error thrown by a program. */
 	private Throwable error;
 	/** Streams opened by process. */
-	private Vector streams = new Vector();
+	private Vector streams;
+	/** Listeners of this context. */
+	private Vector listeners;
 
 	/* CONSTRUCTORS */
 
@@ -245,6 +247,19 @@ public class Context {
 	public int getState() {
 		return state;
 	}
+	
+	/**
+	 * Changes state and notifies listeners.
+	 */
+	private void setState(int state) {
+		this.state = state;
+		if (state == ENDED && listeners != null) {
+			for (Enumeration e = listeners.elements(); e.hasMoreElements(); ) {
+				ContextListener l = (ContextListener)e.nextElement();
+				l.contextEnded(this);
+			}
+		}
+	}
 
 	/**
 	 * Returns program exit code.
@@ -319,7 +334,7 @@ public class Context {
 		Function main = prog.getFunc("main");
 		if (main == null) throw new InstantiationException(I18N._("No 'main' function"));
 		thread = new ContextThread(progname, main, cmdArgs);
-		state = RUNNING;
+		setState(RUNNING);
 		thread.start();
 	}
 
@@ -456,6 +471,7 @@ public class Context {
 	 * @param stream  <code>InputStream</code> or <code>OutputStream</code>
 	 */
 	public void addStream(Object stream) {
+		if (streams == null) streams = new Vector();
 		if ((stream instanceof InputStream) || (stream instanceof OutputStream)) {
 			streams.addElement(stream);
 		}
@@ -468,7 +484,7 @@ public class Context {
 	 * @see #addStream(Object)
 	 */
 	public void removeStream(Object stream) {
-		streams.removeElement(stream);
+		if (streams != null) streams.removeElement(stream);
 	}
 	
 	/**
@@ -493,6 +509,15 @@ public class Context {
 		} else {
 			objects.put(key, value);
 		}
+	}
+	
+	public void addContextListener(ContextListener l) {
+		if (listeners == null) listeners = new Vector();
+		listeners.addElement(l);
+	}
+	
+	public void removeContextListener(ContextListener l) {
+		if (listeners != null) listeners.removeElement(l);
 	}
 
 	/**
@@ -528,20 +553,22 @@ public class Context {
 				error = t;
 				t.printStackTrace();
 			}
-			state = ENDED;
-			for (Enumeration e = streams.elements(); e.hasMoreElements(); ) {
-				Object stream = e.nextElement();
-				if (stream instanceof InputStream) {
-					try {
-						((InputStream)stream).close();
-					} catch (IOException ioe) { }
-				} else if (stream instanceof OutputStream) {
-					try {
-						((OutputStream)stream).flush();
-					} catch (IOException ioe) { }
-					try {
-						((OutputStream)stream).close();
-					} catch (IOException ioe) { }
+			setState(ENDED);
+			if (streams != null) {
+				for (Enumeration e = streams.elements(); e.hasMoreElements(); ) {
+					Object stream = e.nextElement();
+					if (stream instanceof InputStream) {
+						try {
+							((InputStream)stream).close();
+						} catch (IOException ioe) { }
+					} else if (stream instanceof OutputStream) {
+						try {
+							((OutputStream)stream).flush();
+						} catch (IOException ioe) { }
+						try {
+							((OutputStream)stream).close();
+						} catch (IOException ioe) { }
+					}
 				}
 			}
 		}
