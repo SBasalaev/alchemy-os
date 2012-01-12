@@ -50,7 +50,7 @@ public final class Art {
 	}
 
 	/**
-	 * Assotiates given builder with given magic.
+	 * Associates given builder with given magic.
 	 */
 	public void setLibBuilder(short magic, LibBuilder builder) {
 		builders.put(magic, builder);

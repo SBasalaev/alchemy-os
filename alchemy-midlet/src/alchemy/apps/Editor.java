@@ -21,7 +21,7 @@ package alchemy.apps;
 import alchemy.core.Context;
 import alchemy.fs.File;
 import alchemy.l10n.I18N;
-import alchemy.midlet.AlchemyMIDlet;
+import alchemy.midlet.UIServer;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import java.io.InputStream;
@@ -79,7 +79,7 @@ public class Editor extends NativeApp {
 			IO.println(c.stderr, e);
 			return 1;
 		}
-		AlchemyMIDlet.getInstance().pushScreen(box);
+		UIServer.pushScreen(box);
 		try {
 			while (true) {
 				synchronized (l) { l.wait(); }
@@ -89,14 +89,14 @@ public class Editor extends NativeApp {
 					byte[] data = IO.utfEncode(box.getString());
 					out.write(data);
 					out.close();
-					AlchemyMIDlet.getInstance().alert(I18N._("Editor"), I18N._("File saved"), AlertType.INFO);
+					UIServer.alert(I18N._("Editor"), I18N._("File saved"), AlertType.INFO);
 				}
 			}
 		} catch (Exception e) {
 			IO.println(c.stderr, e);
 			return 1;
 		} finally {
-			AlchemyMIDlet.getInstance().popScreen();
+			UIServer.popScreen();
 		}
 	}
 }

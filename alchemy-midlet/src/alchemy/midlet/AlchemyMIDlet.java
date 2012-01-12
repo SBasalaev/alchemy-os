@@ -24,7 +24,6 @@ import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
 import alchemy.l10n.I18N;
 import alchemy.nlib.NativeLibBuilder;
-import java.util.Stack;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -35,26 +34,12 @@ import javax.microedition.midlet.MIDletStateChangeException;
  */
 public class AlchemyMIDlet extends MIDlet implements CommandListener {
 
-	private static AlchemyMIDlet instance;
-
-	/** Returns MIDlet instance. */
-	public static AlchemyMIDlet getInstance() {
-		return instance;
-	}
-
-	private Display display;
-
 	private final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 1);
 	private final Command cmdStart = new Command(I18N._("Start"), Command.OK, 1);
 	private Art runtime;
 
-	private Displayable current;
-
-	private Stack screens = new Stack();
-
 	public AlchemyMIDlet() {
-		instance = this;
-		display = Display.getDisplay(this);
+		UIServer.display = Display.getDisplay(this);
 		try {
 			if (!InstallInfo.exists()) {
 				kernelPanic(I18N._("Alchemy is not installed."));
@@ -85,16 +70,14 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 		alert.addCommand(cmdStart);
 		alert.setCommandListener(this);
 		alert.setType(AlertType.CONFIRMATION);
-		current = alert;
+		UIServer.pushScreen(alert);
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
-		display.setCurrent(current);
+		UIServer.displayCurrent();
 	}
 
-	protected void pauseApp() {
-		current = display.getCurrent();
-	}
+	protected void pauseApp() { }
 
 	protected void destroyApp(boolean unconditional) {
 		notifyDestroyed();
@@ -108,30 +91,6 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 		}
 	}
 
-	/**
-	 * Pushes screen on the top of screen stack.
-	 */
-	public void pushScreen(Displayable d) {
-		screens.push(d);
-		display.setCurrent(d);
-	}
-
-	/**
-	 * Removes top screen from the stack and shows
-	 * screen next to it.
-	 */
-	public void popScreen() {
-		screens.pop();
-		if (!screens.empty()) {
-			display.setCurrent((Displayable)screens.peek());
-		}
-	}
-
-	public void alert(String title, String text, AlertType type) {
-		Alert a = new Alert(title, text, null, type);
-		display.setCurrent(a);
-	}
-
 	private void kernelPanic(String message) {
 		Alert alert = new Alert("Kernel panic");
 		alert.setCommandListener(this);
@@ -139,7 +98,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener {
 		alert.setString(message);
 		alert.setTimeout(Alert.FOREVER);
 		alert.setType(AlertType.ERROR);
-		display.setCurrent(alert);
+		Display.getDisplay(this).setCurrent(alert);
 	}
 
 	/** A thread that closes MIDlet after root context has finished. */

@@ -20,7 +20,7 @@ package alchemy.apps;
 
 import alchemy.core.Context;
 import alchemy.l10n.I18N;
-import alchemy.midlet.AlchemyMIDlet;
+import alchemy.midlet.UIServer;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import javax.microedition.lcdui.Command;
@@ -64,7 +64,7 @@ public class Console extends NativeApp {
 		ConsoleForm form = new ConsoleForm();
 		final NotifyListener l = new NotifyListener();
 		form.setCommandListener(l);
-		AlchemyMIDlet.getInstance().pushScreen(form);
+		UIServer.pushScreen(form);
 		Context child = new Context(c);
 		try {
 			String[] childArgs = null;
@@ -95,10 +95,9 @@ public class Console extends NativeApp {
 		} catch (Exception e) {
 			form.print(e.toString());
 			form.print(child.dumpCallStack());
-			e.printStackTrace();
 			return 1;
 		} finally {
-			AlchemyMIDlet.getInstance().popScreen();
+			UIServer.popScreen();
 		}
 	}
 }
