@@ -79,7 +79,7 @@ public class Editor extends NativeApp {
 			IO.println(c.stderr, e);
 			return 1;
 		}
-		UIServer.pushScreen(box);
+		UIServer.mapContext(c, box);
 		try {
 			while (true) {
 				synchronized (l) { l.wait(); }
@@ -96,7 +96,7 @@ public class Editor extends NativeApp {
 			IO.println(c.stderr, e);
 			return 1;
 		} finally {
-			UIServer.popScreen();
+			UIServer.unmapContext(c);
 		}
 	}
 }

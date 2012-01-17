@@ -64,7 +64,7 @@ public class Console extends NativeApp {
 		ConsoleForm form = new ConsoleForm();
 		final NotifyListener l = new NotifyListener();
 		form.setCommandListener(l);
-		UIServer.pushScreen(form);
+		UIServer.mapContext(c, form);
 		Context child = new Context(c);
 		try {
 			String[] childArgs = null;
@@ -97,7 +97,7 @@ public class Console extends NativeApp {
 			form.print(child.dumpCallStack());
 			return 1;
 		} finally {
-			UIServer.popScreen();
+			UIServer.unmapContext(c);
 		}
 	}
 }

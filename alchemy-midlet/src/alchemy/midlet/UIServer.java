@@ -18,39 +18,63 @@
 
 package alchemy.midlet;
 
-import java.util.Stack;
+import alchemy.core.Context;
+import alchemy.core.ContextListener;
+import java.util.Vector;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 
 /**
- * UI server.
+ * UI server that manages stack of screens.
  * @author Sergey Basalaev
  */
 public final class UIServer {
 	
 	static Display display;
-	
-	private static Stack screens = new Stack();
 
+	private static final Vector contexts = new Vector();
+	private static final Vector screens = new Vector();
+	
+	private static UIListener l = new UIListener();
+	
 	private UIServer() { }
 	
 	/**
-	 * Pushes screen on the top of screen stack.
+	 * Maps specified context to given screen.
+	 * If context is already mapped then its screen is replaced.
+	 * If context is not mapped then new mapping is added and
+	 * corresponding screen is placed on top of the screen stack.
 	 */
-	public static void pushScreen(Displayable d) {
-		screens.push(d);
-		display.setCurrent(d);
+	public static void mapContext(Context c, Displayable d) {
+		synchronized (contexts) {
+			int index = contexts.indexOf(c);
+			if (index < 0) {
+				c.addContextListener(l);
+				contexts.addElement(c);
+				screens.addElement(d);
+			} else {
+				screens.setElementAt(d, index);
+			}
+			displayCurrent();
+		}
 	}
-
+	
 	/**
-	 * Removes top screen from the stack and shows
-	 * screen next to it.
+	 * Unmaps context mapping and removes corresponding screen
+	 * from the screen stack.
 	 */
-	public static void popScreen() {
-		screens.pop();
-		display.setCurrent(currentScreen());
+	public static void unmapContext(Context c) {
+		synchronized (contexts) {
+			int index = contexts.indexOf(c);
+			if (index >= 0) {
+				c.removeContextListener(l);
+				contexts.removeElementAt(index);
+				screens.removeElementAt(index);
+				displayCurrent();
+			}
+		}
 	}
 	
 	public static void alert(String title, String text, AlertType type) {
@@ -59,10 +83,21 @@ public final class UIServer {
 	}
 	
 	public static Displayable currentScreen() {
-		return (!screens.empty()) ? (Displayable)screens.peek() : null;
+		synchronized (contexts) {
+			int top = contexts.size()-1;
+			return (top >= 0) ? (Displayable)screens.elementAt(top) : null;
+		}
 	}
 	
 	public static void displayCurrent() {
 		display.setCurrent(currentScreen());
+	}
+	
+	/** Removes screen mapping when context ends. */
+	private static class UIListener implements ContextListener {
+
+		public void contextEnded(Context c) {
+			unmapContext(c);
+		}
 	}
 }

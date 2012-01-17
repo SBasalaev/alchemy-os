@@ -71,7 +71,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 		alert.addCommand(cmdStart);
 		alert.setCommandListener(this);
 		alert.setType(AlertType.CONFIRMATION);
-		UIServer.pushScreen(alert);
+		Display.getDisplay(this).setCurrent(alert);
 	}
 
 	protected void startApp() throws MIDletStateChangeException {

@@ -513,7 +513,7 @@ public class Context {
 	
 	public void addContextListener(ContextListener l) {
 		if (listeners == null) listeners = new Vector();
-		listeners.addElement(l);
+		if (!listeners.contains(l)) listeners.addElement(l);
 	}
 	
 	public void removeContextListener(ContextListener l) {
