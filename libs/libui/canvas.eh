@@ -1,5 +1,5 @@
 type Screen;
-type Graphics;
+use "graphics";
 
 def new_canvas(full: Bool): Screen;
 def canvas_graphics(cnv: Screen): Graphics;
