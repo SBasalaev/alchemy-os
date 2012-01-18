@@ -578,12 +578,16 @@ class EFunction extends Function {
 					return null;
 				case (byte) 0x1F: // return
 					return stack[head];
-				case (byte) 0x2D: //dup
-					stack[++head] = stack[head]; break;
-				case (byte) 0x2E: //dup2
-					stack[++head] = stack[head-1];
-					stack[++head] = stack[head-1];
+				case (byte) 0x2D: { //dup
+					stack[head+1] = stack[head];
+					head++;
 					break;
+				}
+				case (byte) 0x2E: { //dup2
+					stack[head+2] = stack[head+1] = stack[head];
+					head += 2;
+					break;
+				}
 				case (byte) 0x2F: { //swap
 					Object atmp = stack[head-1];
 					stack[head-1] = stack[head];

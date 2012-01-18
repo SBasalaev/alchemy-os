@@ -36,6 +36,7 @@ public interface ExprVisitor {
 	Object visitFCall(FCallExpr fcall, Object data);
 	Object visitIf(IfExpr ifexpr, Object data);
 	Object visitNewArray(NewArrayExpr newarray, Object data);
+	Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object data);
 	Object visitNone(NoneExpr none, Object data);
 	Object visitUnary(UnaryExpr expr, Object data);
 	Object visitVar(VarExpr vexpr, Object data);

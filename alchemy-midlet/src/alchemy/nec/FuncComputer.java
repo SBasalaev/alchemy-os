@@ -21,6 +21,7 @@ package alchemy.nec;
 import alchemy.nec.tree.*;
 import java.util.Enumeration;
 
+
 /**
  * Computes code size, size of stack and number of locals for
  * Func. Optionally also assigns indices to local variables.
@@ -204,6 +205,22 @@ class FuncComputer implements ExprVisitor {
 		FuncData fdata = (FuncData)data;
 		newarray.lengthexpr.accept(this, data);
 		fdata.codesize++;
+		return null;
+	}
+
+	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object data) {
+		FuncData fdata = (FuncData)data;
+		new ConstExpr(new Integer(newarray.initializers.length)).accept(this, data);
+		fdata.codesize++; // newarray
+		for (int i=0; i < newarray.initializers.length; i++) {
+			fdata.codesize++; // dup
+			fdata.stackhead++;
+			fdata.updateMax();
+			new ConstExpr(new Integer(i)).accept(this, data);
+			newarray.initializers[i].accept(this, data);
+			fdata.codesize++; // astore
+			fdata.stackhead -= 3;
+		}
 		return null;
 	}
 

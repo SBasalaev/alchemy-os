@@ -681,10 +681,29 @@ public class Parser {
 					} else if (type.equals(BuiltinType.typeArray)
 					        || type.equals(BuiltinType.typeBArray)
 							|| type.equals(BuiltinType.typeCArray)) {
-						expect('(');
-						Expr lenexpr = cast(parseExpr(scope), BuiltinType.typeInt);
-						expect(')');
-						return new NewArrayExpr(type, lenexpr);
+						if (t.nextToken() == '(') {
+							Expr lenexpr = cast(parseExpr(scope), BuiltinType.typeInt);
+							expect(')');
+							return new NewArrayExpr(type, lenexpr);
+						} else if (t.ttype == '{') {
+							Vector vinit = new Vector();
+							while (t.nextToken() != '}') {
+								t.pushBack();
+								if (!vinit.isEmpty()) expect(',');
+								Expr e = parseExpr(scope);
+								if (type.equals(BuiltinType.typeArray)) {
+									e = cast(e, BuiltinType.typeAny);
+								} else {
+									e = cast(e, BuiltinType.typeInt);
+								}
+								vinit.addElement(e);
+							}
+							Expr[] init = new Expr[vinit.size()];
+							vinit.copyInto(init);
+							return new NewArrayByEnumExpr(type, init);
+						} else {
+							throw new ParseException(I18N._("'(' or '{' expected in constructor"));
+						}
 					} else {
 						throw new ParseException(I18N._("Applying 'new' to neither array nor structure"));
 					}

@@ -139,6 +139,13 @@ class ConstCollector implements ExprVisitor {
 		return null;
 	}
 
+	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object data) {
+		for (int i=0; i<newarray.initializers.length; i++) {
+			newarray.initializers[i].accept(this, data);
+		}
+		return null;
+	}
+
 	public Object visitNone(NoneExpr none, Object data) {
 		return null;
 	}

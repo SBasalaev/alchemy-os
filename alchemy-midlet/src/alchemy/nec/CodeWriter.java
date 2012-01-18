@@ -438,6 +438,39 @@ class CodeWriter implements ExprVisitor {
 		return null;
 	}
 
+	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object data) {
+		new ConstExpr(new Integer(newarray.initializers.length)).accept(this, data);
+		try {
+			DataOutputStream out = (DataOutputStream)data;
+			Type type = newarray.rettype();
+			if (type.equals(BuiltinType.typeBArray)) {
+				out.writeByte(0xf4); //newba
+			} else if (type.equals(BuiltinType.typeCArray)) {
+				out.writeByte(0xf8); //newca
+			} else {
+				out.write(0xf0); //newarray
+			}
+			addr++;
+			for (int i=0; i < newarray.initializers.length; i++) {
+				out.write(0x2d); //dup
+				addr++;
+				new ConstExpr(new Integer(i)).accept(this, data);
+				newarray.initializers[i].accept(this, data);
+				if (type.equals(BuiltinType.typeBArray)) {
+					out.writeByte(0xf6); //bastore
+				} else if (type.equals(BuiltinType.typeCArray)) {
+					out.writeByte(0xfa); //castore
+				} else {
+					out.write(0xf2); //astore
+				}
+				addr++;
+			}
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe.toString());
+		}
+		return null;
+	}
+
 	public Object visitNone(NoneExpr none, Object out) {
 		//nothing to write
 		return null;
