@@ -674,10 +674,32 @@ public class Parser {
 				} else if (t.svalue.equals("new")) {
 					Type type = parseType(scope);
 					if (type instanceof StructureType) {
-						expect('(');
-						expect(')');
-						int len = ((StructureType)type).fields.length;
-						return new NewArrayExpr(type, new ConstExpr(new Integer(len)));
+						if (t.nextToken() == '(') {
+							expect(')');
+							int len = ((StructureType)type).fields.length;
+							return new NewArrayExpr(type, new ConstExpr(new Integer(len)));
+						} else if (t.ttype == '{') {
+							StructureType struct = (StructureType)type;
+							Expr[] init = new Expr[struct.fields.length];
+							boolean first = true;
+							while (t.nextToken() != '}') {
+								t.pushBack();
+								if (first) first = false; else expect(',');
+								if (t.nextToken() != Tokenizer.TT_IDENTIFIER) {
+									throw new ParseException(I18N._("Identifier expected in structure constructor"));
+								}
+								int index = struct.fields.length-1;
+								while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
+								if (index < 0) {
+									throw new ParseException(I18N._("Type {0} has no member named {1}", type, t.svalue));
+								}
+								expect('=');
+								init[index] = parseExpr(scope);
+							}
+							return new NewArrayByEnumExpr(type, init);
+						} else {
+							throw new ParseException(I18N._("'(' or '{' expected in constructor"));
+						}
 					} else if (type.equals(BuiltinType.typeArray)
 					        || type.equals(BuiltinType.typeBArray)
 							|| type.equals(BuiltinType.typeCArray)) {

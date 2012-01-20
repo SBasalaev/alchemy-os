@@ -452,18 +452,20 @@ class CodeWriter implements ExprVisitor {
 			}
 			addr++;
 			for (int i=0; i < newarray.initializers.length; i++) {
-				out.write(0x2d); //dup
-				addr++;
-				new ConstExpr(new Integer(i)).accept(this, data);
-				newarray.initializers[i].accept(this, data);
-				if (type.equals(BuiltinType.typeBArray)) {
-					out.writeByte(0xf6); //bastore
-				} else if (type.equals(BuiltinType.typeCArray)) {
-					out.writeByte(0xfa); //castore
-				} else {
-					out.write(0xf2); //astore
+				if (newarray.initializers[i] != null) {
+					out.write(0x2d); //dup
+					addr++;
+					new ConstExpr(new Integer(i)).accept(this, data);
+					newarray.initializers[i].accept(this, data);
+					if (type.equals(BuiltinType.typeBArray)) {
+						out.writeByte(0xf6); //bastore
+					} else if (type.equals(BuiltinType.typeCArray)) {
+						out.writeByte(0xfa); //castore
+					} else {
+						out.write(0xf2); //astore
+					}
+					addr++;
 				}
-				addr++;
 			}
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe.toString());

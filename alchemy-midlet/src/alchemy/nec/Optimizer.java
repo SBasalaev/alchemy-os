@@ -493,6 +493,7 @@ class Optimizer implements ExprVisitor {
 
 	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object scope) {
 		for (int i=0; i < newarray.initializers.length; i++) {
+			if (newarray.initializers[i] != null)
 			newarray.initializers[i] = (Expr)newarray.initializers[i].accept(this, scope);
 		}
 		return newarray;

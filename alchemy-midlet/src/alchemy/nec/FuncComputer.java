@@ -213,13 +213,15 @@ class FuncComputer implements ExprVisitor {
 		new ConstExpr(new Integer(newarray.initializers.length)).accept(this, data);
 		fdata.codesize++; // newarray
 		for (int i=0; i < newarray.initializers.length; i++) {
-			fdata.codesize++; // dup
-			fdata.stackhead++;
-			fdata.updateMax();
-			new ConstExpr(new Integer(i)).accept(this, data);
-			newarray.initializers[i].accept(this, data);
-			fdata.codesize++; // astore
-			fdata.stackhead -= 3;
+			if (newarray.initializers[i] != null) {
+				fdata.codesize++; // dup
+				fdata.stackhead++;
+				fdata.updateMax();
+				new ConstExpr(new Integer(i)).accept(this, data);
+				newarray.initializers[i].accept(this, data);
+				fdata.codesize++; // astore
+				fdata.stackhead -= 3;
+			}
 		}
 		return null;
 	}
