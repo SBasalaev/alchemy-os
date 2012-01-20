@@ -5,6 +5,8 @@ use "io";
 def getenv(key: String): String;
 def setenv(key: String, val: String);
 
+def sleep(millis: Int);
+
 def exec_wait(prog: String, args: Array): Int;
 def exec(prog: String, args: Array);
 

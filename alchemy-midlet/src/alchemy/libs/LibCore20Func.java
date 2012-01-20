@@ -403,6 +403,9 @@ class LibCore20Func extends Function {
 				}
 				return keys;
 			}
+			case 124: // sleep(millis: Int)
+				Thread.sleep(ival(args[0]));
+				return null;
 			default:
 				return null;
 		}

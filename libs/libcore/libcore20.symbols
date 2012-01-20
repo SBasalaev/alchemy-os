@@ -122,3 +122,4 @@ getstatic
 setstatic
 sprintf
 ht_keys
+sleep
