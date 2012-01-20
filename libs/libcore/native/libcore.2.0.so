@@ -1,1 +1,3 @@
 #@alchemy.libs.LibCore20
+soname=libcore.2.so
+symbols=/libcore20.symbols

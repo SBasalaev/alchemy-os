@@ -401,20 +401,18 @@ public class NEL extends NativeApp {
 		r.close();
 		LibInfo info = new LibInfo();
 		info.soname = prop.get("soname");
-		String symbols = prop.get("symbols");
-		if (symbols == null) {
+		String symbolfile = prop.get("symbols");
+		if (symbolfile == null) {
 			info.symbols = new Vector();
 		} else {
 			Vector vsym = new Vector();
-			while (true) {
-				int index = symbols.indexOf(' ');
-				if (index >= 0) {
-					vsym.addElement(symbols.substring(0, index));
-					symbols = symbols.substring(index+1).trim();
-				} else {
-					vsym.addElement(symbols);
-					break;
-				}
+			InputStream symstream = getClass().getResourceAsStream(symbolfile);
+			byte[] buf = new byte[symstream.available()];
+			symstream.read(buf);
+			symstream.close();
+			final String[] syms = IO.split(IO.utfDecode(buf), '\n');
+			for (int i=0; i < syms.length; i++) {
+				vsym.addElement(syms[i]);
 			}
 			info.symbols = vsym;
 		}
