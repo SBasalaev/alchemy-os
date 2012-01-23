@@ -20,7 +20,7 @@ package alchemy.core;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;

@@ -16,10 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.l10n;
+package alchemy.util;
 
-import alchemy.util.Properties;
-import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -41,9 +39,9 @@ public class I18N {
 	 */
 	public static void setLocale(String locale) {
 		// try to load bundle for specified locale
-		InputStream in = I18N.class.getResourceAsStream("/alchemy/l10n/"+locale);
+		InputStream in = I18N.class.getResourceAsStream("/locale/"+locale);
 		// try to load bundle for two-letter language code
-		if (in == null) in = I18N.class.getResourceAsStream("/alchemy/l10n/"+locale.substring(0, 2));
+		if (in == null) in = I18N.class.getResourceAsStream("/locale/"+locale.substring(0, 2));
 		// if nothing found fall back to the C locale
 		if (in == null) {
 			strings = null;

@@ -18,7 +18,6 @@
 
 package alchemy.util;
 
-import alchemy.l10n.I18N;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;

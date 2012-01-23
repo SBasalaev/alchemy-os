@@ -23,7 +23,7 @@ import alchemy.core.Context;
 import alchemy.core.ContextListener;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.nlib.NativeLibBuilder;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;

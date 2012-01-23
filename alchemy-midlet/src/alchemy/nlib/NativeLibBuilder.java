@@ -21,7 +21,7 @@ package alchemy.nlib;
 import alchemy.core.Context;
 import alchemy.core.LibBuilder;
 import alchemy.core.Library;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;

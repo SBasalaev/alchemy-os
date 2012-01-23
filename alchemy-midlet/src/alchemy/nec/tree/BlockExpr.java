@@ -18,7 +18,7 @@
 
 package alchemy.nec.tree;
 
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.nec.ParseException;
 import java.util.Vector;
 

@@ -20,7 +20,7 @@ package alchemy.fs.siemens;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.util.Initable;
 import com.siemens.mp.io.file.FileConnection;
 import java.io.IOException;

@@ -23,7 +23,7 @@ import alchemy.core.Function;
 import alchemy.core.HashLibrary;
 import alchemy.core.LibBuilder;
 import alchemy.core.Library;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;

@@ -19,7 +19,7 @@
 package alchemy.midlet;
 
 import alchemy.fs.Filesystem;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.util.Initable;
 import alchemy.util.IO;
 import alchemy.util.Properties;

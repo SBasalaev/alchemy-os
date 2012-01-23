@@ -18,7 +18,6 @@
 
 package alchemy.util;
 
-import alchemy.l10n.I18N;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

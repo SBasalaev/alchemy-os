@@ -19,7 +19,7 @@
 package alchemy.apps;
 
 import alchemy.core.Context;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.midlet.UIServer;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;

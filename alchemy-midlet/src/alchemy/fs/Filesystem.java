@@ -18,7 +18,7 @@
 
 package alchemy.fs;
 
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

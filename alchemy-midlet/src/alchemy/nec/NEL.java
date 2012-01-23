@@ -21,7 +21,7 @@ package alchemy.nec;
 import alchemy.core.Context;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import alchemy.util.Properties;

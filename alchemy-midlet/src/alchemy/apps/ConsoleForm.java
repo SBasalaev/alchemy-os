@@ -18,7 +18,7 @@
 
 package alchemy.apps;
 
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.util.IO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

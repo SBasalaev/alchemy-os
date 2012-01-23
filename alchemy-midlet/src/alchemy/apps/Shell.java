@@ -27,7 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Vector;
 import alchemy.apps.ConsoleForm.ConsoleInputStream;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 
 /**
  * Native shell.

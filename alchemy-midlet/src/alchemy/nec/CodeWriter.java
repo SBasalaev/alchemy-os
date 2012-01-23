@@ -19,7 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.nec.tree.*;
 import java.io.DataOutputStream;
 import java.io.IOException;

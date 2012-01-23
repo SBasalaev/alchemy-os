@@ -20,7 +20,7 @@ package alchemy.fs.jsr75;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
-import alchemy.l10n.I18N;
+import alchemy.util.I18N;
 import alchemy.util.Initable;
 import java.io.IOException;
 import java.io.InputStream;
