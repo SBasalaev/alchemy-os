@@ -1,5 +1,6 @@
 /* Time program
- * (C) 2011, Sergey Basalaev
+ * Version 1.0.1
+ * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
 
@@ -17,11 +18,7 @@ def main(args: Array) {
     acopy(args, 1, params, 0, args.len-1)
   }
   var ms = systime()
-  if (cmd != null) exec(cmd, params);
+  if (cmd != null) exec(cmd, params)
   ms = systime()-ms
-  var out = stdout()
-  print(out, ms/1000)
-  print(out, ".")
-  print(out, ms%1000)
-  println(out, " s")
+  println("" + (ms/1000) + "." + (ms%1000) + " s")
 }

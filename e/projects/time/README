@@ -1,3 +1,6 @@
 Usage: time [program] [args]...
 
 Run program and print time of its execution.
+
+ChangeLog:
+[2012-01-23] Port to libcore 2.0

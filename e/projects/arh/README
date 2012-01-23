@@ -1,3 +1,11 @@
-E version of alchemy archiving tool.
+E port of Alchemy archiving tool.
 
-Depends on libio.
+Usage:
+arh c archive files...    - create archive of given files
+arh t archive             - list contents of archive
+arh x archive             - extract archive to current directory
+arh h                     - show help message and exit
+arh v                     - show arh version and exit
+
+ChangeLog:
+[2012-01-23]  Port to libcore 2.0

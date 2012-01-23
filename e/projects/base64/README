@@ -1,0 +1,14 @@
+Utility to do base64 encoding/decoding
+
+Usage:
+
+base64 [file]
+  Writes base64 encoding of given file to stdout.
+  If no file given then stdin is used.
+
+base64 -d [file]
+  Writes base64 decoding of given file to stdout.
+  If no file given then stdin is used.
+
+ChangeLog:
+[2012-01-23] Port to libcore 2.0

@@ -1,5 +1,0 @@
-I/O library for Alchemy.
-Contains two modules:
-
-  dataio  -  read/write various data
-  textio  -  work with text streams and encodings
