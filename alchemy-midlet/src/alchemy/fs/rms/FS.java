@@ -163,7 +163,7 @@ public final class FS extends Filesystem implements Initable {
 		if ((fd.attrs & F_DIR) == 0) throw new IOException(ERR_NOT_DIR+file.path());
 		RSDirectory dir = new RSDirectory(fd);
 		String[] list = new String[dir.count];
-		for (int i=dir.count-1; i>=0; i--) {
+		for (int i=0; i<dir.count; i++) {
 			RSFD node = dir.nodes[i];
 			list[i] = node.file.name();
 			if ((node.attrs & F_DIR) != 0) list[i] = list[i].concat("/");

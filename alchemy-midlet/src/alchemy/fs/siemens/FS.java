@@ -49,9 +49,16 @@ public final class FS extends Filesystem implements Initable {
 		this.root = "file://"+path;
 	}
 
+	/**
+	 * Returns native path for the file.
+	 */
+	private String pathFor(File file) {
+		if (file.path().equals("")) return root+'/';
+		else return root+file.path();
+	}
 
 	public OutputStream append(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
 			if (!fc.exists()) fc.create();
 			return fc.openOutputStream(fc.fileSize());
@@ -61,7 +68,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public OutputStream write(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
 			if (!fc.exists()) fc.create();
 			fc.truncate(0);
@@ -72,7 +79,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public InputStream read(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
 			return new SiemensInputStream(fc.openInputStream());
 		} finally {
@@ -86,7 +93,7 @@ public final class FS extends Filesystem implements Initable {
 
 	public boolean canRead(File file) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
 				return fc.canRead();
 			} finally {
@@ -99,7 +106,7 @@ public final class FS extends Filesystem implements Initable {
 
 	public boolean canWrite(File file) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
 				return fc.canWrite();
 			} finally {
@@ -111,7 +118,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public void create(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.WRITE);
 		try {
 			fc.create();
 		} finally {
@@ -120,7 +127,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public void mkdir(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path()+'/', Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ_WRITE);
 		try {
 			fc.mkdir();
 		} finally {
@@ -129,7 +136,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public void remove(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
 			if (file.path().length() == 0) throw new SecurityException(I18N._("Cannot delete root directory"));
 			if (fc.exists()) fc.delete();
@@ -140,7 +147,7 @@ public final class FS extends Filesystem implements Initable {
 
 	public boolean exists(File file) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
 				return fc.exists();
 			} finally {
@@ -153,7 +160,7 @@ public final class FS extends Filesystem implements Initable {
 
 	public boolean isDirectory(File file) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
 				return fc.isDirectory();
 			} finally {
@@ -165,7 +172,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public int size(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
 			if (fc.isDirectory()) return 0;
 			else {
@@ -179,7 +186,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public long lastModified(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
 			return fc.lastModified();
 		} finally {
@@ -188,7 +195,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public String[] list(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
 			Enumeration e = fc.list("*", true);
 			Vector v = new Vector();
@@ -209,7 +216,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public void setRead(File file, boolean on) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
 			fc.setReadable(on);
 		} finally {
@@ -218,7 +225,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public void setWrite(File file, boolean on) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(root+file.path(), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
 			fc.setWritable(on);
 		} finally {
@@ -228,7 +235,7 @@ public final class FS extends Filesystem implements Initable {
 
 	public long spaceFree() {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root, Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(root+'/', Connector.READ);
 			try {
 				return fc.availableSize();
 			} finally {
@@ -241,7 +248,7 @@ public final class FS extends Filesystem implements Initable {
 
 	public long spaceTotal() {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root, Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(root+'/', Connector.READ);
 			try {
 				return fc.totalSize();
 			} finally {
@@ -254,7 +261,7 @@ public final class FS extends Filesystem implements Initable {
 
 	public long spaceUsed() {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root, Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(root+'/', Connector.READ);
 			try {
 				return fc.usedSize();
 			} finally {
