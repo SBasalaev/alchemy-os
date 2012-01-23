@@ -31,7 +31,7 @@ import javax.microedition.lcdui.Image;
  */
 class UICanvas extends Canvas implements CommandListener {
 	
-	private Image buffer;
+	private final Image buffer;
 	
 	/** Queue of pressed keys. */
 	private final int[] keyqueue =  new int[16];
@@ -41,19 +41,13 @@ class UICanvas extends Canvas implements CommandListener {
 	private int keycount = 0;
 	
 	public UICanvas(boolean fullscreen) {
-		buffer = Image.createImage(getWidth(), getHeight());
 		setCommandListener(this);
 		setFullScreenMode(fullscreen);
+		buffer = Image.createImage(getWidth(), getHeight());
 	}
 	
 	protected void paint(Graphics g) {
 		g.drawImage(buffer, 0, 0, 0);
-	}
-
-	protected void sizeChanged(int w, int h) {
-		Image newbuf = Image.createImage(w, h);
-		newbuf.getGraphics().drawImage(buffer, 0, 0, 0);
-		buffer = newbuf;
 	}
 	
 	/** Returns graphics of buffer. */
