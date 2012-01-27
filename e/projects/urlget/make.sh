@@ -1,2 +1,3 @@
-ec urlget.e -o urlget.o
-el urlget.o -o urlget
+#!/bin/sh
+
+ex urlget.e -o urlget

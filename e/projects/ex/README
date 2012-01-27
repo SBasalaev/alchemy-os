@@ -1,0 +1,9 @@
+Wrapper on ec/el to build E sources.
+
+Usage:
+ ex [ec-options] [el-options] files... [-o output]
+
+For all files ending in `.e' ec is called. If all
+files are compiled successfully then el called
+to link files ending in `.o' and objects produced
+by compilation in binary file `output'.
