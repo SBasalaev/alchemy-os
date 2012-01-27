@@ -8,17 +8,11 @@ use "string"
 use "sys"
 
 def new_reader(in: IStream, dec: ReadChar): Reader {
-  var r = new Reader()
-  r.in = in
-  r.dec = dec
-  r
+  new Reader(in=in, dec=dec)
 }
 
 def new_writer(out: OStream, enc: WriteChar): Writer {
-  var w = new Writer()
-  w.out = out
-  w.enc = enc
-  w
+  new Writer(out=out, enc=enc)
 }
 
 def freadch(r: Reader): Int = r.dec(r.in)
@@ -78,17 +72,11 @@ def fwriteca(w: Writer, ca: CArray, ofs: Int, len: Int) {
 /* UTF-8 encoding */
 
 def utfreader(in: IStream): Reader {
-  var r = new Reader()
-  r.in = in
-  r.dec = readch_utf8
-  r
+  new Reader(in=in, dec=readch_utf8)
 }
 
 def utfwriter(out: OStream): Writer {
-  var w = new Writer()
-  w.out = out
-  w.enc = writech_utf8
-  w
+  new Writer(out=out, enc=writech_utf8)
 }
 
 def readch_utf8(in: IStream): Int {
@@ -134,17 +122,11 @@ def writech_utf8(out: OStream, ch: Int) {
 /* ISO 8859-1 encoding. */
 
 def latin1reader(in: IStream): Reader {
-  var r = new Reader()
-  r.in = in
-  r.dec = readch_latin1
-  r
+  new Reader(in=in, dec=readch_latin1)
 }
 
 def latin1writer(out: OStream): Writer {
-  var w = new Writer()
-  w.out = out
-  w.enc = writech_latin1
-  w
+  new Writer(out=out, enc=writech_latin1)
 }
 
 def readch_latin1(in: IStream): Int {
