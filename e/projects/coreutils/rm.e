@@ -12,10 +12,8 @@ def main(args: Array): Int {
     fprintln(stderr(), "rm: no arguments")
     1
   } else {
-    var i = 0
-    while (i < len) {
+    for (var i=0, i < len, i = i+1) {
       fremove(to_str(args[i]))
-      i = i+1
     }
     0
   }

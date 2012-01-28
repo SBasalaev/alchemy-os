@@ -74,10 +74,8 @@ def arhwrite(out: OStream, f: String) {
   if (is_dir(f)) {
     fwritebyte(out, attrs | A_DIR)
     var subs = flist(f)
-    var i = 0
-    while (i < subs.len) {
+    for (var i=0, i<subs.len, i=i+1) {
       arhwrite(out, f+"/"+subs[i])
-      i = i + 1
     }
   } else {
     fwritebyte(out, attrs)

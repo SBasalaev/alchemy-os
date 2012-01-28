@@ -16,8 +16,7 @@ def main(args: Array) {
   var writeflag = 0
   var execflag = 0
   // processing options
-  var i=0
-  while (i < len) {
+  for (var i=0, i < len, i = i+1) {
     var arg = to_str(args[i])
     if (arg=="-r") readflag = -1
     else if (arg=="+r") readflag = 1
@@ -25,11 +24,9 @@ def main(args: Array) {
     else if (arg=="+w") writeflag = 1
     else if (arg=="-x") execflag = -1
     else if (arg=="+x") execflag = 1
-    i = i+1
   }
   // setting attributes
-  i = 0
-  while (i < len) {
+  for (var i=0, i < len, i = i+1) {
     var file = to_str(args[i])
     var first = strchr(file,0)
     if (first != '-' && first != '+') {
@@ -40,6 +37,5 @@ def main(args: Array) {
       if (execflag==1) set_exec(file,true)
       else if (execflag==-1) set_exec(file,false)
     }
-    i = i+1
   }
 }

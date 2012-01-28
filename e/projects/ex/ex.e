@@ -16,14 +16,13 @@ def main(args: Array): Int {
   var ecflags = new_vector()
   var elflags = new_vector()
   var outname = "a.out"
-  var i = 0
   /* parsing arguments */
   var mode = 0
   // 0 - normal
   // 1 - waiting outname
   // 2 - help / version
   // 3 - error
-  while (i < args.len) {
+  for (var i=0, i < args.len, i = i+1) {
     var arg = to_str(args[i])
     var len = strlen(arg)
     if (mode == 1) {
@@ -62,7 +61,6 @@ def main(args: Array): Int {
         mode = 3
       }
     }   
-    i = i + 1
   }
   if (mode == 1) {
     fprintln(stderr(), "-o requires name")
@@ -79,13 +77,11 @@ def main(args: Array): Int {
     acopy(v_toarray(ecflags), 0, opts, 3, v_size(ecflags))
     /* compile sources */
     var count = v_size(sources)
-    i = 0
-    while (i < count && exitcode == 0) {
+    for (var i=0, i < count && exitcode == 0, i = i+1) {
       var srcname = to_str(v_get(sources, i))
       opts[0] = srcname
       opts[2] = srcname + ".o"
       exitcode = exec_wait("ec", opts)
-      i = i + 1
     }
     /* prepare el flags */
     if (exitcode == 0) {

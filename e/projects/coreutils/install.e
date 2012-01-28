@@ -16,8 +16,7 @@ def main(args: Array): Int {
     1
   } else {
     var destdir = to_str(args[len-1])
-    var i = 0
-    while (i < len-1) {
+    for (var i = 0, i < len-1, i = i+1) {
       var src = to_str(args[i])
       var path = new_sb()
       sb_append(path, destdir)
@@ -28,7 +27,6 @@ def main(args: Array): Int {
       set_read(dest, can_read(src))
       set_write(dest, can_write(src))
       set_exec(dest, can_exec(src))
-      i = i+1
     }
     0
   }

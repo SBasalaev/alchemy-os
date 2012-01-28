@@ -62,10 +62,8 @@ def fwritech(w: Writer, ch: Int) = w.enc(w.out, ch)
 def fwritestr(w: Writer, str: String) = fwriteca(w, strchars(str), 0, strlen(str))
 
 def fwriteca(w: Writer, ca: CArray, ofs: Int, len: Int) {
-  var i = 0
-  while (i < len) {
+  for(var i=0, i<len, i=i+1) {
     fwritech(w, ca[ofs+i])
-    i = i+1
   }
 }
 

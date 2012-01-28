@@ -17,8 +17,7 @@ def main(args: Array): Int {
   } else {
     var dest = to_str(args[len-1])
     if (is_dir(dest)) {
-      var i = 0
-      while (i < len-1) {
+      for (var i=0, i < len-1, i = i+1) {
         var srcfile = to_str(args[i])
         var path = new_sb()
         sb_append(path, dest)
@@ -26,7 +25,6 @@ def main(args: Array): Int {
         sb_append(path, pathfile(srcfile))
         var destfile = to_str(path)
         fcopy(srcfile, destfile)
-        i = i+1
       }
       0
     } else if (len == 2) {

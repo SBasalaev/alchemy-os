@@ -6,12 +6,9 @@
 use "io"
 
 def main(args: Array) {
-  var len = args.len
-  var i = 0
-  while (i < len) {
+  for (var i=0, i < args.len, i = i+1) {
     if (i != 0) print(" ")
     print(args[i])
-    i = i+1
   }
   println("")
 }
