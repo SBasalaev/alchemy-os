@@ -722,6 +722,22 @@ public class Parser {
 					} else {
 						throw new ParseException(I18N._("Applying 'new' to neither array nor structure"));
 					}
+				} else if (t.svalue.equals("for")) {
+					expect('(');
+					BlockExpr forblock = new BlockExpr(scope);
+					BlockExpr forbody = new BlockExpr(forblock);
+					Expr init = cast(parseExpr(forblock), BuiltinType.typeNone);
+					expect(',');
+					Expr cond = cast(parseExpr(forblock), BuiltinType.typeBool);
+					expect(',');
+					Expr incr = cast(parseExpr(forbody), BuiltinType.typeNone);
+					expect(')');
+					Expr body = cast(parseExpr(forbody), BuiltinType.typeNone);
+					forbody.exprs.addElement(body);
+					forbody.exprs.addElement(incr);
+					forblock.exprs.addElement(init);
+					forblock.exprs.addElement(new WhileExpr(cond, forbody));
+					return forblock;
 				} else {
 					throw new ParseException(I18N._("{0} unexpected here", t));
 				}

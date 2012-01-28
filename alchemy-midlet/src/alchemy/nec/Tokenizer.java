@@ -302,7 +302,7 @@ class Tokenizer {
 			if (id.equals("def") || id.equals("if") || id.equals("else") ||
 			    id.equals("use") || id.equals("do") || id.equals("while")||
 				id.equals("cast")|| id.equals("var")|| id.equals("type") ||
-				id.equals("null")|| id.equals("new"))
+				id.equals("null")|| id.equals("new")|| id.equals("for"))
 				return ttype = TT_KEYWORD;
 			return ttype = TT_IDENTIFIER;
 		}
