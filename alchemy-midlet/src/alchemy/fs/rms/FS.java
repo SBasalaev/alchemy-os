@@ -279,6 +279,36 @@ public final class FS extends Filesystem implements Initable {
 		}
 	}
 
+	public synchronized void move(File source, File dest) throws IOException {
+		if (source.parent().equals(dest.parent())) {
+			// move within one directory
+			RSFD parentfd = getFD(source.parent());
+			RSDirectory parentdir = new RSDirectory(parentfd);
+			int index = parentdir.getIndex(dest.name());
+			if (index >= 0) throw new IOException(ERR_EXISTS+dest.path());
+			index = parentdir.getIndex(source.path());
+			if (index < 0) throw new IOException(ERR_NOT_FOUND+source.path());
+			parentdir.nodes[index].file = dest;
+			parentdir.flush();
+		} else {
+			RSFD destdirfd = getFD(dest.parent());
+			RSDirectory destdir = new RSDirectory(destdirfd);
+			int index = destdir.getIndex(dest.name());
+			if (index >= 0) throw new IOException(ERR_EXISTS+dest.path());
+			RSFD srcdirfd = getFD(source.parent());
+			RSDirectory srcdir = new RSDirectory(srcdirfd);
+			index = srcdir.getIndex(source.name());
+			if (index < 0) throw new IOException(ERR_NOT_FOUND+source.path());
+			// moving
+			destdir.nodes[destdir.count] = srcdir.nodes[index];
+			destdir.count++;
+			srcdir.count--;
+			srcdir.nodes[index] = srcdir.nodes[srcdir.count];
+			destdir.flush();
+			srcdir.flush();
+		}
+	}
+	
 	public int size(File file) throws IOException {
 		RSFD fd = getFD(file);
 		try {

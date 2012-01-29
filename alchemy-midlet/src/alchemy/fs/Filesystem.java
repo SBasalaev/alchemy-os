@@ -216,7 +216,7 @@ public abstract class Filesystem {
 	 *   if <code>dest</code> exists or if an I/O error occurs during moving
 	 */
 	public void move(File source, File dest) throws IOException {
-		if (exists(dest)) throw new IOException(I18N._("Cannot move {0} to {1}, file already exists", source, dest));
+		if (exists(dest)) throw new IOException(I18N._("Cannot move {0} to {1}, destination already exists", source, dest));
 		copy(source, dest);
 		remove(source);
 	}

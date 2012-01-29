@@ -233,6 +233,20 @@ public final class FS extends Filesystem implements Initable {
 		}
 	}
 
+	public void move(File source, File dest) throws IOException {
+		if (exists(dest)) throw new IOException(I18N._("File already exists: {0}", dest));
+		if (source.parent().equals(dest.parent())) {
+			FileConnection fc = (FileConnection)Connector.open(pathFor(source), Connector.READ_WRITE);
+			try {
+				fc.rename(dest.name());
+			} finally {
+				fc.close();
+			}
+		} else {
+			super.move(source, dest);
+		}
+	}
+
 	public long spaceFree() {
 		try {
 			FileConnection fc = (FileConnection)Connector.open(root+'/', Connector.READ);
