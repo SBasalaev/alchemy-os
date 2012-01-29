@@ -36,7 +36,6 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextListener {
 
 	private final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 1);
-	private final Command cmdStart = new Command(I18N._("Start"), Command.OK, 1);
 	private Art runtime;
 
 	public AlchemyMIDlet() {
@@ -55,6 +54,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			root.setEnv("LIBPATH", "/lib");
 			root.setEnv("INCPATH", "/inc");
 			root.setCurDir(new File("/home"));
+			root.addContextListener(this);
 			//preloading core library
 			root.loadLibrary("/lib/libcore.2.0.so");
 			runApp();
@@ -64,14 +64,17 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 	}
 
 	private void runApp() {
-		Alert alert = new Alert("Alchemy");
-		alert.setTimeout(Alert.FOREVER);
-		alert.setString(I18N._("Start application?"));
-		alert.addCommand(cmdQuit);
-		alert.addCommand(cmdStart);
-		alert.setCommandListener(this);
-		alert.setType(AlertType.CONFIRMATION);
-		Display.getDisplay(this).setCurrent(alert);
+		Display.getDisplay(this).callSerially(
+			new Runnable() {
+				public void run() {
+					try {
+						runtime.rootContext().start("terminal", new String[] {"sh"});
+					} catch (Throwable t) {
+						kernelPanic(t.toString());
+					}					
+				}
+			}
+		);
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
@@ -87,13 +90,6 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 	public void commandAction(Command c, Displayable d) {
 		if (c == cmdQuit) {
 			destroyApp(true);
-		} else if (c == cmdStart) {
-			runtime.rootContext().addContextListener(this);
-			try {
-				runtime.rootContext().start("terminal", new String[] {"sh"});
-			} catch (Throwable t) {
-				kernelPanic(t.toString());
-			}
 		}
 	}
 
