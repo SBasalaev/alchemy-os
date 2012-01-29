@@ -286,7 +286,7 @@ public final class FS extends Filesystem implements Initable {
 			RSDirectory parentdir = new RSDirectory(parentfd);
 			int index = parentdir.getIndex(dest.name());
 			if (index >= 0) throw new IOException(ERR_EXISTS+dest.path());
-			index = parentdir.getIndex(source.path());
+			index = parentdir.getIndex(source.name());
 			if (index < 0) throw new IOException(ERR_NOT_FOUND+source.path());
 			parentdir.nodes[index].file = dest;
 			parentdir.flush();
