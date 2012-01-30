@@ -32,7 +32,7 @@ def main(args: Array): Int {
       var ext = substr(arg, len-2, len)
       if (ext == ".e") {
         v_add(sources, arg)
-        v_add(objects, arg+".o")
+        v_add(objects, substr(arg, 0, strlen(arg)-2) +".o")
       } else if (ext == ".o") {
         v_add(objects, arg)
       } else {
@@ -80,7 +80,7 @@ def main(args: Array): Int {
     for (var i=0, i < count && exitcode == 0, i = i+1) {
       var srcname = to_str(v_get(sources, i))
       opts[0] = srcname
-      opts[2] = srcname + ".o"
+      opts[2] = substr(srcname, 0, strlen(srcname)-2) + ".o"
       exitcode = exec_wait("ec", opts)
     }
     /* prepare el flags */
