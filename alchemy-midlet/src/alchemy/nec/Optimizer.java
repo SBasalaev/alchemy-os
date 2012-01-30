@@ -256,14 +256,14 @@ class Optimizer implements ExprVisitor {
 			return new ConstExpr(lval);
 		} else if (binary.operator == '=' && binary.rvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)binary.rvalue).value;
-			if (cnst.equals(new Integer(0))) {
+			if (new Integer(0).equals(cnst)) {
 				// if (val <> 0)   =>   if (val)
 				optimized = true;
 				return binary.lvalue;
 			}
 		} else if (binary.operator == '=' && binary.lvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)binary.lvalue).value;
-			if (cnst.equals(new Integer(0))) {
+			if (new Integer(0).equals(cnst)) {
 				// if (0 <> val)   =>   if (-val)
 				optimized = true;
 				return new UnaryExpr('-', binary.rvalue);
