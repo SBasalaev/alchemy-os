@@ -21,6 +21,7 @@ package alchemy.midlet;
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
 import alchemy.util.I18N;
+import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import java.io.DataInputStream;
@@ -66,9 +67,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.append(I18N._("Fatal error: {0}", I18N._("cannot read setup.cfg")+'\n'+e+'\n'));
 			return;
 		}
-		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+'\n' +
-			"Development branch\n\n" +
-			"Copyright (c) 2011, Sergey Basalaev\n" +
+		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+
+			// "Development branch\n" +
+			"\n\nCopyright (c) 2011, Sergey Basalaev\n" +
 			"http://alchemy-os.googlecode.com\n" +
 			"\n" +
 			I18N._("This MIDlet is free software and is licensed under GNU GPL version 3")+'\n' +
@@ -113,14 +114,12 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			Properties instCfg = InstallInfo.read();
 			messages.append(I18N._("Installed version:")+' '+instCfg.get("alchemy.version")+'\n');
 			messages.addCommand(cmdUninstall);
-			String[] curVersion = split(instCfg.get("alchemy.version"), '.');
-			String[] newVersion = split(setupCfg.get("alchemy.version"), '.');
+			String[] curVersion = IO.split(instCfg.get("alchemy.version"), '.');
+			String[] newVersion = IO.split(setupCfg.get("alchemy.version"), '.');
 			int vcmp = newVersion[0].compareTo(curVersion[0]);
 			if (vcmp == 0) vcmp = newVersion[1].compareTo(curVersion[1]);
 			if (vcmp > 0) {
 				messages.append(I18N._("Can be updated to {0}", setupCfg.get("alchemy.version"))+'\n');
-				messages.addCommand(cmdUpdate);
-			} else { //always enable update in development build
 				messages.addCommand(cmdUpdate);
 			}
 		} else {
@@ -133,7 +132,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.deleteAll();
 		Properties instCfg = InstallInfo.read();
 		//choosing filesystem
-		String[] filesystems = split(setupCfg.get("install.fs"), ' ');
+		String[] filesystems = IO.split(setupCfg.get("install.fs"), ' ');
 		List fschoice = new List(I18N._("Choose filesystem"), Choice.EXCLUSIVE);
 		for (int i=0; i<filesystems.length; i++) {
 			fschoice.append(setupCfg.get("install.fs."+filesystems[i]+".name"), null);
@@ -216,7 +215,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	private void installArchives() throws Exception {
 		Filesystem fs = InstallInfo.getFilesystem();
-		String[] archives = split(setupCfg.get("install.archives"), ' ');
+		String[] archives = IO.split(setupCfg.get("install.archives"), ' ');
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
@@ -259,26 +258,6 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		}
 	}
 
-	private String[] split(String str, char ch) {
-		Vector v = new Vector();
-		str = str.trim();
-		while (true) {
-			int sp = str.indexOf(ch);
-			if (sp < 0) {
-				v.addElement(str);
-				break;
-			} else {
-				v.addElement(str.substring(0, sp));
-				str = str.substring(sp+1).trim();
-			}
-		}
-		String[] ret = new String[v.size()];
-		for (int i=0; i<v.size(); i++) {
-			ret[i] = v.elementAt(i).toString();
-		}
-		return ret;
-	}
-
 	private class InstallerThread extends Thread {
 
 		/**
@@ -308,7 +287,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 					case 3: update(); break;
 				}
 			} catch (Throwable e) {
-				e.printStackTrace();
+				// e.printStackTrace();
 				messages.append(I18N._("Fatal error: {0}", e.toString()+'\n'));
 			}
 			messages.addCommand(cmdQuit);
