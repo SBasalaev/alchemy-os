@@ -404,8 +404,8 @@ public class Parser {
 					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
 				newexpr = new BinaryExpr(left, op, right);
 			} else if (op == '<' || op == '>' || op == Tokenizer.TT_LTEQ || op == Tokenizer.TT_GTEQ) {
-				if (!(ltype instanceof BuiltinType) || ((BuiltinType)ltype).numIndex() < 0
-				  || !(rtype instanceof BuiltinType) || ((BuiltinType)rtype).numIndex() < 0)
+				if (!(ltype.getClass() == BuiltinType.class) || ((BuiltinType)ltype).numIndex() < 0
+				  || !(rtype.getClass() == BuiltinType.class) || ((BuiltinType)rtype).numIndex() < 0)
 					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
 				Type btype = binaryCastType(ltype, rtype);
 				Expr cmpexpr = new BinaryExpr(cast(left,btype), '=', cast(right,btype));
@@ -445,7 +445,7 @@ public class Parser {
 					newexpr = new FCallExpr(new ConstExpr(strcat), new Expr[] { left, right });
 				} else {
 					Type btype = binaryCastType(ltype, rtype);
-					if (!(btype instanceof BuiltinType) || ((BuiltinType)btype).numIndex() < 0)
+					if (!(btype.getClass() == BuiltinType.class) || ((BuiltinType)btype).numIndex() < 0)
 						throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
 					newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
 				}
@@ -472,7 +472,7 @@ public class Parser {
 		while (true) {
 			int ttype = t.nextToken();
 			if (ttype == '(') {
-				if (!(expr.rettype() instanceof FunctionType))
+				if (!(expr.rettype().getClass() == FunctionType.class))
 					throw new ParseException(I18N._("Applying () to non-function expression"));
 				FunctionType ftype = (FunctionType)expr.rettype();
 				Vector vargs = new Vector();
@@ -527,7 +527,7 @@ public class Parser {
 						expr = new ALenExpr(expr);
 						continue;
 					}
-				} else if (type instanceof StructureType) {
+				} else if (type.getClass() == StructureType.class) {
 					Var[] fields = ((StructureType)type).fields;
 					int index = -1;
 					for (int i=0; i<fields.length; i++) {
@@ -673,7 +673,7 @@ public class Parser {
 					}
 				} else if (t.svalue.equals("new")) {
 					Type type = parseType(scope);
-					if (type instanceof StructureType) {
+					if (type.getClass() == StructureType.class) {
 						expect('(');
 						StructureType struct = (StructureType)type;
 						Expr[] init = new Expr[struct.fields.length];
@@ -797,10 +797,10 @@ public class Parser {
 		if (toType.equals(BuiltinType.typeNone)) {
 			return new DiscardExpr(expr);
 		}
-		if (toType instanceof BuiltinType) {
+		if (toType.getClass() == BuiltinType.class) {
 			return castPrimitive(expr, toType);
 		}
-		if (expr instanceof ConstExpr && ((ConstExpr)expr).value == null) {
+		if (expr.getClass() == ConstExpr.class && ((ConstExpr)expr).value == null) {
 			return new CastExpr(toType, expr);
 		}
 		throw new ParseException(I18N._("Cannot convert from {0} to {1}", fromType, toType));
@@ -851,7 +851,7 @@ public class Parser {
 		if (ltype.equals(rtype)) return ltype;
 		if (ltype.equals(BuiltinType.typeNone) || rtype.equals(BuiltinType.typeNone))
 			return BuiltinType.typeNone;
-		if (ltype instanceof BuiltinType && rtype instanceof BuiltinType) {
+		if (ltype.getClass() == BuiltinType.class && rtype.getClass() == BuiltinType.class) {
 			int lindex = ((BuiltinType)ltype).numIndex();
 			int rindex = ((BuiltinType)rtype).numIndex();
 			if (lindex < 0 || rindex < 0) return BuiltinType.typeAny;

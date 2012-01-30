@@ -263,23 +263,23 @@ public class NEL extends NativeApp {
 				Object obj = e.nextElement();
 				if (obj == null) {
 					out.writeByte('0');
-				} else if (obj instanceof Integer) {
+				} else if (obj.getClass() == Integer.class) {
 					out.writeByte('i');
 					Integer ival = (Integer)obj;
 					out.writeInt(ival.intValue());
-				} else if (obj instanceof Long) {
+				} else if (obj.getClass() == Long.class) {
 					out.writeByte('l');
 					Long lval = (Long)obj;
 					out.writeLong(lval.longValue());
-				} else if (obj instanceof Float) {
+				} else if (obj.getClass() == Float.class) {
 					out.writeByte('f');
 					Float fval = (Float)obj;
 					out.writeFloat(fval.floatValue());
-				} else if (obj instanceof Double) {
+				} else if (obj.getClass() == Double.class) {
 					out.writeByte('d');
 					Double dval = (Double)obj;
 					out.writeDouble(dval.doubleValue());
-				} else if (obj instanceof String) {
+				} else if (obj.getClass() == String.class) {
 					out.writeByte('S');
 					out.writeUTF(obj.toString());
 				} else if (obj instanceof ExFunc) {

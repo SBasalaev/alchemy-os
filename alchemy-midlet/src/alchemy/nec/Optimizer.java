@@ -65,11 +65,20 @@ class Optimizer implements ExprVisitor {
 	public Object visitBinary(BinaryExpr binary, Object scope) {
 		binary.lvalue = (Expr)binary.lvalue.accept(this, scope);
 		binary.rvalue = (Expr)binary.rvalue.accept(this, scope);
-		if (binary.lvalue instanceof ConstExpr && binary.rvalue instanceof ConstExpr) {
+		if (binary.lvalue.getClass() == ConstExpr.class
+		 && binary.rvalue.getClass() == ConstExpr.class) {
 			// optimize if both constants
 			Object lval = ((ConstExpr)binary.lvalue).value;
 			Object rval = ((ConstExpr)binary.rvalue).value;
-			if (lval instanceof Integer) {
+			if (lval == null || rval == null) {
+				if (binary.operator == '=') {
+					optimized = true;
+					if (lval == rval) return new ConstExpr(new Integer(0));
+					else return new ConstExpr(new Integer(1));
+				} else {
+					// warn about operation with null
+				}
+			} else if (lval.getClass() == Integer.class) {
 				switch (binary.operator) {
 					case '+':
 						lval = new Integer(((Integer)lval).intValue() + ((Integer)rval).intValue());
@@ -122,7 +131,7 @@ class Optimizer implements ExprVisitor {
 						lval = new Integer(((Integer)lval).intValue() >>> ((Integer)rval).intValue());
 						break;
 				}
-			} else if (lval instanceof Long) {
+			} else if (lval.getClass() == Long.class) {
 				switch (binary.operator) {
 					case '+':
 						lval = new Long(((Long)lval).longValue() + ((Long)rval).longValue());
@@ -175,7 +184,7 @@ class Optimizer implements ExprVisitor {
 						lval = new Long(((Long)lval).longValue() >>> ((Integer)rval).intValue());
 						break;
 				}
-			} else if (lval instanceof Float) {
+			} else if (lval.getClass() == Float.class) {
 				switch (binary.operator) {
 					case '+':
 						lval = new Float(((Float)lval).floatValue() + ((Float)rval).floatValue());
@@ -202,7 +211,7 @@ class Optimizer implements ExprVisitor {
 						}
 						break;
 				}
-			} else if (lval instanceof Double) {
+			} else if (lval.getClass() == Double.class) {
 				switch (binary.operator) {
 					case '+':
 						lval = new Double(((Double)lval).doubleValue() + ((Double)rval).doubleValue());
@@ -229,7 +238,7 @@ class Optimizer implements ExprVisitor {
 						}
 						break;
 				}
-			} else if (lval instanceof Boolean) {
+			} else if (lval.getClass() == Boolean.class) {
 				switch (binary.operator) {
 					case '&':
 						lval = (((Boolean)lval).booleanValue() & ((Boolean)rval).booleanValue()
@@ -254,14 +263,14 @@ class Optimizer implements ExprVisitor {
 			}
 			optimized = true;
 			return new ConstExpr(lval);
-		} else if (binary.operator == '=' && binary.rvalue instanceof ConstExpr) {
+		} else if (binary.operator == '=' && binary.rvalue.getClass() == ConstExpr.class) {
 			Object cnst = ((ConstExpr)binary.rvalue).value;
 			if (new Integer(0).equals(cnst)) {
 				// if (val <> 0)   =>   if (val)
 				optimized = true;
 				return binary.lvalue;
 			}
-		} else if (binary.operator == '=' && binary.lvalue instanceof ConstExpr) {
+		} else if (binary.operator == '=' && binary.lvalue.getClass() == ConstExpr.class) {
 			Object cnst = ((ConstExpr)binary.lvalue).value;
 			if (new Integer(0).equals(cnst)) {
 				// if (0 <> val)   =>   if (-val)
@@ -283,7 +292,7 @@ class Optimizer implements ExprVisitor {
 		while (i < block.exprs.size()) {
 			Expr ex = (Expr)block.exprs.elementAt(i);
 			ex = (Expr)ex.accept(this, block);
-			if (ex instanceof NoneExpr) {
+			if (ex.getClass() == NoneExpr.class) {
 				block.exprs.removeElementAt(i);
 			} else {
 				block.exprs.setElementAt(ex, i);
@@ -316,7 +325,7 @@ class Optimizer implements ExprVisitor {
 	 */
 	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object scope) {
 		cast.expr.accept(this, scope);
-		if (cast.expr instanceof ConstExpr) {
+		if (cast.expr.getClass() == ConstExpr.class) {
 			Object cnst = ((ConstExpr)cast.expr).value;
 			switch (cast.casttype) {
 				case CastPrimitiveExpr.I2L:
@@ -373,7 +382,7 @@ class Optimizer implements ExprVisitor {
 	 */
 	public Object visitDiscard(DiscardExpr disc, Object scope) {
 		disc.expr = (Expr)disc.expr.accept(this, scope);
-		if (disc.expr instanceof ConstExpr || disc.expr instanceof VarExpr) {
+		if (disc.expr.getClass() == ConstExpr.class || disc.expr.getClass() == VarExpr.class) {
 			optimized = true;
 			return new NoneExpr();
 		}
@@ -391,10 +400,10 @@ class Optimizer implements ExprVisitor {
 		for (int i=0; i<fcall.args.length; i++) {
 			fcall.args[i] = (Expr)fcall.args[i].accept(this, scope);
 		}
-		if (fcall.fload instanceof ConstExpr) {
+		if (fcall.fload.getClass() == ConstExpr.class) {
 			Func f = (Func)((ConstExpr)fcall.fload).value;
 			if (f.asVar.name.equals("to_str")
-			 && fcall.args[0] instanceof ConstExpr) {
+			 && fcall.args[0].getClass() == ConstExpr.class) {
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
 				if (cnst == null || cnst.getClass() != Func.class) {
 					f.hits--;
@@ -402,14 +411,14 @@ class Optimizer implements ExprVisitor {
 					return new ConstExpr(String.valueOf(cnst));
 				}
 			} else if (f.asVar.name.equals("strcat")
-			        && fcall.args[0] instanceof ConstExpr
-					&& fcall.args[1] instanceof ConstExpr) {
+			        && fcall.args[0].getClass() == ConstExpr.class
+					&& fcall.args[1].getClass() == ConstExpr.class) {
 				Object c1 = ((ConstExpr)fcall.args[0]).value;
 				Object c2 = ((ConstExpr)fcall.args[1]).value;
 				f.hits--;
 				optimized = true;
 				return new ConstExpr(String.valueOf(c1).concat(String.valueOf(c2)));
-			} else if (f.body instanceof ConstExpr || f.body instanceof NoneExpr) {
+			} else if (f.body != null && (f.body.getClass() == ConstExpr.class || f.body.getClass() == NoneExpr.class)) {
 				// we don't need to call function but we still
 				// need to calculate its arguments
 				f.hits--;
@@ -439,7 +448,7 @@ class Optimizer implements ExprVisitor {
 		expr.ifexpr = (Expr)expr.ifexpr.accept(this, scope);
 		expr.elseexpr = (Expr)expr.elseexpr.accept(this, scope);
 		//test condition
-		if (expr.condition instanceof ConstExpr) {
+		if (expr.condition.getClass() == ConstExpr.class) {
 			optimized = true;
 			Object cond = ((ConstExpr)expr.condition).value;
 			switch (expr.type) {
@@ -504,11 +513,11 @@ class Optimizer implements ExprVisitor {
 						return expr.elseexpr;
 					}
 			}
-		} else if (expr.condition instanceof IfExpr) {
+		} else if (expr.condition.getClass() == IfExpr.class) {
 			IfExpr innerif = (IfExpr)expr.condition;
-			if (innerif.ifexpr instanceof ConstExpr
+			if (innerif.ifexpr.getClass() == ConstExpr.class
 			 && ((ConstExpr)innerif.ifexpr).value == Boolean.TRUE
-			 && innerif.elseexpr instanceof ConstExpr
+			 && innerif.elseexpr.getClass() == ConstExpr.class
 			 && ((ConstExpr)innerif.elseexpr).value == Boolean.FALSE) {
 				expr.condition = innerif.condition;
 				expr.type = innerif.type;
@@ -541,25 +550,25 @@ class Optimizer implements ExprVisitor {
 	 */
 	public Object visitUnary(UnaryExpr unary, Object scope) {
 		unary.expr = (Expr)unary.expr.accept(this, scope);
-		if (unary.expr instanceof ConstExpr) {
+		if (unary.expr.getClass() == ConstExpr.class) {
 			Object cnst = ((ConstExpr)unary.expr).value;
 			if (unary.operator == '!') {
 				optimized = true;
 				return new ConstExpr(cnst.equals(Boolean.TRUE) ? Boolean.FALSE : Boolean.TRUE);
 			} else if (unary.operator == '-') {
-				if (cnst instanceof Integer) {
+				if (cnst.getClass() == Integer.class) {
 					int oldval = ((Integer)cnst).intValue();
 					optimized = true;
 					return new ConstExpr(new Integer(-oldval));
-				} else if (cnst instanceof Long) {
+				} else if (cnst.getClass() == Long.class) {
 					long oldval = ((Long)cnst).longValue();
 					optimized = true;
 					return new ConstExpr(new Long(-oldval));
-				} else if (cnst instanceof Float) {
+				} else if (cnst.getClass() == Float.class) {
 					float oldval = ((Float)cnst).floatValue();
 					optimized = true;
 					return new ConstExpr(new Float(-oldval));
-				} else if (cnst instanceof Double) {
+				} else if (cnst.getClass() == Double.class) {
 					double oldval = ((Double)cnst).doubleValue();
 					optimized = true;
 					return new ConstExpr(new Double(-oldval));
@@ -582,7 +591,7 @@ class Optimizer implements ExprVisitor {
 		wexpr.condition = (Expr)wexpr.condition.accept(this, scope);
 		wexpr.body = (Expr)wexpr.body.accept(this, scope);
 		//test condition
-		if (wexpr.condition instanceof ConstExpr) {
+		if (wexpr.condition.getClass() == ConstExpr.class) {
 			ConstExpr boolConst = (ConstExpr)wexpr.condition;
 			if (boolConst.value.equals(Boolean.FALSE)) {
 				optimized = true;

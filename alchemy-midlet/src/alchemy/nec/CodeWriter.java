@@ -64,24 +64,25 @@ class CodeWriter implements ExprVisitor {
 		out.writeShort(size);
 		for (int i=0; i<size; i++) {
 			Object obj = objects.elementAt(i);
-			if (obj == null) {
+			Class clz = obj == null ? null : obj.getClass();
+			if (clz == null) {
 				out.writeByte('0');
-			} else if (obj instanceof Integer) {
+			} else if (clz == Integer.class) {
 				out.writeByte('i');
 				out.writeInt(((Integer)obj).intValue());
-			} else if (obj instanceof Long) {
+			} else if (clz == Long.class) {
 				out.writeByte('l');
 				out.writeLong(((Long)obj).longValue());
-			} else if (obj instanceof Float) {
+			} else if (clz == Float.class) {
 				out.writeByte('f');
 				out.writeFloat(((Float)obj).floatValue());
-			} else if (obj instanceof Double) {
+			} else if (clz == Double.class) {
 				out.writeByte('d');
 				out.writeDouble(((Double)obj).doubleValue());
-			} else if (obj instanceof String) {
+			} else if (clz == String.class) {
 				out.writeByte('S');
 				out.writeUTF((String)obj);
-			} else if (obj instanceof Func) {
+			} else if (clz == Func.class) {
 				Func func = (Func)obj;
 				if (func.body != null) {
 					visitFunc(func, out);
@@ -254,18 +255,19 @@ class CodeWriter implements ExprVisitor {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			Object value = cexpr.value;
+			Class clz = value == null ? null : value.getClass();
 			boolean inline = false;
 			if (value == null) {
 				out.writeByte(0x01); // aconst_null
 				addr++;
 				inline = true;
-			} else if (value instanceof Boolean) {
+			} else if (clz == Boolean.class) {
 				if (value.equals(Boolean.TRUE))
 					out.writeByte(0x04); // iconst_1
 				else out.writeByte(0x03); // iconst_0
 				addr++;
 				inline = true;
-			} else if (value instanceof Integer) {
+			} else if (clz == Integer.class) {
 				int ival = ((Integer)value).intValue();
 				if (ival >= -1 && ival <= 5) {
 					out.writeByte(0x03+ival); //iconst_X
@@ -282,7 +284,7 @@ class CodeWriter implements ExprVisitor {
 					addr += 3;
 					inline = true;
 				}
-			} else if (value instanceof Long) {
+			} else if (clz == Long.class) {
 				long lval = ((Long)value).longValue();
 				if (lval == 0l) {
 					out.writeByte(0x09); // lconst_0
@@ -293,7 +295,7 @@ class CodeWriter implements ExprVisitor {
 					addr++;
 					inline = true;
 				}
-			} else if (value instanceof Float) {
+			} else if (clz == Float.class) {
 				float fval = ((Float)value).floatValue();
 				if (fval == 0f) {
 					out.writeByte(0x0B); // fconst_0
@@ -308,7 +310,7 @@ class CodeWriter implements ExprVisitor {
 					addr++;
 					inline = true;
 				}
-			} else if (value instanceof Double) {
+			} else if (clz == Double.class) {
 				double dval = ((Double)value).doubleValue();
 				if (dval == 0d) {
 					out.writeByte(0x0E); // dconst_0

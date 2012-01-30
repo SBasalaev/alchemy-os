@@ -86,23 +86,23 @@ class ConstCollector implements ExprVisitor {
 	}
 
 	public Object visitConst(ConstExpr cexpr, Object data) {
-		if (cexpr.rettype() instanceof BuiltinType) {
+		if (cexpr.rettype().getClass() == BuiltinType.class) {
 			Object val = cexpr.value;
 			// do not collect null and short numbers - will be inlined
-			if (val == null || val instanceof Boolean) return null;
-			if (val instanceof Integer) {
+			if (val == null || val.getClass() == Boolean.class) return null;
+			if (val.getClass() == Integer.class) {
 				int ival = ((Integer)val).intValue();
 				if (ival >= -0x8000 && ival < 0x8000) return null;
 			}
-			if (val instanceof Long) {
+			if (val.getClass() == Long.class) {
 				long lval = ((Long)val).longValue();
 				if (lval == 0l || lval == 1l) return null;
 			}
-			if (val instanceof Float) {
+			if (val.getClass() == Float.class) {
 				float fval = ((Float)val).floatValue();
 				if (fval == 0f || fval == 1f || fval == 2f) return null;
 			}
-			if (val instanceof Double) {
+			if (val.getClass() == Double.class) {
 				double dval = ((Double)val).doubleValue();
 				if (dval == 0d || dval == 1d) return null;
 			}

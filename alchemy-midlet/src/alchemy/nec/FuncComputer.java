@@ -129,10 +129,10 @@ class FuncComputer implements ExprVisitor {
 		FuncData fdata = (FuncData)data;
 		Object value = cexpr.value;
 		boolean inline = false;
-		if (value == null || value instanceof Boolean) {
+		if (value == null || value.getClass() == Boolean.class) {
 			fdata.codesize++; // aconst_null, iconst_{0,1}
 			inline = true;
-		} else if (value instanceof Integer) {
+		} else if (value.getClass() == Integer.class) {
 			int ival = ((Integer)value).intValue();
 			if (ival >= -1 && ival <= 5) {
 				fdata.codesize++;     // iconst_x
@@ -141,19 +141,19 @@ class FuncComputer implements ExprVisitor {
 				fdata.codesize += 2;  // bipush <byte>
 				inline = true;
 			}
-		} else if (value instanceof Long) {
+		} else if (value.getClass() == Long.class) {
 			long lval = ((Long)value).longValue();
 			if (lval == 0l || lval == 1l) {
 				fdata.codesize++; // lconst_X
 				inline = true;
 			}
-		} else if (value instanceof Float) {
+		} else if (value.getClass() == Float.class) {
 			float fval = ((Float)value).floatValue();
 			if (fval == 0f || fval == 1f || fval == 2f) {
 				fdata.codesize++; // fconst_X
 				inline = true;
 			}
-		} else if (value instanceof Double) {
+		} else if (value.getClass() == Double.class) {
 			double dval = ((Double)value).doubleValue();
 			if (dval == 0d || dval == 1d) {
 				fdata.codesize++; // dconst_X
