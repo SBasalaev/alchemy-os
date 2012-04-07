@@ -18,10 +18,9 @@
 
 package alchemy.libs;
 
+import alchemy.core.Function;
+import alchemy.midlet.UIServer;
 import javax.microedition.lcdui.Canvas;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 
@@ -29,19 +28,11 @@ import javax.microedition.lcdui.Image;
  * Double buffered canvas implementation for Alchemy UI.
  * @author Sergey Basalaev
  */
-class UICanvas extends Canvas implements CommandListener {
+class UICanvas extends Canvas {
 	
 	private final Image buffer;
 	
-	/** Queue of pressed keys. */
-	private final int[] keyqueue =  new int[16];
-	/** Index of first key code in the queue. */
-	private int keyfirst = 0;
-	/** Total number of key codes available in the queue. */
-	private int keycount = 0;
-	
 	public UICanvas(boolean fullscreen) {
-		setCommandListener(this);
 		setFullScreenMode(fullscreen);
 		buffer = Image.createImage(getWidth(), getHeight());
 	}
@@ -55,31 +46,23 @@ class UICanvas extends Canvas implements CommandListener {
 		return buffer.getGraphics();
 	}
 
-	public void commandAction(Command c, Displayable d) {
+	/** Generates key event. */
+	protected void keyPressed(int keyCode) {
+		UIServer.addEvent(this, UIServer.EVENT_KEY_PRESS, new Integer(keyCode), Function.ZERO);
 	}
 
-	/** Adds key code in the queue. */
-	protected void keyPressed(int keyCode) {
-		synchronized (keyqueue) {
-			if (keycount == keyqueue.length) return;
-			int nextindex = (keyfirst + keycount) % keyqueue.length;
-			keyqueue[nextindex] = keyCode;
-			keycount++;
-		}
+	/** Generates pointer press event. */
+	protected void pointerPressed(int x, int y) {
+		UIServer.addEvent(this, UIServer.EVENT_PTR_PRESS, new Integer(x), new Integer(y));
 	}
 	
-	/**
-	 * Returns next key code from the queue.
-	 * If there are no key presses in the queue this
-	 * method returns <code>null</code>.
-	 */
-	public int readKeyCode() {
-		synchronized (keyqueue) {
-			if (keycount == 0) return 0;
-			int code = keyqueue[keyfirst];
-			keyfirst = (keyfirst + 1) % keyqueue.length;
-			keycount--;
-			return code;
-		}
+	/** Generates pointer release event. */
+	protected void pointerReleased(int x, int y) {
+		UIServer.addEvent(this, UIServer.EVENT_PTR_RELEASE, new Integer(x), new Integer(y));
+	}
+
+	/** Generates pointer drag event. */
+	protected void pointerDragged(int x, int y) {
+		UIServer.addEvent(this, UIServer.EVENT_PTR_DRAG, new Integer(x), new Integer(y));
 	}
 }

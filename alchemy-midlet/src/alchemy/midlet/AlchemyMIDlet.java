@@ -78,10 +78,13 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
+		UIServer.addEvent(UIServer.currentScreen(), UIServer.EVENT_SHOW, null, null);
 		UIServer.displayCurrent();
 	}
 
-	protected void pauseApp() { }
+	protected void pauseApp() {
+		UIServer.addEvent(UIServer.currentScreen(), UIServer.EVENT_HIDE, null, null);
+	}
 
 	protected void destroyApp(boolean unconditional) {
 		notifyDestroyed();

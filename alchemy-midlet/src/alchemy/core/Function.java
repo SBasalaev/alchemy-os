@@ -94,8 +94,8 @@ public abstract class Function {
 		return signature;
 	}
 
-	private static final Integer iTRUE = new Integer(1);
-	private static final Integer iFALSE = new Integer(0);
+	public static final Integer ONE = new Integer(1);
+	public static final Integer ZERO = new Integer(0);
 
 	/** Boxing method for integer values. */
 	protected static final Integer Ival(int value) {
@@ -107,7 +107,7 @@ public abstract class Function {
 	 * and <code>false</code> to <code>Integer(0)</code>.
 	 */
 	protected static final Integer Ival(boolean value) {
-		return value ? iTRUE : iFALSE;
+		return value ? ONE : ZERO;
 	}
 
 	/** Boxing method for long values. */

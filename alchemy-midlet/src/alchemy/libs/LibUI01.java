@@ -25,16 +25,16 @@ import java.io.IOException;
 /**
  * Native UI library for Alchemy.
  * @author Sergey Basalaev
- * @version 0.0.0
+ * @version 0.1.0
  */
-public class LibUI00 extends HashLibrary {
+public class LibUI01 extends HashLibrary {
 	
-	public LibUI00() throws IOException {
-		UTFReader r = new UTFReader(getClass().getResourceAsStream("/libui00.symbols"));
+	public LibUI01() throws IOException {
+		UTFReader r = new UTFReader(getClass().getResourceAsStream("/libui01.symbols"));
 		String name;
 		int index = 0;
 		while ((name = r.readLine()) != null) {
-			putFunc(new LibUI00Func(name, index));
+			putFunc(new LibUI01Func(name, index));
 			index++;
 		}
 		r.close();

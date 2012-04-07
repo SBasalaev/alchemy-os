@@ -22,20 +22,24 @@ import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.midlet.UIServer;
 import java.io.InputStream;
+import javax.microedition.lcdui.Choice;
+import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.TextBox;
 
 /**
- * libui.0.0.so functions.
+ * libui.0.1.so functions.
  * @author Sergey Basalaev
  */
-class LibUI00Func extends Function {
+class LibUI01Func extends Function {
 	
 	private final int index;
 
-	public LibUI00Func(String name, int index) {
+	public LibUI01Func(String name, int index) {
 		super(name);
 		this.index = index;
 	}
@@ -86,6 +90,7 @@ class LibUI00Func extends Function {
 				return Ival(font2int(((Graphics)args[0]).getFont()));
 			case 10: // set_font(g: Graphics, font: Int)
 				((Graphics)args[0]).setFont(int2font(ival(args[1])));
+				return null;
 			case 11: // str_width(font: Int, str: String): Int
 				return Ival(int2font(ival(args[0])).stringWidth((String)args[1]));
 			case 12: // font_height(font: Int): Int
@@ -148,21 +153,38 @@ class LibUI00Func extends Function {
 			}
 			case 31: // screen_shown(scr: Screen): Bool
 				return Ival(((Displayable)args[0]).isShown());
-			case 32: // canvas_read_key(cnv: Screen): Int
-				return Ival(((UICanvas)args[0]).readKeyCode());
-			case 33: // canvas_refresh(cnv: Screen)
+			case 32: // canvas_refresh(cnv: Screen)
 				((UICanvas)args[0]).repaint();
 				return null;
-//			case n: // new_command(lbl: String, t: Int, pr: Int): Command
-//				return new Command((String)args[0], ival(args[1]), ival(args[2]));
-//			case n+1: { // screen_add_command(scr: Screen, c: Command)
-//				((Displayable)args[0]).addCommand((Command)args[1]);
-//				return null;
-//			}
-//			case n+2: { // screen_rm_command(scr: Screen, c: Command)
-//				((Displayable)args[0]).removeCommand((Command)args[1]);
-//				return null;
-//			}
+			case 33: // screen_add_menu(scr: Screen, caption: String, order: Int)
+				((Displayable)args[0]).addCommand(new Command((String)args[1], Command.ITEM, ival(args[2])));
+				return null;
+			case 34: // ui_read_event(): UIEvent
+				return UIServer.readEvent(c);
+			case 35: // new_textbox(mode: Int): Screen
+				return new TextBox(null, null, Short.MAX_VALUE, ival(args[0]));
+			case 36: // textbox_get_text(box: Screen): String
+				return ((TextBox)args[0]).getString();
+			case 37: // textbox_set_text(box: Screen, text: String)
+				((TextBox)args[0]).setString((String)args[1]);
+				return null;
+			case 38: { // new_listbox(strings: Array, images: Array): Screen
+				Object[] str = (Object[])args[0];
+				String[] strings = new String[str.length];
+				System.arraycopy(str, 0, strings, 0, str.length);
+				Object[] img = (Object[])args[1];
+				Image[] images = null;
+				if (img != null) {
+					images = new Image[img.length];
+					System.arraycopy(img, 0, images, 0, img.length);
+				}
+				return new List(null, Choice.IMPLICIT, strings, images);
+			}
+			case 39: // listbox_get_index(list: Screen): Int
+				return Ival(((List)args[0]).getSelectedIndex());
+			case 40: // listbox_set_index(list: Screen, index: Int)
+				((List)args[0]).setSelectedIndex(ival(args[1]), true);
+				return null;
 			default:
 				return null;
 		}
