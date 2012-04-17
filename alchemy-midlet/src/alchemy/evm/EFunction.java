@@ -65,15 +65,15 @@ class EFunction extends Function {
 					break;
 				}
 				case (byte) 0x02: { // iconst_m1
-					stack[++head] = Ival(-1);
+					stack[++head] = Function.M_ONE;
 					break;
 				}
 				case (byte) 0x03: { // iconst_0
-					stack[++head] = Ival(false);
+					stack[++head] = Function.ZERO;
 					break;
 				}
 				case (byte) 0x04: { // iconst_1
-					stack[++head] = Ival(true);
+					stack[++head] = Function.ONE;
 					break;
 				}
 				case (byte) 0x05: { // iconst_2
@@ -203,7 +203,7 @@ class EFunction extends Function {
 				}
 				case (byte) 0x16: { // icmp
 					int itmp = ival(stack[--head]) - ival(stack[++head]);
-					stack[--head] = (itmp > 0) ? Ival(true) : (itmp == 0 ? Ival(false) : Ival(-1));
+					stack[--head] = (itmp > 0) ? Function.ONE : (itmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
 				case (byte) 0x17: { // ishl
@@ -269,7 +269,7 @@ class EFunction extends Function {
 				}
 				case (byte) 0x26: { // lcmp
 					long ltmp = lval(stack[--head]) - lval(stack[++head]);
-					stack[--head] = (ltmp > 0) ? Ival(true) : (ltmp == 0 ? Ival(false) : Ival(-1));
+					stack[--head] = (ltmp > 0) ? Function.ONE : (ltmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
 				case (byte) 0x27: { // lshl
@@ -335,7 +335,7 @@ class EFunction extends Function {
 				}
 				case (byte) 0x36: { // fcmp
 					float ftmp = fval(stack[--head]) - fval(stack[++head]);
-					stack[--head] = (ftmp > 0) ? Ival(true) : (ftmp == 0 ? Ival(false) : Ival(-1));
+					stack[--head] = (ftmp > 0) ? Function.ONE : (ftmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
 
@@ -371,7 +371,7 @@ class EFunction extends Function {
 				}
 				case (byte) 0x46: { // dcmp
 					double dtmp = dval(stack[--head]) - dval(stack[++head]);
-					stack[--head] = (dtmp > 0) ? Ival(true) : (dtmp == 0 ? Ival(false) : Ival(-1));
+					stack[--head] = (dtmp > 0) ? Function.ONE : (dtmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
 

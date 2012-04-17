@@ -96,6 +96,7 @@ public abstract class Function {
 
 	public static final Integer ONE = new Integer(1);
 	public static final Integer ZERO = new Integer(0);
+	public static final Integer M_ONE = new Integer(-1);
 
 	/** Boxing method for integer values. */
 	protected static final Integer Ival(int value) {
