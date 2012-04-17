@@ -49,7 +49,7 @@ public class ConstExpr extends Expr {
 		} else if (clz == Boolean.class) {
 			return BuiltinType.typeBool;
 		} else if (clz == Func.class) {
-			return ((Func)value).asVar.type;
+			return ((Func)value).type;
 		} else {
 			return null;
 		}

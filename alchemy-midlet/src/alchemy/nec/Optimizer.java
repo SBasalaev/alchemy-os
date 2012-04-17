@@ -309,6 +309,7 @@ class Optimizer implements ExprVisitor {
 					optimized = true;
 					return e;
 				}
+				return block;
 			default:
 				return block;
 		}
@@ -401,7 +402,7 @@ class Optimizer implements ExprVisitor {
 		}
 		if (fcall.fload.getClass() == ConstExpr.class) {
 			Func f = (Func)((ConstExpr)fcall.fload).value;
-			if (f.asVar.name.equals("to_str")
+			if (f.signature.equals("to_str")
 			 && fcall.args[0].getClass() == ConstExpr.class) {
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
 				if (cnst == null || cnst.getClass() != Func.class) {
@@ -409,7 +410,7 @@ class Optimizer implements ExprVisitor {
 					optimized = true;
 					return new ConstExpr(String.valueOf(cnst));
 				}
-			} else if (f.asVar.name.equals("strcat")
+			} else if (f.signature.equals("strcat")
 			        && fcall.args[0].getClass() == ConstExpr.class
 					&& fcall.args[1].getClass() == ConstExpr.class) {
 				Object c1 = ((ConstExpr)fcall.args[0]).value;

@@ -28,8 +28,10 @@ import java.util.Vector;
 public class Func implements Scope {
 	private final Unit unit;
 
-	/** Holds name and type. */
-	public Var asVar;
+	/** Function signature. Not neccessarily equals variable name. */
+	public String signature;
+	/** Type of this function. */
+	public FunctionType type;
 	/** Holds implementation (if any). */
 	public Expr body;
 	/** Local variables. */

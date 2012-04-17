@@ -184,9 +184,20 @@ public class Parser {
 							}
 						} else if (t.svalue.equals("def")) {
 							Func fdef = parseFuncDef();
-							Func prev = unit.getFunc(fdef.asVar.name);
-							if (prev != null && !fdef.asVar.type.equals(prev.asVar.type))
-								throw new ParseException(I18N._("Definition of function {0} conflicts with previous definition.", fdef.asVar.name));
+							Var fvar = unit.getVar(fdef.signature);
+							if (fvar == null) {
+								fvar = new Var(fdef.signature, fdef.type);
+								fvar.isConst = true;
+								fvar.constValue = new ConstExpr(fdef);
+								unit.addVar(fvar);
+							} else if (!fvar.type.equals(fdef.type)) {
+								if (fvar.type.getClass() == FunctionType.class)
+									throw new ParseException(I18N._("Definition of function {0} conflicts with previous definition.", fdef.signature));
+								else
+									throw new ParseException(I18N._("Variable {0} is already defined", fdef.signature));
+							}
+							
+							Func prev = unit.getFunc(fdef.signature);
 							if (prev == null) unit.funcs.addElement(fdef);
 							switch (t.nextToken()) {
 								case ';':
@@ -194,7 +205,7 @@ public class Parser {
 								case '{':
 								case '=':
 									if (prev != null && prev.body != null)
-										throw new ParseException(I18N._("Function {0} is already defined.", fdef.asVar.name));
+										throw new ParseException(I18N._("Function {0} is already defined.", fdef.signature));
 									if (prev != null) {
 										prev.locals = fdef.locals; //actual names for impl.
 										fdef = prev;
@@ -205,10 +216,9 @@ public class Parser {
 									} else {
 										body = parseExpr(fdef);
 									}
-									Type rettype = ((FunctionType)fdef.asVar.type).rettype;
-									fdef.body = cast(body, rettype);
-									// if exported increase hits
-									if (fdef.asVar.name.charAt(0) != '_') fdef.hits++;
+									fdef.body = cast(body, fdef.type.rettype);
+									// if function is public then increase hits
+									if (fdef.signature.charAt(0) != '_') fdef.hits++;
 									break;
 								default:
 									throw new ParseException(I18N._("{0} unexpected here", t));
@@ -265,7 +275,8 @@ public class Parser {
 		for (int i=args.size()-1; i>=0; i--) {
 			ftype.args[i] = ((Var)args.elementAt(i)).type;
 		}
-		func.asVar = new Var(fname, ftype);
+		func.signature = fname;
+		func.type = ftype;
 		//some checkings
 		if (fname.equals("main")) {
 			if (args.size() != 1) {

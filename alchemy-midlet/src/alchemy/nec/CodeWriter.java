@@ -97,9 +97,9 @@ class CodeWriter implements ExprVisitor {
 	public void visitFunc(Func f, DataOutputStream out) throws Exception {
 		FuncData data = new FuncComputer(true).visitFunc(f);
 		if (data.stackmax > 255 || data.localmax > 255 || data.codesize > 65535)
-			throw new Exception(I18N._("Function {0} can not be compiled, too complicated", f.asVar.name));
-		out.writeByte(f.asVar.name.charAt(0) == '_' ? 'H' : 'P');
-		out.writeShort(objects.indexOf(f.asVar.name));
+			throw new Exception(I18N._("Function {0} can not be compiled, too complicated", f.signature));
+		out.writeByte(f.signature.charAt(0) == '_' ? 'H' : 'P');
+		out.writeShort(objects.indexOf(f.signature));
 		out.writeByte(1); //has relocations
 		out.writeByte(data.stackmax);
 		out.writeByte(data.localmax);
@@ -120,7 +120,7 @@ class CodeWriter implements ExprVisitor {
 	
 	public void visitUndef(Func f, DataOutputStream out) throws IOException {
 		out.writeByte('U');
-		out.writeShort(objects.indexOf(f.asVar.name));
+		out.writeShort(objects.indexOf(f.signature));
 	}
 
 	public Object visitALen(ALenExpr alen, Object data) {

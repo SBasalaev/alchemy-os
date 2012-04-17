@@ -19,6 +19,8 @@
 package alchemy.nec.tree;
 
 import alchemy.nec.ParseException;
+import alchemy.util.I18N;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -35,22 +37,32 @@ public class Unit implements Scope {
 	Hashtable types = new Hashtable();
 
 	/**
-	 * Global functions.
+	 * Functions defined in this unit.
 	 */
 	public Vector funcs = new Vector();
+	
+	/**
+	 * Global variables.
+	 */
+	private Vector vars = new Vector();
 
 	public Type getType(String alias) {
 		return (Type)types.get(alias);
 	}
 
 	public Var getVar(String id) {
-		Func f = getFunc(id);
-		return f == null ? null : f.asVar;
+		for (Enumeration e = vars.elements(); e.hasMoreElements(); ) {
+			Var v = (Var)e.nextElement();
+			if (v.name.equals(id)) return v;
+		}
+		return null;
 	}
 
-	/** Always throws exceptions. Unit scope can only contain constants. */
 	public boolean addVar(Var v) throws ParseException {
-		throw new ParseException("Cannot add variable to outer scope");
+		if (getVar(v.name) != null)
+			throw new ParseException(I18N._("Variable {0} already exists at the outer scope", v.name));
+		vars.addElement(v);
+		return false;
 	}
 
 	public boolean isLocal(String id) {
@@ -62,9 +74,9 @@ public class Unit implements Scope {
 	}
 
 	public Func getFunc(String name) {
-		for (int i=funcs.size()-1; i>=0; i--) {
-			Func f = (Func)funcs.elementAt(i);
-			if (f.asVar.name.equals(name)) return f;
+		for (Enumeration e = funcs.elements(); e.hasMoreElements(); ) {
+			Func f = (Func)e.nextElement();
+			if (f.signature.equals(name)) return f;
 		}
 		return null;
 	}

@@ -31,8 +31,8 @@ class ConstCollector implements ExprVisitor {
 	public ConstCollector() { }
 
 	public void visitFunc(Func f, Vector v) {
-		if (!v.contains(f.asVar.name)) {
-			v.addElement(f.asVar.name);
+		if (!v.contains(f.signature)) {
+			v.addElement(f.signature);
 		}
 		if (f.body != null) {
 			f.body.accept(this, v);
