@@ -133,7 +133,16 @@ class LibUI01Func extends Function {
 			case 25: { // canvas_graphics(cnv: Screen): Graphics
 				return ((UICanvas)args[0]).getGraphics();
 			}
-			case 26: { // ui_set_screen(scr: Screen)
+			case 26: { // canvas_read_key(cnv: Screen): Int
+				// compatibility function with previous non-event canvas behavior
+				Object[] event = (Object[])UIServer.readEvent(c);
+				if (event != null && event[0] == args[0] && event[1] == UIServer.EVENT_KEY_PRESS) {
+					return event[2];
+				} else {
+					return Function.ZERO;
+				}
+			}
+			case 27: { // ui_set_screen(scr: Screen)
 				if (args[0] != null) {
 					UIServer.mapContext(c, (Displayable)args[0]);
 				} else {
@@ -141,34 +150,34 @@ class LibUI01Func extends Function {
 				}
 				return null;
 			}
-			case 27: // screen_height(scr: Screen): Int
+			case 28: // screen_height(scr: Screen): Int
 				return Ival(((Displayable)args[0]).getHeight());
-			case 28: // screen_width(scr: Screen): Int
+			case 29: // screen_width(scr: Screen): Int
 				return Ival(((Displayable)args[0]).getWidth());
-			case 29: // screen_get_title(scr: Screen): String
+			case 30: // screen_get_title(scr: Screen): String
 				return ((Displayable)args[0]).getTitle();
-			case 30: { // screen_set_title(scr: Screen, title: String)
+			case 31: { // screen_set_title(scr: Screen, title: String)
 				((Displayable)args[0]).setTitle((String)args[1]);
 				return null;
 			}
-			case 31: // screen_shown(scr: Screen): Bool
+			case 32: // screen_shown(scr: Screen): Bool
 				return Ival(((Displayable)args[0]).isShown());
-			case 32: // canvas_refresh(cnv: Screen)
+			case 33: // canvas_refresh(cnv: Screen)
 				((UICanvas)args[0]).repaint();
 				return null;
-			case 33: // screen_add_menu(scr: Screen, caption: String, order: Int)
+			case 34: // screen_add_menu(scr: Screen, caption: String, order: Int)
 				((Displayable)args[0]).addCommand(new Command((String)args[1], Command.ITEM, ival(args[2])));
 				return null;
-			case 34: // ui_read_event(): UIEvent
+			case 35: // ui_read_event(): UIEvent
 				return UIServer.readEvent(c);
-			case 35: // new_textbox(mode: Int): Screen
+			case 36: // new_textbox(mode: Int): Screen
 				return new TextBox(null, null, Short.MAX_VALUE, ival(args[0]));
-			case 36: // textbox_get_text(box: Screen): String
+			case 37: // textbox_get_text(box: Screen): String
 				return ((TextBox)args[0]).getString();
-			case 37: // textbox_set_text(box: Screen, text: String)
+			case 38: // textbox_set_text(box: Screen, text: String)
 				((TextBox)args[0]).setString((String)args[1]);
 				return null;
-			case 38: { // new_listbox(strings: Array, images: Array): Screen
+			case 39: { // new_listbox(strings: Array, images: Array): Screen
 				Object[] str = (Object[])args[0];
 				String[] strings = new String[str.length];
 				System.arraycopy(str, 0, strings, 0, str.length);
@@ -180,9 +189,9 @@ class LibUI01Func extends Function {
 				}
 				return new List(null, Choice.IMPLICIT, strings, images);
 			}
-			case 39: // listbox_get_index(list: Screen): Int
+			case 40: // listbox_get_index(list: Screen): Int
 				return Ival(((List)args[0]).getSelectedIndex());
-			case 40: // listbox_set_index(list: Screen, index: Int)
+			case 41: // listbox_set_index(list: Screen, index: Int)
 				((List)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
 			default:

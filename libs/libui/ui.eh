@@ -11,6 +11,7 @@ def screen_shown(scr: Screen): Bool;
 def screen_add_menu(scr: Screen, caption: String, order: Int);
 
 type UIEvent {
+  source: Screen,
   kind: Int,
   x: Int,
   y: Int

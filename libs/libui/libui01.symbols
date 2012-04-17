@@ -24,6 +24,7 @@ draw_image
 copy_area
 new_canvas
 canvas_graphics
+canvas_read_key
 ui_set_screen
 screen_height
 screen_width

@@ -133,7 +133,7 @@ public final class UIServer {
 	public static synchronized void addEvent(Displayable d, Integer kind, Integer val1, Integer val2) {
 		int index = screens.indexOf(d);
 		if (index < 0) return;
-		((Queue)queues.elementAt(index)).pushEvent(new Object[] { kind, val1, val2 });
+		((Queue)queues.elementAt(index)).pushEvent(new Object[] {d, kind, val1, val2 });
 	}
 	
 	/** Reads next event object for given context. */
