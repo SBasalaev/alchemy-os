@@ -14,7 +14,7 @@ def substr(s: String, from: Int, to: Int): String;
 def strucase(s: String): String;
 def strlcase(s: String): String;
 def strcat(s1: String, s2: String): String;
-def strcmp(s1: String, s2: String): String;
+def strcmp(s1: String, s2: String): Int;
 def strtrim(s: String): String;
 def strsplit(s: String, ch: Int): Array;
 def sprintf(fmt: String, args: Array): String;
