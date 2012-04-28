@@ -316,6 +316,7 @@ class Optimizer implements ExprVisitor {
 	}
 
 	public Object visitCast(CastExpr cast, Object scope) {
+		cast.expr = (Expr)cast.expr.accept(this, scope);
 		return cast;
 	}
 

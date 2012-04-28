@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
+import alchemy.core.Function;
 import alchemy.fs.File;
 import alchemy.util.I18N;
 import alchemy.nec.tree.*;
@@ -182,6 +183,25 @@ public class Parser {
 								default:
 									throw new ParseException(I18N._("{0} unexpected here", t));
 							}
+						} else if (t.svalue.equals("const")) {
+							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+								throw new ParseException(I18N._("Constant name expected after 'const'"));
+							String name = t.svalue;
+							expect('=');
+							Expr expr = (Expr)parseExpr(unit).accept(new Optimizer(), unit);
+							if (expr.getClass() != ConstExpr.class)
+								throw new ParseException(I18N._("Could not evaluate value of global constant"));
+							Var cnst = new Var(name, expr.rettype());
+							cnst.isConst = true;
+							cnst.constValue = (ConstExpr)expr;
+							unit.addVar(cnst);
+						} else if (t.svalue.equals("var")) {
+							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+								throw new ParseException(I18N._("Variable name expected after 'var'"));
+							String varname = t.svalue;
+							expect(':');
+							Type vartype = parseType(unit);
+							unit.addVar(new Var(varname, vartype));
 						} else if (t.svalue.equals("def")) {
 							Func fdef = parseFuncDef();
 							Var fvar = unit.getVar(fdef.signature);
@@ -582,7 +602,7 @@ public class Parser {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
 				if (type.equals(BuiltinType.typeInt))
-					return new BinaryExpr(sub, '^', new ConstExpr(new Integer(-1)));
+					return new BinaryExpr(sub, '^', new ConstExpr(Function.M_ONE));
 				else if (type.equals(BuiltinType.typeLong))
 					return new BinaryExpr(sub, '^', new ConstExpr(new Long(-1l)));
 				else
@@ -642,45 +662,50 @@ public class Parser {
 					}
 					Type btype = binaryCastType(ifexpr.rettype(), elseexpr.rettype());
 					return new IfExpr(cond, IfExpr.TRUE, cast(ifexpr,btype), cast(elseexpr,btype));
-				} else if (t.svalue.equals("var")) {
+				} else if (t.svalue.equals("var") || t.svalue.equals("const")) {
+					boolean isConst = t.svalue.equals("const");
 					if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-						throw new ParseException(I18N._("Identifier expected after var"));
+						throw new ParseException(I18N._("Identifier expected after 'var'"));
 					String varname = t.svalue;
 					Type vartype = null;
+					Expr varvalue = null;
+					// parsing type
 					if (t.nextToken() == ':') {
 						vartype = parseType(scope);
 					} else {
 						t.pushBack();
 					}
-					if (t.nextToken() == ';') {
-						if (vartype != null) {
-							Var v = new Var(varname, vartype);
-							if (scope.addVar(v)) {
-								warn(I18N._("Variable {0} hides another variable with the same name", v.name));
-							}
-							return new NoneExpr();
+					// parsing value
+					if (t.nextToken() == '=') {
+						varvalue = parseExpr(scope);
+						if (vartype == null) {
+							vartype = varvalue.rettype();
+							if (vartype.equals(BuiltinType.typeNone))
+								throw new ParseException(I18N._("Cannot convert from [none] to Any"));
 						} else {
-							throw new ParseException(I18N._("Type of {0} is not defined", varname));
+							varvalue = cast(varvalue, vartype);
 						}
 					} else {
 						t.pushBack();
 					}
-					if (t.nextToken() == '=') {
-						Expr value = parseExpr(scope);
-						if (vartype == null) {
-							vartype = value.rettype();
-							if (vartype.equals(BuiltinType.typeNone))
-								throw new ParseException(I18N._("Cannot convert from none to Any"));
-						} else {
-							value = cast(value, vartype);
+					// defining variable
+					if (vartype == null) {
+						throw new ParseException(I18N._("Type of {0} is not defined", varname));
+					}
+					Var v = new Var(varname, vartype);
+					if (isConst) {
+						v.isConst = true;
+						if (varvalue == null) {
+							throw new ParseException(I18N._("Constant {0} is not initialized", varname));
 						}
-						Var v = new Var(varname, vartype);
-						if (scope.addVar(v)) {
-							warn(I18N._("Variable {0} hides another variable with the same name", v.name));
-						}
-						return new AssignExpr(v, value);
+					}
+					if (scope.addVar(v)) {
+						warn(I18N._("Variable {0} hides another variable with the same name", v.name));
+					}
+					if (varvalue != null) {
+						return new AssignExpr(v, varvalue);
 					} else {
-						throw new ParseException(I18N._("{0} unexpected here", t));
+						return new NoneExpr();
 					}
 				} else if (t.svalue.equals("new")) {
 					Type type = parseType(scope);
@@ -756,22 +781,33 @@ public class Parser {
 				String str = t.svalue;
 				Var var = scope.getVar(str);
 				if (var == null) throw new ParseException(I18N._("Variable {0} is not defined", str));
-				switch (t.nextToken()) {
-					case '=': {
-						if (!scope.isLocal(str))
-							throw new ParseException(I18N._("Cannot assign to constant {0}", str));
-						Expr value = cast(parseExpr(scope), var.type);
+				if (t.nextToken() == '=') { // setting variable value
+					if (var.isConst)
+						throw new ParseException(I18N._("Cannot assign to constant {0}", str));
+					Expr value = cast(parseExpr(scope), var.type);
+					if (scope.isLocal(str)) {
 						return new AssignExpr(var, value);
+					} else {
+						// convert to  setstatic("var#hash", value)
+						Func setstatic = unit.getFunc("setstatic");
+						setstatic.hits++;
+						return new FCallExpr(new ConstExpr(setstatic), new Expr[] { new ConstExpr(str+'#'+var.hashCode()), value });
 					}
-					default: {
-						t.pushBack();
-						if (scope.isLocal(str)) {
-							return new VarExpr(var);
-						} else {
-							Func f = unit.getFunc(str);
-							f.hits++;
-							return new ConstExpr(f);
+				} else { // getting variable value
+					t.pushBack();
+					if (var.isConst && var.constValue != null) {
+						Object cnst = var.constValue.value;
+						if (cnst.getClass() == Func.class) {
+							((Func)cnst).hits++;
 						}
+						return var.constValue;
+					} else if (scope.isLocal(str)) {
+						return new VarExpr(var);
+					} else {
+						// convert to  cast(type)getstatic("var#hash")
+						Func getstatic = unit.getFunc("getstatic");
+						getstatic.hits++;
+						return new CastExpr(var.type, new FCallExpr(new ConstExpr(getstatic), new Expr[] { new ConstExpr(str+'#'+var.hashCode()) }));
 					}
 				}
 			default:
