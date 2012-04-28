@@ -1,5 +1,7 @@
 //math routines
 
+const PI = 3.141592653589793;
+
 def pi(): Double;
 def abs(val: Double): Double;
 def sin(val: Double): Double;
