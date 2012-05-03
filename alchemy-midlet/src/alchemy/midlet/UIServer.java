@@ -20,7 +20,6 @@ package alchemy.midlet;
 
 import alchemy.core.Context;
 import alchemy.core.ContextListener;
-import alchemy.core.Function;
 import java.util.Vector;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
@@ -123,17 +122,17 @@ public final class UIServer {
 		Displayable oldscr = display.getCurrent();
 		Displayable newscr = currentScreen();
 		if (oldscr != newscr) {
-			if (oldscr != null) addEvent(oldscr, EVENT_HIDE, Function.ZERO, Function.ZERO);
-			if (newscr != null) addEvent(newscr, EVENT_SHOW, Function.ZERO, Function.ZERO);
+			if (oldscr != null) addEvent(oldscr, EVENT_HIDE, null);
+			if (newscr != null) addEvent(newscr, EVENT_SHOW, null);
 		}
 		display.setCurrent(newscr);
 	}
 	
 	/** Adds given event to the event queue. */
-	public static synchronized void addEvent(Displayable d, Integer kind, Integer val1, Integer val2) {
+	public static synchronized void addEvent(Displayable d, Integer kind, Object value) {
 		int index = screens.indexOf(d);
 		if (index < 0) return;
-		((Queue)queues.elementAt(index)).pushEvent(new Object[] {d, kind, val1, val2 });
+		((Queue)queues.elementAt(index)).pushEvent(new Object[] {kind, d, value});
 	}
 	
 	/** Reads next event object for given context. */
@@ -153,7 +152,7 @@ public final class UIServer {
 	/** Generates command events. */
 	private static class UICommandListener implements CommandListener {
 		public void commandAction(Command c, Displayable d) {
-			addEvent(d, EVENT_MENU, new Integer(c.getPriority()), Function.ZERO);
+			addEvent(d, EVENT_MENU, c);
 		}
 	}
 	

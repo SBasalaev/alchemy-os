@@ -1,3 +1,3 @@
 #@alchemy.libs.LibUI01
-soname=libui.0.so
+soname=libui.0.1.so
 symbols=/libui01.symbols

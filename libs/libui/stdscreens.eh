@@ -9,3 +9,6 @@ def new_listbox(strings: Array, images: Array): Screen;
 
 def listbox_get_index(list: Screen): Int;
 def listbox_set_index(list: Screen, index: Int);
+
+type Menu;
+def listbox_default_menu(): Menu;

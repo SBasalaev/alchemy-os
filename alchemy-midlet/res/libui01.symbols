@@ -32,7 +32,6 @@ screen_get_title
 screen_set_title
 screen_shown
 canvas_refresh
-screen_add_menu
 ui_read_event
 new_textbox
 textbox_get_text
@@ -40,3 +39,9 @@ textbox_set_text
 new_listbox
 listbox_get_index
 listbox_set_index
+listbox_default_menu
+new_menu
+menu_get_text
+menu_get_priority
+screen_add_menu
+screen_remove_menu
