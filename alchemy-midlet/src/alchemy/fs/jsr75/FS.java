@@ -29,6 +29,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.io.file.FileSystemRegistry;
 
 /**
  * Filesystem using JSR75 specification.
@@ -309,5 +310,18 @@ public class FS extends Filesystem implements Initable {
 		} catch (IOException e) {
 			return -1l;
 		}
+	}
+
+	public String[] listRoots() {
+		Enumeration e = FileSystemRegistry.listRoots();
+		Vector rootv = new Vector();
+		while (e.hasMoreElements()) rootv.addElement(e.nextElement());
+		String[] roots = new String[rootv.size()];
+		for (int i=0; i<rootv.size(); i++) {
+			String str = String.valueOf(rootv.elementAt(i));
+			if (!str.endsWith("/")) str = str+"/";
+			roots[i] = str;
+		}
+		return roots;
 	}
 }

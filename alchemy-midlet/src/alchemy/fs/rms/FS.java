@@ -84,6 +84,10 @@ public final class FS extends Filesystem implements Initable {
 		this.store = rs;
 	}
 
+	public String[] listRoots() {
+		return new String[] {"/"};
+	}
+
 	public synchronized void create(File file) throws IOException {
 		RSFD parentfd = getFD(file.parent());
 		if ((parentfd.attrs & F_DIR) == 0)

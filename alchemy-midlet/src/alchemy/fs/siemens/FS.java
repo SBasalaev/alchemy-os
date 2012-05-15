@@ -23,6 +23,7 @@ import alchemy.fs.Filesystem;
 import alchemy.util.I18N;
 import alchemy.util.Initable;
 import com.siemens.mp.io.file.FileConnection;
+import com.siemens.mp.io.file.FileSystemRegistry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -284,5 +285,18 @@ public final class FS extends Filesystem implements Initable {
 		} catch (IOException e) {
 			return -1l;
 		}
+	}
+
+	public String[] listRoots() {
+		Enumeration e = FileSystemRegistry.listRoots();
+		Vector rootv = new Vector();
+		while (e.hasMoreElements()) rootv.addElement(e.nextElement());
+		String[] roots = new String[rootv.size()];
+		for (int i=0; i<rootv.size(); i++) {
+			String str = String.valueOf(rootv.elementAt(i));
+			if (!str.endsWith("/")) str = str+"/";
+			roots[i] = str;
+		}
+		return roots;
 	}
 }

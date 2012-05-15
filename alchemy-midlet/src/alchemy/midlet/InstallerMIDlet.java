@@ -25,6 +25,7 @@ import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Vector;
 import javax.microedition.lcdui.*;
@@ -45,15 +46,16 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private final Display display;
 	private final Form messages = new Form(I18N._("Installer"));
 
+	/** Commands for main screen. */
 	private final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 10);
 	private final Command cmdAbout = new Command(I18N._("About"), Command.OK, 8);
 	private final Command cmdInstall = new Command(I18N._("Install"), Command.OK, 1);
 	private final Command cmdUpdate = new Command(I18N._("Update"), Command.OK, 2);
 	private final Command cmdUninstall = new Command(I18N._("Uninstall"), Command.OK, 5);
-	private final Command cmdOk = new Command(I18N._("Ok"), Command.OK, 1);
-
-	/** Used by interactive dialogs. */
-	private final Object waitForAction = new Object();
+	
+	/** Command for dialogs. */
+	private final Command cmdChoose = new Command(I18N._("Choose"), Command.OK, 2);
+	private final Command cmdOpenDir = new Command(I18N._("Open"), Command.ITEM, 1);
 
 	private Properties setupCfg;
 
@@ -68,7 +70,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			return;
 		}
 		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+
-			"Development branch\n" +
+			"\nDevelopment branch\n" +
 			"\n\nCopyright (c) 2011-2012, Sergey Basalaev\n" +
 			"http://alchemy-os.googlecode.com\n" +
 			"\n" +
@@ -102,9 +104,23 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			new InstallerThread(2).start();
 		} else if (c == cmdUpdate) {
 			new InstallerThread(3).start();
-		} else {
-			synchronized (waitForAction) {
-				waitForAction.notify();
+		} else if (c == cmdChoose) {
+			synchronized (d) {
+				d.notify();
+			}
+		} else if (c == cmdOpenDir) {
+			FSNavigator nav = (FSNavigator)d;
+			String path = nav.getString(nav.getSelectedIndex());
+			if (path.endsWith("/")) try {
+				nav.setCurrentDir(new File(nav.getCurrentDir(), path));
+				if (nav.getCurrentDir().path().length() == 0) {
+					nav.removeCommand(cmdChoose);
+				} else {
+					nav.addCommand(cmdChoose);
+				}
+			} catch (IOException ioe) {
+				Alert alert = new Alert("I/O error", ioe.toString(), null, AlertType.ERROR);
+				display.setCurrent(alert, d);
 			}
 		}
 	}
@@ -135,36 +151,50 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.deleteAll();
 		Properties instCfg = InstallInfo.read();
 		//choosing filesystem
-		String[] filesystems = IO.split(setupCfg.get("install.fs"), ' ');
-		List fschoice = new List(I18N._("Choose filesystem"), Choice.EXCLUSIVE);
-		for (int i=0; i<filesystems.length; i++) {
-			fschoice.append(setupCfg.get("install.fs."+filesystems[i]+".name"), null);
+		Vector filesystems = new Vector();
+		String[] fstypes = IO.split(setupCfg.get("install.fs"), ' ');
+		for (int i=0; i<fstypes.length; i++) {
+			try {
+				Class.forName(setupCfg.get("install.fs."+fstypes[i]+".test"));
+				filesystems.addElement(fstypes[i]);
+			} catch (ClassNotFoundException cnfe) {
+				// skip this file system
+			}
 		}
-		fschoice.addCommand(cmdOk);
-		fschoice.setSelectCommand(cmdOk);
+		final List fschoice = new List(I18N._("Choose filesystem"), Choice.IMPLICIT);
+		for (int i=0; i<filesystems.size(); i++) {
+			fschoice.append(setupCfg.get("install.fs."+filesystems.elementAt(i)+".name"), null);
+		}
+		fschoice.addCommand(cmdChoose);
+		fschoice.setSelectCommand(cmdChoose);
 		fschoice.setCommandListener(this);
 		display.setCurrent(fschoice);
-		synchronized (waitForAction) {
-			waitForAction.wait();
+		synchronized (fschoice) {
+			fschoice.wait();
 		}
-		String selectedfs = filesystems[fschoice.getSelectedIndex()];
-		//reading fs init settings
-		String fsask = setupCfg.get("install.fs."+selectedfs+".ask");
-		String fsinit = setupCfg.get("install.fs."+selectedfs+".default");
-		if (fsask != null) {
-			TextBox bxInitFs = new TextBox(I18N._(fsask), fsinit, 512, TextField.ANY);
-			bxInitFs.addCommand(cmdOk);
-			bxInitFs.setCommandListener(this);
-			display.setCurrent(bxInitFs);
-			synchronized (waitForAction) {
-				waitForAction.wait();
+		String selectedfs = filesystems.elementAt(fschoice.getSelectedIndex()).toString();
+		messages.append(I18N._("Selected filesystem: {0}", fschoice.getString(fschoice.getSelectedIndex()))+'\n');
+		//choosing root path if needed
+		String fsinit = setupCfg.get("install.fs."+selectedfs+".init");
+		if (fsinit == null) fsinit = "";
+		String neednav = setupCfg.get("install.fs."+selectedfs+".nav");
+		instCfg.put("fs.type", selectedfs);
+		instCfg.put("fs.init", fsinit);
+		if ("true".equals(neednav)) {
+			final FSNavigator navigator = new FSNavigator(InstallInfo.getFilesystem());
+			navigator.setSelectCommand(cmdOpenDir);
+			navigator.addCommand(cmdChoose);
+			navigator.setCommandListener(this);
+			navigator.setCurrentDir(new File(""));
+			display.setCurrent(navigator);
+			synchronized (navigator) {
+				navigator.wait();
 			}
-			fsinit = bxInitFs.getString();
+			String path = navigator.getCurrentDir().path();
+			instCfg.put("fs.init", path);
+			messages.append("Selected path: "+path);
 		}
 		display.setCurrent(messages);
-		//initializing fs
-		instCfg.put(InstallInfo.FS_TYPE, selectedfs);
-		instCfg.put(InstallInfo.FS_INIT, fsinit);
 		//installing files
 		installArchives();
 		installCfg();
@@ -184,6 +214,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		//purging filesystem
 		try {
 			RecordStore.deleteRecordStore("rsfiles");
+			messages.append(I18N._("Filesystem erased")+'\n');
 		} catch (RecordStoreException rse) { }
 		//removing config
 		InstallInfo.remove();
@@ -193,6 +224,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	private void update() throws Exception {
 		messages.deleteAll();
+		messages.append(I18N._("Removing deprecated components")+'\n');
 		Filesystem fs = InstallInfo.getFilesystem();
 		//changes since 1.0
 		fs.remove(new File("/lib/libcore"));
@@ -211,6 +243,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		Properties instCfg = InstallInfo.read();
 		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
 		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
+		messages.append(I18N._("Saving configuration...")+'\n');
 		InstallInfo.save();
 		messages.append(I18N._("Updated successfully")+'\n');
 		messages.addCommand(cmdUninstall);

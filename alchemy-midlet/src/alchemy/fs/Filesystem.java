@@ -362,4 +362,13 @@ public abstract class Filesystem {
 	 *   if application is not granted access to the file system
 	 */
 	public abstract long spaceUsed();
+	
+	/**
+	 * Service method for the installer.
+	 * If implementation represents a set of mounted file systems,
+	 * method returns paths to all file system roots ("C:/", "0:/" and so on).
+	 * If implementation allows just a single root, method should return one
+	 * element "/".
+	 */
+	public abstract String[] listRoots();
 }

@@ -72,9 +72,8 @@ public final class File {
 	}
 
 	/**
-	 * Validates and normalizes path.
-	 * Valid path either empty or starts with slash and not ends with
-	 * slash. Normalization includes:
+	 * Normalizes path.
+	 * Normalization includes:
 	 * <ol>
 	 *   <li>
 	 *     Replacing all sequences of slashes with single slash.
@@ -89,14 +88,13 @@ public final class File {
 	 *
 	 * @param path  path to the file
 	 *
-	 * @throws IllegalArgumentException if parameter is not valid path
 	 * @throws NullPointerException if parameter is <code>null</code>
 	 * @return normalized path
 	 */
 	private static String normalize(String path) {
 		if (path.length() == 0) return path;
-		if ((path.charAt(0) != '/') || (path.charAt(path.length()-1) == '/'))
-			throw new IllegalArgumentException(path);
+		if (path.charAt(0) != '/') path = "/"+path;
+		if (path.charAt(path.length()-1) == '/') path = path+'.';
 		//we know string starts with '/' and not ends with '/'
 		StringBuffer sb = new StringBuffer();
 		while (path.length() > 0) {

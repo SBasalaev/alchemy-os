@@ -31,25 +31,25 @@ import javax.microedition.rms.RecordStoreNotFoundException;
 
 /**
  * Information about Alchemy installation.
+ * Information is stored as properties in the record store
+ * named "installinfo". Stored properties are:
+ * <dl>
+ * <dt><code>fs.type</code></dt>
+ * <dd>Type of filesystem to use</dd>
+ * <dt><code>fs.init</code></dt>
+ * <dd>Initialization string for the filesystem, for
+ * RMS - name of the recordstore, for others - path to the root
+ * directory</dd>
+ * <dt><code>alchemy.initcmd</code></dt>
+ * <dd>Command that is executed to run Alchemy</dd>
+ * <dt><code>alchemy.version</code></dt>
+ * <dd>Version of installation</dd>
+ * </dl>
  * @author Sergey Basalaev
  */
 class InstallInfo {
 
 	private static final String INSTALLINFO = "installinfo";
-
-	/**
-	 * Key for the property that identifies type of used filesystem.
-	 */
-	static final String FS_TYPE = "fs.type";
-	/**
-	 * Property that contains initialization string for filesystem.
-	 * Value depends on the value for 'fs.type' property.
-	 * <ul>
-	 *   <li>For RMS it will be name of the used record store</li>
-	 *   <li>For JSR75 and SIEMENS it will be path to the root directory</li>
-	 * </ul>
-	 */
-	static final String FS_INIT = "fs.init";
 
 	private static Properties props;
 
@@ -117,7 +117,7 @@ class InstallInfo {
 			props = null;
 			RecordStore.deleteRecordStore(INSTALLINFO);
 		} catch (RecordStoreNotFoundException rsnfe) {
-			
+			// already removed
 		} catch (Exception e) {
 			throw new RuntimeException(e.toString());
 		}
@@ -130,8 +130,8 @@ class InstallInfo {
 	public static Filesystem getFilesystem() throws IOException {
 		if (props == null && !exists()) return null;
 		if (props == null) read();
-		String fstype = props.get(FS_TYPE);
-		String fsinit = props.get(FS_INIT);
+		String fstype = props.get("fs.type");
+		String fsinit = props.get("fs.init");
 		try {
 			Class fsclass = Class.forName("alchemy.fs."+fstype+".FS");
 			Filesystem fs = (Filesystem)fsclass.newInstance();
@@ -140,9 +140,9 @@ class InstallInfo {
 			}
 			return fs;
 		} catch (ClassNotFoundException cnfe) {
-			throw new RuntimeException(I18N._("FS module not found for ")+FS_TYPE+'='+fstype);
+			throw new RuntimeException(I18N._("FS module not found for fs.type={0}", fstype));
 		} catch (Throwable t) {
-			throw new RuntimeException(I18N._("Error while creating FS: ")+t);
+			throw new RuntimeException(I18N._("Error while creating FS: {0}", t));
 		}
 	}
 }
