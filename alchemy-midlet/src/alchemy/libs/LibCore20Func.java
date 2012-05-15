@@ -21,7 +21,6 @@ package alchemy.libs;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
-import alchemy.util.I18N;
 import alchemy.util.IO;
 import java.io.IOException;
 import java.io.InputStream;
@@ -351,7 +350,7 @@ class LibCore20Func extends Function {
 			case 110: { // netread(url: String): IStream
 				String addr = (String)args[0];
 				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
-					throw new IOException(I18N._("Unknown protocol in netread()"));
+					throw new IOException("Unknown protocol in netread()");
 				InputStream stream = Connector.openInputStream(addr);
 				c.addStream(stream);
 				return stream;

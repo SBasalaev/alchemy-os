@@ -18,7 +18,6 @@
 
 package alchemy.nec;
 
-import alchemy.util.I18N;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 
@@ -137,13 +136,13 @@ class Tokenizer {
 		if (ch == '\'') {
 			ch = readChar();
 			if (ch == '\n' || ch == EOF_CHAR) {
-				throw new ParseException(I18N._("Unclosed character literal"));
+				throw new ParseException("Unclosed character literal");
 			}
 			if (ch == '\\') ch = readEscape();
 			ivalue = ch;
 			ch = readChar();
 			if (ch != '\'') {
-				throw new ParseException(I18N._("Unclosed character literal"));
+				throw new ParseException("Unclosed character literal");
 			}
 			return ttype = TT_INT;
 		}
@@ -158,7 +157,7 @@ class Tokenizer {
 				ch = readChar();
 			}
 			if (ch != '"') {
-				throw new ParseException(I18N._("Unclosed string literal"));
+				throw new ParseException("Unclosed string literal");
 			}
 			svalue = str.toString();
 			return ttype = TT_QUOTED;
@@ -189,7 +188,7 @@ class Tokenizer {
 						try {
 							lvalue = Long.parseLong(number.toString(), 16);
 						} catch (NumberFormatException nfe) {
-							throw new ParseException(I18N._("Integer number too large: {0}", number));
+							throw new ParseException("Integer number too large: "+number);
 						}
 						return ttype = TT_LONG;
 					} else {
@@ -197,7 +196,7 @@ class Tokenizer {
 						try {
 							ivalue = Integer.parseInt(number.toString(), 16);
 						} catch (NumberFormatException nfe) {
-							throw new ParseException(I18N._("Integer number too large: {0}", number));
+							throw new ParseException("Integer number too large: "+number);
 						}
 						return ttype = TT_INT;
 					}
@@ -234,7 +233,7 @@ class Tokenizer {
 					nextch = ch;
 					number.append(readDecimal());
 				} else {
-					throw new ParseException(I18N._("Malformed floating point literal: {0}", number));
+					throw new ParseException("Malformed floating point literal: "+number);
 				}
 				dotseen = true;
 			} else {
@@ -246,7 +245,7 @@ class Tokenizer {
 				try {
 					fvalue = Float.parseFloat(number.toString());
 				} catch (NumberFormatException nfe) {
-					throw new ParseException(I18N._("Floating point number too large: {0}", number));
+					throw new ParseException("Floating point number too large: "+number);
 				}
 				return ttype = TT_FLOAT;
 			}
@@ -254,7 +253,7 @@ class Tokenizer {
 				try {
 					dvalue = Double.parseDouble(number.toString());
 				} catch (NumberFormatException nfe) {
-					throw new ParseException(I18N._("Floating point number too large: {0}", number));
+					throw new ParseException("Floating point number too large: "+number);
 				}
 				return ttype = TT_DOUBLE;
 			}
@@ -263,7 +262,7 @@ class Tokenizer {
 				try {
 					dvalue = Double.parseDouble(number.toString());
 				} catch (NumberFormatException nfe) {
-					throw new ParseException(I18N._("Floating point number too large: {0}", number));
+					throw new ParseException("Floating point number too large: "+number);
 				}
 				return ttype = TT_DOUBLE;
 			}
@@ -271,7 +270,7 @@ class Tokenizer {
 				try {
 					lvalue = Long.parseLong(number.toString(), 10);
 				} catch (NumberFormatException nfe) {
-					throw new ParseException(I18N._("Integer number too large: {0}", number));
+					throw new ParseException("Integer number too large: "+number);
 				}
 				return ttype = TT_LONG;
 			} else {
@@ -279,7 +278,7 @@ class Tokenizer {
 				try {
 					ivalue = Integer.parseInt(number.toString(), 10);
 				} catch (NumberFormatException nfe) {
-					throw new ParseException(I18N._("Integer number too large: {0}", number));
+					throw new ParseException("Integer number too large: "+number);
 				}
 				return ttype = TT_INT;
 			}
@@ -343,7 +342,7 @@ class Tokenizer {
 						ch2 = readChar();
 					}
 					if (ch2 == EOF_CHAR) {
-						throw new ParseException(I18N._("Unclosed comment"));
+						throw new ParseException("Unclosed comment");
 					}
 					return nextToken();
 				}
@@ -384,7 +383,7 @@ class Tokenizer {
 				int u3 = hexdigit(readChar());
 				int u4 = hexdigit(readChar());
 				if ((u1|u2|u3|u4) < 0) {
-					throw new ParseException(I18N._("Illegal unicode escape"));
+					throw new ParseException("Illegal unicode escape");
 				}
 				return (u1 << 12) | (u2 << 8) | (u3 << 4) | u4;
 			}
@@ -417,7 +416,7 @@ class Tokenizer {
 				return octal;
 			}
 		}
-		throw new ParseException(I18N._("Illegal escape sequence"));
+		throw new ParseException("Illegal escape sequence");
 	}
 
 	/**

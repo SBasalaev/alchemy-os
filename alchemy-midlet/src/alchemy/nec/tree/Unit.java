@@ -19,7 +19,6 @@
 package alchemy.nec.tree;
 
 import alchemy.nec.ParseException;
-import alchemy.util.I18N;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -60,7 +59,7 @@ public class Unit implements Scope {
 
 	public boolean addVar(Var v) throws ParseException {
 		if (getVar(v.name) != null)
-			throw new ParseException(I18N._("Variable {0} already exists at the outer scope", v.name));
+			throw new ParseException("Variable "+v.name+" already exists at the outer scope");
 		vars.addElement(v);
 		return false;
 	}

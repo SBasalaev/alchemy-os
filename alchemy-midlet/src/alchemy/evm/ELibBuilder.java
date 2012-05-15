@@ -23,7 +23,6 @@ import alchemy.core.Function;
 import alchemy.core.HashLibrary;
 import alchemy.core.LibBuilder;
 import alchemy.core.Library;
-import alchemy.util.I18N;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +69,7 @@ public class ELibBuilder implements LibBuilder {
 		//reading format version
 		int ver = data.readUnsignedShort();
 		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
-			throw new InstantiationException(I18N._("Incompatible file format"));
+			throw new InstantiationException("Incompatible file format");
 		//reading flags
 		int lflags = data.readUnsignedByte();
 		//reading soname
@@ -137,10 +136,10 @@ public class ELibBuilder implements LibBuilder {
 				} break;
 				case 'U': { //unresolved function
 					int nameref = data.readUnsignedShort();
-					throw new InstantiationException(I18N._("Unresolved function: {0}", cpool[nameref]));
+					throw new InstantiationException("Unresolved function: "+cpool[nameref]);
 				}
 				default:
-					throw new InstantiationException(I18N._("Unknown data type: {0}", String.valueOf(ctype)));
+					throw new InstantiationException("Unknown data type: "+String.valueOf(ctype));
 			}
 		}
 		in.close();

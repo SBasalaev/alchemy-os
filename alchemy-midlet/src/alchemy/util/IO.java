@@ -30,9 +30,9 @@ import java.util.Vector;
  */
 public final class IO {
 
-	private static final String ERR_END = I18N._("Incomplete character at the end");
-	private static final String ERR_WRONG = I18N._("Wrong code at byte ");
-	private static final String ERR_LONG = I18N._("Encoded string is too long");
+	private static final String ERR_END = "Incomplete character at the end";
+	private static final String ERR_WRONG = "Wrong code at byte ";
+	private static final String ERR_LONG = "Encoded string is too long";
 
 	private IO() { }
 

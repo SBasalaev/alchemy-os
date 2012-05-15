@@ -19,7 +19,6 @@
 package alchemy.apps;
 
 import alchemy.core.Context;
-import alchemy.util.I18N;
 import alchemy.midlet.UIServer;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -32,23 +31,23 @@ import javax.microedition.lcdui.Command;
  */
 public class Console extends NativeApp {
 
-	private static final String HELP = I18N._("Usage: terminal [-k] <command> <args>...");
-	private static final Command cmdClose = new Command(I18N._("Close"), Command.EXIT, 4);
+	private static final String HELP = "Usage: terminal [-k] <command> <args>...";
+	private static final Command cmdClose = new Command("Close", Command.EXIT, 4);
 
 	public Console() { }
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			IO.println(c.stderr, I18N._("terminal: no command given"));
+			IO.println(c.stderr, "terminal: no command given");
 			IO.println(c.stderr, HELP);
 			return 1;
 		}
 		if (args[0].equals("-v")) {
-			IO.println(c.stdout, I18N._("Native terminal v1.1"));
+			IO.println(c.stdout, "Native terminal v1.1");
 			return 0;
 		}
 		if (args[0].equals("-h")) {
-			IO.println(c.stdout, I18N._("terminal - run command in the new terminal"));
+			IO.println(c.stdout, "terminal - run command in the new terminal");
 			IO.println(c.stdout, HELP);
 			return 0;
 		}
@@ -56,7 +55,7 @@ public class Console extends NativeApp {
 		if (args[0].equals("-k")) {
 			keep = true;
 			if (args.length == 1) {
-				IO.println(c.stderr, I18N._("terminal: no command given"));
+				IO.println(c.stderr, "terminal: no command given");
 				IO.println(c.stderr, HELP);
 				return 1;
 			}
@@ -82,7 +81,7 @@ public class Console extends NativeApp {
 					System.arraycopy(args, 1, childArgs, 0, args.length-1);
 				}
 			}
-			form.setTitle(childCmd+" - "+I18N._("Terminal"));
+			form.setTitle(childCmd+" - Terminal");
 			child.stdin = form.in;
 			child.stdout = form.out;
 			child.stderr = form.out;

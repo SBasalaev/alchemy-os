@@ -21,7 +21,6 @@ package alchemy.nec;
 import alchemy.core.Context;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
-import alchemy.util.I18N;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import alchemy.util.Properties;
@@ -46,7 +45,7 @@ public class NEL extends NativeApp {
 	static private final int SUPPORTED = 0x0101;
 
 	static private final String VERSION =
-			I18N._("Native E linker version 1.2");
+			"Native E linker version 1.2";
 
 	static private final String HELP =
 			"Usage: el [options] <input>...\nOptions:\n" +
@@ -89,7 +88,7 @@ public class NEL extends NativeApp {
 			} else if (arg.startsWith("-s") && arg.length() > 2) {
 				soname = arg.substring(2);
 			} else if (arg.charAt(0) == '-') {
-				IO.println(c.stderr, I18N._("Unknown argument: {0}", arg));
+				IO.println(c.stderr, "Unknown argument: "+arg);
 				return 1;
 			} else if (wait_outname) {
 				outname = arg;
@@ -99,7 +98,7 @@ public class NEL extends NativeApp {
 			}
 		}
 		if (infiles.isEmpty()) {
-			IO.println(c.stderr, I18N._("No files to process"));
+			IO.println(c.stderr, "No files to process");
 			return 1;
 		}
 		try {
@@ -123,10 +122,10 @@ public class NEL extends NativeApp {
 				File infile = c.toFile(infiles.elementAt(fi).toString());
 				DataInputStream data = new DataInputStream(c.fs().read(infile));
 				if (data.readInt() != 0xC0DE0101)
-					throw new Exception(I18N._("Unsupported object format in {0}", infile));
+					throw new Exception("Unsupported object format in "+infile);
 				int lflags = data.readUnsignedByte();
 				if (lflags != 0)
-					throw new Exception(I18N._("Relinkage of shared objects is not supported"));
+					throw new Exception("Relinkage of shared objects is not supported");
 				int poolsize = data.readUnsignedShort();
 				for (int oi = 0; oi < poolsize; oi++) {
 					int type = data.readUnsignedByte();
@@ -163,7 +162,7 @@ public class NEL extends NativeApp {
 							break;
 						}
 						case 'E':
-							throw new Exception(I18N._("Partial linkage is not supported"));
+							throw new Exception("Partial linkage is not supported");
 						case 'H':
 						case 'P': {
 							String name = pool.elementAt(reloctable[offset+data.readUnsignedShort()]).toString();
@@ -171,7 +170,7 @@ public class NEL extends NativeApp {
 							f.type = type;
 							f.flags = data.readUnsignedByte();
 							if ((f.flags & 1) == 0)
-								throw new Exception(I18N._("Missing relocation table in {0}", f.name));
+								throw new Exception("Missing relocation table in "+f.name);
 							f.stack = data.readUnsignedByte();
 							f.locals = data.readUnsignedByte();
 							f.code = new byte[data.readUnsignedShort()];
@@ -185,7 +184,7 @@ public class NEL extends NativeApp {
 							break;
 						}
 						default:
-							throw new Exception(I18N._("Unknown object type: {0}", String.valueOf(type)));
+							throw new Exception("Unknown object type: "+String.valueOf(type));
 					}
 					int objindex = pool.indexOf(obj);
 					if (objindex < 0) {
@@ -195,13 +194,13 @@ public class NEL extends NativeApp {
 						NELFunc old = (NELFunc)pool.elementAt(objindex);
 						if (old instanceof ExFunc) {
 							if (obj instanceof InFunc) {
-								throw new Exception(I18N._("Multiple definitions of {0}", obj));
+								throw new Exception("Multiple definitions of "+obj);
 							} else if (obj instanceof ExFunc) {
 								//should be ok
 							}
 						} else if (old instanceof InFunc) {
 							if (obj instanceof ExFunc || obj instanceof InFunc) {
-								throw new Exception(I18N._("Multiple definitions of {0}", obj));
+								throw new Exception("Multiple definitions of "+obj);
 							}
 						} else { //old is unresolved, replace it without a doubt
 							pool.setElementAt(obj, objindex);
@@ -230,7 +229,7 @@ public class NEL extends NativeApp {
 						f.code[r+1] = (byte)newaddr;
 					}
 				} else if (obj.getClass() == NELFunc.class) {
-					throw new Exception(I18N._("Unresolved symbol: {0}", obj));
+					throw new Exception("Unresolved symbol: "+obj);
 				}
 			}
 			//indexing libraries, throwing out unused
@@ -301,8 +300,8 @@ public class NEL extends NativeApp {
 			out.close();
 			c.fs().setExec(outfile, true);
 		} catch (Exception e) {
-			IO.println(c.stderr, I18N._("Error: {0}", e));
-			e.printStackTrace();
+			IO.println(c.stderr, "Error: "+e);
+			//e.printStackTrace();
 			return 1;
 		}
 		return 0;
@@ -315,7 +314,7 @@ public class NEL extends NativeApp {
 		LibInfo info;
 		if (magic < 0) {
 			in.close();
-			throw new Exception(I18N._("File is too short: {0}", libfile));
+			throw new Exception("File is too short: "+libfile);
 		} else if (magic == ('#'<<8|'=')) {
 			byte[] buf = IO.readFully(in);
 			in.close();
@@ -325,7 +324,7 @@ public class NEL extends NativeApp {
 		} else if (magic == ('#'<<8|'@')) {
 			info = loadFromNative(in);
 		} else {
-			throw new Exception(I18N._("Unknown library format in {0}", libfile));
+			throw new Exception("Unknown library format in "+libfile);
 		}
 		if (info.soname == null) info.soname = libname;
 		return info;
@@ -334,12 +333,12 @@ public class NEL extends NativeApp {
 	private LibInfo loadFromECode(InputStream in) throws Exception {
 		DataInputStream data = new DataInputStream(in);
 		if (data.readUnsignedShort() > 0x0101)
-			throw new Exception(I18N._("Unsupported format version"));
+			throw new Exception("Unsupported format version");
 		LibInfo info = new LibInfo();
 		Vector symbols = new Vector();
 		int lflags = data.readUnsignedByte();
 		if ((lflags & 1) == 0) { //not linked
-			throw new Exception(I18N._("Not shared object passed to -l"));
+			throw new Exception("Not shared object passed to -l");
 		}
 		if ((lflags & 4) != 0) { //has soname
 			info.soname = data.readUTF();
@@ -384,9 +383,9 @@ public class NEL extends NativeApp {
 					break;
 				}
 				case 'U':
-					throw new Exception(I18N._("Unresolved symbol: {0}", data.readUTF()));
+					throw new Exception("Unresolved symbol: "+data.readUTF());
 				default:
-					throw new Exception(I18N._("Unknown object type: ", String.valueOf(ch)));
+					throw new Exception("Unknown object type: "+String.valueOf(ch));
 			}
 		}
 		in.close();

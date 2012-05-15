@@ -20,7 +20,6 @@ package alchemy.core;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
-import alchemy.util.I18N;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
@@ -243,7 +242,7 @@ public class Context {
 	 * @see #getCurDir() 
 	 */
 	public void setCurDir(File newdir) throws IOException {
-		if (!art.fs.isDirectory(newdir)) throw new IOException(I18N._("Not a directory: {0}", newdir));
+		if (!art.fs.isDirectory(newdir)) throw new IOException("Not a directory: "+newdir);
 		curdir = newdir;
 	}
 
@@ -338,7 +337,7 @@ public class Context {
 		if (cmdArgs == null) cmdArgs = new String[0];
 		Library prog = loadLibForPath(progname, getEnv("PATH"));
 		Function main = prog.getFunc("main");
-		if (main == null) throw new InstantiationException(I18N._("No 'main' function"));
+		if (main == null) throw new InstantiationException("No 'main' function");
 		thread = new ContextThread(progname, main, cmdArgs);
 		setState(RUNNING);
 		thread.start();
@@ -375,7 +374,7 @@ public class Context {
 		File libfile = resolveFile(libname, pathlist);
 		//checking permissions
 		if (!fs().canExec(libfile))
-			throw new InstantiationException(I18N._("Permission denied: {0}", libfile));
+			throw new InstantiationException("Permission denied: "+libfile);
 		//searching in cache
 		long tstamp = fs().lastModified(libfile);
 		Library lib = art.cache.getLibrary(libfile, tstamp);
@@ -385,7 +384,7 @@ public class Context {
 		try {
 			int magic = (in.read() << 8) | in.read();
 			if (magic < 0)
-				throw new InstantiationException(I18N._("Unknown library format"));
+				throw new InstantiationException("Unknown library format");
 			//parsing link
 			if (magic == (short)(('#'<<8)|'=')) {
 				String fname = new UTFReader(in).readLine();
@@ -405,7 +404,7 @@ public class Context {
 			}
 			LibBuilder builder = art.builders.get((short)magic);
 			if (builder == null)
-				throw new InstantiationException(I18N._("Unknown library format"));
+				throw new InstantiationException("Unknown library format");
 			lib = builder.build(this, in);
 			//caching
 			art.cache.putLibrary(libfile, tstamp, lib);
@@ -444,7 +443,7 @@ public class Context {
 				if (fs().exists(f)) return f;
 			}
 		}
-		throw new IOException(I18N._("File not found: {0}", name));
+		throw new IOException("File not found: "+name);
 	}
 
 	/**
@@ -557,7 +556,7 @@ public class Context {
 				exitcode = r == null ? 0 : r.intValue();
 			} catch (Throwable t) {
 				error = t;
-				t.printStackTrace();
+				//t.printStackTrace();
 			}
 			setState(ENDED);
 			if (streams != null) {

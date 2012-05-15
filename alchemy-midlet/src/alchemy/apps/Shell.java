@@ -27,7 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Vector;
 import alchemy.apps.ConsoleForm.ConsoleInputStream;
-import alchemy.util.I18N;
 
 /**
  * Native shell.
@@ -35,7 +34,7 @@ import alchemy.util.I18N;
  */
 public class Shell extends NativeApp {
 
-	static private final String C_USAGE = I18N._("Usage: sh -c <cmd> <args>...");
+	static private final String C_USAGE = "Usage: sh -c <cmd> <args>...";
 
 	public Shell() { }
 
@@ -91,7 +90,7 @@ public class Shell extends NativeApp {
 							((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 						}
 					} else {
-						IO.println(c.stderr, I18N._("cd: no directory specified"));
+						IO.println(c.stderr, "cd: no directory specified");
 					}
 				} else if (cc.cmd.equals("cls")) {
 					if (c.stdin instanceof ConsoleInputStream) {
@@ -133,7 +132,7 @@ public class Shell extends NativeApp {
 			}
 			return 0;
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			IO.println(c.stderr, e);
 			return 1;
 		}
@@ -157,13 +156,13 @@ public class Shell extends NativeApp {
 			String token;
 			if (line.charAt(0) == '\'') {
 				end = line.indexOf('\'', 1);
-				if (end < 0) throw new IllegalArgumentException(I18N._("Unclosed '"));
+				if (end < 0) throw new IllegalArgumentException("Unclosed '");
 				token = line.substring(1,end);
 				line = line.substring(end+1).trim();
 				if (mode == MODE_ARG) mode = MODE_QARG;
 			} else if (line.charAt(0) == '"') {
 				end = line.indexOf('"', 1);
-				if (end < 0) throw new IllegalArgumentException(I18N._("Unclosed \""));
+				if (end < 0) throw new IllegalArgumentException("Unclosed \"");
 				token = line.substring(1, end);
 				line = line.substring(end+1).trim();
 				if (mode == MODE_ARG) mode = MODE_QARG;

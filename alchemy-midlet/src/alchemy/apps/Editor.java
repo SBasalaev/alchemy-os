@@ -20,7 +20,6 @@ package alchemy.apps;
 
 import alchemy.core.Context;
 import alchemy.fs.File;
-import alchemy.util.I18N;
 import alchemy.midlet.UIServer;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -37,15 +36,15 @@ import javax.microedition.lcdui.TextField;
  */
 public class Editor extends NativeApp {
 
-	private static final String HELP = I18N._("Usage: edit <filename>");
-	private static final String VERSION = I18N._("native editor v1.0");
+	private static final String HELP = "Usage: edit <filename>";
+	private static final String VERSION = "native editor v1.0";
 	
-	private static final Command cmdSave = new Command(I18N._("Save"), Command.OK, 1);
-	private static final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 5);
+	private static final Command cmdSave = new Command("Save", Command.OK, 1);
+	private static final Command cmdQuit = new Command("Quit", Command.EXIT, 5);
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			IO.println(c.stderr, I18N._("edit: no file specified"));
+			IO.println(c.stderr, "edit: no file specified");
 			IO.println(c.stderr, HELP);
 			return 1;
 		}
@@ -58,7 +57,7 @@ public class Editor extends NativeApp {
 			return 0;
 		}
 		File docfile = c.toFile(args[0]);
-		TextBox box = new TextBox(docfile.name()+" - "+I18N._("Editor"), null, 65536, TextField.ANY);
+		TextBox box = new TextBox(docfile.name()+" - Editor", null, 65536, TextField.ANY);
 		box.addCommand(cmdSave);
 		box.addCommand(cmdQuit);
 		final NotifyListener l = new NotifyListener();
@@ -70,7 +69,7 @@ public class Editor extends NativeApp {
 				byte[] data = IO.readFully(in);
 				in.close();
 				if (data.length > box.getMaxSize()) {
-					IO.println(c.stderr, I18N._("edit: file is too long"));
+					IO.println(c.stderr, "edit: file is too long");
 					return 1;
 				}
 				box.setString(IO.utfDecode(data));
@@ -89,7 +88,7 @@ public class Editor extends NativeApp {
 					byte[] data = IO.utfEncode(box.getString());
 					out.write(data);
 					out.close();
-					UIServer.alert(I18N._("Editor"), I18N._("File saved"), AlertType.INFO);
+					UIServer.alert("Editor", "File saved", AlertType.INFO);
 				}
 			}
 		} catch (Exception e) {

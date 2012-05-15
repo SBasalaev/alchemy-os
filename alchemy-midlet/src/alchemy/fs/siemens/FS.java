@@ -20,7 +20,6 @@ package alchemy.fs.siemens;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
-import alchemy.util.I18N;
 import alchemy.util.Initable;
 import com.siemens.mp.io.file.FileConnection;
 import com.siemens.mp.io.file.FileSystemRegistry;
@@ -139,7 +138,7 @@ public final class FS extends Filesystem implements Initable {
 	public void remove(File file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
-			if (file.path().length() == 0) throw new SecurityException(I18N._("Cannot delete root directory"));
+			if (file.path().length() == 0) throw new SecurityException("Cannot delete root directory");
 			if (fc.exists()) fc.delete();
 		} finally {
 			fc.close();
@@ -235,7 +234,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public void move(File source, File dest) throws IOException {
-		if (exists(dest)) throw new IOException(I18N._("File already exists: {0}", dest));
+		if (exists(dest)) throw new IOException("File already exists: "+dest);
 		if (source.parent().equals(dest.parent())) {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(source), Connector.READ_WRITE);
 			try {

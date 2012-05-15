@@ -21,7 +21,6 @@ package alchemy.nec;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.fs.File;
-import alchemy.util.I18N;
 import alchemy.nec.tree.*;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
@@ -73,7 +72,7 @@ public class Parser {
 			error(pe.getMessage());
 			return null;
 		} catch (IOException ioe) {
-			IO.println(c.stderr, I18N._("I/O error: {0}", ioe));
+			IO.println(c.stderr, "I/O error: "+ioe);
 			return null;
 		}
 		//removing unused imports
@@ -95,7 +94,7 @@ public class Parser {
 	 *   $INCPATH/name.eh
 	 */
 	private File resolveFile(String name) throws ParseException {
-		if (name.length() == 0) throw new ParseException(I18N._("Empty string in 'use'"));
+		if (name.length() == 0) throw new ParseException("Empty string in 'use'");
 		File f = c.toFile(name);
 		if (c.fs().exists(f)) return f;
 		f = c.toFile(name+".eh");
@@ -109,7 +108,7 @@ public class Parser {
 				if (c.fs().exists(f)) return f;
 			}
 		}
-		throw new ParseException(I18N._("Module not found: {0}", name));
+		throw new ParseException("Module not found: "+name);
 	}
 
 	private void parseFile(File file) throws ParseException, IOException {
@@ -117,9 +116,9 @@ public class Parser {
 		if (parsed.contains(file)) return;
 		//if file is in stack we have cyclic inclusion
 		if (files.contains(file)) {
-			StringBuffer sb = new StringBuffer(I18N._("Cyclic inclusion"));
+			StringBuffer sb = new StringBuffer("Cyclic inclusion");
 			for (int i=0; i<files.size(); i++) {
-				sb.append(I18N._("{0} from {1}", "\n", "")).append(files.elementAt(i));
+				sb.append("\n from ").append(files.elementAt(i));
 			}
 			throw new ParseException(sb.toString());
 		}
@@ -137,19 +136,19 @@ public class Parser {
 					case Tokenizer.TT_KEYWORD:
 						if (t.svalue.equals("use")) {
 							if (t.nextToken() != Tokenizer.TT_QUOTED)
-								throw new ParseException(I18N._("String literal expected after 'use'"));
+								throw new ParseException("String literal expected after 'use'");
 							File next = resolveFile(t.svalue);
 							if (t.nextToken() != ';') t.pushBack();
 							parseFile(next);
 						} else if (t.svalue.equals("type")) {
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-								throw new ParseException(I18N._("Type name expected after 'type'"));
+								throw new ParseException("Type name expected after 'type'");
 							String alias = t.svalue;
 							Type type = unit.getType(alias);
 							if (type == null) {
 								unit.putType(alias, new NamedType(alias));
 							} else if (type.getClass() != NamedType.class) {
-								throw new ParseException(I18N._("Type {0} is already defined", alias));
+								throw new ParseException("Type "+alias+" is already defined");
 							}
 							switch (t.nextToken()) {
 								case ';': // forward declaration
@@ -165,7 +164,7 @@ public class Parser {
 										t.pushBack();
 										if (!fields.isEmpty()) expect(',');
 										if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-											throw new ParseException(I18N._("Field name expected, got {0}", t));
+											throw new ParseException("Field name expected, got "+t);
 										String fieldname = t.svalue;
 										expect(':');
 										Type vartype = parseType(unit);
@@ -181,23 +180,23 @@ public class Parser {
 									break;
 								}
 								default:
-									throw new ParseException(I18N._("{0} unexpected here", t));
+									throw new ParseException(t.toString()+" unexpected here");
 							}
 						} else if (t.svalue.equals("const")) {
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-								throw new ParseException(I18N._("Constant name expected after 'const'"));
+								throw new ParseException("Constant name expected after 'const'");
 							String name = t.svalue;
 							expect('=');
 							Expr expr = (Expr)parseExpr(unit).accept(new Optimizer(), unit);
 							if (expr.getClass() != ConstExpr.class)
-								throw new ParseException(I18N._("Could not evaluate value of global constant"));
+								throw new ParseException("Could not evaluate value of global constant");
 							Var cnst = new Var(name, expr.rettype());
 							cnst.isConst = true;
 							cnst.constValue = (ConstExpr)expr;
 							unit.addVar(cnst);
 						} else if (t.svalue.equals("var")) {
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-								throw new ParseException(I18N._("Variable name expected after 'var'"));
+								throw new ParseException("Variable name expected after 'var'");
 							String varname = t.svalue;
 							expect(':');
 							Type vartype = parseType(unit);
@@ -212,9 +211,9 @@ public class Parser {
 								unit.addVar(fvar);
 							} else if (!fvar.type.equals(fdef.type)) {
 								if (fvar.type.getClass() == FunctionType.class)
-									throw new ParseException(I18N._("Definition of function {0} conflicts with previous definition.", fdef.signature));
+									throw new ParseException("Definition of function "+fdef.signature+" conflicts with previous definition.");
 								else
-									throw new ParseException(I18N._("Variable {0} is already defined", fdef.signature));
+									throw new ParseException("Variable "+fdef.signature+" is already defined");
 							}
 							
 							Func prev = unit.getFunc(fdef.signature);
@@ -225,7 +224,7 @@ public class Parser {
 								case '{':
 								case '=':
 									if (prev != null && prev.body != null)
-										throw new ParseException(I18N._("Function {0} is already defined.", fdef.signature));
+										throw new ParseException("Function "+fdef.signature+" is already defined.");
 									if (prev != null) {
 										prev.locals = fdef.locals; //actual names for impl.
 										fdef = prev;
@@ -241,16 +240,16 @@ public class Parser {
 									if (fdef.signature.charAt(0) != '_') fdef.hits++;
 									break;
 								default:
-									throw new ParseException(I18N._("{0} unexpected here", t));
+									throw new ParseException(t.toString()+" unexpected here");
 							}
 						} else {
-							throw new ParseException(I18N._("{0} unexpected here", t));
+							throw new ParseException(t.toString()+" unexpected here");
 						}
 						break;
 					case ';':
 						break;
 					default:
-						throw new ParseException(I18N._("{0} unexpected here", t));
+						throw new ParseException(t.toString()+" unexpected here");
 				}
 			}
 		} finally {
@@ -266,7 +265,7 @@ public class Parser {
 		Func func = new Func(unit);
 		//parsing def
 		if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-			throw new ParseException(I18N._("Function name expected, got {0}", t));
+			throw new ParseException("Function name expected, got "+t);
 		String fname = t.svalue;
 		expect('(');
 		Vector args = new Vector();
@@ -274,7 +273,7 @@ public class Parser {
 			t.pushBack();
 			if (!args.isEmpty()) expect(',');
 			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-				throw new ParseException(I18N._("Variable name expected, got {0}", t));
+				throw new ParseException("Variable name expected, got "+t);
 			String varname = t.svalue;
 			expect(':');
 			Type vartype = parseType(func);
@@ -300,16 +299,16 @@ public class Parser {
 		//some checkings
 		if (fname.equals("main")) {
 			if (args.size() != 1) {
-				warn(I18N._("Incorrect number of arguments in main()"));
+				warn("Incorrect number of arguments in main()");
 			}
 			if (args.size() > 0) {
 				Var arg0 = (Var)args.elementAt(0);
 				if (!arg0.type.equals(BuiltinType.typeAny) && !arg0.type.equals(BuiltinType.typeArray)) {
-					warn(I18N._("Incompatible argument type in main()"));
+					warn("Incompatible argument type in main()");
 				}
 			}
 			if (!rettype.equals(BuiltinType.typeInt) && !rettype.equals(BuiltinType.typeNone)) {
-				warn(I18N._("Incompatible return type in main()"));
+				warn("Incompatible return type in main()");
 			}
 		}
 		return func;
@@ -323,7 +322,7 @@ public class Parser {
 		//scalar type or alias
 		if (ttype == Tokenizer.TT_IDENTIFIER) {
 			Type type = scope.getType(t.svalue);
-			if (type == null) throw new ParseException(I18N._("Undefined type {0}", t));
+			if (type == null) throw new ParseException("Undefined type "+t);
 			return type;
 		}
 		//function type
@@ -349,7 +348,7 @@ public class Parser {
 			}
 			return type;
 		}
-		throw new ParseException(I18N._("{0} unexpected here", t));
+		throw new ParseException(t.toString()+" unexpected here");
 	}
 
 	private Expr parseBlock(Scope scope) throws ParseException, IOException {
@@ -432,12 +431,12 @@ public class Parser {
 			if (op == Tokenizer.TT_GTGT || op == Tokenizer.TT_LTLT || op == Tokenizer.TT_GTGTGT) {
 				if (!ltype.equals(BuiltinType.typeInt) && !ltype.equals(BuiltinType.typeLong)
 						|| !rtype.equals(BuiltinType.typeInt))
-					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
+					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new BinaryExpr(left, op, right);
 			} else if (op == '<' || op == '>' || op == Tokenizer.TT_LTEQ || op == Tokenizer.TT_GTEQ) {
 				if (!(ltype.getClass() == BuiltinType.class) || ((BuiltinType)ltype).numIndex() < 0
 				  || !(rtype.getClass() == BuiltinType.class) || ((BuiltinType)rtype).numIndex() < 0)
-					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
+					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				Type btype = binaryCastType(ltype, rtype);
 				Expr cmpexpr = new BinaryExpr(cast(left,btype), '=', cast(right,btype));
 				int iftype;
@@ -457,11 +456,11 @@ public class Parser {
 						new ConstExpr(Boolean.TRUE), new ConstExpr(Boolean.FALSE));
 			} else if (op == Tokenizer.TT_AMPAMP) {
 				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
-					throw new ParseException(I18N._("Operator && cannot be applied to {0},{1}", ltype, rtype));
+					throw new ParseException("Operator && cannot be applied to "+ltype+","+rtype);
 				newexpr = new IfExpr(left, IfExpr.TRUE, right, new ConstExpr(Boolean.FALSE));
 			} else if (op == Tokenizer.TT_BARBAR) {
 				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
-					throw new ParseException(I18N._("Operator || cannot be applied to {0},{1}", ltype, rtype));
+					throw new ParseException("Operator || cannot be applied to "+ltype+","+rtype);
 				newexpr = new IfExpr(left, IfExpr.TRUE, new ConstExpr(Boolean.TRUE), right);
 			} else if ("+-*/%".indexOf(op) >= 0) {
 				if (ltype.equals(BuiltinType.typeString)) {
@@ -477,17 +476,17 @@ public class Parser {
 				} else {
 					Type btype = binaryCastType(ltype, rtype);
 					if (!(btype.getClass() == BuiltinType.class) || ((BuiltinType)btype).numIndex() < 0)
-						throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
+						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 					newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
 				}
 			} else if ("^&|".indexOf(op) >= 0) {
 				Type btype = binaryCastType(ltype, rtype);
 				if (!btype.equals(BuiltinType.typeBool) && !btype.equals(BuiltinType.typeInt) && !btype.equals(BuiltinType.typeLong))
-					throw new ParseException(I18N._("Operator {0} cannot be applied to {1},{2}", opstring(op), ltype, rtype));
+					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
 			} else {
 				//should not happen, but...
-				throw new ParseException(I18N._("Error while parsing expression, please report."));
+				throw new ParseException("Error while parsing expression, please report.");
 			}
 			exprs.setElementAt(newexpr, index);
 			exprs.removeElementAt(index+1);
@@ -504,7 +503,7 @@ public class Parser {
 			int ttype = t.nextToken();
 			if (ttype == '(') {
 				if (!(expr.rettype().getClass() == FunctionType.class))
-					throw new ParseException(I18N._("Applying () to non-function expression"));
+					throw new ParseException("Applying () to non-function expression");
 				FunctionType ftype = (FunctionType)expr.rettype();
 				Vector vargs = new Vector();
 				while (t.nextToken() != ')') {
@@ -513,7 +512,7 @@ public class Parser {
 					vargs.addElement(parseExpr(scope));
 				}
 				if (ftype.args.length != vargs.size())
-					throw new ParseException(I18N._("Wrong number of arguments in function call"));
+					throw new ParseException("Wrong number of arguments in function call");
 				Expr[] args = new Expr[vargs.size()];
 				for (int i=0; i<args.length; i++) {
 					args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
@@ -525,7 +524,7 @@ public class Parser {
 				if (!arrtype.equals(BuiltinType.typeArray)
 				 && !arrtype.equals(BuiltinType.typeBArray)
 				 && !arrtype.equals(BuiltinType.typeCArray)) {
-					throw new ParseException(I18N._("Applying [] to non-array expression"));
+					throw new ParseException("Applying [] to non-array expression");
 				}
 				Expr indexexpr = cast(parseExpr(scope), BuiltinType.typeInt);
 				expect(']');
@@ -548,7 +547,7 @@ public class Parser {
 				}
 			} else if (ttype == '.') {
 				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-					throw new ParseException(I18N._("Identifier expected after '.'"));
+					throw new ParseException("Identifier expected after '.'");
 				String member = t.svalue;
 				Type type = expr.rettype();
 				if (type.equals(BuiltinType.typeArray)
@@ -580,7 +579,7 @@ public class Parser {
 						}
 					}
 				}
-				throw new ParseException(I18N._("Type {0} has no member named {1}", type, member));
+				throw new ParseException("Type "+type+" has no member named "+member);
 			} else {
 				t.pushBack();
 				return expr;
@@ -606,7 +605,7 @@ public class Parser {
 				else if (type.equals(BuiltinType.typeLong))
 					return new BinaryExpr(sub, '^', new ConstExpr(new Long(-1l)));
 				else
-					throw new ParseException(I18N._("Operator ~ cannot be applied to {0}", type));
+					throw new ParseException("Operator ~ cannot be applied to "+type);
 			}
 			case '-': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
@@ -615,7 +614,7 @@ public class Parser {
 				 && !type.equals(BuiltinType.typeLong)
 				 && !type.equals(BuiltinType.typeFloat)
 				 && !type.equals(BuiltinType.typeDouble))
-					throw new ParseException(I18N._("Operator - cannot be applied to {0}", type));
+					throw new ParseException("Operator - cannot be applied to "+type);
 				return new UnaryExpr(ttype, sub);
 			}
 			case '{':
@@ -665,7 +664,7 @@ public class Parser {
 				} else if (t.svalue.equals("var") || t.svalue.equals("const")) {
 					boolean isConst = t.svalue.equals("const");
 					if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-						throw new ParseException(I18N._("Identifier expected after 'var'"));
+						throw new ParseException("Identifier expected after 'var'");
 					String varname = t.svalue;
 					Type vartype = null;
 					Expr varvalue = null;
@@ -681,7 +680,7 @@ public class Parser {
 						if (vartype == null) {
 							vartype = varvalue.rettype();
 							if (vartype.equals(BuiltinType.typeNone))
-								throw new ParseException(I18N._("Cannot convert from [none] to Any"));
+								throw new ParseException("Cannot convert from [none] to Any");
 						} else {
 							varvalue = cast(varvalue, vartype);
 						}
@@ -690,17 +689,17 @@ public class Parser {
 					}
 					// defining variable
 					if (vartype == null) {
-						throw new ParseException(I18N._("Type of {0} is not defined", varname));
+						throw new ParseException("Type of "+varname+" is not defined");
 					}
 					Var v = new Var(varname, vartype);
 					if (isConst) {
 						v.isConst = true;
 						if (varvalue == null) {
-							throw new ParseException(I18N._("Constant {0} is not initialized", varname));
+							throw new ParseException("Constant "+varname+" is not initialized");
 						}
 					}
 					if (scope.addVar(v)) {
-						warn(I18N._("Variable {0} hides another variable with the same name", v.name));
+						warn("Variable "+v.name+" hides another variable with the same name");
 					}
 					if (varvalue != null) {
 						return new AssignExpr(v, varvalue);
@@ -718,12 +717,12 @@ public class Parser {
 							t.pushBack();
 							if (first) first = false; else expect(',');
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER) {
-								throw new ParseException(I18N._("Identifier expected in structure constructor"));
+								throw new ParseException("Identifier expected in structure constructor");
 							}
 							int index = struct.fields.length-1;
 							while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
 							if (index < 0) {
-								throw new ParseException(I18N._("Type {0} has no member named {1}", type, t.svalue));
+								throw new ParseException("Type "+type+" has no member named "+t.svalue);
 							}
 							expect('=');
 							init[index] = cast(parseExpr(scope), struct.fields[index].type);
@@ -753,10 +752,10 @@ public class Parser {
 							vinit.copyInto(init);
 							return new NewArrayByEnumExpr(type, init);
 						} else {
-							throw new ParseException(I18N._("'(' or '{' expected in constructor"));
+							throw new ParseException("'(' or '{' expected in constructor");
 						}
 					} else {
-						throw new ParseException(I18N._("Applying 'new' to neither array nor structure"));
+						throw new ParseException("Applying 'new' to neither array nor structure");
 					}
 				} else if (t.svalue.equals("for")) {
 					expect('(');
@@ -775,15 +774,15 @@ public class Parser {
 					forblock.exprs.addElement(new WhileExpr(cond, forbody));
 					return forblock;
 				} else {
-					throw new ParseException(I18N._("{0} unexpected here", t));
+					throw new ParseException(t.toString()+" unexpected here");
 				}
 			case Tokenizer.TT_IDENTIFIER:
 				String str = t.svalue;
 				Var var = scope.getVar(str);
-				if (var == null) throw new ParseException(I18N._("Variable {0} is not defined", str));
+				if (var == null) throw new ParseException("Variable "+str+" is not defined");
 				if (t.nextToken() == '=') { // setting variable value
 					if (var.isConst)
-						throw new ParseException(I18N._("Cannot assign to constant {0}", str));
+						throw new ParseException("Cannot assign to constant "+str);
 					Expr value = cast(parseExpr(scope), var.type);
 					if (scope.isLocal(str)) {
 						return new AssignExpr(var, value);
@@ -811,7 +810,7 @@ public class Parser {
 					}
 				}
 			default:
-				throw new ParseException(I18N._("{0} unexpected here", t));
+				throw new ParseException(t.toString()+" unexpected here");
 		}
 	}
 
@@ -824,10 +823,10 @@ public class Parser {
 		expect(')');
 		Expr expr = parseExpr(scope);
 		if (toType.equals(expr.rettype())) {
-			warn(I18N._("Cast to the same type"));
+			warn("Cast to the same type");
 		}
 		if (toType.equals(BuiltinType.typeAny)) {
-			warn(I18N._("Cast to Any"));
+			warn("Cast to Any");
 		}
 		if (expr.rettype().equals(BuiltinType.typeAny)) {
 			return new CastExpr(toType, expr);
@@ -850,7 +849,7 @@ public class Parser {
 		if (expr.getClass() == ConstExpr.class && ((ConstExpr)expr).value == null) {
 			return new CastExpr(toType, expr);
 		}
-		throw new ParseException(I18N._("Cannot convert from {0} to {1}", fromType, toType));
+		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
 	}
 
 	private Expr castPrimitive(Expr expr, Type toType) throws ParseException {
@@ -876,7 +875,7 @@ public class Parser {
 			if (toType.equals(BuiltinType.typeFloat)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2F);
 			if (toType.equals(BuiltinType.typeInt)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2I);
 		}
-		throw new ParseException(I18N._("Cannot convert from {0} to {1}", fromType, toType));
+		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
 	}
 
 	/**
@@ -930,19 +929,19 @@ public class Parser {
 	/** Reads next token and if it is not the given character, throws exception. */
 	private void expect(char ttype) throws ParseException, IOException {
 		if (t.nextToken() != ttype) {
-			throw new ParseException(I18N._("Expected '{0}', got {1}", String.valueOf(ttype), t));
+			throw new ParseException("Expected '"+String.valueOf(ttype)+"', got "+t);
 		}
 	}
 
 	/** Prints error on stderr. */
 	private void error(String msg) {
 		IO.println(c.stderr, files.peek().toString() + ':' + t.lineNumber()
-				+ ": "+I18N._("[Error]")+"\n "+msg);
+				+ ": "+"[Error]"+"\n "+msg);
 	}
 
 	/** Prints warning on stderr. */
 	private void warn(String msg) {
 		IO.println(c.stderr, files.peek().toString() + ':' + t.lineNumber()
-				+ ": "+I18N._("[Warning]")+"\n "+msg);
+				+ ": "+"[Warning]"+"\n "+msg);
 	}
 }

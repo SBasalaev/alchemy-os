@@ -23,7 +23,6 @@ import alchemy.core.Context;
 import alchemy.core.ContextListener;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
-import alchemy.util.I18N;
 import alchemy.nlib.NativeLibBuilder;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
@@ -35,14 +34,14 @@ import javax.microedition.midlet.MIDletStateChangeException;
  */
 public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextListener {
 
-	private final Command cmdQuit = new Command(I18N._("Quit"), Command.EXIT, 1);
+	private final Command cmdQuit = new Command("Quit", Command.EXIT, 1);
 	private Art runtime;
 
 	public AlchemyMIDlet() {
 		UIServer.display = Display.getDisplay(this);
 		try {
 			if (!InstallInfo.exists()) {
-				kernelPanic(I18N._("Alchemy is not installed."));
+				kernelPanic("Alchemy is not installed.");
 				return;
 			}
 			//setting up environment
