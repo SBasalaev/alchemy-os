@@ -23,10 +23,12 @@ import alchemy.core.ContextListener;
 import java.util.Vector;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.List;
 
 /**
  * UI server for Alchemy.
@@ -62,15 +64,31 @@ public final class UIServer {
 	/** Display set by Alchemy MIDlet. */
 	static Display display;
 
-	private static final Vector contexts = new Vector();
-	private static final Vector screens = new Vector();
-	private static final Vector queues = new Vector();
+	/** Holds all contexts which have associated screens. */
+	private static final Vector frames = new Vector();
 	
 	private static final UIContextListener l = new UIContextListener();
 	private static final UICommandListener cl = new UICommandListener();
 	
+	private static final List appList = new List("Applications", Choice.IMPLICIT);
+	private static final Command appCommand = new Command("Apps...", Command.SCREEN, -1);
+	
+	static {
+		appList.setCommandListener(new AppListCommandListener());
+	}
+	
 	private UIServer() { }
 	
+	/** Finds frame in a vector by its Context or Displayable. */
+	private static int frameIndex(Object obj) {
+		int index;
+		for (index=frames.size()-1; index>=0; index--) {
+			UIFrame frame = (UIFrame)frames.elementAt(index);
+			if (frame.c == obj || frame.d == obj) break;
+		}
+		return index;
+	}
+
 	/**
 	 * Maps specified context to given screen.
 	 * If context is already mapped then its screen is replaced.
@@ -78,17 +96,16 @@ public final class UIServer {
 	 * corresponding screen is placed on top of the screen stack.
 	 */
 	public static synchronized void mapContext(Context c, Displayable d) {
-		d.setCommandListener(cl);
-		int index = contexts.indexOf(c);
-		if (index < 0) {
-			c.addContextListener(l);
-			contexts.addElement(c);
-			screens.addElement(d);
-			queues.addElement(new Queue());
+		int i = frameIndex(c);
+		if (i >= 0) {
+			((UIFrame)frames.elementAt(i)).d = d;
 		} else {
-			screens.setElementAt(d, index);
-			((Queue)queues.elementAt(index)).clearEvents();
+			frames.addElement(new UIFrame(c, d));
+			c.addContextListener(l);
+			appList.append(c.getName(), null);
 		}
+		d.addCommand(appCommand);
+		d.setCommandListener(cl);
 		displayCurrent();
 	}
 	
@@ -97,49 +114,49 @@ public final class UIServer {
 	 * from the screen stack.
 	 */
 	public static synchronized void unmapContext(Context c) {
-		int index = contexts.indexOf(c);
+		int index = frameIndex(c);
 		if (index >= 0) {
-			c.removeContextListener(l);
-			((Displayable)screens.elementAt(index)).setCommandListener(null);
-			contexts.removeElementAt(index);
-			screens.removeElementAt(index);
-			queues.removeElementAt(index);
+			UIFrame frame = (UIFrame)frames.elementAt(index);
+			frame.c.removeContextListener(l);
+			frame.d.setCommandListener(null);
+			frame.d.removeCommand(appCommand);
+			frames.removeElementAt(index);
+			appList.delete(index);
 			displayCurrent();
 		}
 	}
-	
+
 	public static void alert(String title, String text, AlertType type) {
 		Alert a = new Alert(title, text, null, type);
 		display.setCurrent(a);
 	}
 	
-	public static synchronized Displayable currentScreen() {
-		int top = contexts.size()-1;
-		return (top >= 0) ? ((Displayable)screens.elementAt(top)) : null;
+	public static Displayable currentScreen() {
+		if (frames.isEmpty()) return null;
+		return ((UIFrame)frames.lastElement()).d;
 	}
 	
 	public static void displayCurrent() {
 		Displayable oldscr = display.getCurrent();
 		Displayable newscr = currentScreen();
 		if (oldscr != newscr) {
-			if (oldscr != null) addEvent(oldscr, EVENT_HIDE, null);
-			if (newscr != null) addEvent(newscr, EVENT_SHOW, null);
+			if (oldscr != null) pushEvent(oldscr, EVENT_HIDE, null);
+			if (newscr != null) pushEvent(newscr, EVENT_SHOW, null);
 		}
 		display.setCurrent(newscr);
 	}
 	
 	/** Adds given event to the event queue. */
-	public static synchronized void addEvent(Displayable d, Integer kind, Object value) {
-		int index = screens.indexOf(d);
-		if (index < 0) return;
-		((Queue)queues.elementAt(index)).pushEvent(new Object[] {kind, d, value});
+	public static synchronized void pushEvent(Displayable d, Integer kind, Object value) {
+		int i = frameIndex(d);
+		if (i >= 0) ((UIFrame)frames.elementAt(i)).queue.push(new Object[] {kind, d, value});
 	}
 	
 	/** Reads next event object for given context. */
 	public static synchronized Object readEvent(Context c) {
-		int index = contexts.indexOf(c);
-		if (index < 0) return null;
-		return ((Queue)queues.elementAt(index)).popEvent();
+		int i = frameIndex(c);
+		if (i >= 0) return ((UIFrame)frames.elementAt(i)).queue.pop();
+		else return null;
 	}
 	
 	/** Removes screen mapping when context ends. */
@@ -151,8 +168,29 @@ public final class UIServer {
 	
 	/** Generates command events. */
 	private static class UICommandListener implements CommandListener {
+		public void commandAction(Command command, Displayable d) {
+			if (command == appCommand) { // show app selection screen
+				appList.setSelectedIndex(0, true);
+				display.setCurrent(appList);
+			} else {
+				pushEvent(d, EVENT_MENU, command);
+			}
+		}
+	}
+	
+	private static class AppListCommandListener implements CommandListener {
 		public void commandAction(Command c, Displayable d) {
-			addEvent(d, EVENT_MENU, c);
+			synchronized (UIServer.class) {
+				int index = appList.getSelectedIndex();
+				if (index != appList.size()-1) {
+					UIFrame frame = (UIFrame)frames.elementAt(index);
+					frames.removeElementAt(index);
+					frames.addElement(frame);
+					appList.delete(index);
+					appList.append(frame.c.getName(), null);
+				}
+				displayCurrent();
+			}
 		}
 	}
 	
@@ -168,12 +206,12 @@ public final class UIServer {
 		private int ev_count = 0;
 		
 		/** Clears event queue. */
-		public void clearEvents() {
+		public void clear() {
 			ev_count = 0;
 		}
 		
 		/** Adds new event to the event queue. */
-		public void pushEvent(Object e) {
+		public void push(Object e) {
 			events[(ev_start + ev_count) % QUEUE_SIZE] = e;
 			if (ev_count < QUEUE_SIZE) {
 				ev_count++;
@@ -184,12 +222,24 @@ public final class UIServer {
 		}
 		
 		/** Reads event from the event queue. */
-		public Object popEvent() {
+		public Object pop() {
 			if (ev_count == 0) return null;
 			Object ret = events[ev_start];
 			ev_start = (ev_start+1) % QUEUE_SIZE;
 			ev_count--;
 			return ret;
+		}
+	}
+
+	private static class UIFrame {
+		final Context c;
+		Displayable d;
+		final Queue queue;
+
+		public UIFrame(Context c, Displayable d) {
+			this.c = c;
+			this.d = d;
+			queue = new Queue();
 		}
 	}
 }

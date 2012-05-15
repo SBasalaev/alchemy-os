@@ -156,8 +156,6 @@ public class Context {
 	private Thread thread;
 	/** State of the context. */
 	private int state = NEW;
-//	/** Lock for methods that affect changing context's state. */
-//	private final Object stateLock = new Object();
 	/** Result returned by a program. */
 	private int exitcode = -1;
 	/** Error thrown by a program. */
@@ -194,6 +192,14 @@ public class Context {
 
 	/* CONTEXT METHODS */
 
+	/**
+	 * Returns name of the program this context executes.
+	 * If context is in NEW state this method return <code>null</code>.
+	 */
+	public String getName() {
+		return (thread == null) ? null : thread.getName();
+	}
+	
 	/**
 	 * Returns value of environment variable.
 	 * If variable is not defined then empty

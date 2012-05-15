@@ -18,7 +18,6 @@
 
 package alchemy.libs;
 
-import alchemy.core.Function;
 import alchemy.midlet.UIServer;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Graphics;
@@ -48,21 +47,21 @@ class UICanvas extends Canvas {
 
 	/** Generates key event. */
 	protected void keyPressed(int keyCode) {
-		UIServer.addEvent(this, UIServer.EVENT_KEY_PRESS, new Integer(keyCode));
+		UIServer.pushEvent(this, UIServer.EVENT_KEY_PRESS, new Integer(keyCode));
 	}
 
 	/** Generates pointer press event. */
 	protected void pointerPressed(int x, int y) {
-		UIServer.addEvent(this, UIServer.EVENT_PTR_PRESS, new Object[] {new Integer(x), new Integer(y)});
+		UIServer.pushEvent(this, UIServer.EVENT_PTR_PRESS, new Object[] {new Integer(x), new Integer(y)});
 	}
 	
 	/** Generates pointer release event. */
 	protected void pointerReleased(int x, int y) {
-		UIServer.addEvent(this, UIServer.EVENT_PTR_RELEASE, new Object[] {new Integer(x), new Integer(y)});
+		UIServer.pushEvent(this, UIServer.EVENT_PTR_RELEASE, new Object[] {new Integer(x), new Integer(y)});
 	}
 
 	/** Generates pointer drag event. */
 	protected void pointerDragged(int x, int y) {
-		UIServer.addEvent(this, UIServer.EVENT_PTR_DRAG, new Object[] {new Integer(x), new Integer(y)});
+		UIServer.pushEvent(this, UIServer.EVENT_PTR_DRAG, new Object[] {new Integer(x), new Integer(y)});
 	}
 }
