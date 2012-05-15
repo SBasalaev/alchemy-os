@@ -1,5 +1,13 @@
 type Screen;
 
+const TEXT_ANY = 0;
+const TEXT_EMAIL = 1;
+const TEXT_NUMBER = 2;
+const TEXT_PHONE = 3;
+const TEXT_URL = 4;
+const TEXT_DECIMAL = 5;
+const TEXT_PASSWORD = 0x10000;
+
 def new_textbox(mode: Int): Screen;
 
 def textbox_get_text(box: Screen): String;
