@@ -568,7 +568,7 @@ class EFunction extends Function {
 
 			//OTHERS
 				case (byte) 0x4F: {// acmp
-					boolean btmp = stack[head] == null ? stack[head-1] == null : stack[head-1].equals(stack[head]);
+					boolean btmp = stack[head] == null ? stack[head-1] == null : stack[head].equals(stack[head-1]);
 					stack[--head] = Ival(!btmp);
 					break;
 				}
