@@ -40,3 +40,4 @@ type Point {
 }
 
 def ui_read_event(): UIEvent;
+def ui_wait_event(): UIEvent;

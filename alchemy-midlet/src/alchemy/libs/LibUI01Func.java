@@ -135,7 +135,7 @@ class LibUI01Func extends Function {
 			}
 			case 26: { // canvas_read_key(cnv: Screen): Int
 				// compatibility function with previous non-event canvas behavior
-				Object[] event = (Object[])UIServer.readEvent(c);
+				Object[] event = (Object[])UIServer.readEvent(c, false);
 				if (event != null && event[0] == args[0] && event[1] == UIServer.EVENT_KEY_PRESS) {
 					return event[2];
 				} else {
@@ -166,15 +166,17 @@ class LibUI01Func extends Function {
 				((UICanvas)args[0]).repaint();
 				return null;
 			case 34: // ui_read_event(): UIEvent
-				return UIServer.readEvent(c);
-			case 35: // new_textbox(mode: Int): Screen
+				return UIServer.readEvent(c, false);
+			case 35: // ui_wait_event(): UIEvent
+				return UIServer.readEvent(c, true);
+			case 36: // new_textbox(mode: Int): Screen
 				return new TextBox(null, null, Short.MAX_VALUE, ival(args[0]));
-			case 36: // textbox_get_text(box: Screen): String
+			case 37: // textbox_get_text(box: Screen): String
 				return ((TextBox)args[0]).getString();
-			case 37: // textbox_set_text(box: Screen, text: String)
+			case 38: // textbox_set_text(box: Screen, text: String)
 				((TextBox)args[0]).setString((String)args[1]);
 				return null;
-			case 38: { // new_listbox(strings: Array, images: Array): Screen
+			case 39: { // new_listbox(strings: Array, images: Array): Screen
 				Object[] str = (Object[])args[0];
 				String[] strings = new String[str.length];
 				System.arraycopy(str, 0, strings, 0, str.length);
@@ -186,23 +188,23 @@ class LibUI01Func extends Function {
 				}
 				return new List(null, Choice.IMPLICIT, strings, images);
 			}
-			case 39: // listbox_get_index(list: Screen): Int
+			case 40: // listbox_get_index(list: Screen): Int
 				return Ival(((List)args[0]).getSelectedIndex());
-			case 40: // listbox_set_index(list: Screen, index: Int)
+			case 41: // listbox_set_index(list: Screen, index: Int)
 				((List)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
-			case 41: // listbox_default_menu(): Menu
+			case 42: // listbox_default_menu(): Menu
 				return List.SELECT_COMMAND;
-			case 42: // new_menu(text: String, priority: Int): Menu
+			case 43: // new_menu(text: String, priority: Int): Menu
 				return new Command((String)args[0], Command.SCREEN, ival(args[1]));
-			case 43: // menu_get_text(menu: Menu): String
+			case 44: // menu_get_text(menu: Menu): String
 				return ((Command)args[0]).getLabel();
-			case 44: // menu_get_priority(menu: Menu): Int
+			case 45: // menu_get_priority(menu: Menu): Int
 				return Ival(((Command)args[0]).getPriority());
-			case 45: // screen_add_menu(scr: Screen, menu: Menu)
+			case 46: // screen_add_menu(scr: Screen, menu: Menu)
 				((Displayable)args[0]).addCommand((Command)args[1]);
 				return null;
-			case 46: // screen_remove_menu(scr: Screen, menu: Menu)
+			case 47: // screen_remove_menu(scr: Screen, menu: Menu)
 				((Displayable)args[0]).removeCommand((Command)args[1]);
 				return null;
 			default:
@@ -216,5 +218,9 @@ class LibUI01Func extends Function {
 	
 	private static Font int2font(int mask) {
 		return Font.getFont(mask & 0x60, mask & 0x7, mask & 0x18);
+	}
+
+	public String toString() {
+		return "ui:"+signature;
 	}
 }

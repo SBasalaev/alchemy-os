@@ -71,7 +71,7 @@ public final class UIServer {
 	private static final UICommandListener cl = new UICommandListener();
 	
 	private static final List appList = new List("Applications", Choice.IMPLICIT);
-	private static final Command appCommand = new Command("Apps...", Command.SCREEN, -1);
+	private static final Command appCommand = new Command("Apps...", Command.SCREEN, 100);
 	
 	static {
 		appList.setCommandListener(new AppListCommandListener());
@@ -149,14 +149,37 @@ public final class UIServer {
 	/** Adds given event to the event queue. */
 	public static synchronized void pushEvent(Displayable d, Integer kind, Object value) {
 		int i = frameIndex(d);
-		if (i >= 0) ((UIFrame)frames.elementAt(i)).queue.push(new Object[] {kind, d, value});
+		if (i >= 0) {
+			final UIFrame frame = (UIFrame)frames.elementAt(i);
+			synchronized (frame) {
+				frame.queue.push(new Object[] {kind, d, value});
+				frame.notify();
+			}
+		}
 	}
 	
-	/** Reads next event object for given context. */
-	public static synchronized Object readEvent(Context c) {
-		int i = frameIndex(c);
-		if (i >= 0) return ((UIFrame)frames.elementAt(i)).queue.pop();
-		else return null;
+	/**
+	 * Reads next event object for given context.
+	 * If the event queue is empty and wait is <code>true</code>
+	 * this method blocks until an event is available, otherwise
+	 * it returns <code>null</code> on empty queue.
+	 */
+	public static Object readEvent(Context c, boolean wait) {
+		UIFrame frame = null;
+		synchronized (UIServer.class) {
+			int i = frameIndex(c);
+			if (i >= 0) frame = ((UIFrame)frames.elementAt(i));
+		}
+		if (frame == null) return null;
+		synchronized (frame) {
+			Object e = frame.queue.pop();
+			if (e == null && wait) {
+				try { frame.wait(); }
+				catch (InterruptedException ie) { }
+				e = frame.queue.pop();
+			}
+			return e;
+		}
 	}
 	
 	/** Removes screen mapping when context ends. */

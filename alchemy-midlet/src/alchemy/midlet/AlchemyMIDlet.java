@@ -56,6 +56,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			root.addContextListener(this);
 			//preloading core library
 			root.loadLibrary("/lib/libcore.2.0.so");
+			root.loadLibrary("/lib/libcoree.2.0.so");
 			runApp();
 		} catch (Throwable t) {
 			kernelPanic(t.toString());
