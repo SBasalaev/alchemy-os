@@ -1,11 +1,11 @@
-/* I/O library
- * (C) 2011, Sergey Basalaev
- * Licensed under LGPL v3
+/* Core library: data I/O functions
+ * (C) 2011-2012, Sergey Basalaev
+ * Licensed under GPL v3 with linkage exception
  */
 
 use "dataio.eh"
-use "math"
-use "string"
+use "math.eh"
+use "string.eh"
 
 def freadbool(in: IStream): Bool {
   var b = fread(in)

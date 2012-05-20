@@ -1,9 +1,9 @@
-/* Vector library
- * (C) 2011, Sergey Basalaev
- * Licensed under LGPL v3
+/* Core library: vector implementation
+ * (C) 2011-2012, Sergey Basalaev
+ * Licensed under GPL v3 with linkage exception
  */
 
-use "sys"
+use "sys.eh"
 use "vector.eh"
 
 type Vector {

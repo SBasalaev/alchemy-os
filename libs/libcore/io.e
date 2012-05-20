@@ -1,5 +1,10 @@
-use "io"
-use "string"
+/* Core library: I/O functions
+ * (C) 2011-2012, Sergey Basalaev
+ * Licensed under GPL v3 with linkage exception
+ */
+
+use "io.eh"
+use "string.eh"
 
 def read(): Int = fread(stdin());
 def readarray(buf: BArray, ofs: Int, len: Int): Int = freadarray(stdin(), buf, ofs, len);

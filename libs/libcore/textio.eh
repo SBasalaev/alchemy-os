@@ -1,6 +1,6 @@
 // text I/O routines
 
-use "io"
+use "io.eh"
 
 type ReadChar = (IStream):Int;
 type WriteChar = (OStream,Int);
@@ -23,9 +23,17 @@ def freadstr(r: Reader, len: Int): String;
 def freadca(r: Reader, ca: CArray, ofs: Int, len: Int): Int;
 def freadline(r: Reader): String;
 
+def readstr(len: Int): String;
+def readca(ca: CArray, ofs: Int, len: Int);
+def readline(): String;
+
 def fwritech(w: Writer, ch: Int);
 def fwritestr(w: Writer, str: String);
 def fwriteca(w: Writer, ca: CArray, ofs: Int, len: Int);
+
+def writech(ch: Int);
+const writestr = print;
+def writeca(ca: CArray, ofs: Int, len: Int);
 
 /* UTF-8 encoding */
 def utfreader(in: IStream): Reader;

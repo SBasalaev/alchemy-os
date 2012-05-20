@@ -1,7 +1,5 @@
 // various system functions
 
-use "io";
-
 def getenv(key: String): String;
 def setenv(key: String, val: String);
 
@@ -16,6 +14,7 @@ def cacopy(src: CArray, sofs: Int, dest: CArray, dofs: Int, len: Int);
 
 def hash(a: Any): Int;
 
+type IStream;
 def readresource(path: String): IStream;
 
 def clone(struct: Any): Any;

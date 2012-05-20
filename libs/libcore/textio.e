@@ -1,11 +1,11 @@
-/* I/O library
- * (C) 2011, Sergey Basalaev
- * Licensed under LGPL v3
+/* Core library: text I/O functions
+ * (C) 2011-2012, Sergey Basalaev
+ * Licensed under GPL v3 with linkage exception
  */
 
 use "textio.eh"
-use "string"
-use "sys"
+use "string.eh"
+use "sys.eh"
 
 def new_reader(in: IStream, dec: ReadChar): Reader {
   new Reader(in=in, dec=dec)
@@ -57,6 +57,12 @@ def freadline(r: Reader): String {
   }
 }
 
+def readstr(len: Int): String = freadstr(utfreader(stdin()))
+
+def readca(ca: CArray, ofs: Int, len: Int) = freadca(utfreader(stdin()), ca, ofs, len)
+
+def readline(): String = freadline(utfreader(stdin()))
+
 def fwritech(w: Writer, ch: Int) = w.enc(w.out, ch)
 
 def fwritestr(w: Writer, str: String) = fwriteca(w, strchars(str), 0, strlen(str))
@@ -66,6 +72,9 @@ def fwriteca(w: Writer, ca: CArray, ofs: Int, len: Int) {
     fwritech(w, ca[ofs+i])
   }
 }
+
+def writech(ch: Int) = fwritech(utfwriter(stdout()), ch)
+def writeca(ca: CArray, ofs: Int, len: Int) = fwriteca(utfwriter(stdout()), ofs, len)
 
 /* UTF-8 encoding */
 
