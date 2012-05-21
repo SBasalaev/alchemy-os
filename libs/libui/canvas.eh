@@ -1,6 +1,4 @@
-use "graphics";
-
-type Screen;
+use "graphics.eh"
 
 def new_canvas(full: Bool): Screen;
 def canvas_graphics(cnv: Screen): Graphics;

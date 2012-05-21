@@ -22,14 +22,23 @@ import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.midlet.UIServer;
 import java.io.InputStream;
+import java.util.Date;
 import javax.microedition.lcdui.Choice;
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.DateField;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.Gauge;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.ImageItem;
+import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextBox;
+import javax.microedition.lcdui.TextField;
 
 /**
  * libui.0.1.so functions.
@@ -169,11 +178,11 @@ class LibUI01Func extends Function {
 				return UIServer.readEvent(c, false);
 			case 35: // ui_wait_event(): UIEvent
 				return UIServer.readEvent(c, true);
-			case 36: // new_textbox(mode: Int): Screen
+			case 36: // new_editbox(mode: Int): Screen
 				return new TextBox(null, null, Short.MAX_VALUE, ival(args[0]));
-			case 37: // textbox_get_text(box: Screen): String
+			case 37: // editbox_get_text(box: Screen): String
 				return ((TextBox)args[0]).getString();
-			case 38: // textbox_set_text(box: Screen, text: String)
+			case 38: // editbox_set_text(box: Screen, text: String)
 				((TextBox)args[0]).setString((String)args[1]);
 				return null;
 			case 39: { // new_listbox(strings: Array, images: Array): Screen
@@ -206,6 +215,104 @@ class LibUI01Func extends Function {
 				return null;
 			case 47: // screen_remove_menu(scr: Screen, menu: Menu)
 				((Displayable)args[0]).removeCommand((Command)args[1]);
+				return null;
+			case 48: // new_form(): Screen
+				return new Form(null);
+			case 49: // form_add(form: Screen, item: Item)
+				((Form)args[0]).append((Item)args[1]);
+				return null;
+			case 50: // form_get(form: Screen, at: Int): Item
+				return ((Form)args[0]).get(ival(args[1]));
+			case 51: // form_set(form: Screen, at: Int, item: Item)
+				((Form)args[0]).set(ival(args[1]), (Item)args[2]);
+				return null;
+			case 52: // form_insert(form: Screen, at: Int, item: Item)
+				((Form)args[0]).insert(ival(args[1]), (Item)args[2]);
+				return null;
+			case 53: // form_remove(form: Screen, at: Int)
+				((Form)args[0]).delete(ival(args[1]));
+				return null;
+			case 54: // form_size(form: Screen): Int
+				return Ival(((Form)args[0]).size());
+			case 55: // form_clear(form: Screen)
+				((Form)args[0]).deleteAll();
+				return null;
+			case 56: // item_get_label(item: Item): String
+				return ((Item)args[0]).getLabel();
+			case 57: // item_set_label(item: Item, label: String)
+				((Item)args[0]).setLabel((String)args[1]);
+				return null;
+			case 58: // new_textitem(label: String, text: String): Item
+				return new StringItem((String)args[0], (String)args[1]);
+			case 59: // textitem_get_text(item: Item): String
+				return ((StringItem)args[0]).getText();
+			case 60: // textitem_set_text(item: Item, text: String)
+				((StringItem)args[0]).setText((String)args[1]);
+				return null;
+			case 61: // textitem_get_font(item: Item): Int
+				return Ival(font2int(((StringItem)args[0]).getFont()));
+			case 62: // textitem_set_font(item: Item, font: Int)
+				((StringItem)args[0]).setFont(int2font(ival(args[1])));
+				return null;
+			case 63: // new_imageitem(label: String, img: Image): Item
+				return new ImageItem((String)args[0], (Image)args[1], ImageItem.LAYOUT_DEFAULT, null);
+			case 64: // imageitem_get_image(item: Item): Image
+				return ((ImageItem)args[0]).getImage();
+			case 65: // imageitem_set_image(item: Item, img: Image)
+				((ImageItem)args[0]).setImage((Image)args[1]);
+				return null;
+			case 66: // new_edititem(label: String, text: String, mode: Int, size: Int): Item
+				return new TextField((String)args[0], (String)args[1], ival(args[3]), ival(args[2]));
+			case 67: // edititem_get_text(item: Item): String
+				return ((TextField)args[0]).getString();
+			case 68: // edititem_set_text(item: Item, text: String)
+				((TextField)args[0]).setString((String)args[0]);
+				return null;
+			case 69: // new_gaugeitem(label: String, max: Int, init: Int): Item
+				return new Gauge((String)args[0], true, ival(args[1]), ival(args[2]));
+			case 70: // gaugeitem_get_value(item: Item): Int
+				return Ival(((Gauge)args[0]).getValue());
+			case 71: // gaugeitem_set_value(item: Item, val: Int)
+				((Gauge)args[0]).setValue(ival(args[1]));
+				return null;
+			case 72: // gaugeitem_get_maxvalue(item: Item): Int
+				return Ival(((Gauge)args[0]).getMaxValue());
+			case 73: // gaugeitem_set_maxvalue(item: Item, val: Int)
+				((Gauge)args[0]).setMaxValue(ival(args[1]));
+				return null;
+			case 74: // new_dateitem(label: String, mode: Int): Item
+				return new DateField((String)args[0], ival(args[1]));
+			case 75: { // dateitem_get_date(item: Item): Long
+				Date date = ((DateField)args[0]).getDate();
+				return (date == null) ? null : Lval(date.getTime());
+			}
+			case 76: // dateitem_set_date(item: Item, date: Long)
+				((DateField)args[0]).setDate(new Date(lval(args[1])));
+				return null;
+			case 77: { // new_checkitem(label: String, text: String, checked: Bool): Item
+				ChoiceGroup check = new ChoiceGroup((String)args[0], Choice.MULTIPLE);
+				check.append((String)args[1], null);
+				check.setSelectedIndex(0, bval(args[2]));
+				return check;
+			}
+			case 78: { // checkitem_get_checked(item: Item): Bool
+				boolean[] checked = new boolean[1];
+				((ChoiceGroup)args[0]).getSelectedFlags(checked);
+				return Ival(checked[0]);
+			}
+			case 79: // checkitem_set_checked(item: Item, checked: Bool)
+				((ChoiceGroup)args[0]).setSelectedIndex(0, bval(args[1]));
+				return null;
+			case 80: { // new_radioitem(label: String, strings: Array): Item
+				Object[] array = (Object[])args[1];
+				String[] strings = new String[array.length];
+				System.arraycopy(array, 0, strings, 0, array.length);
+				return new ChoiceGroup((String)args[0], Choice.EXCLUSIVE, strings, null);
+			}
+			case 81: // radioitem_get_index(item: Item): Int
+				return Ival(((ChoiceGroup)args[0]).getSelectedIndex());
+			case 82: // radioitem_set_index(item: Item, index: String)
+				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
 			default:
 				return null;

@@ -1,4 +1,4 @@
-type Image;
+use "ui_types.eh"
 
 /* mutable image */
 type Graphics;

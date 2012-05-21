@@ -1,0 +1,2 @@
+type Screen;
+type Image;

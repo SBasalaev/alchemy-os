@@ -1,4 +1,4 @@
-type Screen;
+use "ui_types.eh"
 
 def screen_height(scr: Screen): Int;
 def screen_width(scr: Screen): Int;
