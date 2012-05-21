@@ -125,7 +125,7 @@ class ConsoleForm extends Form implements ItemCommandListener {
 
 	public class ConsoleInputStream extends InputStream {
 
-		private ByteArrayInputStream buf = null;
+		private ByteArrayInputStream buf = new ByteArrayInputStream(new byte[0]);
 
 		public ConsoleInputStream() { }
 
@@ -139,17 +139,16 @@ class ConsoleForm extends Form implements ItemCommandListener {
 		}
 
 		public int available() throws IOException {
-			if (buf == null) return 0;
 			return buf.available();
 		}
 
 		public int read() throws IOException {
-			if (buf == null) {
+			int b = buf.read();
+			if (b == -1) {
 				String data = waitForInput();
 				buf = new ByteArrayInputStream(IO.utfEncode(data));
+				b = buf.read();
 			}
-			int b = buf.read();
-			if (b == -1) buf = null;
 			return b;
 		}
 	}

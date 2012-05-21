@@ -120,7 +120,13 @@ public class Shell extends NativeApp {
 						}
 						child.addStream(child.stderr);
 					}
+					if (c.stdin instanceof ConsoleInputStream) {
+						((ConsoleInputStream)c.stdin).setPrompt("");
+					}
 					child.startAndWait(cc.cmd, cc.args);
+					if (c.stdin instanceof ConsoleInputStream) {
+						((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
+					}
 					Throwable err = child.getError();
 					if (err != null) {
 						IO.println(c.stderr, err);

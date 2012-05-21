@@ -145,7 +145,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public void mkdir(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ_WRITE);
 		try {
 			File parent = file.parent();
 			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
