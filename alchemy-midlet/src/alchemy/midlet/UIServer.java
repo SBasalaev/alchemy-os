@@ -194,6 +194,7 @@ public final class UIServer {
 		public void commandAction(Command command, Displayable d) {
 			if (command == appCommand) { // show app selection screen
 				appList.setSelectedIndex(0, true);
+				pushEvent(currentScreen(), EVENT_HIDE, null);
 				display.setCurrent(appList);
 			} else {
 				pushEvent(d, EVENT_MENU, command);
