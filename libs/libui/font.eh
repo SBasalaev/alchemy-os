@@ -10,7 +10,5 @@ const SIZE_SMALL = 8;
 const SIZE_MED = 0;
 const SIZE_LARGE = 16;
 
-def get_font(g: Graphics): Int;
-def set_font(g: Graphics, font: Int);
 def str_width(font: Int, str: String): Int;
 def font_height(font: Int): Int;

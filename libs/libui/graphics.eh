@@ -7,6 +7,9 @@ type Graphics;
 def get_color(g: Graphics): Int;
 def set_color(g: Graphics, rgb: Int);
 
+def get_font(g: Graphics): Int;
+def set_font(g: Graphics, font: Int);
+
 def draw_line(g: Graphics, x1: Int, y1: Int, x2: Int, y2: Int);
 def draw_rect(g: Graphics, x: Int, y: Int, w: Int, h: Int);
 def fill_rect(g: Graphics, x: Int, y: Int, w: Int, h: Int);
