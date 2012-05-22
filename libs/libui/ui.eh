@@ -10,10 +10,7 @@ def screen_shown(scr: Screen): Bool;
 
 def ui_set_screen(scr: Screen);
 
-type Menu;
-
 def new_menu(text: String, priority: Int): Menu;
-
 def menu_get_text(menu: Menu): String;
 def menu_get_priority(menu: Menu): Int;
 

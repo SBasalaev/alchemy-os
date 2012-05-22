@@ -185,7 +185,7 @@ class LibUI01Func extends Function {
 			case 38: // editbox_set_text(box: Screen, text: String)
 				((TextBox)args[0]).setString((String)args[1]);
 				return null;
-			case 39: { // new_listbox(strings: Array, images: Array): Screen
+			case 39: { // new_listbox(strings: Array, images: Array, select: Menu): Screen
 				Object[] str = (Object[])args[0];
 				String[] strings = new String[str.length];
 				System.arraycopy(str, 0, strings, 0, str.length);
@@ -195,15 +195,15 @@ class LibUI01Func extends Function {
 					images = new Image[img.length];
 					System.arraycopy(img, 0, images, 0, img.length);
 				}
-				return new List(null, Choice.IMPLICIT, strings, images);
+				List list = new List(null, Choice.IMPLICIT, strings, images);
+				list.setSelectCommand((Command)args[2]);
+				return list;
 			}
 			case 40: // listbox_get_index(list: Screen): Int
 				return Ival(((List)args[0]).getSelectedIndex());
 			case 41: // listbox_set_index(list: Screen, index: Int)
 				((List)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
-			case 42: // listbox_default_menu(): Menu
-				return List.SELECT_COMMAND;
 			case 43: // new_menu(text: String, priority: Int): Menu
 				return new Command((String)args[0], Command.SCREEN, ival(args[1]));
 			case 44: // menu_get_text(menu: Menu): String

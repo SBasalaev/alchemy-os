@@ -40,7 +40,6 @@ editbox_set_text
 new_listbox
 listbox_get_index
 listbox_set_index
-listbox_default_menu
 new_menu
 menu_get_text
 menu_get_priority
