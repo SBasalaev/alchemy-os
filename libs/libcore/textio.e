@@ -57,7 +57,7 @@ def freadline(r: Reader): String {
   }
 }
 
-def readstr(len: Int): String = freadstr(utfreader(stdin()))
+def readstr(len: Int): String = freadstr(utfreader(stdin()), len)
 
 def readca(ca: CArray, ofs: Int, len: Int) = freadca(utfreader(stdin()), ca, ofs, len)
 
@@ -74,7 +74,7 @@ def fwriteca(w: Writer, ca: CArray, ofs: Int, len: Int) {
 }
 
 def writech(ch: Int) = fwritech(utfwriter(stdout()), ch)
-def writeca(ca: CArray, ofs: Int, len: Int) = fwriteca(utfwriter(stdout()), ofs, len)
+def writeca(ca: CArray, ofs: Int, len: Int) = fwriteca(utfwriter(stdout()), ca, ofs, len)
 
 /* UTF-8 encoding */
 
