@@ -163,14 +163,16 @@ public final class UIServer {
 	 * If the event queue is empty and wait is <code>true</code>
 	 * this method blocks until an event is available, otherwise
 	 * it returns <code>null</code> on empty queue.
+	 *
+	 * @throws IllegalStateException  if context is not mapped to a screen
 	 */
-	public static Object readEvent(Context c, boolean wait) {
+	public static Object readEvent(Context c, boolean wait) throws IllegalStateException {
 		UIFrame frame = null;
 		synchronized (UIServer.class) {
 			int i = frameIndex(c);
 			if (i >= 0) frame = ((UIFrame)frames.elementAt(i));
 		}
-		if (frame == null) return null;
+		if (frame == null) throw new IllegalStateException("Screen is not set.");
 		synchronized (frame) {
 			Object e = frame.queue.pop();
 			if (e == null && wait) {

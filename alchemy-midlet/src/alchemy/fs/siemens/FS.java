@@ -195,7 +195,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public String[] list(File file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ);
 		try {
 			Enumeration e = fc.list("*", true);
 			Vector v = new Vector();

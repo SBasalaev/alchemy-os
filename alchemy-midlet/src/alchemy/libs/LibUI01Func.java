@@ -145,7 +145,7 @@ class LibUI01Func extends Function {
 			case 26: { // canvas_read_key(cnv: Screen): Int
 				// compatibility function with previous non-event canvas behavior
 				Object[] event = (Object[])UIServer.readEvent(c, false);
-				if (event != null && event[0] == args[0] && event[1] == UIServer.EVENT_KEY_PRESS) {
+				if (event != null && event[0] == UIServer.EVENT_KEY_PRESS && event[1] == args[0]) {
 					return event[2];
 				} else {
 					return Function.ZERO;
