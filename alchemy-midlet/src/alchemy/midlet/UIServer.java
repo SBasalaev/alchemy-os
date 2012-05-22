@@ -95,7 +95,7 @@ public final class UIServer {
 	 * If context is not mapped then new mapping is added and
 	 * corresponding screen is placed on top of the screen stack.
 	 */
-	public static synchronized void mapContext(Context c, Displayable d) {
+	public static synchronized void setScreen(Context c, Displayable d) {
 		int i = frameIndex(c);
 		if (i >= 0) {
 			((UIFrame)frames.elementAt(i)).d = d;
@@ -113,7 +113,7 @@ public final class UIServer {
 	 * Unmaps context mapping and removes corresponding screen
 	 * from the screen stack.
 	 */
-	public static synchronized void unmapContext(Context c) {
+	public static synchronized void removeScreen(Context c) {
 		int index = frameIndex(c);
 		if (index >= 0) {
 			UIFrame frame = (UIFrame)frames.elementAt(index);
@@ -123,6 +123,19 @@ public final class UIServer {
 			frames.removeElementAt(index);
 			appList.delete(index);
 			displayCurrent();
+		}
+	}
+	
+	/**
+	 * Returns screen this context mapped to or <code>null</code>.
+	 */
+	public static synchronized Displayable getScreen(Context c) {
+		int index = frameIndex(c);
+		if (index >= 0) {
+			UIFrame frame = (UIFrame)frames.elementAt(index);
+			return frame.d;
+		} else {
+			return null;
 		}
 	}
 
@@ -187,7 +200,7 @@ public final class UIServer {
 	/** Removes screen mapping when context ends. */
 	private static class UIContextListener implements ContextListener {
 		public void contextEnded(Context c) {
-			unmapContext(c);
+			removeScreen(c);
 		}
 	}
 	

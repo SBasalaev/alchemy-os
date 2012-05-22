@@ -8,6 +8,7 @@ def screen_set_title(scr: Screen, title: String);
 
 def screen_shown(scr: Screen): Bool;
 
+def ui_get_screen(): Screen;
 def ui_set_screen(scr: Screen);
 
 def new_menu(text: String, priority: Int): Menu;

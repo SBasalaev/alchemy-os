@@ -153,9 +153,9 @@ class LibUI01Func extends Function {
 			}
 			case 27: { // ui_set_screen(scr: Screen)
 				if (args[0] != null) {
-					UIServer.mapContext(c, (Displayable)args[0]);
+					UIServer.setScreen(c, (Displayable)args[0]);
 				} else {
-					UIServer.unmapContext(c);
+					UIServer.removeScreen(c);
 				}
 				return null;
 			}
@@ -204,6 +204,8 @@ class LibUI01Func extends Function {
 			case 41: // listbox_set_index(list: Screen, index: Int)
 				((List)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
+			case 42: // ui_get_screen(): Screen
+				return UIServer.getScreen(c);
 			case 43: // new_menu(text: String, priority: Int): Menu
 				return new Command((String)args[0], Command.SCREEN, ival(args[1]));
 			case 44: // menu_get_text(menu: Menu): String
@@ -303,16 +305,31 @@ class LibUI01Func extends Function {
 			case 79: // checkitem_set_checked(item: Item, checked: Bool)
 				((ChoiceGroup)args[0]).setSelectedIndex(0, bval(args[1]));
 				return null;
-			case 80: { // new_radioitem(label: String, strings: Array): Item
+			case 80: // checkitem_get_text(item: Item): String
+				return ((ChoiceGroup)args[0]).getString(0);
+			case 81: // checkitem_set_text(item: Item, text: String)
+				((ChoiceGroup)args[0]).set(0, (String)args[1], null);
+				return null;
+			case 82: { // new_radioitem(label: String, strings: Array): Item
 				Object[] array = (Object[])args[1];
 				String[] strings = new String[array.length];
 				System.arraycopy(array, 0, strings, 0, array.length);
 				return new ChoiceGroup((String)args[0], Choice.EXCLUSIVE, strings, null);
 			}
-			case 81: // radioitem_get_index(item: Item): Int
+			case 83: // radioitem_get_index(item: Item): Int
 				return Ival(((ChoiceGroup)args[0]).getSelectedIndex());
-			case 82: // radioitem_set_index(item: Item, index: String)
+			case 84: // radioitem_set_index(item: Item, index: String)
 				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
+				return null;
+			case 85: { // new_textbox(text: String): Screen
+				Form box = new Form(null);
+				box.append(new StringItem(null, (String)args[0]));
+				return box;
+			}
+			case 86: // textbox_get_text(box: Screen): String
+				return ((StringItem)((Form)args[0]).get(0)).getText();
+			case 87: // textbox_set_text(box: Screen, text: String)
+				((StringItem)((Form)args[0]).get(0)).setText((String)args[1]);
 				return null;
 			default:
 				return null;

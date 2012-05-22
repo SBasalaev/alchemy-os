@@ -40,6 +40,7 @@ editbox_set_text
 new_listbox
 listbox_get_index
 listbox_set_index
+ui_get_screen
 new_menu
 menu_get_text
 menu_get_priority
@@ -82,3 +83,6 @@ checkitem_set_text
 new_radioitem
 radioitem_get_index
 radioitem_set_index
+new_textbox
+textbox_get_text
+textbox_set_text
