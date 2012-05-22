@@ -38,9 +38,9 @@ def main(args: Array) {
     println(VERSION)
   } else {
     var f = to_str(args[0])
-    var edit = new_textbox(TEXT_ANY)
+    var edit = new_editbox(EDIT_ANY)
     screen_set_title(edit, "edit - "+f)
-    textbox_set_text(edit, readfile(f))
+    editbox_set_text(edit, readfile(f))
     var msave = new_menu("Save", 1)
     var mquit = new_menu("Quit", 2)
     screen_add_menu(edit, msave)
@@ -49,7 +49,7 @@ def main(args: Array) {
     var e = ui_wait_event()
     while (e.value != mquit) {
       if (e.value == msave) {
-        writefile(f, textbox_get_text(edit))
+        writefile(f, editbox_get_text(edit))
       }
       e = ui_wait_event()
     }
