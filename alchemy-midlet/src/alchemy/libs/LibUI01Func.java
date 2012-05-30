@@ -245,11 +245,11 @@ class LibUI01Func extends Function {
 				((Item)args[0]).setLabel((String)args[1]);
 				return null;
 			case 58: // new_textitem(label: String, text: String): Item
-				return new StringItem((String)args[0], (String)args[1]);
+				return new StringItem((String)args[0], String.valueOf(args[1])+'\n');
 			case 59: // textitem_get_text(item: Item): String
 				return ((StringItem)args[0]).getText();
 			case 60: // textitem_set_text(item: Item, text: String)
-				((StringItem)args[0]).setText((String)args[1]);
+				((StringItem)args[0]).setText(String.valueOf(args[1])+'\n');
 				return null;
 			case 61: // textitem_get_font(item: Item): Int
 				return Ival(font2int(((StringItem)args[0]).getFont()));
@@ -257,7 +257,7 @@ class LibUI01Func extends Function {
 				((StringItem)args[0]).setFont(int2font(ival(args[1])));
 				return null;
 			case 63: // new_imageitem(label: String, img: Image): Item
-				return new ImageItem((String)args[0], (Image)args[1], ImageItem.LAYOUT_DEFAULT, null);
+				return new ImageItem((String)args[0], (Image)args[1], Item.LAYOUT_NEWLINE_AFTER, null);
 			case 64: // imageitem_get_image(item: Item): Image
 				return ((ImageItem)args[0]).getImage();
 			case 65: // imageitem_set_image(item: Item, img: Image)

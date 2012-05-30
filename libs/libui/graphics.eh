@@ -1,8 +1,6 @@
 use "ui_types.eh"
 use "font.eh"
 
-type Graphics;
-
 // color mask: 0x00RRGGBB
 def get_color(g: Graphics): Int;
 def set_color(g: Graphics, rgb: Int);

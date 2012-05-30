@@ -1,7 +1,6 @@
 use "ui_types.eh"
 
 /* mutable image */
-type Graphics;
 def new_image(w: Int, h: Int): Image;
 def image_graphics(im: Image): Graphics;
 
