@@ -69,7 +69,6 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			return;
 		}
 		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+
-			"\nVersion 1.4 beta 2\n" +
 			"\n\nCopyright (c) 2011-2012, Sergey Basalaev\n" +
 			"http://alchemy-os.googlecode.com\n" +
 			"\n" +
@@ -129,20 +128,33 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			Properties instCfg = InstallInfo.read();
 			messages.append("Installed version: "+instCfg.get("alchemy.version")+'\n');
 			messages.addCommand(cmdUninstall);
-			String[] curVersion = IO.split(instCfg.get("alchemy.version"), '.');
-			String[] newVersion = IO.split(setupCfg.get("alchemy.version"), '.');
-			int vcmp = newVersion[0].compareTo(curVersion[0]);
-			if (vcmp == 0) vcmp = newVersion[1].compareTo(curVersion[1]);
-			if (vcmp > 0) {
+			int vcmp = compareVersions(instCfg.get("alchemy.version"), setupCfg.get("alchemy.version"));
+			if (vcmp < 0) {
 				messages.append("Can be updated to "+setupCfg.get("alchemy.version")+'\n');
-			//	messages.addCommand(cmdUpdate);
+				messages.addCommand(cmdUpdate);
 			}
-			//always allow update in development branch
-			// FIXME: remove in release
-			messages.addCommand(cmdUpdate);
 		} else {
 			messages.append("Not installed"+'\n');
 			messages.addCommand(cmdInstall);
+		}
+	}
+	
+	private int compareVersions(String v1, String v2) {
+		String[] v1parts = IO.split(v1, '.');
+		String[] v2parts = IO.split(v2, '.');
+		int index = 0;
+		while (true) {
+			if (index < v1parts.length) {
+				int i1 = Integer.parseInt(v1parts[index]);
+				int i2 = (index < v2parts.length) ? Integer.parseInt(v2parts[index]) : 0;
+				if (i1 != i2) return i1-i2;
+			} else if (index < v2parts.length) {
+				int i2 = Integer.parseInt(v2parts[index]);
+				if (i2 != 0) return -i2;
+			} else {
+				return 0; // the two versions are equal
+			}
+			index++;
 		}
 	}
 

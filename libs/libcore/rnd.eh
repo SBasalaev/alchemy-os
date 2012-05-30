@@ -5,4 +5,3 @@ def rndint(): Int;
 def rndlong(): Long;
 def rndfloat(): Float;
 def rnddouble(): Double;
-

@@ -19,4 +19,3 @@ def ibits2f(bits: Int): Float;
 def f2ibits(f: Float): Int;
 def lbits2d(bits: Long): Double;
 def d2lbits(d: Double): Long;
-
