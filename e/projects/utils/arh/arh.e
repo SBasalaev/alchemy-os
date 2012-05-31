@@ -1,10 +1,16 @@
 /* Arh utility
- * Version 1.0.1
+ * Version 1.0.2
  * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
 
-use "dataio"
+use "dataio.eh"
+
+//attribute flags
+const A_DIR = 16
+const A_READ = 4
+const A_WRITE = 2
+const A_EXEC = 1
 
 def arhpath(path: String): String
   = relpath("./"+abspath("/"+path))
@@ -26,10 +32,6 @@ def arhlist(in: IStream) {
 }
 
 def unarh(in: IStream) {
-  var A_DIR = 16
-  var A_READ = 4
-  var A_WRITE = 2
-  var A_EXEC = 1
   var f = freadutf(in)
   while (f != null) {
     f = arhpath(f)
@@ -61,10 +63,6 @@ def unarh(in: IStream) {
 }
 
 def arhwrite(out: OStream, f: String) {
-  var A_DIR = 16
-  var A_READ = 4
-  var A_WRITE = 2
-  var A_EXEC = 1
   fwriteutf(out, arhpath(f))
   fwritelong(out, fmodified(f))
   var attrs = 0
@@ -101,7 +99,7 @@ def main(args: Array): Int {
   } else {
     var cmd = args[0]
     if (cmd == "v" || cmd == "-v") {
-      println("arh 1.0.1")
+      println("arh 1.0.2")
       0
     } else if (cmd == "h" || cmd == "-h") {
       println("Usage:\narh c archive files...\narh t archive\narh x archive")
@@ -117,10 +115,8 @@ def main(args: Array): Int {
       0
     } else if (cmd == "c") {
       var out = fopen_w(to_str(args[1]))
-      var i = 2
-      while (i < args.len) {
+      for (var i=2, i<args.len, i=i+1) {
         arhwrite(out, to_str(args[i]))
-        i = i + 1
       }
       fflush(out)
       fclose(out)

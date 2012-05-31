@@ -1,5 +1,5 @@
 /* base64 encoder/decoder
- * Version 1.0.1
+ * Version 1.0.2
  * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
@@ -7,9 +7,11 @@
 use "io"
 use "string"
 
-def enc(b: Int): Int = strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", b)
+const CODING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-def dec(ch: Int): Int = strindex("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", ch)
+def enc(b: Int): Int = strchr(CODING, b)
+
+def dec(ch: Int): Int = strindex(CODING, ch)
 
 def encode() {
   var buf = new BArray(3)
