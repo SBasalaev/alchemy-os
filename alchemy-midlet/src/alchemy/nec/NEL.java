@@ -357,10 +357,10 @@ public class NEL extends NativeApp {
 				case '0':
 					break;
 				case 'i':
-				case 'l':
+				case 'f':
 					data.skipBytes(4);
 					break;
-				case 'f':
+				case 'l':
 				case 'd':
 					data.skipBytes(8);
 					break;
