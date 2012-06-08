@@ -556,6 +556,8 @@ public class Context {
 				exitcode = r == null ? 0 : r.intValue();
 			} catch (Throwable t) {
 				error = t;
+				IO.println(stderr, t);
+				IO.println(stderr, dumpCallStack());
 				//t.printStackTrace();
 			}
 			setState(ENDED);
@@ -576,6 +578,8 @@ public class Context {
 					}
 				}
 			}
+			try { stdout.flush(); } catch (IOException e) { }
+			try { stderr.flush(); } catch (IOException e) { }
 		}
 	}
 	
