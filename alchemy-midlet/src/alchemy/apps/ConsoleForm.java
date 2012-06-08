@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.ItemCommandListener;
@@ -43,6 +44,7 @@ class ConsoleForm extends Form implements ItemCommandListener {
 
 	private final TextField input = new TextField(">", null, 1024, TextField.ANY);
 	private final Command cmdInput = new Command("Execute", Command.OK, 1);
+	private final Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
 	private boolean inputvisible = false;
 
 	public ConsoleForm() {
@@ -53,6 +55,7 @@ class ConsoleForm extends Form implements ItemCommandListener {
 
 	public void print(String msg) {
 		StringItem message = new StringItem(null, msg);
+		message.setFont(smallfont);
 		int pos = size() - (inputvisible? 1:0);
 		insert(pos, message);
 	}
