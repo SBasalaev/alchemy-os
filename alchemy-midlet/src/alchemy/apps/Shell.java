@@ -55,6 +55,7 @@ public class Shell extends NativeApp {
 				scriptinput = new ByteArrayInputStream(IO.utfEncode(cmdline.toString()));
 			} else {
 				scriptinput = c.fs().read(c.toFile(args[0]));
+				c.addStream(scriptinput);
 			}
 			if (c.stdin instanceof ConsoleInputStream) {
 				((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
@@ -126,11 +127,6 @@ public class Shell extends NativeApp {
 					child.startAndWait(cc.cmd, cc.args);
 					if (c.stdin instanceof ConsoleInputStream) {
 						((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
-					}
-					Throwable err = child.getError();
-					if (err != null) {
-						IO.println(c.stderr, err);
-						IO.println(c.stderr, child.dumpCallStack());
 					}
 				}
 			} catch (Throwable t) {
