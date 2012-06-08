@@ -103,7 +103,12 @@ public class NEC extends NativeApp {
 		}
 		//parsing source
 		Parser parser = new Parser(c, target);
-		Unit unit = parser.parse(c.toFile(fname));
+		Unit unit = null;
+		try {
+			unit = parser.parse(c.toFile(fname));
+		} catch (Exception e) {
+			IO.println(c.stderr, "There is a bug in compiler. Please report it with your source code and the following error message: "+e);
+		}
 		if (unit == null) return -1;
 		//optimizing
 		if (optimize) new Optimizer().visitUnit(unit);
