@@ -1,10 +1,13 @@
 /* Arh utility
- * Version 1.0.2
+ * Version 1.0.3
  * (C) 2011-2012, Sergey Basalaev
  * Licensed under GPL v3
  */
 
 use "dataio.eh"
+
+const VERSION = "arh 1.0.3"
+const HELP = "Usage:\narh c archive files...\narh t archive\narh x archive"
 
 //attribute flags
 const A_DIR = 16
@@ -38,7 +41,7 @@ def unarh(in: IStream) {
     fskip(in,8)
     var attrs = freadubyte(in)
     if ((attrs & A_DIR) != 0) {
-      mkdir(f)
+      if (!exists(f)) mkdir(f)
     } else {
       var out = fopen_w(f)
       var len = freadint(in)
@@ -99,21 +102,21 @@ def main(args: Array): Int {
   } else {
     var cmd = args[0]
     if (cmd == "v" || cmd == "-v") {
-      println("arh 1.0.2")
+      println(VERSION)
       0
     } else if (cmd == "h" || cmd == "-h") {
-      println("Usage:\narh c archive files...\narh t archive\narh x archive")
+      println(HELP)
       0
     } else if (args.len < 2) {
       fprintln(stderr(), "arh: no archive")
       1
-    } else if (cmd == "t") {
+    } else if (cmd == "t" || cmd == "-t") {
       arhlist(fopen_r(to_str(args[1])))
       0
-    } else if (cmd == "x") {
+    } else if (cmd == "x" || cmd == "-x") {
       unarh(fopen_r(to_str(args[1])))
       0
-    } else if (cmd == "c") {
+    } else if (cmd == "c" || cmd == "-c") {
       var out = fopen_w(to_str(args[1]))
       for (var i=2, i<args.len, i=i+1) {
         arhwrite(out, to_str(args[i]))
