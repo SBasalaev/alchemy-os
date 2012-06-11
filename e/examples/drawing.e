@@ -1,4 +1,7 @@
-/* Example of drawing on canvas. */
+/* Example of drawing on canvas.
+ * To compile: ex drawing.e -o drawing -lui
+ * To run: ./drawing
+ */
 
 use "ui"
 use "canvas"

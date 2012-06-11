@@ -1,4 +1,7 @@
-/* Example of canvas application. */
+/* Example of application using canvas.
+ * To compile: ex canvasinput.e -o canvasinput -lui
+ * To run: ./canvasinput
+ */
 
 use "ui"
 use "canvas"
