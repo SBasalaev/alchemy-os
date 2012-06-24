@@ -31,6 +31,7 @@ public class FunctionType extends Type {
 		if (!(obj.getClass() == FunctionType.class)) return false;
 		final FunctionType other = (FunctionType)obj;
 		if (!this.rettype.equals(other.rettype)) return false;
+		if (this.args.length != other.args.length) return false;
 		for (int i=0; i<args.length; i++) {
 			if (!this.args[i].equals(other.args[i])) return false;
 		}
