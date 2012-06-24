@@ -343,7 +343,7 @@ class Optimizer implements ExprVisitor {
 	 *   cast(type) number   =>   castednumber
 	 */
 	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object scope) {
-		cast.expr.accept(this, scope);
+		cast.expr = (Expr)cast.expr.accept(this, scope);
 		if (cast.expr.getClass() == ConstExpr.class) {
 			Object cnst = ((ConstExpr)cast.expr).value;
 			switch (cast.casttype) {
