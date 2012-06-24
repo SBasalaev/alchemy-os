@@ -61,8 +61,6 @@ public class Console extends NativeApp {
 			}
 		}
 		ConsoleForm form = new ConsoleForm();
-		final NotifyListener l = new NotifyListener();
-		form.setCommandListener(l);
 		UIServer.setScreen(c, form);
 		Context child = new Context(c);
 		try {
@@ -88,7 +86,10 @@ public class Console extends NativeApp {
 			int result = child.startAndWait(childCmd, childArgs);
 			if (keep) {
 				form.addCommand(cmdClose);
-				synchronized (l) { l.wait(); }
+				Object[] event;
+				do {
+					event = (Object[])UIServer.readEvent(c, true);
+				} while (event[2] != cmdClose);
 			}
 			return result;
 		} catch (Exception e) {
