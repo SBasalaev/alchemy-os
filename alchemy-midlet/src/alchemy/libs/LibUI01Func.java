@@ -345,6 +345,6 @@ class LibUI01Func extends Function {
 	}
 
 	public String toString() {
-		return "ui:"+signature;
+		return "libui0.1.so:"+signature;
 	}
 }

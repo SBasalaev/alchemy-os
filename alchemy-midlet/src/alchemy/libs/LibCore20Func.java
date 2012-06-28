@@ -411,6 +411,6 @@ class LibCore20Func extends Function {
 	}
 	
 	public String toString() {
-		return "core:"+signature;
+		return "libcore.2.so:"+signature;
 	}
 }
