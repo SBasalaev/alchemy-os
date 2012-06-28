@@ -1,0 +1,100 @@
+Package: appmenu
+Version: 0.3-1
+Section: gui
+Depends: libcore2, libui0.1
+Summary: application menu
+File: appmenu_0.3-1.pkg
+
+Package: coreutils
+Version: 0.4.1-1
+Section: utils
+Homepage: http://code.google.com/p/alchemy-os/
+Summary: core Alchemy utilities
+Depends: libcore2
+File: coreutils_0.4.1-1.pkg
+
+Package: edit
+Version: 0.8-1
+Section: gui
+Summary: simple text editor
+Depends: libcore2, libui0.1
+File: edit_0.8-1.pkg
+
+Package: ex
+Version: 1.0-1
+Section: devel
+Copyright: (C) 2012, Sergey Basalaev
+Summary: Alchemy unified compiler/linker
+File: ex_1.0-1.pkg
+
+Package: fileinfo
+Version: 1.0-1
+Section: gui
+Summary: file properties viewer
+Depends: libcore2, libui0.1
+File: fileinfo_1.0-1.pkg
+
+Package: libcore2
+Version: 2.1-1
+Summary: core library
+Section: libs
+File: libcore2_2.1-1.pkg
+
+Package: libcore-dev
+Version: 2.1-1
+Summary: core development headers
+Section: libdevel
+Depends: libcore2
+File: libcore-dev_2.1-1.pkg
+
+Package: libpkg0
+Version: 0.3.1-1
+Section: libs
+Summary: package management library
+Depends: libcore2
+File: libpkg0_0.3.1-1.pkg
+
+Package: libui0.1
+Version: 0.1-1
+Section: libs
+Summary: user interface library
+File: libui0.1_0.1-1.pkg
+
+Package: libui-dev
+Version: 0.1-1
+Section: libdevel
+Depends: libui0.1
+Summary: headers for user interface library
+File: libui-dev_0.1-1.pkg
+
+Package: navigator
+Version: 0.2-1
+Section: gui
+Depends: libcore2, libui0.1, edit, fileinfo, coreutils
+Summary: file manager for Alchemy
+File: navigator_0.2-1.pkg
+
+Package: nec
+Version: 1.4-1
+Section: devel
+Summary: Alchemy builtin compiler and linker
+File: nec_1.4-1.pkg
+
+Package: pkg
+Version: 0.1.1-1
+Section: admin
+Summary: Alchemy package manager
+Depends: libpkg0, libcore2
+File: pkg_0.1.1-1.pkg
+
+Package: sh
+Version: 1.0-1
+Section: admin
+Summary: Alchemy builtin shell
+File: sh_1.0-1.pkg
+
+Package: terminal
+Version: 1.0-2
+Section: gui
+Summary: Alchemy builtin terminal
+File: terminal_1.0-2.pkg

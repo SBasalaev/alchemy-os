@@ -25,6 +25,7 @@ import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 import javax.microedition.lcdui.*;
@@ -72,8 +73,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			"\n\nCopyright (c) 2011-2012, Sergey Basalaev\n" +
 			"http://alchemy-os.googlecode.com\n" +
 			"\n" +
-			"This MIDlet is free software and is licensed under GNU GPL version 3"+'\n' +
-			"A copy of the GNU GPL may be found at http://www.gnu.org/licenses/"+'\n';
+			"This MIDlet is free software and is licensed under GNU GPL version 3\n" +
+			"A copy of the GNU GPL may be found at http://www.gnu.org/licenses/\n";
 
 		new InstallerThread(0).start();
 	}
@@ -203,19 +204,17 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			}
 			String path = navigator.getCurrentDir().path();
 			instCfg.put("fs.init", path);
-			messages.append("Selected path: "+path);
+			messages.append("Selected path: "+path+'\n');
 		}
 		display.setCurrent(messages);
-		//installing files
-		installArchives();
-		installCfg();
+		//installing core files
+		installArchives("install.archives");
 		//writing configuration data
-		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
 		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
 		//writing install config
 		messages.append("Saving configuration..."+'\n');
 		InstallInfo.save();
-		messages.append("Installed successfully"+'\n');
+		messages.append("Launch Alchemy OS to finish installation"+'\n');
 		messages.addCommand(cmdUninstall);
 	}
 
@@ -235,34 +234,20 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	private void update() throws Exception {
 		messages.deleteAll();
-		messages.append("Removing deprecated components"+'\n');
-		Filesystem fs = InstallInfo.getFilesystem();
-		//changes since 1.0
-		fs.remove(new File("/lib/libcore"));
-		fs.remove(new File("/lib/libcore.0"));
-		fs.remove(new File("/lib/libcore.0.0"));
-		fs.remove(new File("/inc/array.eh"));
-		//changes since 1.1
-		fs.remove(new File("/bin/con"));
-		//changes since 1.2 / 1.2.1
-		fs.remove(new File("/lib/libcore.1.1.so"));
-		fs.remove(new File("/lib/libcore.1.0.so"));
-		fs.remove(new File("/lib/libcore.1.so"));
 		//installing new files
-		installArchives();
-		installCfg();
+		installArchives("update.archives");
+		//writing configuration data
 		Properties instCfg = InstallInfo.read();
-		instCfg.put("alchemy.initcmd", setupCfg.get("alchemy.initcmd"));
 		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
 		messages.append("Saving configuration..."+'\n');
 		InstallInfo.save();
-		messages.append("Updated successfully"+'\n');
+		messages.append("Launch Alchemy OS to finish update"+'\n');
 		messages.addCommand(cmdUninstall);
 	}
 
-	private void installArchives() throws Exception {
+	private void installArchives(String property) throws Exception {
 		Filesystem fs = InstallInfo.getFilesystem();
-		String[] archives = IO.split(setupCfg.get("install.archives"), ' ');
+		String[] archives = IO.split(setupCfg.get(property), ' ');
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
@@ -288,21 +273,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 				fs.setExec(f, (attrs & 1) != 0);
 			}
 		}
-	}
-
-	private void installCfg() throws Exception {
-		//writing current locale
-		Filesystem fs = InstallInfo.getFilesystem();
-		File localeFile = new File("/cfg/locale");
-		if (!fs.exists(localeFile)) {
-			String locale = System.getProperty("microedition.locale");
-			if (locale == null) locale = "en_US";
-			else locale = locale.replace('-', '_');
-			OutputStream out = fs.write(localeFile);
-			out.write(locale.getBytes());
-			out.flush();
-			out.close();
-		}
+		fs.remove(new File("/PACKAGE"));
 	}
 
 	private class InstallerThread extends Thread {

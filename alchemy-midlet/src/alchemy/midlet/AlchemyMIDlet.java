@@ -23,7 +23,10 @@ import alchemy.core.Context;
 import alchemy.core.ContextListener;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
+import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeLibBuilder;
+import alchemy.util.IO;
+import alchemy.util.UTFReader;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -54,9 +57,9 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			root.setEnv("INCPATH", "/inc");
 			root.setCurDir(new File("/home"));
 			root.addContextListener(this);
-			//preloading core library
+			//preloading core libraries
 			root.loadLibrary("/lib/libcore.2.0.so");
-			root.loadLibrary("/lib/libcoree.2.0.so");
+			root.loadLibrary("/lib/libcoree.2.1.so");
 			runApp();
 		} catch (Throwable t) {
 			kernelPanic(t.toString());
@@ -68,10 +71,16 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			new Runnable() {
 				public void run() {
 					try {
-						runtime.rootContext().start("terminal", new String[] {"sh"});
+						Filesystem fs = InstallInfo.getFilesystem();
+						UTFReader r = new UTFReader(fs.read(new File("/cfg/init")));
+						String[] cmd = IO.split(r.readLine(), ' ');
+						r.close();
+						String[] cmdargs = new String[cmd.length-1];
+						System.arraycopy(cmd, 1, cmdargs, 0, cmdargs.length);
+						runtime.rootContext().start(cmd[0], cmdargs);
 					} catch (Throwable t) {
 						kernelPanic(t.toString());
-					}					
+					}
 				}
 			}
 		);
