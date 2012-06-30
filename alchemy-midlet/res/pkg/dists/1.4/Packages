@@ -98,3 +98,17 @@ Version: 1.0-2
 Section: gui
 Summary: Alchemy builtin terminal
 File: terminal_1.0-2.pkg
+
+Package: alchemy-core
+Version: 1
+Section: admin
+Depends: libcore2, libui0.1, sh, terminal, edit, coreutils, pkg
+Summary: this package depends on all core components of Alchemy OS, it is recommended not to remove it to ensure safe upgrades
+File: alchemy-core_1.pkg
+
+Package: alchemy-gui
+Version: 4
+Section: gui
+Depends: appmenu, terminal, alpaca, navigator, imgview
+Summary: this package depends on all packages that constitute Alchemy GUI, it is recommended not to remove it to ensure safe upgrades
+File: alchemy-gui_4.pkg
