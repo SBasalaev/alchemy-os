@@ -112,3 +112,21 @@ Section: gui
 Depends: appmenu, terminal, alpaca, navigator, imgview
 Summary: this package depends on all packages that constitute Alchemy GUI, it is recommended not to remove it to ensure safe upgrades
 File: alchemy-gui_4.pkg
+
+Package: alpaca
+Version: 0.1-1
+Section: admin
+Depends: libcore2, libui0.1, libpkg0
+Summary: GUI for Alchemy package manager
+License: GPL v3
+Copyright: (c) 2012, Sergey Basalaev
+File: alpaca_0.1-1.pkg
+
+Package: imgview
+Version: 0.1-1
+Section: gui
+Depends: libcore2, libui0.1
+Summary: simple image viewer
+License: GPL v3
+Copyright: (c) 2012 Sergey Basalaev
+File: imgview_0.1-1.pkg
