@@ -77,7 +77,7 @@ public class NEC extends NativeApp {
 			} else if (arg.equals("-O0")) {
 				optimize = false;
 			} else if (arg.startsWith("-I") && arg.length() > 2) {
-				c.setEnv("INCPATH", c.getEnv("INCPATH")+':'+arg);
+				c.setEnv("INCPATH", c.getEnv("INCPATH")+':'+arg.substring(2));
 			} else if (arg.charAt(0) == '-') {
 				IO.println(c.stderr, "Unknown argument: "+arg);
 				IO.println(c.stderr, HELP);

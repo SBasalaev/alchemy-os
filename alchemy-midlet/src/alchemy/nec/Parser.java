@@ -108,7 +108,7 @@ public class Parser {
 				if (c.fs().exists(f)) return f;
 			}
 		}
-		throw new ParseException("Module not found: "+name);
+		throw new ParseException("File not found: "+name);
 	}
 
 	private void parseFile(File file) throws ParseException, IOException {
