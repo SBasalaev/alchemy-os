@@ -35,24 +35,24 @@ Depends: libcore2, libui0.1
 File: fileinfo_1.0-1.pkg
 
 Package: libcore2
-Version: 2.1-1
+Version: 2.1.1-1
 Summary: core library
 Section: libs
-File: libcore2_2.1-1.pkg
+File: libcore2_2.1.1-1.pkg
 
 Package: libcore-dev
-Version: 2.1-1
+Version: 2.1.1-1
 Summary: core development headers
 Section: libdevel
 Depends: libcore2
-File: libcore-dev_2.1-1.pkg
+File: libcore-dev_2.1.1-1.pkg
 
 Package: libpkg0
-Version: 0.3.1-1
+Version: 0.3.2-1
 Section: libs
 Summary: package management library
 Depends: libcore2
-File: libpkg0_0.3.1-1.pkg
+File: libpkg0_0.3.2-1.pkg
 
 Package: libui0.1
 Version: 0.1-1
@@ -114,19 +114,15 @@ Summary: this package depends on all packages that constitute Alchemy GUI, it is
 File: alchemy-gui_4.pkg
 
 Package: alpaca
-Version: 0.1-1
+Version: 0.2.1-1
 Section: admin
 Depends: libcore2, libui0.1, libpkg0
 Summary: GUI for Alchemy package manager
-License: GPL v3
-Copyright: (c) 2012, Sergey Basalaev
-File: alpaca_0.1-1.pkg
+File: alpaca_0.2.1-1.pkg
 
 Package: imgview
 Version: 0.1-1
 Section: gui
 Depends: libcore2, libui0.1
 Summary: simple image viewer
-License: GPL v3
-Copyright: (c) 2012 Sergey Basalaev
 File: imgview_0.1-1.pkg
