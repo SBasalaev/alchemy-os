@@ -428,19 +428,12 @@ public class Context {
 			f = toFile(name);
 			if (fs().exists(f)) return f;
 		} else {
-			while (pathlist.length() > 0) {
-				String path;
-				int colon = pathlist.indexOf(':');
-				if (colon >= 0) {
-					path = name.substring(0, colon);
-					pathlist = pathlist.substring(colon+1);
-				} else {
-					path = pathlist;
-					pathlist = "";
-				}
+			String[] paths = IO.split(pathlist, ':');
+			for (int i=0; i<paths.length; i++) {
+				String path =paths[i];
 				if (path.length() == 0) continue;
 				f = toFile(path+'/'+name);
-				if (fs().exists(f)) return f;
+				if (fs().exists(f)) return f;				
 			}
 		}
 		throw new IOException("File not found: "+name);
