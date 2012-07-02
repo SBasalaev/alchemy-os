@@ -50,7 +50,7 @@ def freadline(r: Reader): String {
   else {
     var sb = new_sb()
     while (ch != '\n' && ch >= 0) {
-      sb_addch(sb, ch)
+      if (ch != '\r') sb_addch(sb, ch)
       ch = freadch(r)
     }
     to_str(sb)
