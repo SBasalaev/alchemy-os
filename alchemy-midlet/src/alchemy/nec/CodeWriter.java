@@ -106,7 +106,7 @@ class CodeWriter implements ExprVisitor {
 		addr = 0;
 		relocs.removeAllElements();
 		f.body.accept(this, out);
-		if (f.body.rettype().equals(BuiltinType.typeNone)) {
+		if (f.body.rettype().equals(BuiltinType.NONE)) {
 			out.writeByte(0x1e);  // ret_nul
 		} else {
 			out.writeByte(0x1f);  // return
@@ -127,9 +127,9 @@ class CodeWriter implements ExprVisitor {
 		alen.arrayexpr.accept(this, data);
 		try {
 			Type type = alen.arrayexpr.rettype();
-			if (type.equals(BuiltinType.typeBArray)) {
+			if (type.equals(BuiltinType.BARRAY)) {
 				out.writeByte(0xf7); //balen
-			} else if (type.equals(BuiltinType.typeCArray)) {
+			} else if (type.equals(BuiltinType.CARRAY)) {
 				out.writeByte(0xfb); //calen
 			} else {
 				out.write(0xf3); //alen
@@ -147,9 +147,9 @@ class CodeWriter implements ExprVisitor {
 		aload.indexexpr.accept(this, data);
 		try {
 			Type type = aload.arrayexpr.rettype();
-			if (type.equals(BuiltinType.typeBArray)) {
+			if (type.equals(BuiltinType.BARRAY)) {
 				out.writeByte(0xf5); //baload
-			} else if (type.equals(BuiltinType.typeCArray)) {
+			} else if (type.equals(BuiltinType.CARRAY)) {
 				out.writeByte(0xf9); //caload
 			} else {
 				out.write(0xf1); //aload
@@ -168,9 +168,9 @@ class CodeWriter implements ExprVisitor {
 		astore.assignexpr.accept(this, data);
 		try {
 			Type type = astore.arrayexpr.rettype();
-			if (type.equals(BuiltinType.typeBArray)) {
+			if (type.equals(BuiltinType.BARRAY)) {
 				out.writeByte(0xf6); //bastore
-			} else if (type.equals(BuiltinType.typeCArray)) {
+			} else if (type.equals(BuiltinType.CARRAY)) {
 				out.writeByte(0xfa); //castore
 			} else {
 				out.write(0xf2); //astore
@@ -211,11 +211,11 @@ class CodeWriter implements ExprVisitor {
 			int opcode = 0;
 			while (binary.operator != binops[opcode]) opcode++;
 			Type type = binary.lvalue.rettype();
-			if (type.equals(BuiltinType.typeInt) || type.equals(BuiltinType.typeBool))
+			if (type.equals(BuiltinType.INT) || type.equals(BuiltinType.BOOL))
 				opcode += 0x10;
-			else if (type.equals(BuiltinType.typeLong)) opcode += 0x20;
-			else if (type.equals(BuiltinType.typeFloat)) opcode += 0x30;
-			else if (type.equals(BuiltinType.typeDouble)) opcode += 0x40;
+			else if (type.equals(BuiltinType.LONG)) opcode += 0x20;
+			else if (type.equals(BuiltinType.FLOAT)) opcode += 0x30;
+			else if (type.equals(BuiltinType.DOUBLE)) opcode += 0x40;
 			else opcode = 0x4f; // acmp - the only operator with non-primitive types
 			DataOutputStream out = (DataOutputStream)data;
 			out.writeByte(opcode);
@@ -352,7 +352,7 @@ class CodeWriter implements ExprVisitor {
 			for (int i=0; i<fcall.args.length; i++) {
 				fcall.args[i].accept(this, data);
 			}
-			if (fcall.rettype().equals(BuiltinType.typeNone)) {
+			if (fcall.rettype().equals(BuiltinType.NONE)) {
 				out.writeByte(0x78+fcall.args.length); // calv
 			} else {
 				out.writeByte(0x70+fcall.args.length); // call
@@ -425,9 +425,9 @@ class CodeWriter implements ExprVisitor {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			Type type = newarray.rettype();
-			if (type.equals(BuiltinType.typeBArray)) {
+			if (type.equals(BuiltinType.BARRAY)) {
 				out.writeByte(0xf4); //newba
-			} else if (type.equals(BuiltinType.typeCArray)) {
+			} else if (type.equals(BuiltinType.CARRAY)) {
 				out.writeByte(0xf8); //newca
 			} else {
 				out.write(0xf0); //newarray
@@ -444,9 +444,9 @@ class CodeWriter implements ExprVisitor {
 		try {
 			DataOutputStream out = (DataOutputStream)data;
 			Type type = newarray.rettype();
-			if (type.equals(BuiltinType.typeBArray)) {
+			if (type.equals(BuiltinType.BARRAY)) {
 				out.writeByte(0xf4); //newba
-			} else if (type.equals(BuiltinType.typeCArray)) {
+			} else if (type.equals(BuiltinType.CARRAY)) {
 				out.writeByte(0xf8); //newca
 			} else {
 				out.write(0xf0); //newarray
@@ -458,9 +458,9 @@ class CodeWriter implements ExprVisitor {
 					addr++;
 					new ConstExpr(new Integer(i)).accept(this, data);
 					newarray.initializers[i].accept(this, data);
-					if (type.equals(BuiltinType.typeBArray)) {
+					if (type.equals(BuiltinType.BARRAY)) {
 						out.writeByte(0xf6); //bastore
-					} else if (type.equals(BuiltinType.typeCArray)) {
+					} else if (type.equals(BuiltinType.CARRAY)) {
 						out.writeByte(0xfa); //castore
 					} else {
 						out.write(0xf2); //astore
@@ -492,13 +492,13 @@ class CodeWriter implements ExprVisitor {
 				addr += 8;
 			} else if (unary.operator == '-') {
 				Type type = unary.rettype();
-				if (type.equals(BuiltinType.typeInt))
+				if (type.equals(BuiltinType.INT))
 					out.writeByte(0x15); //ineg
-				else if (type.equals(BuiltinType.typeLong))
+				else if (type.equals(BuiltinType.LONG))
 					out.writeByte(0x25); //lneg
-				else if (type.equals(BuiltinType.typeFloat))
+				else if (type.equals(BuiltinType.FLOAT))
 					out.writeByte(0x35); //fneg
-				else if (type.equals(BuiltinType.typeDouble))
+				else if (type.equals(BuiltinType.DOUBLE))
 					out.writeByte(0x45); //dneg
 				addr++;
 			}

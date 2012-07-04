@@ -184,7 +184,7 @@ class FuncComputer implements ExprVisitor {
 		FuncData fdata = (FuncData)data;
 		fdata.codesize++; //call / calv
 		fdata.stackhead -= fcall.args.length;
-		if (fcall.rettype().equals(BuiltinType.typeNone)) {
+		if (fcall.rettype().equals(BuiltinType.NONE)) {
 			fdata.stackhead--;
 		}
 		return null;

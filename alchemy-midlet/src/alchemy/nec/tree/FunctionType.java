@@ -19,7 +19,12 @@
 package alchemy.nec.tree;
 
 /**
- *
+ * Type of a function.
+ * <pre>
+ *  (type1,...,typeN):rettype
+ *  (type1,...,typeN)
+ * </pre>
+ * 
  * @author Sergey Basalaev
  */
 public class FunctionType extends Type {
@@ -45,9 +50,13 @@ public class FunctionType extends Type {
 			buf.append(args[i]);
 		}
 		buf.append(')');
-		if (!rettype.equals(BuiltinType.typeNone)) {
+		if (!rettype.equals(BuiltinType.NONE)) {
 			buf.append(':').append(rettype);
 		}
 		return buf.toString();
+	}
+
+	public Type superType() {
+		return BuiltinType.FUNCTION;
 	}
 }

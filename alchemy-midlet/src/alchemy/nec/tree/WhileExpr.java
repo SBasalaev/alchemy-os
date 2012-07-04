@@ -35,7 +35,7 @@ public class WhileExpr extends Expr {
 	}
 
 	public Type rettype() {
-		return BuiltinType.typeNone;
+		return BuiltinType.NONE;
 	}
 
 	public Object accept(ExprVisitor v, Object data) {

@@ -26,8 +26,8 @@ public class BuiltinType extends NamedType {
 
 	private final int numindex;
 
-	private BuiltinType(String name, int numindex) {
-		super(name);
+	private BuiltinType(String name, Type superType, int numindex) {
+		super(name, superType);
 		this.numindex = numindex;
 	}
 
@@ -38,15 +38,18 @@ public class BuiltinType extends NamedType {
 		return numindex;
 	}
 
-	static public final BuiltinType typeInt = new BuiltinType("Int", 1);
-	static public final BuiltinType typeLong = new BuiltinType("Long", 2);
-	static public final BuiltinType typeFloat = new BuiltinType("Float", 3);
-	static public final BuiltinType typeDouble = new BuiltinType("Double", 4);
-	static public final BuiltinType typeString = new BuiltinType("String", -1);
-	static public final BuiltinType typeBool = new BuiltinType("Bool", -1);
-	static public final BuiltinType typeArray = new BuiltinType("Array", -1);
-	static public final BuiltinType typeBArray = new BuiltinType("BArray", -1);
-	static public final BuiltinType typeCArray = new BuiltinType("CArray", -1);
-	static public final BuiltinType typeAny = new BuiltinType("Any", -1);
-	static public final BuiltinType typeNone = new BuiltinType("[none]", -1);
+	static public final BuiltinType ANY = new BuiltinType("Any", null, -1);
+	static public final BuiltinType INT = new BuiltinType("Int", ANY, 1);
+	static public final BuiltinType LONG = new BuiltinType("Long", ANY, 2);
+	static public final BuiltinType FLOAT = new BuiltinType("Float", ANY, 3);
+	static public final BuiltinType DOUBLE = new BuiltinType("Double", ANY, 4);
+	static public final BuiltinType STRING = new BuiltinType("String", ANY, -1);
+	static public final BuiltinType BOOL = new BuiltinType("Bool", ANY, -1);
+	static public final BuiltinType ARRAY = new BuiltinType("Array", ANY, -1);
+	static public final BuiltinType BARRAY = new BuiltinType("BArray", ANY, -1);
+	static public final BuiltinType CARRAY = new BuiltinType("CArray", ANY, -1);
+	static public final BuiltinType FUNCTION = new BuiltinType("Function", ANY, -1);
+	static public final BuiltinType STRUCTURE = new BuiltinType("Structure", ANY, -1);
+	/** Special type that used when there is no return value. */
+	static public final BuiltinType NONE = new BuiltinType("*none*", null, -1);
 }

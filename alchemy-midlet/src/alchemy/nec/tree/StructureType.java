@@ -19,7 +19,15 @@
 package alchemy.nec.tree;
 
 /**
- * Type of composite structure.
+ * Structured type.
+ * <pre>
+ * type Structure {
+ *   field1: type1,
+ *   ...
+ *   fieldN: typeN
+ * }
+ * </pre>
+ * 
  * @author Sergey Basalaev
  */
 public class StructureType extends NamedType {
@@ -27,6 +35,6 @@ public class StructureType extends NamedType {
 	public Var[] fields;
 
 	public StructureType(String name) {
-		super(name);
+		super(name, BuiltinType.STRUCTURE);
 	}
 }

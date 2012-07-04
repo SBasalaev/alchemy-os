@@ -19,16 +19,24 @@
 package alchemy.nec.tree;
 
 /**
- * Type is uniquely defined by its name.
- * This does not include aliases.
+ * Type that is uniquely identified by its name.
+ * <p/>
+ * This very class is used for abstract types. Subclasses are
+ * type implementations (e.g. structure type). When type is
+ * implemented in E code, Type instance in type cache is replaced
+ * by implementation with the same name (so they are considered
+ * equal).
+ * 
  * @author Sergey Basalaev
  */
 public class NamedType extends Type {
 
 	private final String name;
+	private final Type superType;
 
-	public NamedType(String name) {
+	public NamedType(String name, Type superType) {
 		this.name = name;
+		this.superType = superType;
 	}
 
 	public boolean equals(Object obj) {
@@ -40,5 +48,9 @@ public class NamedType extends Type {
 
 	public String toString() {
 		return name;
+	}
+
+	public Type superType() {
+		return superType;
 	}
 }

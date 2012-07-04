@@ -19,27 +19,33 @@
 package alchemy.nec.tree;
 
 /**
- * Storing element in array.
- * <pre><i>arrayexpr</i> [ <i>indexexpr</i> ] = <i>assignexpr</i></pre>
- * @author Sergey Basalaev
+ * Array type.
+ * <pre>
+ * [<i>elementType</i>]
+ * </pre>
+ * 
+ * @author Sergey Basalaev.
  */
-public class AStoreExpr extends Expr {
-
-	public Expr arrayexpr;
-	public Expr indexexpr;
-	public Expr assignexpr;
-
-	public AStoreExpr(Expr arrayexpr, Expr indexexpr, Expr assignexpr) {
-		this.arrayexpr = arrayexpr;
-		this.indexexpr = indexexpr;
-		this.assignexpr = assignexpr;
+public class ArrayType extends Type {
+	
+	private final Type elementType;
+	
+	public ArrayType(Type elementType) {
+		this.elementType = elementType;
 	}
 
-	public Type rettype() {
-		return BuiltinType.NONE;
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (!(obj instanceof ArrayType)) return false;
+		ArrayType other = (ArrayType)obj;
+		return this.elementType.equals(other.elementType);
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitAStore(this, data);
+	public String toString() {
+		return "["+elementType+"]";
+	}
+
+	public Type superType() {
+		return BuiltinType.ARRAY;
 	}
 }

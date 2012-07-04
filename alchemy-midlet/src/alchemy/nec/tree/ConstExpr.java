@@ -35,19 +35,19 @@ public class ConstExpr extends Expr {
 	public Type rettype() {
 		Class clz = value == null ? null : value.getClass();
 		if (clz == null) {
-			return BuiltinType.typeAny;
+			return BuiltinType.ANY;
 		} else if (clz == Integer.class) {
-			return BuiltinType.typeInt;
+			return BuiltinType.INT;
 		} else if (clz == Long.class) {
-			return BuiltinType.typeLong;
+			return BuiltinType.LONG;
 		} else if (clz == Float.class) {
-			return BuiltinType.typeFloat;
+			return BuiltinType.FLOAT;
 		} else if (clz == Double.class) {
-			return BuiltinType.typeDouble;
+			return BuiltinType.DOUBLE;
 		} else if (clz == String.class) {
-			return BuiltinType.typeString;
+			return BuiltinType.STRING;
 		} else if (clz == Boolean.class) {
-			return BuiltinType.typeBool;
+			return BuiltinType.BOOL;
 		} else if (clz == Func.class) {
 			return ((Func)value).type;
 		} else {

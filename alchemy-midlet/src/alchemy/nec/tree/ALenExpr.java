@@ -33,7 +33,7 @@ public class ALenExpr extends Expr {
 	}
 
 	public Type rettype() {
-		return BuiltinType.typeInt;
+		return BuiltinType.INT;
 	}
 
 	public Object accept(ExprVisitor v, Object data) {

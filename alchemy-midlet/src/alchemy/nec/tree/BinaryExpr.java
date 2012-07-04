@@ -41,7 +41,7 @@ public class BinaryExpr extends Expr {
 	}
 
 	public Type rettype() {
-		if (operator == '=') return BuiltinType.typeInt;
+		if (operator == '=') return BuiltinType.INT;
 		else return lvalue.rettype();
 	}
 

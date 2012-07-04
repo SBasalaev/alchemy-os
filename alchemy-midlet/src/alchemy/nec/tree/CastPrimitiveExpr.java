@@ -50,19 +50,19 @@ public class CastPrimitiveExpr extends Expr {
 			case L2I:
 			case F2I:
 			case D2I:
-				return BuiltinType.typeInt;
+				return BuiltinType.INT;
 			case I2L:
 			case F2L:
 			case D2L:
-				return BuiltinType.typeLong;
+				return BuiltinType.LONG;
 			case I2F:
 			case L2F:
 			case D2F:
-				return BuiltinType.typeFloat;
+				return BuiltinType.FLOAT;
 			case I2D:
 			case L2D:
 			case F2D:
-				return BuiltinType.typeDouble;
+				return BuiltinType.DOUBLE;
 			default:
 				return null;
 		}

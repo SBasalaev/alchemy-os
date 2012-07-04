@@ -54,16 +54,16 @@ public class Parser {
 	public Unit parse(File source) {
 		//initializing
 		unit = new Unit();
-		unit.putType("Any", BuiltinType.typeAny);
-		unit.putType("Int", BuiltinType.typeInt);
-		unit.putType("Long", BuiltinType.typeLong);
-		unit.putType("Float", BuiltinType.typeFloat);
-		unit.putType("Double", BuiltinType.typeDouble);
-		unit.putType("Bool", BuiltinType.typeBool);
-		unit.putType("String", BuiltinType.typeString);
-		unit.putType("Array", BuiltinType.typeArray);
-		unit.putType("BArray", BuiltinType.typeBArray);
-		unit.putType("CArray", BuiltinType.typeCArray);
+		unit.putType("Any", BuiltinType.ANY);
+		unit.putType("Int", BuiltinType.INT);
+		unit.putType("Long", BuiltinType.LONG);
+		unit.putType("Float", BuiltinType.FLOAT);
+		unit.putType("Double", BuiltinType.DOUBLE);
+		unit.putType("Bool", BuiltinType.BOOL);
+		unit.putType("String", BuiltinType.STRING);
+		unit.putType("Array", BuiltinType.ARRAY);
+		unit.putType("BArray", BuiltinType.BARRAY);
+		unit.putType("CArray", BuiltinType.CARRAY);
 		//parsing
 		try {
 			parseFile(new File("/res/nec/embed.eh"));
@@ -146,7 +146,7 @@ public class Parser {
 							String alias = t.svalue;
 							Type type = unit.getType(alias);
 							if (type == null) {
-								unit.putType(alias, new NamedType(alias));
+								unit.putType(alias, new NamedType(alias, BuiltinType.ANY));
 							} else if (type.getClass() != NamedType.class) {
 								throw new ParseException("Type "+alias+" is already defined");
 							}
@@ -284,7 +284,7 @@ public class Parser {
 			rettype = parseType(func);
 		} else {
 			t.pushBack();
-			rettype = BuiltinType.typeNone;
+			rettype = BuiltinType.NONE;
 		}
 		//populating fields
 		func.locals = args;
@@ -303,11 +303,11 @@ public class Parser {
 			}
 			if (args.size() > 0) {
 				Var arg0 = (Var)args.elementAt(0);
-				if (!arg0.type.equals(BuiltinType.typeAny) && !arg0.type.equals(BuiltinType.typeArray)) {
+				if (!arg0.type.equals(BuiltinType.ANY) && !arg0.type.equals(BuiltinType.ARRAY)) {
 					warn("Incompatible argument type in main()");
 				}
 			}
-			if (!rettype.equals(BuiltinType.typeInt) && !rettype.equals(BuiltinType.typeNone)) {
+			if (!rettype.equals(BuiltinType.INT) && !rettype.equals(BuiltinType.NONE)) {
 				warn("Incompatible return type in main()");
 			}
 		}
@@ -338,7 +338,7 @@ public class Parser {
 				rettype = parseType(scope);
 			} else {
 				t.pushBack();
-				rettype = BuiltinType.typeNone;
+				rettype = BuiltinType.NONE;
 			}
 			FunctionType type = new FunctionType();
 			type.rettype = rettype;
@@ -357,7 +357,7 @@ public class Parser {
 		while (t.nextToken() != '}') {
 			t.pushBack();
 			lastexpr = parseExpr(block);
-			if (lastexpr.rettype().equals(BuiltinType.typeNone))
+			if (lastexpr.rettype().equals(BuiltinType.NONE))
 				block.exprs.addElement(lastexpr);
 			else
 				block.exprs.addElement(new DiscardExpr(lastexpr));
@@ -429,8 +429,8 @@ public class Parser {
 			Type rtype = right.rettype();
 			Expr newexpr;
 			if (op == Tokenizer.TT_GTGT || op == Tokenizer.TT_LTLT || op == Tokenizer.TT_GTGTGT) {
-				if (!ltype.equals(BuiltinType.typeInt) && !ltype.equals(BuiltinType.typeLong)
-						|| !rtype.equals(BuiltinType.typeInt))
+				if (!ltype.equals(BuiltinType.INT) && !ltype.equals(BuiltinType.LONG)
+						|| !rtype.equals(BuiltinType.INT))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new BinaryExpr(left, op, right);
 			} else if (op == '<' || op == '>' || op == Tokenizer.TT_LTEQ || op == Tokenizer.TT_GTEQ) {
@@ -455,20 +455,20 @@ public class Parser {
 						op == Tokenizer.TT_EQEQ ? IfExpr.ZERO : IfExpr.NOTZERO,
 						new ConstExpr(Boolean.TRUE), new ConstExpr(Boolean.FALSE));
 			} else if (op == Tokenizer.TT_AMPAMP) {
-				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
+				if (!ltype.equals(BuiltinType.BOOL) || !rtype.equals(BuiltinType.BOOL))
 					throw new ParseException("Operator && cannot be applied to "+ltype+","+rtype);
 				newexpr = new IfExpr(left, IfExpr.TRUE, right, new ConstExpr(Boolean.FALSE));
 			} else if (op == Tokenizer.TT_BARBAR) {
-				if (!ltype.equals(BuiltinType.typeBool) || !rtype.equals(BuiltinType.typeBool))
+				if (!ltype.equals(BuiltinType.BOOL) || !rtype.equals(BuiltinType.BOOL))
 					throw new ParseException("Operator || cannot be applied to "+ltype+","+rtype);
 				newexpr = new IfExpr(left, IfExpr.TRUE, new ConstExpr(Boolean.TRUE), right);
 			} else if ("+-*/%".indexOf(op) >= 0) {
-				if (ltype.equals(BuiltinType.typeString)) {
+				if (ltype.equals(BuiltinType.STRING)) {
 					// string concatenation, does strcat(left, to_str(right))
-					if (!right.rettype().equals(BuiltinType.typeString)) {
+					if (!right.rettype().equals(BuiltinType.STRING)) {
 						Func to_str = unit.getFunc("to_str");
 						to_str.hits++;
-						right = new FCallExpr(new ConstExpr(to_str), new Expr[] { cast(right, BuiltinType.typeAny) });
+						right = new FCallExpr(new ConstExpr(to_str), new Expr[] { cast(right, BuiltinType.ANY) });
 					}
 					Func strcat = unit.getFunc("strcat");
 					strcat.hits++;
@@ -481,7 +481,7 @@ public class Parser {
 				}
 			} else if ("^&|".indexOf(op) >= 0) {
 				Type btype = binaryCastType(ltype, rtype);
-				if (!btype.equals(BuiltinType.typeBool) && !btype.equals(BuiltinType.typeInt) && !btype.equals(BuiltinType.typeLong))
+				if (!btype.equals(BuiltinType.BOOL) && !btype.equals(BuiltinType.INT) && !btype.equals(BuiltinType.LONG))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
 			} else {
@@ -521,27 +521,27 @@ public class Parser {
 				continue;
 			} else if (ttype == '[') {
 				Type arrtype = expr.rettype();
-				if (!arrtype.equals(BuiltinType.typeArray)
-				 && !arrtype.equals(BuiltinType.typeBArray)
-				 && !arrtype.equals(BuiltinType.typeCArray)) {
+				if (!arrtype.equals(BuiltinType.ARRAY)
+				 && !arrtype.equals(BuiltinType.BARRAY)
+				 && !arrtype.equals(BuiltinType.CARRAY)) {
 					throw new ParseException("Applying [] to non-array expression");
 				}
-				Expr indexexpr = cast(parseExpr(scope), BuiltinType.typeInt);
+				Expr indexexpr = cast(parseExpr(scope), BuiltinType.INT);
 				expect(']');
 				if (t.nextToken() == '=') {
 					Expr assignexpr = parseExpr(scope);
-					if (!arrtype.equals(BuiltinType.typeArray)) {
-						assignexpr = cast(assignexpr, BuiltinType.typeInt);
+					if (!arrtype.equals(BuiltinType.ARRAY)) {
+						assignexpr = cast(assignexpr, BuiltinType.INT);
 					} else {
-						assignexpr = cast(assignexpr, BuiltinType.typeAny);
+						assignexpr = cast(assignexpr, BuiltinType.ANY);
 					}
 					expr = new AStoreExpr(expr, indexexpr, assignexpr);
 				} else {
 					t.pushBack();
-					if (arrtype.equals(BuiltinType.typeArray)) {
-						expr = new ALoadExpr(expr, indexexpr, BuiltinType.typeAny);
+					if (arrtype.equals(BuiltinType.ARRAY)) {
+						expr = new ALoadExpr(expr, indexexpr, BuiltinType.ANY);
 					} else {
-						expr = new ALoadExpr(expr, indexexpr, BuiltinType.typeInt);
+						expr = new ALoadExpr(expr, indexexpr, BuiltinType.INT);
 					}
 					continue;
 				}
@@ -550,9 +550,9 @@ public class Parser {
 					throw new ParseException("Identifier expected after '.'");
 				String member = t.svalue;
 				Type type = expr.rettype();
-				if (type.equals(BuiltinType.typeArray)
-				 || type.equals(BuiltinType.typeBArray)
-				 || type.equals(BuiltinType.typeCArray)) {
+				if (type.equals(BuiltinType.ARRAY)
+				 || type.equals(BuiltinType.BARRAY)
+				 || type.equals(BuiltinType.CARRAY)) {
 					if (member.equals("len")) {
 						expr = new ALenExpr(expr);
 						continue;
@@ -596,13 +596,13 @@ public class Parser {
 			case ';':
 				return new NoneExpr();
 			case '!':
-				return new UnaryExpr(ttype, cast(parsePostfix(scope, parseExprNoop(scope)), BuiltinType.typeBool));
+				return new UnaryExpr(ttype, cast(parsePostfix(scope, parseExprNoop(scope)), BuiltinType.BOOL));
 			case '~': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
-				if (type.equals(BuiltinType.typeInt))
+				if (type.equals(BuiltinType.INT))
 					return new BinaryExpr(sub, '^', new ConstExpr(Function.M_ONE));
-				else if (type.equals(BuiltinType.typeLong))
+				else if (type.equals(BuiltinType.LONG))
 					return new BinaryExpr(sub, '^', new ConstExpr(new Long(-1l)));
 				else
 					throw new ParseException("Operator ~ cannot be applied to "+type);
@@ -610,10 +610,10 @@ public class Parser {
 			case '-': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
-				if (!type.equals(BuiltinType.typeInt)
-				 && !type.equals(BuiltinType.typeLong)
-				 && !type.equals(BuiltinType.typeFloat)
-				 && !type.equals(BuiltinType.typeDouble))
+				if (!type.equals(BuiltinType.INT)
+				 && !type.equals(BuiltinType.LONG)
+				 && !type.equals(BuiltinType.FLOAT)
+				 && !type.equals(BuiltinType.DOUBLE))
 					throw new ParseException("Operator - cannot be applied to "+type);
 				return new UnaryExpr(ttype, sub);
 			}
@@ -643,13 +643,13 @@ public class Parser {
 					return new ConstExpr(null);
 				} else if (t.svalue.equals("while")) {
 					expect('(');
-					Expr cond = cast(parseExpr(scope), BuiltinType.typeBool);
+					Expr cond = cast(parseExpr(scope), BuiltinType.BOOL);
 					expect(')');
-					Expr body = cast(parseExpr(scope), BuiltinType.typeNone);
+					Expr body = cast(parseExpr(scope), BuiltinType.NONE);
 					return new WhileExpr(cond, body);
 				} else if (t.svalue.equals("if")) {
 					expect('(');
-					Expr cond = cast(parseExpr(scope), BuiltinType.typeBool);
+					Expr cond = cast(parseExpr(scope), BuiltinType.BOOL);
 					expect(')');
 					Expr ifexpr = parseExpr(scope);
 					Expr elseexpr;
@@ -679,7 +679,7 @@ public class Parser {
 						varvalue = parseExpr(scope);
 						if (vartype == null) {
 							vartype = varvalue.rettype();
-							if (vartype.equals(BuiltinType.typeNone))
+							if (vartype.equals(BuiltinType.NONE))
 								throw new ParseException("Cannot convert from [none] to Any");
 						} else {
 							varvalue = cast(varvalue, vartype);
@@ -728,11 +728,11 @@ public class Parser {
 							init[index] = cast(parseExpr(scope), struct.fields[index].type);
 						}
 						return new NewArrayByEnumExpr(type, init);
-					} else if (type.equals(BuiltinType.typeArray)
-					        || type.equals(BuiltinType.typeBArray)
-							|| type.equals(BuiltinType.typeCArray)) {
+					} else if (type.equals(BuiltinType.ARRAY)
+					        || type.equals(BuiltinType.BARRAY)
+							|| type.equals(BuiltinType.CARRAY)) {
 						if (t.nextToken() == '(') {
-							Expr lenexpr = cast(parseExpr(scope), BuiltinType.typeInt);
+							Expr lenexpr = cast(parseExpr(scope), BuiltinType.INT);
 							expect(')');
 							return new NewArrayExpr(type, lenexpr);
 						} else if (t.ttype == '{') {
@@ -741,10 +741,10 @@ public class Parser {
 								t.pushBack();
 								if (!vinit.isEmpty()) expect(',');
 								Expr e = parseExpr(scope);
-								if (type.equals(BuiltinType.typeArray)) {
-									e = cast(e, BuiltinType.typeAny);
+								if (type.equals(BuiltinType.ARRAY)) {
+									e = cast(e, BuiltinType.ANY);
 								} else {
-									e = cast(e, BuiltinType.typeInt);
+									e = cast(e, BuiltinType.INT);
 								}
 								vinit.addElement(e);
 							}
@@ -761,13 +761,13 @@ public class Parser {
 					expect('(');
 					BlockExpr forblock = new BlockExpr(scope);
 					BlockExpr forbody = new BlockExpr(forblock);
-					Expr init = cast(parseExpr(forblock), BuiltinType.typeNone);
+					Expr init = cast(parseExpr(forblock), BuiltinType.NONE);
 					expect(',');
-					Expr cond = cast(parseExpr(forblock), BuiltinType.typeBool);
+					Expr cond = cast(parseExpr(forblock), BuiltinType.BOOL);
 					expect(',');
-					Expr incr = cast(parseExpr(forbody), BuiltinType.typeNone);
+					Expr incr = cast(parseExpr(forbody), BuiltinType.NONE);
 					expect(')');
-					Expr body = cast(parseExpr(forbody), BuiltinType.typeNone);
+					Expr body = cast(parseExpr(forbody), BuiltinType.NONE);
 					forbody.exprs.addElement(body);
 					forbody.exprs.addElement(incr);
 					forblock.exprs.addElement(init);
@@ -825,10 +825,10 @@ public class Parser {
 		if (toType.equals(expr.rettype())) {
 			warn("Cast to the same type");
 		}
-		if (toType.equals(BuiltinType.typeAny)) {
+		if (toType.equals(BuiltinType.ANY)) {
 			warn("Cast to Any");
 		}
-		if (expr.rettype().equals(BuiltinType.typeAny)) {
+		if (expr.rettype().equals(BuiltinType.ANY)) {
 			return new CastExpr(toType, expr);
 		}
 		return cast(expr, toType);
@@ -837,10 +837,10 @@ public class Parser {
 	private Expr cast(Expr expr, Type toType) throws ParseException {
 		Type fromType = expr.rettype();
 		if (fromType.equals(toType)) return expr;
-		if (toType.equals(BuiltinType.typeAny) && !fromType.equals(BuiltinType.typeNone)) {
-			return new CastExpr(BuiltinType.typeAny, expr);
+		if (toType.equals(BuiltinType.ANY) && !fromType.equals(BuiltinType.NONE)) {
+			return new CastExpr(BuiltinType.ANY, expr);
 		}
-		if (toType.equals(BuiltinType.typeNone)) {
+		if (toType.equals(BuiltinType.NONE)) {
 			return new DiscardExpr(expr);
 		}
 		if (toType.getClass() == BuiltinType.class) {
@@ -855,25 +855,25 @@ public class Parser {
 	private Expr castPrimitive(Expr expr, Type toType) throws ParseException {
 		Type fromType = expr.rettype();
 		if (fromType.equals(toType)) return expr;
-		if (fromType.equals(BuiltinType.typeInt)) {
-			if (toType.equals(BuiltinType.typeLong)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.I2L);
-			if (toType.equals(BuiltinType.typeFloat)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.I2F);
-			if (toType.equals(BuiltinType.typeDouble)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.I2D);
+		if (fromType.equals(BuiltinType.INT)) {
+			if (toType.equals(BuiltinType.LONG)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.I2L);
+			if (toType.equals(BuiltinType.FLOAT)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.I2F);
+			if (toType.equals(BuiltinType.DOUBLE)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.I2D);
 		}
-		if (fromType.equals(BuiltinType.typeLong)) {
-			if (toType.equals(BuiltinType.typeInt)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.L2I);
-			if (toType.equals(BuiltinType.typeFloat)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.L2F);
-			if (toType.equals(BuiltinType.typeDouble)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.L2D);
+		if (fromType.equals(BuiltinType.LONG)) {
+			if (toType.equals(BuiltinType.INT)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.L2I);
+			if (toType.equals(BuiltinType.FLOAT)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.L2F);
+			if (toType.equals(BuiltinType.DOUBLE)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.L2D);
 		}
-		if (fromType.equals(BuiltinType.typeFloat)) {
-			if (toType.equals(BuiltinType.typeLong)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.F2L);
-			if (toType.equals(BuiltinType.typeInt)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.F2I);
-			if (toType.equals(BuiltinType.typeDouble)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.F2D);
+		if (fromType.equals(BuiltinType.FLOAT)) {
+			if (toType.equals(BuiltinType.LONG)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.F2L);
+			if (toType.equals(BuiltinType.INT)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.F2I);
+			if (toType.equals(BuiltinType.DOUBLE)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.F2D);
 		}
-		if (fromType.equals(BuiltinType.typeDouble)) {
-			if (toType.equals(BuiltinType.typeLong)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2L);
-			if (toType.equals(BuiltinType.typeFloat)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2F);
-			if (toType.equals(BuiltinType.typeInt)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2I);
+		if (fromType.equals(BuiltinType.DOUBLE)) {
+			if (toType.equals(BuiltinType.LONG)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2L);
+			if (toType.equals(BuiltinType.FLOAT)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2F);
+			if (toType.equals(BuiltinType.INT)) return new CastPrimitiveExpr(expr, CastPrimitiveExpr.D2I);
 		}
 		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
 	}
@@ -895,20 +895,20 @@ public class Parser {
 	 */
 	private Type binaryCastType(Type ltype, Type rtype) {
 		if (ltype.equals(rtype)) return ltype;
-		if (ltype.equals(BuiltinType.typeNone) || rtype.equals(BuiltinType.typeNone))
-			return BuiltinType.typeNone;
+		if (ltype.equals(BuiltinType.NONE) || rtype.equals(BuiltinType.NONE))
+			return BuiltinType.NONE;
 		if (ltype.getClass() == BuiltinType.class && rtype.getClass() == BuiltinType.class) {
 			int lindex = ((BuiltinType)ltype).numIndex();
 			int rindex = ((BuiltinType)rtype).numIndex();
-			if (lindex < 0 || rindex < 0) return BuiltinType.typeAny;
+			if (lindex < 0 || rindex < 0) return BuiltinType.ANY;
 			switch (lindex > rindex ? lindex : rindex) {
-				case 1: return BuiltinType.typeInt;
-				case 2: return BuiltinType.typeLong;
-				case 3: return BuiltinType.typeFloat;
-				case 4: return BuiltinType.typeDouble;
+				case 1: return BuiltinType.INT;
+				case 2: return BuiltinType.LONG;
+				case 3: return BuiltinType.FLOAT;
+				case 4: return BuiltinType.DOUBLE;
 			}
 		}
-		return BuiltinType.typeAny;
+		return BuiltinType.ANY;
 	}
 
 	/** Returns operator string by ttype. */

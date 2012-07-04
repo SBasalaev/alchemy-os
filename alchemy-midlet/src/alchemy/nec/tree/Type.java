@@ -21,10 +21,16 @@ package alchemy.nec.tree;
 /**
  * Expression type.
  * Subclasses need to implement <code>equals()</code>
- * and provide sane <code>toString()</code> which
- * will be used in error messages.
+ * and provide <code>toString()</code> with representation
+ * of type in E code.
+ * 
  * @author Sergey Basalaev
  */
 public abstract class Type {
-
+	
+	/**
+	 * Returns supertype of this type.
+	 * For <code>Any</code> returns <code>null</code>.
+	 */
+	public abstract Type superType();
 }
