@@ -162,6 +162,21 @@ class Tokenizer {
 			svalue = str.toString();
 			return ttype = TT_QUOTED;
 		}
+		
+		// escaped identifier literal
+		if (ch == '`') {
+			StringBuffer id = new StringBuffer();
+			ch = readChar();
+			while (ch != '`' && ch != EOF_CHAR && ch != '\n') {
+				id.append((char)ch);
+				ch = readChar();
+			}
+			if (ch != '`') {
+				throw new ParseException("Unclosed identifier literal");
+			}
+			svalue = id.toString();
+			return ttype = TT_IDENTIFIER;
+		}
 
 		//dot and numbers
 		if (ch >= '0' && ch <= '9' || ch == '.') {
