@@ -7,14 +7,14 @@ use "sys.eh"
 use "vector.eh"
 
 type Vector {
-  data: Array,
+  data: [Any],
   size: Int
 }
 
 def new_vector(): Vector =
   new Vector(
     size = 0,
-    data = new Array(8)
+    data = new [Any](8)
   )
 
 def v_size(v: Vector): Int =
@@ -43,7 +43,7 @@ def v_remove(v: Vector, at: Int) =
   }
 
 def _v_grow(v: Vector) = {
-  var newdata = new Array(v.data.len << 1)
+  var newdata = new [Any](v.data.len << 1)
   acopy(v.data, 0, newdata, 0, v.data.len)
   v.data = newdata
 }
@@ -81,8 +81,8 @@ def v_lindexof(v: Vector, a: Any): Int = {
   n
 }
 
-def v_toarray(v: Vector): Array = {
-  var ar = new Array(v.size)
+def v_toarray(v: Vector): [Any] = {
+  var ar = new [Any](v.size)
   acopy(v.data, 0, ar, 0, v.size)
   ar
 }

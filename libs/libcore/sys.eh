@@ -5,8 +5,8 @@ def setenv(key: String, val: String);
 
 def sleep(millis: Int);
 
-def exec_wait(prog: String, args: Array): Int;
-def exec(prog: String, args: Array);
+def exec_wait(prog: String, args: [String]): Int;
+def exec(prog: String, args: [String]);
 
 def acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int);
 def bacopy(src: BArray, sofs: Int, dest: BArray, dofs: Int, len: Int);

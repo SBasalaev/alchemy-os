@@ -1,7 +1,9 @@
 // I/O operations
 
-type IStream;
-type OStream;
+type Stream < Any;
+
+type IStream < Stream;
+type OStream < Stream;
 
 def stdin(): IStream;
 def stdout(): OStream;
@@ -10,7 +12,7 @@ def setin(s: IStream);
 def setout(s: OStream);
 def seterr(s: OStream);
 
-def fclose(stream: Any);
+def fclose(stream: Stream);
 
 def fread(s: IStream): Int;
 def freadarray(s: IStream, buf: BArray, ofs: Int, len: Int): Int;
@@ -49,7 +51,7 @@ def is_dir(f: String): Bool;
 def fopen_r(f: String): IStream;
 def fopen_w(f: String): OStream;
 def fopen_a(f: String): OStream;
-def flist(f: String): Array;
+def flist(f: String): [String];
 def fmodified(f: String): Long;
 def fsize(f: String): Int;
 

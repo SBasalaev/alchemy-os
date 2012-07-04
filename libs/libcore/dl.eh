@@ -1,6 +1,6 @@
 //dynamic loading
 
-type Library;
+type Library < Any;
 
 def loadlibrary(libname: String): Library;
-def loadfunc(lib: Library, sig: String) : Any;
+def loadfunc(lib: Library, sig: String) : Function;

@@ -6,7 +6,7 @@ def image_graphics(im: Image): Graphics;
 
 /* immutable images */
 type IStream;
-def image_from_argb(argb: Array, w: Int, h: Int, alpha: Bool): Image;
+def image_from_argb(argb: [Int], w: Int, h: Int, alpha: Bool): Image;
 def image_from_stream(in: IStream): Image;
 def image_from_data(data: BArray): Image;
 def image_from_image(im: Image, x: Int, y: Int, w: Int, h: Int): Image;

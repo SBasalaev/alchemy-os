@@ -2,21 +2,18 @@
 
 use "io.eh"
 
-type ReadChar = (IStream):Int;
-type WriteChar = (OStream,Int);
-
 type Reader {
   in: IStream,
-  dec: ReadChar
+  dec: (IStream):Int
 }
 
 type Writer {
   out: OStream,
-  enc: WriteChar
+  enc: (OStream,Int)
 }
 
-def new_reader(in: IStream, dec: ReadChar): Reader;
-def new_writer(out: OStream, enc: WriteChar): Writer;
+def new_reader(in: IStream, dec: (IStream):Int): Reader;
+def new_writer(out: OStream, enc: (OStream,Int)): Writer;
 
 def freadch(r: Reader): Int;
 def freadstr(r: Reader, len: Int): String;

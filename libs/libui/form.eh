@@ -51,6 +51,6 @@ def checkitem_set_checked(item: Item, checked: Bool);
 def checkitem_get_text(item: Item): String;
 def checkitem_set_text(item: Item, text: String);
 
-def new_radioitem(label: String, strings: Array): Item;
+def new_radioitem(label: String, strings: [String]): Item;
 def radioitem_get_index(item: Item): Int;
 def radioitem_set_index(item: Item, index: String);

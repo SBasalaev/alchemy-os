@@ -16,7 +16,7 @@ def strlcase(s: String): String;
 def strcat(s1: String, s2: String): String;
 def strcmp(s1: String, s2: String): Int;
 def strtrim(s: String): String;
-def strsplit(s: String, ch: Int): Array;
+def strsplit(s: String, ch: Int): [String];
 def sprintf(fmt: String, args: Array): String;
 
 def strchars(s1: String): CArray;
