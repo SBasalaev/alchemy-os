@@ -270,9 +270,25 @@ public class Parser {
 		//parsing def
 		if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
 			throw new ParseException("Function name expected, got "+t);
-		String fname = t.svalue;
+		String str = t.svalue;
+		String fname;
+		NamedType methodholder = null;
+		if (t.nextToken() == '.') {
+			methodholder = unit.getType(str);
+			if (methodholder == null)
+				throw new ParseException("Type "+str+" is not defined");
+			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+				throw new ParseException("Function name expected, got "+t);
+			fname = methodholder.toString()+'.'+t.svalue;
+		} else {
+			t.pushBack();
+			fname = str;
+		}
 		expect('(');
 		Vector args = new Vector();
+		if (methodholder != null) {
+			args.addElement(new Var("this", methodholder));
+		}
 		while (t.nextToken() != ')') {
 			t.pushBack();
 			if (!args.isEmpty()) expect(',');
@@ -525,8 +541,14 @@ public class Parser {
 					if (!vargs.isEmpty()) expect(',');
 					vargs.addElement(parseExpr(scope));
 				}
-				if (ftype.args.length != vargs.size())
-					throw new ParseException("Wrong number of arguments in function call");
+				if (ftype.args.length != vargs.size()) {
+					if (expr.getClass() == ConstExpr.class) {
+						Func f = (Func)((ConstExpr)expr).value;
+						throw new ParseException("Wrong number of arguments in call to "+f.signature+"()");
+					} else {
+						throw new ParseException("Wrong number of arguments in function call");
+					}
+				}
 				Expr[] args = new Expr[vargs.size()];
 				for (int i=0; i<args.length; i++) {
 					args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
@@ -596,6 +618,28 @@ public class Parser {
 							continue;
 						}
 					}
+				}
+				// neither Array.len nor structure field
+				// trying to find method
+				Func method = unit.getFunc(type.toString()+'.'+member);
+				if (method != null) {
+					// parsing method call
+					expect('(');
+					Vector vargs = new Vector();
+					vargs.addElement(expr); //this
+					while (t.nextToken() != ')') {
+						t.pushBack();
+						if (vargs.size() > 1) expect(',');
+						vargs.addElement(parseExpr(scope));
+					}
+					if (method.type.args.length != vargs.size())
+						throw new ParseException("Wrong number of arguments in call to "+method.signature+"()");
+					Expr[] args = new Expr[vargs.size()];
+					for (int i=0; i<args.length; i++) {
+						args[i] = cast((Expr)vargs.elementAt(i), method.type.args[i]);
+					}
+					expr = new FCallExpr(new ConstExpr(method), args);
+					continue;
 				}
 				throw new ParseException("Type "+type+" has no member named "+member);
 			} else {
