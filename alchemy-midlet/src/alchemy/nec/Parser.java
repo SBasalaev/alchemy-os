@@ -621,7 +621,11 @@ public class Parser {
 				}
 				// neither Array.len nor structure field
 				// trying to find method
-				Func method = unit.getFunc(type.toString()+'.'+member);
+				Func method = null;
+				while (method == null && type != null) {
+					method = unit.getFunc(type.toString()+'.'+member);
+					type = type.superType();
+				}
 				if (method != null) {
 					// parsing method call
 					expect('(');
