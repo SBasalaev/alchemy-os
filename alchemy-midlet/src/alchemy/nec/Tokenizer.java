@@ -187,7 +187,7 @@ class Tokenizer {
 					if (ch == 'l' || ch == 'L') {
 						try {
 							lvalue = Long.parseLong(number.toString(), 16);
-						} catch (NumberFormatException nfe) {
+						} catch (Exception nfe) {
 							throw new ParseException("Integer number too large: "+number);
 						}
 						return ttype = TT_LONG;
@@ -195,7 +195,7 @@ class Tokenizer {
 						nextch = ch;
 						try {
 							ivalue = Integer.parseInt(number.toString(), 16);
-						} catch (NumberFormatException nfe) {
+						} catch (Exception nfe) {
 							throw new ParseException("Integer number too large: "+number);
 						}
 						return ttype = TT_INT;
@@ -244,7 +244,7 @@ class Tokenizer {
 			if (ch == 'f' || ch == 'F') {
 				try {
 					fvalue = Float.parseFloat(number.toString());
-				} catch (NumberFormatException nfe) {
+				} catch (Exception nfe) {
 					throw new ParseException("Floating point number too large: "+number);
 				}
 				return ttype = TT_FLOAT;
@@ -252,7 +252,7 @@ class Tokenizer {
 			if (ch == 'd' || ch == 'D') {
 				try {
 					dvalue = Double.parseDouble(number.toString());
-				} catch (NumberFormatException nfe) {
+				} catch (Exception nfe) {
 					throw new ParseException("Floating point number too large: "+number);
 				}
 				return ttype = TT_DOUBLE;
@@ -261,7 +261,7 @@ class Tokenizer {
 				nextch = ch;
 				try {
 					dvalue = Double.parseDouble(number.toString());
-				} catch (NumberFormatException nfe) {
+				} catch (Exception nfe) {
 					throw new ParseException("Floating point number too large: "+number);
 				}
 				return ttype = TT_DOUBLE;
@@ -269,7 +269,7 @@ class Tokenizer {
 			if (ch == 'l' || ch == 'L') {
 				try {
 					lvalue = Long.parseLong(number.toString(), 10);
-				} catch (NumberFormatException nfe) {
+				} catch (Exception nfe) {
 					throw new ParseException("Integer number too large: "+number);
 				}
 				return ttype = TT_LONG;
@@ -277,7 +277,7 @@ class Tokenizer {
 				nextch = ch;
 				try {
 					ivalue = Integer.parseInt(number.toString(), 10);
-				} catch (NumberFormatException nfe) {
+				} catch (Exception nfe) {
 					throw new ParseException("Integer number too large: "+number);
 				}
 				return ttype = TT_INT;
