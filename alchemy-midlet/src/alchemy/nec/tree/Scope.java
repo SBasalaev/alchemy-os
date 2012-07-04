@@ -26,10 +26,10 @@ import alchemy.nec.ParseException;
  */
 public interface Scope {
 	/**
-	 * Returns type by its alias.
-	 * Returns <code>null</code> if alias is not defined.
+	 * Returns type for given name.
+	 * Returns <code>null</code> if type is not defined.
 	 */
-	Type getType(String alias);
+	NamedType getType(String name);
 
 	/**
 	 * Returns variable for given identifier.

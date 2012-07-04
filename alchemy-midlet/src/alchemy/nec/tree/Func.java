@@ -72,7 +72,7 @@ public class Func implements Scope {
 		return unit.getVar(v.name) != null;
 	}
 
-	public Type getType(String alias) {
+	public NamedType getType(String alias) {
 		return unit.getType(alias);
 	}
 }

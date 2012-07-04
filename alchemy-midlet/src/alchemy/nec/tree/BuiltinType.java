@@ -25,7 +25,7 @@ package alchemy.nec.tree;
 public class BuiltinType extends NamedType {
 
 	private final int numindex;
-
+	
 	private BuiltinType(String name, Type superType, int numindex) {
 		super(name, superType);
 		this.numindex = numindex;

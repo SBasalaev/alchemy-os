@@ -30,7 +30,7 @@ public abstract class Type {
 	
 	/**
 	 * Returns supertype of this type.
-	 * For <code>Any</code> returns <code>null</code>.
+	 * For forward declarations returns <code>null</code>.
 	 */
 	public abstract Type superType();
 }

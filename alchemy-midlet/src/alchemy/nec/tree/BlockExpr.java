@@ -50,7 +50,7 @@ public class BlockExpr extends Expr implements Scope {
 		return last.rettype();
 	}
 
-	public Type getType(String alias) {
+	public NamedType getType(String alias) {
 		return parent.getType(alias);
 	}
 

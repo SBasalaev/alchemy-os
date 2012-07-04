@@ -52,20 +52,22 @@ public class Parser {
 	}
 
 	public Unit parse(File source) {
-		//initializing
 		unit = new Unit();
-		unit.putType("Any", BuiltinType.ANY);
-		unit.putType("Int", BuiltinType.INT);
-		unit.putType("Long", BuiltinType.LONG);
-		unit.putType("Float", BuiltinType.FLOAT);
-		unit.putType("Double", BuiltinType.DOUBLE);
-		unit.putType("Bool", BuiltinType.BOOL);
-		unit.putType("String", BuiltinType.STRING);
-		unit.putType("Array", BuiltinType.ARRAY);
-		unit.putType("BArray", BuiltinType.BARRAY);
-		unit.putType("CArray", BuiltinType.CARRAY);
-		//parsing
 		try {
+			//initializing
+			unit.putType(BuiltinType.ANY);
+			unit.putType(BuiltinType.INT);
+			unit.putType(BuiltinType.LONG);
+			unit.putType(BuiltinType.FLOAT);
+			unit.putType(BuiltinType.DOUBLE);
+			unit.putType(BuiltinType.BOOL);
+			unit.putType(BuiltinType.STRING);
+			unit.putType(BuiltinType.ARRAY);
+			unit.putType(BuiltinType.BARRAY);
+			unit.putType(BuiltinType.CARRAY);
+			unit.putType(BuiltinType.FUNCTION);
+			unit.putType(BuiltinType.STRUCTURE);
+			//parsing
 			parseFile(new File("/res/nec/embed.eh"));
 			parseFile(source);
 		} catch (ParseException pe) {
@@ -143,44 +145,46 @@ public class Parser {
 						} else if (t.svalue.equals("type")) {
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
 								throw new ParseException("Type name expected after 'type'");
-							String alias = t.svalue;
-							Type type = unit.getType(alias);
-							if (type == null) {
-								unit.putType(alias, new NamedType(alias, BuiltinType.ANY));
-							} else if (type.getClass() != NamedType.class) {
-								throw new ParseException("Type "+alias+" is already defined");
-							}
-							switch (t.nextToken()) {
-								case ';': // forward declaration
-									break;
-								case '=': // type alias
-									unit.putType(alias, parseType(unit));
-									if (t.nextToken() != ';') t.pushBack();
-									break;
-								case '{': { // structure type
-									StructureType struct = new StructureType(alias);
-									Vector fields = new Vector();
-									while (t.nextToken() != '}') {
-										t.pushBack();
-										if (!fields.isEmpty()) expect(',');
-										if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
-											throw new ParseException("Field name expected, got "+t);
-										String fieldname = t.svalue;
-										expect(':');
-										Type vartype = parseType(unit);
-										Var var = new Var(fieldname, vartype);
-										var.index = fields.size();
-										fields.addElement(var);
+							String typename = t.svalue;
+							if (typename.equals("Any"))
+								throw new ParseException("Cannot redefine Any type.");
+							Type prevtype = unit.getType(typename);
+							if (t.nextToken() == ';') { // forward declaration
+								if (prevtype == null) unit.putType(new NamedType(typename, null));
+							} else {
+								t.pushBack();
+								if (prevtype != null && prevtype.superType() != null)
+									throw new ParseException("Type "+typename+" is already defined.");	
+								switch (t.nextToken()) {
+									case '<': { // defining subtype
+										unit.putType(new NamedType(typename, parseType(unit)));
+										break;
 									}
-									struct.fields = new Var[fields.size()];
-									for (int i=fields.size()-1; i>=0; i--) {
-										struct.fields[i] = ((Var)fields.elementAt(i));
+									case '{': { // structure type
+										StructureType struct = new StructureType(typename);
+										Vector fields = new Vector();
+										while (t.nextToken() != '}') {
+											t.pushBack();
+											if (!fields.isEmpty()) expect(',');
+											if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+												throw new ParseException("Field name expected, got "+t);
+											String fieldname = t.svalue;
+											expect(':');
+											Type vartype = parseType(unit);
+											Var var = new Var(fieldname, vartype);
+											var.index = fields.size();
+											fields.addElement(var);
+										}
+										struct.fields = new Var[fields.size()];
+										for (int i=fields.size()-1; i>=0; i--) {
+											struct.fields[i] = ((Var)fields.elementAt(i));
+										}
+										unit.putType(struct);
+										break;
 									}
-									unit.putType(alias, struct);
-									break;
+									default:
+										throw new ParseException(t.toString()+" unexpected here");
 								}
-								default:
-									throw new ParseException(t.toString()+" unexpected here");
 							}
 						} else if (t.svalue.equals("const")) {
 							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)

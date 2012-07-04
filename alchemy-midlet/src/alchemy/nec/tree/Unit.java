@@ -30,7 +30,7 @@ import java.util.Vector;
 public class Unit implements Scope {
 
 	/**
-	 * Type aliases.
+	 * Known type names.
 	 * String -> Type.
 	 */
 	Hashtable types = new Hashtable();
@@ -45,8 +45,8 @@ public class Unit implements Scope {
 	 */
 	private Vector vars = new Vector();
 
-	public Type getType(String alias) {
-		return (Type)types.get(alias);
+	public NamedType getType(String name) {
+		return (NamedType)types.get(name);
 	}
 
 	public Var getVar(String id) {
@@ -68,8 +68,10 @@ public class Unit implements Scope {
 		return false;
 	}
 
-	public void putType(String alias, Type type) {
-		types.put(alias, type);
+	public void putType(Type type) throws ParseException {
+		if (!(type instanceof NamedType))
+			throw new ParseException("Compiler error, trying to add composite type to the cache: "+type);
+		types.put(type.toString(), type);
 	}
 
 	public Func getFunc(String name) {
