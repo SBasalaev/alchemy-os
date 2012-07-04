@@ -17,4 +17,4 @@ def hash(a: Any): Int;
 type IStream;
 def readresource(path: String): IStream;
 
-def clone(struct: Any): Any;
+def clone(struct: Structure): Structure;
