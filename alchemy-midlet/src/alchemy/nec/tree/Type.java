@@ -33,4 +33,24 @@ public abstract class Type {
 	 * For forward declarations returns <code>null</code>.
 	 */
 	public abstract Type superType();
+	
+	public final boolean isSupertypeOf(Type type) {
+		while (type != null) {
+			if (this.equals(type)) return true;
+			type = type.superType();
+		}
+		return false;
+	}
+	
+	public final boolean isSubtypeOf(Type type) {
+		return type.isSupertypeOf(this);
+	}
+	
+	public static Type commonSupertype(Type type1, Type type2) {
+		while (type1 != null) {
+			if (type1.isSupertypeOf(type2)) return type1;
+			type1 = type1.superType();
+		}
+		return BuiltinType.NONE;
+	}
 }

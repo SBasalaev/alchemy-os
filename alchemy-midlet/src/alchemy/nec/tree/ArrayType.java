@@ -48,4 +48,8 @@ public class ArrayType extends Type {
 	public Type superType() {
 		return BuiltinType.ARRAY;
 	}
+	
+	public Type elementType() {
+		return elementType;
+	}
 }

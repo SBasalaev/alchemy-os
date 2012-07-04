@@ -303,16 +303,19 @@ public class Parser {
 		//some checkings
 		if (fname.equals("main")) {
 			if (args.size() != 1) {
-				warn("Incorrect number of arguments in main()");
-			}
-			if (args.size() > 0) {
-				Var arg0 = (Var)args.elementAt(0);
-				if (!arg0.type.equals(BuiltinType.ANY) && !arg0.type.equals(BuiltinType.ARRAY)) {
-					warn("Incompatible argument type in main()");
+				warn("Incorrect number of arguments in main(), should be ([String])");
+			} else {
+				Type argtype = ((Var)args.elementAt(0)).type;
+				Type shouldbe = new ArrayType(BuiltinType.STRING);
+				if (!argtype.isSupertypeOf(shouldbe)) {
+					throw new ParseException("Incompatible argument type in main()");
+				}
+				if (!argtype.equals(shouldbe)) {
+					warn("argument of main() should be of type [String]");
 				}
 			}
 			if (!rettype.equals(BuiltinType.INT) && !rettype.equals(BuiltinType.NONE)) {
-				warn("Incompatible return type in main()");
+				throw new ParseException("Incompatible return type in main(), should be Int or none.");
 			}
 		}
 		return func;
@@ -322,37 +325,44 @@ public class Parser {
 	 * Parses type expression.
 	 */
 	private Type parseType(Scope scope) throws ParseException, IOException {
-		int ttype = t.nextToken();
-		//scalar type or alias
-		if (ttype == Tokenizer.TT_IDENTIFIER) {
-			Type type = scope.getType(t.svalue);
-			if (type == null) throw new ParseException("Undefined type "+t);
-			return type;
+		switch (t.nextToken()) {
+			case Tokenizer.TT_IDENTIFIER: { //scalar type
+				Type type = scope.getType(t.svalue);
+				if (type == null) {
+					throw new ParseException("Undefined type "+t);
+				}
+				return type;
+			}
+			case '(': { //function type
+				Vector argtypes = new Vector();
+				while (t.nextToken() != ')') {
+					t.pushBack();
+					if (!argtypes.isEmpty()) expect(',');
+					argtypes.addElement(parseType(scope));
+				}
+				Type rettype;
+				if (t.nextToken() == ':') {
+					rettype = parseType(scope);
+				} else {
+					t.pushBack();
+					rettype = BuiltinType.NONE;
+				}
+				FunctionType type = new FunctionType();
+				type.rettype = rettype;
+				type.args = new Type[argtypes.size()];
+				for (int i=argtypes.size()-1; i>=0; i--) {
+					type.args[i] = (Type)argtypes.elementAt(i);
+				}
+				return type;
+			}
+			case '[': { // array type
+				Type elementType = parseType(scope);
+				expect(']');
+				return new ArrayType(elementType);
+			}
+			default:
+				throw new ParseException(t.toString()+" unexpected here");
 		}
-		//function type
-		if (ttype == '(') {
-			Vector argtypes = new Vector();
-			while (t.nextToken() != ')') {
-				t.pushBack();
-				if (!argtypes.isEmpty()) expect(',');
-				argtypes.addElement(parseType(scope));
-			}
-			Type rettype;
-			if (t.nextToken() == ':') {
-				rettype = parseType(scope);
-			} else {
-				t.pushBack();
-				rettype = BuiltinType.NONE;
-			}
-			FunctionType type = new FunctionType();
-			type.rettype = rettype;
-			type.args = new Type[argtypes.size()];
-			for (int i=argtypes.size()-1; i>=0; i--) {
-				type.args[i] = (Type)argtypes.elementAt(i);
-			}
-			return type;
-		}
-		throw new ParseException(t.toString()+" unexpected here");
 	}
 
 	private Expr parseBlock(Scope scope) throws ParseException, IOException {
@@ -506,7 +516,7 @@ public class Parser {
 		while (true) {
 			int ttype = t.nextToken();
 			if (ttype == '(') {
-				if (!(expr.rettype().getClass() == FunctionType.class))
+				if (!(expr.rettype() instanceof FunctionType))
 					throw new ParseException("Applying () to non-function expression");
 				FunctionType ftype = (FunctionType)expr.rettype();
 				Vector vargs = new Vector();
@@ -525,7 +535,7 @@ public class Parser {
 				continue;
 			} else if (ttype == '[') {
 				Type arrtype = expr.rettype();
-				if (!arrtype.equals(BuiltinType.ARRAY)
+				if (!arrtype.isSubtypeOf(BuiltinType.ARRAY)
 				 && !arrtype.equals(BuiltinType.BARRAY)
 				 && !arrtype.equals(BuiltinType.CARRAY)) {
 					throw new ParseException("Applying [] to non-array expression");
@@ -534,18 +544,22 @@ public class Parser {
 				expect(']');
 				if (t.nextToken() == '=') {
 					Expr assignexpr = parseExpr(scope);
-					if (!arrtype.equals(BuiltinType.ARRAY)) {
+					if (arrtype.equals(BuiltinType.BARRAY) || arrtype.equals(BuiltinType.CARRAY)) {
 						assignexpr = cast(assignexpr, BuiltinType.INT);
+					} else if (arrtype instanceof ArrayType) {
+						assignexpr = cast(assignexpr, ((ArrayType)arrtype).elementType());
 					} else {
 						assignexpr = cast(assignexpr, BuiltinType.ANY);
 					}
 					expr = new AStoreExpr(expr, indexexpr, assignexpr);
 				} else {
 					t.pushBack();
-					if (arrtype.equals(BuiltinType.ARRAY)) {
-						expr = new ALoadExpr(expr, indexexpr, BuiltinType.ANY);
-					} else {
+					if (arrtype.equals(BuiltinType.BARRAY) || arrtype.equals(BuiltinType.CARRAY)) {
 						expr = new ALoadExpr(expr, indexexpr, BuiltinType.INT);
+					} else if (arrtype instanceof ArrayType) {
+						expr = new ALoadExpr(expr, indexexpr, ((ArrayType)arrtype).elementType());
+					} else {
+						expr = new ALoadExpr(expr, indexexpr, BuiltinType.ANY);
 					}
 					continue;
 				}
@@ -554,7 +568,7 @@ public class Parser {
 					throw new ParseException("Identifier expected after '.'");
 				String member = t.svalue;
 				Type type = expr.rettype();
-				if (type.equals(BuiltinType.ARRAY)
+				if (type.isSubtypeOf(BuiltinType.ARRAY)
 				 || type.equals(BuiltinType.BARRAY)
 				 || type.equals(BuiltinType.CARRAY)) {
 					if (member.equals("len")) {
@@ -832,7 +846,7 @@ public class Parser {
 		if (toType.equals(BuiltinType.ANY)) {
 			warn("Cast to Any");
 		}
-		if (expr.rettype().equals(BuiltinType.ANY)) {
+		if (expr.rettype().isSupertypeOf(toType)) {
 			return new CastExpr(toType, expr);
 		}
 		return cast(expr, toType);
@@ -840,9 +854,11 @@ public class Parser {
 
 	private Expr cast(Expr expr, Type toType) throws ParseException {
 		Type fromType = expr.rettype();
-		if (fromType.equals(toType)) return expr;
-		if (toType.equals(BuiltinType.ANY) && !fromType.equals(BuiltinType.NONE)) {
-			return new CastExpr(BuiltinType.ANY, expr);
+		if (fromType.equals(toType)) {
+			return expr;
+		}
+		if (toType.isSupertypeOf(fromType)) {
+			return new CastExpr(toType, expr);
 		}
 		if (toType.equals(BuiltinType.NONE)) {
 			return new DiscardExpr(expr);
@@ -850,6 +866,7 @@ public class Parser {
 		if (toType.getClass() == BuiltinType.class) {
 			return castPrimitive(expr, toType);
 		}
+		// null can be cast to any type
 		if (expr.getClass() == ConstExpr.class && ((ConstExpr)expr).value == null) {
 			return new CastExpr(toType, expr);
 		}
@@ -893,7 +910,7 @@ public class Parser {
 	 *     If both are numbers then returned type is first
 	 *     occured in the list: Double, Float, Long, Int.
 	 *   </li><li>
-	 *     Otherwise returned type is 'Any'.
+	 *     Otherwise returned type is the common supertype.
 	 *   </li>
 	 * </ul>
 	 */
@@ -912,7 +929,7 @@ public class Parser {
 				case 4: return BuiltinType.DOUBLE;
 			}
 		}
-		return BuiltinType.ANY;
+		return Type.commonSupertype(ltype, rtype);
 	}
 
 	/** Returns operator string by ttype. */
