@@ -746,7 +746,7 @@ public class Parser {
 							init[index] = cast(parseExpr(scope), struct.fields[index].type);
 						}
 						return new NewArrayByEnumExpr(type, init);
-					} else if (type.equals(BuiltinType.ARRAY)
+					} else if (type.isSubtypeOf(BuiltinType.ARRAY)
 					        || type.equals(BuiltinType.BARRAY)
 							|| type.equals(BuiltinType.CARRAY)) {
 						if (t.nextToken() == '(') {
