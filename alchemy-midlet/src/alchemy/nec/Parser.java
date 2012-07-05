@@ -289,9 +289,11 @@ public class Parser {
 		if (methodholder != null) {
 			args.addElement(new Var("this", methodholder));
 		}
+		boolean first = true;
 		while (t.nextToken() != ')') {
 			t.pushBack();
-			if (!args.isEmpty()) expect(',');
+			if (first) first = false;
+			else expect(',');
 			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
 				throw new ParseException("Variable name expected, got "+t);
 			String varname = t.svalue;
@@ -622,11 +624,13 @@ public class Parser {
 				// neither Array.len nor structure field
 				// trying to find method
 				Func method = null;
-				while (method == null && type != null) {
-					method = unit.getFunc(type.toString()+'.'+member);
-					type = type.superType();
+				Type stype = type;
+				while (method == null && stype != null) {
+					method = unit.getFunc(stype.toString()+'.'+member);
+					stype = stype.superType();
 				}
 				if (method != null) {
+					method.hits++;
 					// parsing method call
 					expect('(');
 					Vector vargs = new Vector();
@@ -809,6 +813,8 @@ public class Parser {
 								Expr e = parseExpr(scope);
 								if (type.equals(BuiltinType.ARRAY)) {
 									e = cast(e, BuiltinType.ANY);
+								} else if (type instanceof ArrayType) {
+									e = cast(e, ((ArrayType)type).elementType());
 								} else {
 									e = cast(e, BuiltinType.INT);
 								}
@@ -905,11 +911,11 @@ public class Parser {
 		if (fromType.equals(toType)) {
 			return expr;
 		}
-		if (toType.isSupertypeOf(fromType)) {
-			return new CastExpr(toType, expr);
-		}
 		if (toType.equals(BuiltinType.NONE)) {
 			return new DiscardExpr(expr);
+		}
+		if (toType.isSupertypeOf(fromType) || toType.equals(BuiltinType.ANY)) {
+			return new CastExpr(toType, expr);
 		}
 		if (toType.getClass() == BuiltinType.class) {
 			return castPrimitive(expr, toType);
