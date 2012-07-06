@@ -97,10 +97,12 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 	}
 
 	protected void destroyApp(boolean unconditional) {
-		Filesystem fs = runtime.rootContext().fs();
-		if (fs instanceof Closeable) {
-			((Closeable)fs).close();
-		}
+		try {
+			Filesystem fs = runtime.rootContext().fs();
+			if (fs instanceof Closeable) {
+				((Closeable)fs).close();
+			}
+		} catch (Exception e) { }
 		notifyDestroyed();
 	}
 
