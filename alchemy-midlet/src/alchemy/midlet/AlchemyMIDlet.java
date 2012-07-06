@@ -25,6 +25,7 @@ import alchemy.evm.ELibBuilder;
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeLibBuilder;
+import alchemy.util.Closeable;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import javax.microedition.lcdui.*;
@@ -96,6 +97,10 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 	}
 
 	protected void destroyApp(boolean unconditional) {
+		Filesystem fs = runtime.rootContext().fs();
+		if (fs instanceof Closeable) {
+			((Closeable)fs).close();
+		}
 		notifyDestroyed();
 	}
 
