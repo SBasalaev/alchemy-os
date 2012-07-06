@@ -20,12 +20,12 @@ package alchemy.midlet;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.util.Closeable;
 import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 import javax.microedition.lcdui.*;
@@ -274,6 +274,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			}
 		}
 		fs.remove(new File("/PACKAGE"));
+		if (fs instanceof Closeable) {
+			((Closeable)fs).close();
+		}
 	}
 
 	private class InstallerThread extends Thread {

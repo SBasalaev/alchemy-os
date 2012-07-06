@@ -176,7 +176,7 @@ public abstract class Filesystem {
 		InputStream in = read(source);
 		OutputStream out = write(dest);
 		try {
-			byte[] buf = new byte[128];
+			byte[] buf = new byte[1024];
 			int count = in.read(buf);
 			while (count >= 0) {
 				out.write(buf, 0, count);
