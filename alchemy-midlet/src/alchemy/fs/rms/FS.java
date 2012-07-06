@@ -20,6 +20,7 @@ package alchemy.fs.rms;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.util.Closeable;
 import alchemy.util.Initable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -28,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
+import javax.microedition.rms.RecordStoreFullException;
 import javax.microedition.rms.RecordStoreNotFoundException;
 
 /**
@@ -36,30 +38,34 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  * rather slow.
  * @author Sergey Basalaev
  */
-public final class FS extends Filesystem implements Initable {
+public final class FS extends Filesystem implements Initable, Closeable {
 
-	static private final String ERR_DENIED = "Access denied to ";
-	static private final String ERR_CLOSED = "File is closed: ";
-	static private final String ERR_NOT_DIR = "Not a directory: ";
-	static private final String ERR_IS_DIR = "Is a directory: ";
 	static private final String ERR_EXISTS = "File already exists: ";
 	static private final String ERR_NOT_FOUND = "File not found: ";
-	static private final String ERR_NOT_EMPTY = "Directory not empty: ";
 
-	static private int F_DIR = 16;
-	static private int F_READ = 4;
-	static private int F_WRITE = 2;
-	static private int F_EXEC = 1;
+	// file attributes
+	static private int A_DIR = 16;
+	static private int A_READ = 4;
+	static private int A_WRITE = 2;
+	static private int A_EXEC = 1;
 
 	/** <code>RecordStore</code> to use as filesystem. */
 	private RecordStore store;
 
+	private final FD rootFD;
+	
 	/**
 	 * Constructor to load through the reflection.
 	 * <code>init()</code> should be called before
 	 * filesystem can be used.
 	 */
-	public FS() { }
+	public FS() {
+		FD fd = new FD();
+		fd.name = "/";
+		fd.record = 1;
+		fd.attrs = A_READ | A_WRITE | A_DIR;
+		rootFD = fd;
+	}
 
 	/**
 	 * Creates new <code>RSFilesystem</code> that uses
@@ -76,7 +82,7 @@ public final class FS extends Filesystem implements Initable {
 				rs = RecordStore.openRecordStore(storename, false);
 			} catch (RecordStoreNotFoundException rsnfe) {
 				rs = RecordStore.openRecordStore(storename, true);
-				rs.addRecord(new byte[] {0,0,0,0,0,0,0,0,0,0,0,0}, 0, 12);
+				rs.addRecord(new byte[12], 0, 12);
 			}
 		} catch (RecordStoreException rse) {
 			throw new RuntimeException(rse.toString());
@@ -84,20 +90,26 @@ public final class FS extends Filesystem implements Initable {
 		this.store = rs;
 	}
 
+	public void close() {
+		try { store.closeRecordStore(); }
+		catch (RecordStoreException rse) { }
+	}
+	
 	public String[] listRoots() {
 		return new String[] {"/"};
 	}
 
 	public synchronized void create(File file) throws IOException {
-		RSFD parentfd = getFD(file.parent());
-		if ((parentfd.attrs & F_DIR) == 0)
-			throw new IOException(ERR_NOT_DIR+parentfd.file.path());
-		RSDirectory dir = new RSDirectory(parentfd);
+		File parent = file.parent();
+		if (parent == null) throw new IOException("File already exists: /");
+		FD parentfd = getFD(parent);
+		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
+		Directory dir = new Directory(parentfd);
 		int index = dir.getIndex(file.name());
-		if (index >= 0) throw new IOException(ERR_EXISTS+file.path());
-		RSFD fd = new RSFD();
-		fd.file = file;
-		fd.attrs = F_READ | F_WRITE;
+		if (index >= 0) throw new IOException("File already exists: "+file);
+		FD fd = new FD();
+		fd.name = file.name();
+		fd.attrs = A_READ | A_WRITE;
 		fd.record = createFileNode(false);
 		dir.nodes[dir.count] = fd;
 		dir.count++;
@@ -105,15 +117,16 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public synchronized void mkdir(File file) throws IOException {
-		RSFD parentfd = getFD(file.parent());
-		if ((parentfd.attrs & F_DIR) == 0)
-			throw new IOException(ERR_NOT_DIR+parentfd.file.path());
-		RSDirectory dir = new RSDirectory(parentfd);
+		File parent = file.parent();
+		if (parent == null) throw new IOException("File already exists: /");
+		FD parentfd = getFD(parent);
+		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
+		Directory dir = new Directory(parentfd);
 		int index = dir.getIndex(file.name());
-		if (index >= 0) throw new IOException(ERR_EXISTS+file.path());
-		RSFD fd = new RSFD();
-		fd.file = file;
-		fd.attrs = F_READ | F_WRITE | F_DIR;
+		if (index >= 0) throw new IOException("File already exists: "+file);
+		FD fd = new FD();
+		fd.name = file.name();
+		fd.attrs = A_READ | A_WRITE | A_DIR;
 		fd.record = createFileNode(true);
 		dir.nodes[dir.count] = fd;
 		dir.count++;
@@ -121,36 +134,36 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public synchronized InputStream read(File file) throws IOException {
-		RSFD fd = getFD(file);
-		if ((fd.attrs & F_DIR) != 0) throw new IOException(ERR_IS_DIR+file.path());
-		return new RSInputStream(fd);
+		FD fd = getFD(file);
+		if ((fd.attrs & A_DIR) != 0) throw new IOException("Is a directory: "+file);
+		return new FileInputStream(fd);
 	}
 
 	public synchronized OutputStream write(File file) throws IOException {
 		if (!exists(file)) create(file);
-		RSFD fd = getFD(file);
-		if ((fd.attrs & F_DIR) != 0) throw new IOException(ERR_IS_DIR+file.path());
-		return new RSOutputStream(fd, false);
+		FD fd = getFD(file);
+		if ((fd.attrs & A_DIR) != 0) throw new IOException("Is a directory: "+file);
+		return new FileOutputStream(fd, false);
 	}
 
 	public synchronized OutputStream append(File file) throws IOException {
 		if (!exists(file)) create(file);
-		RSFD fd = getFD(file);
-		if ((fd.attrs & F_DIR) != 0) throw new IOException(ERR_IS_DIR+file.path());
-		return new RSOutputStream(fd, true);
+		FD fd = getFD(file);
+		if ((fd.attrs & A_DIR) != 0) throw new IOException("Is a directory: "+file);
+		return new FileOutputStream(fd, true);
 	}
 
 	public synchronized void remove(File file) throws IOException {
-		RSFD parentfd = getFD(file.parent());
-		if ((parentfd.attrs & F_DIR) == 0)
-			throw new IOException(ERR_NOT_DIR+parentfd.file.path());
-		RSDirectory dir = new RSDirectory(parentfd);
+		File parent = file.parent();
+		if (parent == null) throw new IOException("Cannot remove /");
+		FD parentfd = getFD(parent);
+		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
+		Directory dir = new Directory(parentfd);
 		int index = dir.getIndex(file.name());
 		if (index < 0) return;
-		if ((dir.nodes[index].attrs & F_DIR) != 0) {
-			RSDirectory toRemove = new RSDirectory(dir.nodes[index]);
-			if (toRemove.count > 0)
-				throw new IOException(ERR_NOT_EMPTY+dir.nodes[index].file);
+		if ((dir.nodes[index].attrs & A_DIR) != 0) {
+			Directory toRemove = new Directory(dir.nodes[index]);
+			if (toRemove.count > 0) throw new IOException("Cannot remove non-empty directory: "+file);
 		}
 		try {
 			store.deleteRecord(dir.nodes[index].record);
@@ -163,14 +176,14 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public synchronized String[] list(File file) throws IOException {
-		RSFD fd = getFD(file);
-		if ((fd.attrs & F_DIR) == 0) throw new IOException(ERR_NOT_DIR+file.path());
-		RSDirectory dir = new RSDirectory(fd);
+		FD fd = getFD(file);
+		if ((fd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+file);
+		Directory dir = new Directory(fd);
 		String[] list = new String[dir.count];
 		for (int i=0; i<dir.count; i++) {
-			RSFD node = dir.nodes[i];
-			list[i] = node.file.name();
-			if ((node.attrs & F_DIR) != 0) list[i] = list[i].concat("/");
+			FD node = dir.nodes[i];
+			list[i] = node.name;
+			if ((node.attrs & A_DIR) != 0) list[i] = list[i].concat("/");
 		}
 		return list;
 	}
@@ -186,8 +199,8 @@ public final class FS extends Filesystem implements Initable {
 
 	public synchronized boolean isDirectory(File file) {
 		try {
-			RSFD fd = getFD(file);
-			return (fd.attrs & F_DIR) != 0;
+			FD fd = getFD(file);
+			return (fd.attrs & A_DIR) != 0;
 		} catch (IOException e) {
 			return false;
 		}
@@ -195,8 +208,8 @@ public final class FS extends Filesystem implements Initable {
 
 	public synchronized boolean canRead(File file) {
 		try {
-			RSFD fd = getFD(file);
-			return (fd.attrs & F_READ) != 0;
+			FD fd = getFD(file);
+			return (fd.attrs & A_READ) != 0;
 		} catch (IOException e) {
 			return false;
 		}
@@ -204,8 +217,8 @@ public final class FS extends Filesystem implements Initable {
 
 	public synchronized boolean canWrite(File file) {
 		try {
-			RSFD fd = getFD(file);
-			return (fd.attrs & F_WRITE) != 0;
+			FD fd = getFD(file);
+			return (fd.attrs & A_WRITE) != 0;
 		} catch (IOException e) {
 			return false;
 		}
@@ -213,96 +226,99 @@ public final class FS extends Filesystem implements Initable {
 
 	public synchronized boolean canExec(File file) {
 		try {
-			RSFD fd = getFD(file);
-			return (fd.attrs & F_EXEC) != 0;
+			FD fd = getFD(file);
+			return (fd.attrs & A_EXEC) != 0;
 		} catch (IOException e) {
 			return false;
 		}
 	}
 
 	public synchronized void setRead(File file, boolean on) throws IOException {
-		RSFD parentfd = getFD(file.parent());
-		if ((parentfd.attrs & F_DIR) == 0)
-			throw new IOException(ERR_NOT_DIR+parentfd.file.path());
-		RSDirectory dir = new RSDirectory(parentfd);
+		File parent = file.parent();
+		if (parent == null) throw new IOException("Cannot change attrubutes of /");
+		FD parentfd = getFD(parent);
+		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
+		Directory dir = new Directory(parentfd);
 		int index = dir.getIndex(file.name());
-		if (index < 0) throw new IOException(ERR_NOT_FOUND+file.path());
-		RSFD fd = dir.nodes[index];
+		if (index < 0) throw new IOException("File not found: "+file);
+		FD fd = dir.nodes[index];
 		if (on) {
-			if ((fd.attrs & F_READ) == 0) {
-				fd.attrs |= F_READ;
+			if ((fd.attrs & A_READ) == 0) {
+				fd.attrs |= A_READ;
 				dir.flush();
 			}
 		} else {
-			if ((fd.attrs & F_READ) != 0) {
-				fd.attrs &= ~F_READ;
+			if ((fd.attrs & A_READ) != 0) {
+				fd.attrs &= ~A_READ;
 				dir.flush();
 			}
 		}
 	}
 
 	public synchronized void setWrite(File file, boolean on) throws IOException {
-		RSFD parentfd = getFD(file.parent());
-		if ((parentfd.attrs & F_DIR) == 0)
-			throw new IOException(ERR_NOT_DIR+parentfd.file.path());
-		RSDirectory dir = new RSDirectory(parentfd);
+		File parent = file.parent();
+		if (parent == null) throw new IOException("Cannot change attrubutes of /");
+		FD parentfd = getFD(parent);
+		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
+		Directory dir = new Directory(parentfd);
 		int index = dir.getIndex(file.name());
-		if (index < 0) throw new IOException(ERR_NOT_FOUND+file.path());
-		RSFD fd = dir.nodes[index];
+		if (index < 0) throw new IOException("File not found: "+file);
+		FD fd = dir.nodes[index];
 		if (on) {
-			if ((fd.attrs & F_WRITE) == 0) {
-				fd.attrs |= F_WRITE;
+			if ((fd.attrs & A_WRITE) == 0) {
+				fd.attrs |= A_WRITE;
 				dir.flush();
 			}
 		} else {
-			if ((fd.attrs & F_WRITE) != 0) {
-				fd.attrs &= ~F_WRITE;
+			if ((fd.attrs & A_WRITE) != 0) {
+				fd.attrs &= ~A_WRITE;
 				dir.flush();
 			}
 		}
 	}
 
 	public synchronized void setExec(File file, boolean on) throws IOException {
-		RSFD parentfd = getFD(file.parent());
-		if ((parentfd.attrs & F_DIR) == 0)
-			throw new IOException(ERR_NOT_DIR+parentfd.file.path());
-		RSDirectory dir = new RSDirectory(parentfd);
+		File parent = file.parent();
+		if (parent == null) throw new IOException("Cannot change attrubutes of /");
+		FD parentfd = getFD(parent);
+		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
+		Directory dir = new Directory(parentfd);
 		int index = dir.getIndex(file.name());
-		if (index < 0) throw new IOException(ERR_NOT_FOUND+file.path());
-		RSFD fd = dir.nodes[index];
+		if (index < 0) throw new IOException("File not found: "+file);
+		FD fd = dir.nodes[index];
 		if (on) {
-			if ((fd.attrs & F_EXEC) == 0) {
-				fd.attrs |= F_EXEC;
+			if ((fd.attrs & A_EXEC) == 0) {
+				fd.attrs |= A_EXEC;
 				dir.flush();
 			}
 		} else {
-			if ((fd.attrs & F_EXEC) != 0) {
-				fd.attrs &= ~F_EXEC;
+			if ((fd.attrs & A_EXEC) != 0) {
+				fd.attrs &= ~A_EXEC;
 				dir.flush();
 			}
 		}
 	}
 
 	public synchronized void move(File source, File dest) throws IOException {
-		if (source.parent().equals(dest.parent())) {
-			// move within one directory
-			RSFD parentfd = getFD(source.parent());
-			RSDirectory parentdir = new RSDirectory(parentfd);
-			int index = parentdir.getIndex(dest.name());
-			if (index >= 0) throw new IOException(ERR_EXISTS+dest.path());
-			index = parentdir.getIndex(source.name());
-			if (index < 0) throw new IOException(ERR_NOT_FOUND+source.path());
-			parentdir.nodes[index].file = dest;
+		File srcparent = source.parent();
+		if (srcparent == null) throw new IOException("Cannot move /");
+		if (exists(dest)) throw new IOException("Cannot move "+source+" to "+dest+", destination exists.");
+		if (srcparent.equals(dest.parent())) {
+			// rename within one directory
+			FD parentfd = getFD(srcparent);
+			Directory parentdir = new Directory(parentfd);
+			int index = parentdir.getIndex(source.name());
+			if (index < 0) throw new IOException("File not found: "+source);
+			parentdir.nodes[index].name = dest.name();
 			parentdir.flush();
 		} else {
-			RSFD destdirfd = getFD(dest.parent());
-			RSDirectory destdir = new RSDirectory(destdirfd);
-			int index = destdir.getIndex(dest.name());
-			if (index >= 0) throw new IOException(ERR_EXISTS+dest.path());
-			RSFD srcdirfd = getFD(source.parent());
-			RSDirectory srcdir = new RSDirectory(srcdirfd);
-			index = srcdir.getIndex(source.name());
-			if (index < 0) throw new IOException(ERR_NOT_FOUND+source.path());
+			// reading both dirs
+			FD destdirfd = getFD(dest.parent());
+			Directory destdir = new Directory(destdirfd);
+			FD srcdirfd = getFD(source.parent());
+			Directory srcdir = new Directory(srcdirfd);
+			int index = srcdir.getIndex(source.name());
+			if (index < 0) throw new IOException("File not found: "+source);
 			// moving
 			destdir.nodes[destdir.count] = srcdir.nodes[index];
 			destdir.count++;
@@ -314,7 +330,7 @@ public final class FS extends Filesystem implements Initable {
 	}
 	
 	public int size(File file) throws IOException {
-		RSFD fd = getFD(file);
+		FD fd = getFD(file);
 		try {
 			return store.getRecordSize(fd.record)-8;
 		} catch (RecordStoreException rse) {
@@ -323,9 +339,9 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public long lastModified(File file) throws IOException {
-		RSFD fd = getFD(file);
-		RSInputStream stream = new RSInputStream(fd);
-		long stamp = stream.tstamp();
+		FD fd = getFD(file);
+		FileInputStream stream = new FileInputStream(fd);
+		long stamp = stream.timeStamp();
 		stream.close();
 		return stamp;
 	}
@@ -339,7 +355,10 @@ public final class FS extends Filesystem implements Initable {
 	}
 
 	public long spaceTotal() {
-		return spaceFree() + spaceUsed();
+		long free = spaceFree();
+		long used = spaceUsed();
+		if (free < 0 || used < 0) return -1;
+		else return free + used;
 	}
 
 	public long spaceUsed() {
@@ -350,99 +369,90 @@ public final class FS extends Filesystem implements Initable {
 		}
 	}
 
-	private RSFD root() {
-		RSFD fd = new RSFD();
-		fd.record = 1;
-		fd.attrs = F_DIR | F_READ | F_WRITE;
-		fd.file = new File("");
-		return fd;
-	}
-
-	private RSFD getFD(File file) throws IOException {
-		if (file.path().length() == 0) return root();
-		RSFD parent = getFD(file.parent());
-		if ((parent.attrs & F_DIR) == 0)
-			throw new IOException(ERR_NOT_DIR+parent.file.path());
-		RSDirectory dir = new RSDirectory(parent);
+	private FD getFD(File file) throws IOException {
+		File parent = file.parent();
+		if (parent == null) return rootFD;
+		FD parentfd = getFD(parent);
+		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
+		Directory dir = new Directory(parentfd);
 		int index = dir.getIndex(file.name());
-		if (index < 0) throw new IOException(file.path());
+		if (index < 0) throw new IOException("File not found: "+file);
 		return dir.nodes[index];
 	}
 
-	private int createFileNode(boolean isdir) throws IOException {
+	private int createFileNode(boolean isDir) throws IOException {
 		byte[] buf = new byte[12];
 		long time = System.currentTimeMillis();
-		buf[0] = (byte)(time >> 56);
-		buf[1] = (byte)(time >> 48);
-		buf[2] = (byte)(time >> 40);
-		buf[3] = (byte)(time >> 32);
-		buf[4] = (byte)(time >> 24);
-		buf[5] = (byte)(time >> 16);
-		buf[6] = (byte)(time >> 8);
-		buf[7] = (byte)(time);
+		for (int i=7; i>=0; i--) {
+			buf[i] = (byte)time;
+			time >>>= 8;
+		}
 		try {
-			return store.addRecord(buf, 0, isdir ? 12 : 8);
+			return store.addRecord(buf, 0, isDir ? 12 : 8);
+		} catch (RecordStoreFullException rsfe) {
+			throw new IOException("Cannot create file, no more free space.");
 		} catch (RecordStoreException rse) {
 			throw new IOException(rse.toString());
 		}
 	}
 
-	private static class RSFD {
+	/** File descriptor */
+	private static class FD {
 		int record;
 		int attrs;
-		File file;
+		String name;
 	}
 
-	private class RSDirectory {
+	private class Directory {
 
-		private RSFD fd;
+		private FD fd;
 		private int count;
-		private RSFD[] nodes;
+		private FD[] nodes;
 
-		public RSDirectory(RSFD fd) throws IOException {
+		public Directory(FD fd) throws IOException {
 			this.fd = fd;
-			DataInputStream stream = new DataInputStream(new RSInputStream(fd));
+			DataInputStream stream = new DataInputStream(new FileInputStream(fd));
 			count = stream.readUnsignedShort();
-			nodes = new RSFD[count+1];
+			nodes = new FD[count+1];
 			for (int i=0; i<count; i++) {
-				nodes[i] = new RSFD();
+				nodes[i] = new FD();
 				nodes[i].record = stream.readInt();
 				nodes[i].attrs = stream.readUnsignedByte();
-				nodes[i].file = new File(fd.file, stream.readUTF());
+				nodes[i].name = stream.readUTF();
+				//TODO: optimize here
 			}
 			stream.close();
 		}
 
 		public int getIndex(String name) {
-			int i=count-1;
-			while (i >= 0) {
-				if (nodes[i].file.name().equals(name)) break;
-				i--;
+			for (int i=count-1; i>=0; i--) {
+				if (nodes[i].name.equals(name)) return i;
 			}
-			return i;
+			return -1;
 		}
 
 		public void flush() throws IOException {
-			DataOutputStream stream = new DataOutputStream(new RSOutputStream(fd, false));
+			DataOutputStream stream = new DataOutputStream(new FileOutputStream(fd, false));
 			stream.writeShort(count);
 			for (int i=0; i<count; i++) {
 				stream.writeInt(nodes[i].record);
 				stream.writeByte(nodes[i].attrs);
-				stream.writeUTF(nodes[i].file.name());
+				stream.writeUTF(nodes[i].name);
+				// TODO: optimize here
 			}
 			stream.close();
 		}
 	}
 
-	private class RSInputStream extends InputStream {
+	private class FileInputStream extends InputStream {
 
-		private RSFD fd;
+		private FD fd;
 		private byte[] buf;
 		private int mark = 8;
 		private int pos = 8;
 
-		public RSInputStream(RSFD fd) throws IOException {
-			if ((fd.attrs & F_READ) == 0) throw new IOException(ERR_DENIED+fd.file);
+		public FileInputStream(FD fd) throws IOException {
+			if ((fd.attrs & A_READ) == 0) throw new IOException("Access denied to "+fd.name);
 			try {
 				buf = store.getRecord(fd.record);
 			} catch (RecordStoreException rse) {
@@ -451,22 +461,26 @@ public final class FS extends Filesystem implements Initable {
 		}
 
 		public synchronized int read() throws IOException {
-			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
+			if (buf == null) throw new IOException("Stream is closed");
 			if (pos == buf.length) return -1;
 			return buf[pos++] & 0xff;
 		}
 
 		public synchronized int read(byte[] b, int off, int len) throws IOException {
-			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
+			if (buf == null) throw new IOException("Stream is closed");
 			if (pos == buf.length) return -1;
-			int reallen = Math.min(len, buf.length-pos);
+			if (off < 0 || len < 0 || off+len > b.length) throw new ArrayIndexOutOfBoundsException();
+			if (len == 0) return 0;
+			int reallen = buf.length-pos;
+			if (reallen == 0) return -1;
+			if (reallen > len) reallen = len;
 			System.arraycopy(buf, pos, b, off, reallen);
 			pos += reallen;
 			return reallen;
 		}
 
 		public int available() throws IOException {
-			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
+			if (buf == null) throw new IOException("Stream is closed");
 			return buf.length - pos;
 		}
 
@@ -482,83 +496,88 @@ public final class FS extends Filesystem implements Initable {
 			return true;
 		}
 
-		public synchronized void reset() throws IOException {
+		public synchronized void reset() {
 			pos = mark;
 		}
 
 		public synchronized long skip(long n) throws IOException {
-			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
+			if (buf == null) throw new IOException("Stream is closed");
 			if (n <= 0) return 0;
-			long realskip = Math.min(n, buf.length-pos);
+			long realskip = buf.length-pos;
+			if (realskip > n) realskip = n;
 			pos += realskip;
 			return realskip;
 		}
 
-		public long tstamp() {
-			return (long)buf[0]          << 56 |
-			       (long)(buf[1] & 0xff) << 48 |
-			       (long)(buf[2] & 0xff) << 40 |
-			       (long)(buf[3] & 0xff) << 32 |
-			       (long)(buf[4] & 0xff) << 24 |
-			       (long)(buf[5] & 0xff) << 16 |
-			       (long)(buf[6] & 0xff) <<  8 |
-			       (long)(buf[7] & 0xff);
+		public long timeStamp() {
+			long time = 0;
+			for (int i=0; i<8; i++) {
+				time = (time << 8) | (buf[i] & 0xff);
+			}
+			return time;
 		}
 	}
 
-	private class RSOutputStream extends OutputStream {
+	private class FileOutputStream extends OutputStream {
 
-		private RSFD fd;
+		private final FD fd;
 		private byte[] buf;
 		private int count;
+		private boolean modified;
 
-		public RSOutputStream(RSFD fd, boolean append) throws IOException {
-			if ((fd.attrs & F_WRITE) == 0) throw new IOException(ERR_DENIED+fd.file);
+		public FileOutputStream(FD fd, boolean append) throws IOException {
+			if ((fd.attrs & A_WRITE) == 0) throw new IOException("Access denied to "+fd.name);
 			this.fd = fd;
 			if (append) {
 				try {
 					count = store.getRecordSize(fd.record);
-					buf = new byte[count+128];
+					buf = new byte[count+32];
 					store.getRecord(fd.record, buf, 0);
+					modified = false;
 				} catch (RecordStoreException rse) {
 					throw new IOException(rse.toString());
 				}
 			} else {
-				buf = new byte[128];
+				buf = new byte[40];
 				count = 8;
+				modified = true;
 			}
 		}
 
 		public synchronized void write(int b) throws IOException {
-			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
-			if (buf.length == count) grow(0);
+			if (buf == null) throw new IOException("Stream is closed");
+			if (buf.length == count) grow(count << 1);
 			buf[count] = (byte)b;
 			count++;
+			modified = true;
 		}
 
 		public synchronized void write(byte[] b, int off, int len) throws IOException {
-			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
-			if (count + len >= buf.length) grow(len);
+			if (buf == null) throw new IOException("Stream is closed");
+			if (off < 0 || len < 0 || off+len > b.length) throw new ArrayIndexOutOfBoundsException();
+			if (buf.length < count+len) grow(buf.length+len);
 			System.arraycopy(b, off, buf, count, len);
 			count += len;
+			modified = true;
 		}
 
 		public synchronized void flush() throws IOException {
-			if (buf == null) throw new IOException(ERR_CLOSED+fd.file);
-			if ((fd.attrs & F_WRITE) == 0) throw new IOException(ERR_DENIED+fd.file);
-			long stamp = System.currentTimeMillis();
-			buf[0] = (byte)(stamp >> 56);
-			buf[1] = (byte)(stamp >> 48);
-			buf[2] = (byte)(stamp >> 40);
-			buf[3] = (byte)(stamp >> 32);
-			buf[4] = (byte)(stamp >> 24);
-			buf[5] = (byte)(stamp >> 16);
-			buf[6] = (byte)(stamp >> 8);
-			buf[7] = (byte)(stamp);
-			try {
-				store.setRecord(fd.record, buf, 0, count);
-			} catch (RecordStoreException rse) {
-				throw new IOException(rse.toString());
+			if (buf == null) throw new IOException("Stream is closed");
+			if ((fd.attrs & A_WRITE) == 0) throw new IOException("Access denied to "+fd.name);
+			if (modified) {
+				long stamp = System.currentTimeMillis();
+				for (int i=7; i >= 0; i--) {
+					buf[i] = (byte)(stamp);
+					stamp >>>= 8;
+				}
+				try {
+					synchronized (FS.this) {
+						store.setRecord(fd.record, buf, 0, count);
+					}
+				} catch (RecordStoreException rse) {
+					throw new IOException(rse.toString());
+				}
+				modified = false;
 			}
 		}
 
@@ -570,8 +589,8 @@ public final class FS extends Filesystem implements Initable {
 			buf = null;
 		}
 
-		private void grow(int needed) {
-			byte[] newbuf = new byte[(buf.length << 1) + needed];
+		private void grow(int len) {
+			byte[] newbuf = new byte[len];
 			System.arraycopy(buf, 8, newbuf, 8, count-8);
 			buf = newbuf;
 		}
