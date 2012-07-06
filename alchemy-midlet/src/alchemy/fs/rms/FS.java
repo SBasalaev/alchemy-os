@@ -27,6 +27,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Hashtable;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
 import javax.microedition.rms.RecordStoreFullException;
@@ -40,9 +41,6 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  */
 public final class FS extends Filesystem implements Initable, Closeable {
 
-	static private final String ERR_EXISTS = "File already exists: ";
-	static private final String ERR_NOT_FOUND = "File not found: ";
-
 	// file attributes
 	static private int A_DIR = 16;
 	static private int A_READ = 4;
@@ -52,7 +50,14 @@ public final class FS extends Filesystem implements Initable, Closeable {
 	/** <code>RecordStore</code> to use as filesystem. */
 	private RecordStore store;
 
+	/** File descriptor for the root directory. */
 	private final FD rootFD;
+	
+	/**
+	 * Cache of file descriptors.
+	 * Maps file name to descriptor.
+	 */
+	private Hashtable fdCache = new Hashtable();
 	
 	/**
 	 * Constructor to load through the reflection.
@@ -114,6 +119,7 @@ public final class FS extends Filesystem implements Initable, Closeable {
 		dir.nodes[dir.count] = fd;
 		dir.count++;
 		dir.flush();
+		fdCache.put(file, fd);
 	}
 
 	public synchronized void mkdir(File file) throws IOException {
@@ -131,6 +137,7 @@ public final class FS extends Filesystem implements Initable, Closeable {
 		dir.nodes[dir.count] = fd;
 		dir.count++;
 		dir.flush();
+		fdCache.put(file, fd);
 	}
 
 	public synchronized InputStream read(File file) throws IOException {
@@ -173,6 +180,7 @@ public final class FS extends Filesystem implements Initable, Closeable {
 		dir.count--;
 		dir.nodes[index] = dir.nodes[dir.count];
 		dir.flush();
+		fdCache.remove(file);
 	}
 
 	public synchronized String[] list(File file) throws IOException {
@@ -246,11 +254,13 @@ public final class FS extends Filesystem implements Initable, Closeable {
 			if ((fd.attrs & A_READ) == 0) {
 				fd.attrs |= A_READ;
 				dir.flush();
+				fdCache.put(file, fd);
 			}
 		} else {
 			if ((fd.attrs & A_READ) != 0) {
 				fd.attrs &= ~A_READ;
 				dir.flush();
+				fdCache.put(file, fd);
 			}
 		}
 	}
@@ -268,11 +278,13 @@ public final class FS extends Filesystem implements Initable, Closeable {
 			if ((fd.attrs & A_WRITE) == 0) {
 				fd.attrs |= A_WRITE;
 				dir.flush();
+				fdCache.put(file, fd);
 			}
 		} else {
 			if ((fd.attrs & A_WRITE) != 0) {
 				fd.attrs &= ~A_WRITE;
 				dir.flush();
+				fdCache.put(file, fd);
 			}
 		}
 	}
@@ -290,11 +302,13 @@ public final class FS extends Filesystem implements Initable, Closeable {
 			if ((fd.attrs & A_EXEC) == 0) {
 				fd.attrs |= A_EXEC;
 				dir.flush();
+				fdCache.put(file, fd);
 			}
 		} else {
 			if ((fd.attrs & A_EXEC) != 0) {
 				fd.attrs &= ~A_EXEC;
 				dir.flush();
+				fdCache.put(file, fd);
 			}
 		}
 	}
@@ -309,23 +323,32 @@ public final class FS extends Filesystem implements Initable, Closeable {
 			Directory parentdir = new Directory(parentfd);
 			int index = parentdir.getIndex(source.name());
 			if (index < 0) throw new IOException("File not found: "+source);
-			parentdir.nodes[index].name = dest.name();
+			FD destfd = parentdir.nodes[index];
+			destfd.name = dest.name();
 			parentdir.flush();
+			// apply changes to cache
+			fdCache.remove(source);
+			fdCache.put(dest, destfd);
 		} else {
-			// reading both dirs
+			// read both dirs
 			FD destdirfd = getFD(dest.parent());
 			Directory destdir = new Directory(destdirfd);
 			FD srcdirfd = getFD(source.parent());
 			Directory srcdir = new Directory(srcdirfd);
 			int index = srcdir.getIndex(source.name());
 			if (index < 0) throw new IOException("File not found: "+source);
-			// moving
-			destdir.nodes[destdir.count] = srcdir.nodes[index];
+			// move / rename
+			FD destfd = srcdir.nodes[index];
+			destfd.name = dest.name();
+			destdir.nodes[destdir.count] = destfd;
 			destdir.count++;
 			srcdir.count--;
 			srcdir.nodes[index] = srcdir.nodes[srcdir.count];
 			destdir.flush();
 			srcdir.flush();
+			// apply changes to cache
+			fdCache.remove(source);
+			fdCache.put(dest, destfd);
 		}
 	}
 	
@@ -374,10 +397,18 @@ public final class FS extends Filesystem implements Initable, Closeable {
 		if (parent == null) return rootFD;
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
-		Directory dir = new Directory(parentfd);
-		int index = dir.getIndex(file.name());
-		if (index < 0) throw new IOException("File not found: "+file);
-		return dir.nodes[index];
+		if ((parentfd.attrs & A_READ) == 0) throw new IOException("Access denied to "+parent);
+		FD fd = (FD)fdCache.get(file);
+		if (fd != null) {
+			return fd;
+		} else {
+			Directory dir = new Directory(parentfd);
+			int index = dir.getIndex(file.name());
+			if (index < 0) throw new IOException("File not found: "+file);
+			fd = dir.nodes[index];
+			fdCache.put(file, fd);
+			return fd;
+		}
 	}
 
 	private int createFileNode(boolean isDir) throws IOException {
