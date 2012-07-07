@@ -22,22 +22,19 @@ import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
 import alchemy.fs.File;
+import alchemy.nlib.NativeFunction;
+import alchemy.nlib.NativeLibrary;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.util.Hashtable;
 
 /**
  * Alchemy core runtime library.
- * This library is assumed to be used (directly or indirectly)
- * by nearly all applications so it is initialized in static
- * context with {@link #init()} and remains in memory forever.
  * 
  * @author Sergey Basalaev
  * @version 2.0
  */
-public class LibCore20 extends Library {
-
-	private static Hashtable functions;
+public class LibCore20 extends NativeLibrary {
 
 	/**
 	 * Constructor without parameters to load
@@ -46,31 +43,11 @@ public class LibCore20 extends Library {
 	 *         function definitions file
 	 */
 	public LibCore20() throws IOException {
-		init();
+		super("/libcore20.symbols");
 	}
 
-	/**
-	 * Initializes this library and loads all its functions.
-	 * @throws IOException if I/O error occured while reading
-	 *         function definitions file
-	 */
-	public static void init() throws IOException {
-		if (functions == null) {
-			Hashtable table = functions = new Hashtable();
-			UTFReader r = new UTFReader(table.getClass().getResourceAsStream("/libcore20.symbols"));
-			String name;
-			int index = 0;
-			while ((name = r.readLine()) != null) {
-				table.put(name, new LibCore20Func(name, index));
-				index++;
-			}
-			r.close();
-		}
-	}
-
-
-	public Function getFunc(String sig) {
-		return (Function)functions.get(sig);
+	public NativeFunction loadFunction(String name, int index) {
+		return new LibCore20Func(name, index);
 	}
 
 	/**

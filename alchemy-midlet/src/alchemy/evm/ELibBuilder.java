@@ -112,7 +112,7 @@ public class ELibBuilder implements LibBuilder {
 				case 'E': { //external function
 					int libref = data.readUnsignedShort();
 					int nameref = data.readUnsignedShort();
-					cpool[cindex] = libdeps[libref].getFunc((String)cpool[nameref]);
+					cpool[cindex] = libdeps[libref].getFunction((String)cpool[nameref]);
 				} break;
 				case 'H':   //private function
 				case 'P': { //public function

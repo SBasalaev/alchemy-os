@@ -41,7 +41,7 @@ public abstract class NativeApp extends Library {
 
 	public abstract int main(Context c, String[] args) throws Exception;
 
-	public final Function getFunc(String sig) {
+	public final Function getFunction(String sig) {
 		return "main".equals(sig) ? main : null;
 	}
 

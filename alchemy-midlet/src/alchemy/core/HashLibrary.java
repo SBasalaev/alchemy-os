@@ -41,7 +41,7 @@ public class HashLibrary extends Library {
 	private boolean locked = false;
 
 	/** {@inheritDoc} */
-	public Function getFunc(String sig) {
+	public Function getFunction(String sig) {
 		return (Function)functions.get(sig);
 	}
 

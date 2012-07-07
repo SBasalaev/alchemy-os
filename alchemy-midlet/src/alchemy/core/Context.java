@@ -336,7 +336,7 @@ public class Context {
 		if (state != NEW) throw new IllegalStateException();
 		if (cmdArgs == null) cmdArgs = new String[0];
 		Library prog = loadLibForPath(progname, getEnv("PATH"));
-		Function main = prog.getFunc("main");
+		Function main = prog.getFunction("main");
 		if (main == null) throw new InstantiationException("No 'main' function");
 		thread = new ContextThread(progname, main, cmdArgs);
 		setState(RUNNING);

@@ -21,6 +21,7 @@ package alchemy.libs;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.midlet.UIServer;
+import alchemy.nlib.NativeFunction;
 import java.io.InputStream;
 import java.util.Date;
 import javax.microedition.lcdui.Choice;
@@ -44,13 +45,10 @@ import javax.microedition.lcdui.TextField;
  * libui.0.1.so functions.
  * @author Sergey Basalaev
  */
-class LibUI01Func extends Function {
-	
-	private final int index;
+class LibUI01Func extends NativeFunction {
 
 	public LibUI01Func(String name, int index) {
-		super(name);
-		this.index = index;
+		super(name, index);
 	}
 
 	protected Object exec(Context c, Object[] args) throws Exception {

@@ -37,5 +37,5 @@ public abstract class Library {
 	 *   <code>Function</code> instance or <code>null</code>
 	 *   if library does not contain function with given signature
 	 */
-	public abstract Function getFunc(String sig);
+	public abstract Function getFunction(String sig);
 }

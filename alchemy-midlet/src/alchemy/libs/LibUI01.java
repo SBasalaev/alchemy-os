@@ -18,8 +18,8 @@
 
 package alchemy.libs;
 
-import alchemy.core.HashLibrary;
-import alchemy.util.UTFReader;
+import alchemy.nlib.NativeFunction;
+import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
 
 /**
@@ -27,17 +27,13 @@ import java.io.IOException;
  * @author Sergey Basalaev
  * @version 0.1.0
  */
-public class LibUI01 extends HashLibrary {
+public class LibUI01 extends NativeLibrary {
 	
 	public LibUI01() throws IOException {
-		UTFReader r = new UTFReader(getClass().getResourceAsStream("/libui01.symbols"));
-		String name;
-		int index = 0;
-		while ((name = r.readLine()) != null) {
-			putFunc(new LibUI01Func(name, index));
-			index++;
-		}
-		r.close();
-		lock();
+		super("/libui01.symbols");
+	}
+
+	public NativeFunction loadFunction(String name, int index) {
+		return new LibUI01Func(name, index);
 	}
 }

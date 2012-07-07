@@ -21,6 +21,7 @@ package alchemy.libs;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
+import alchemy.nlib.NativeFunction;
 import alchemy.util.IO;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,15 +38,12 @@ import javax.microedition.io.Connector;
  * Core runtime function set.
  * @author Sergey Basalaev
  */
-class LibCore20Func extends Function {
+class LibCore20Func extends NativeFunction {
 
 	private static final Random rnd = new Random(0);
-	
-	private final int index;
 
 	public LibCore20Func(String name, int index) {
-		super(name);
-		this.index = index;
+		super(name, index);
 	}
 
 	protected Object exec(Context c, Object[] args) throws Exception {
@@ -367,7 +365,7 @@ class LibCore20Func extends Function {
 					return null;
 				}
 			case 113: // loadfunc(lib: Library, sig: String): Any
-				return ((Library)args[0]).getFunc((String)args[1]);
+				return ((Library)args[0]).getFunction((String)args[1]);
 			case 114: {// clone(struct: Any): Any
 				Object[] struct = (Object[])args[0];
 				Object[] clone = new Object[struct.length];
