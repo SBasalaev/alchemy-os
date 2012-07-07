@@ -19,7 +19,6 @@
 package alchemy.libs;
 
 import alchemy.core.Context;
-import alchemy.core.Function;
 import alchemy.core.Library;
 import alchemy.nlib.NativeFunction;
 import alchemy.util.IO;

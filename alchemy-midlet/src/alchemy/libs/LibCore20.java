@@ -19,14 +19,10 @@
 package alchemy.libs;
 
 import alchemy.core.Context;
-import alchemy.core.Function;
-import alchemy.core.Library;
 import alchemy.fs.File;
 import alchemy.nlib.NativeFunction;
 import alchemy.nlib.NativeLibrary;
-import alchemy.util.UTFReader;
 import java.io.IOException;
-import java.util.Hashtable;
 
 /**
  * Alchemy core runtime library.
