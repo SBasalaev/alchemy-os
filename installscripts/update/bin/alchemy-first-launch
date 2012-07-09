@@ -1,0 +1,9 @@
+#!/bin/sh
+
+terminal -k alchemy-update
+
+echo 'appmenu' > /cfg/init
+rm /bin/alchemy-first-launch
+rm /bin/alchemy-update
+
+appmenu
