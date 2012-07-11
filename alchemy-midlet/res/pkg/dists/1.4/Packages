@@ -14,11 +14,11 @@ Depends: libcore2
 File: coreutils_0.4.1-1.pkg
 
 Package: edit
-Version: 0.8-1
+Version: 0.9-1
 Section: gui
 Summary: simple text editor
 Depends: libcore2, libui0.1
-File: edit_0.8-1.pkg
+File: edit_0.9-1.pkg
 
 Package: ex
 Version: 1.0-1
@@ -28,11 +28,11 @@ Summary: Alchemy unified compiler/linker
 File: ex_1.0-1.pkg
 
 Package: fileinfo
-Version: 1.0-1
+Version: 1.2-4
 Section: gui
 Summary: file properties viewer
-Depends: libcore2, libui0.1
-File: fileinfo_1.0-1.pkg
+Depends: libcore2, libui0.1, libfiletype1
+File: fileinfo_1.2-4.pkg
 
 Package: libcore2
 Version: 2.1.1-1
@@ -46,6 +46,13 @@ Summary: core development headers
 Section: libdevel
 Depends: libcore2
 File: libcore-dev_2.1.1-1.pkg
+
+Package: libfiletype1
+Version: 1.0-1
+Section: libs
+Depends: libcore2
+Summary: library to detect file type
+File: libfiletype1_1.0-1.pkg
 
 Package: libpkg0
 Version: 0.3.2-1
@@ -68,11 +75,11 @@ Summary: headers for user interface library
 File: libui-dev_0.1-1.pkg
 
 Package: navigator
-Version: 0.2-1
+Version: 0.3-2
 Section: gui
-Depends: libcore2, libui0.1, edit, fileinfo, coreutils
+Depends: libcore2, libui0.1, libfiletype1, edit, imgview, fileinfo, coreutils
 Summary: file manager for Alchemy
-File: navigator_0.2-1.pkg
+File: navigator_0.3-2.pkg
 
 Package: nec
 Version: 1.4-1

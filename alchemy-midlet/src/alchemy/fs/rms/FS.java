@@ -79,14 +79,13 @@ public final class FS extends Filesystem implements Initable, Closeable {
 	 * @throws RuntimeException
 	 *   if an error occurs within record storage system
 	 */
-	public void init(Object name) {
+	public void init(String name) {
 		RecordStore rs = null;
-		String storename = String.valueOf(name);
 		try {
 			try {
-				rs = RecordStore.openRecordStore(storename, false);
+				rs = RecordStore.openRecordStore(name, false);
 			} catch (RecordStoreNotFoundException rsnfe) {
-				rs = RecordStore.openRecordStore(storename, true);
+				rs = RecordStore.openRecordStore(name, true);
 				rs.addRecord(new byte[12], 0, 12);
 			}
 		} catch (RecordStoreException rse) {

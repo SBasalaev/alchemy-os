@@ -25,5 +25,10 @@ package alchemy.util;
  * @author Sergey Basalaev
  */
 public interface Initable {
-	public void init(Object cfg);
+	
+	/**
+	 * Initializes this object.
+	 * @param cfg  configuration string
+	 */
+	public void init(String cfg);
 }
