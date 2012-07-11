@@ -20,12 +20,14 @@ package alchemy.midlet;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
+import alchemy.fs.rms.FS;
 import alchemy.util.Closeable;
 import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 import javax.microedition.lcdui.*;
@@ -52,6 +54,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private final Command cmdInstall = new Command("Install", Command.OK, 1);
 	private final Command cmdUpdate = new Command("Update", Command.OK, 2);
 	private final Command cmdUninstall = new Command("Uninstall", Command.OK, 5);
+	private final Command cmdRebuild = new Command("Rebuild FS", Command.OK, 3);
 	
 	/** Command for dialogs. */
 	private final Command cmdChoose = new Command("Choose", Command.OK, 2);
@@ -103,6 +106,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			new InstallerThread(2).start();
 		} else if (c == cmdUpdate) {
 			new InstallerThread(3).start();
+		} else if (c == cmdRebuild) {
+			new InstallerThread(4).start();
 		} else if (c == cmdChoose) {
 			synchronized (d) {
 				d.notify();
@@ -126,13 +131,19 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	private void check() {
 		if (InstallInfo.exists()) {
+			// fetching version
 			Properties instCfg = InstallInfo.read();
 			messages.append("Installed version: "+instCfg.get("alchemy.version")+'\n');
 			messages.addCommand(cmdUninstall);
+			// testing whether update is needed
 			int vcmp = compareVersions(instCfg.get("alchemy.version"), setupCfg.get("alchemy.version"));
 			if (vcmp < 0) {
 				messages.append("Can be updated to "+setupCfg.get("alchemy.version")+'\n');
 				messages.addCommand(cmdUpdate);
+			}
+			// testing whether FS can be rebuilt
+			if (instCfg.get("fs.type").equals("rms")) {
+				messages.addCommand(cmdRebuild);
 			}
 		} else {
 			messages.append("Not installed"+'\n');
@@ -222,10 +233,13 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.deleteAll();
 		messages.append("Uninstalling..."+'\n');
 		//purging filesystem
-		try {
-			RecordStore.deleteRecordStore("rsfiles");
-			messages.append("Filesystem erased"+'\n');
-		} catch (RecordStoreException rse) { }
+		Properties instCfg = InstallInfo.read();
+		if (instCfg.get("fs.type").equals("rms")) {
+			try {
+				RecordStore.deleteRecordStore(instCfg.get("fs.init"));
+				messages.append("Filesystem erased"+'\n');
+			} catch (RecordStoreException rse) { }
+		}
 		//removing config
 		InstallInfo.remove();
 		messages.append("Configuration removed"+'\n');
@@ -278,6 +292,63 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			((Closeable)fs).close();
 		}
 	}
+	
+	/** Should be only available when RMS file system is in use. */
+	private void rebuildFileSystem() throws Exception {
+		messages.deleteAll();
+		// opening old FS and creating new
+		messages.append("Creating new file system...\n");
+		Properties instCfg = InstallInfo.read();
+		String oldfsname = instCfg.get("fs.init");
+		String newfsname = (oldfsname.equals("rsfiles")) ? "rsfiles2" : "rsfiles";
+		alchemy.fs.rms.FS oldfs = new FS();
+		oldfs.init(oldfsname);
+		alchemy.fs.rms.FS newfs = new FS();
+		newfs.init(newfsname);
+		// copying all files from the old FS to the new
+		messages.append("Copying data from the old file system...\n");
+		File root = new File("");
+		String[] list = oldfs.list(root);
+		for (int i=0; i<list.length; i++) {
+			copyTree(oldfs, newfs, new File(root, list[i]));
+		}
+		// writing configuration
+		oldfs.close();
+		newfs.close();
+		messages.append("Saving configuration...\n");
+		instCfg.put("fs.init", newfsname);
+		InstallInfo.save();
+		// removing old FS
+		messages.append("Removing old file system...\n");
+		RecordStore.deleteRecordStore(oldfsname);
+		messages.append("Rebuilding FS complete.\n");
+	}
+	
+	private void copyTree(Filesystem from, Filesystem to, File file) throws IOException {
+		boolean fRead = from.canRead(file);
+		boolean fWrite = from.canWrite(file);
+		if (!fRead) from.setRead(file, true);
+		if (!fWrite) from.setWrite(file, true);
+		if (from.isDirectory(file)) {
+			to.mkdir(file);
+			String[] list = from.list(file);
+			for (int i=0; i<list.length; i++) {
+				File subfile = new File(file, list[i]);
+				copyTree(from, to, subfile);
+			}
+		} else {
+			to.create(file);
+			InputStream in = from.read(file);
+			OutputStream out = to.write(file);
+			IO.writeAll(in, out);
+			in.close();
+			out.flush();
+			out.close();
+		}
+		to.setExec(file, from.canExec(file));
+		to.setWrite(file, fWrite);
+		to.setRead(file, fRead);
+	}
 
 	private class InstallerThread extends Thread {
 
@@ -287,6 +358,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		 *   1 - install
 		 *   2 - uninstall
 		 *   3 - update
+		 *   4 - rebuild FS
 		 */
 		private final int action;
 
@@ -300,12 +372,14 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.removeCommand(cmdInstall);
 			messages.removeCommand(cmdUninstall);
 			messages.removeCommand(cmdUpdate);
+			messages.removeCommand(cmdRebuild);
 			try {
 				switch(action) {
 					case 0: check(); break;
 					case 1: install(); break;
 					case 2: uninstall(); break;
 					case 3: update(); break;
+					case 4: rebuildFileSystem();
 				}
 			} catch (Throwable e) {
 				// e.printStackTrace();

@@ -51,9 +51,9 @@ public class FS extends Filesystem implements Initable {
 	 * given string as root directory.
 	 * @param root root directory
 	 */
-	public void init(Object root) {
+	public void init(String root) {
 		//normalizing path
-		String path = String.valueOf(root);
+		String path = root;
 		if (path.startsWith("file:")) path = path.substring(5);
 		path = "/"+path+"/.";
 		path = new File(path).toString();

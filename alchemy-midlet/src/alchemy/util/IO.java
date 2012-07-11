@@ -223,4 +223,13 @@ public final class IO {
 		}
 		return buf.toString();
 	}
+	
+	public static void writeAll(InputStream from, OutputStream to) throws IOException {
+		byte[] buf = new byte[1024];
+		int len = from.read(buf);
+		while (len > 0) {
+			to.write(buf, 0, len);
+			len = from.read(buf);
+		}
+	}
 }
