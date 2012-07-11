@@ -20,6 +20,8 @@ package alchemy.libs;
 
 import alchemy.core.Context;
 import alchemy.nlib.NativeFunction;
+import java.io.InputStream;
+import java.io.OutputStream;
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
@@ -45,16 +47,25 @@ public class LibNet1Func extends NativeFunction {
 		switch (index) {
 			case 0: // Connection.close()
 				((Connection)args[0]).close();
+				c.removeStream(args[0]);
 				return null;
-			case 1: // StreamConnection.open_input(): IStream
-				return ((StreamConnection)args[0]).openInputStream();
-			case 2: // StreamConnection.open_output(): OStream
-				return ((StreamConnection)args[0]).openOutputStream();
+			case 1: { // StreamConnection.open_input(): IStream
+				InputStream in = ((StreamConnection)args[0]).openInputStream();
+				c.addStream(in);
+				return in;
+			}
+			case 2: { // StreamConnection.open_output(): OStream
+				OutputStream out = ((StreamConnection)args[0]).openOutputStream();
+				c.addStream(out);
+				return out;
+			}
 			case 3: { // new_socket(host: String, port: Int): Socket
 				String host = ((String)args[0]).trim();
 				int port = ival(args[1]);
 				if (host.length() == 0) throw new IllegalArgumentException("No host");
-				return Connector.open("socket://"+host+':'+port);
+				Connection conn = Connector.open("socket://"+host+':'+port);
+				c.addStream(conn);
+				return conn;
 			}
 			case 4: // Socket.get_host(): String
 				return ((SocketConnection)args[0]).getAddress();
@@ -93,14 +104,18 @@ public class LibNet1Func extends NativeFunction {
 				String host = ((String)args[0]).trim();
 				int port = ival(args[1]);
 				if (host.length() == 0) throw new IllegalArgumentException("No host");
-				return Connector.open("ssl://"+host+':'+port);
+				Connection conn = Connector.open("ssl://"+host+':'+port);
+				c.addStream(conn);
+				return conn;
 			}
 			case 19: // SecureSocket.get_secinfo(): SecInfo
 				return ((SecureConnection)args[0]).getSecurityInfo();
 			case 20: { // new_serversocket(port: Int): ServerSocket
 				int port = ival(args[0]);
 				String url = "socket://" + ((port >= 0) ? ":"+port : "");
-				return Connector.open(url);
+				Connection conn = Connector.open(url);
+				c.addStream(conn);
+				return conn;
 			}
 			case 21: // ServerSocket.get_localhost(): String
 				return ((ServerSocketConnection)args[0]).getLocalAddress();
@@ -130,8 +145,11 @@ public class LibNet1Func extends NativeFunction {
 				return Lval(((Certificate)args[0]).getNotBefore());
 			case 34: // Certificate.notafter(): Long
 				return Lval(((Certificate)args[0]).getNotAfter());
-			case 35: // new_http(host: String): Http
-				return Connector.open("http://"+args[0]);
+			case 35: { // new_http(host: String): Http
+				Connection conn = Connector.open("http://"+args[0]);
+				c.addStream(conn);
+				return conn;
+			}
 			case 36: // Http.get_req_method(): String
 				return ((HttpConnection)args[0]).getRequestMethod();
 			case 37: // Http.set_req_method(method: String)
@@ -144,22 +162,25 @@ public class LibNet1Func extends NativeFunction {
 				return null;
 			case 40: // Http.get_type(): String
 				return ((HttpConnection)args[0]).getType();
-			case 41: // def Http.get_encoding(): String
+			case 41: // Http.get_encoding(): String
 				return ((HttpConnection)args[0]).getEncoding();
-			case 42: // def Http.get_length(): Long
+			case 42: // Http.get_length(): Long
 				return Lval(((HttpConnection)args[0]).getLength());
-			case 43: // def Http.get_resp_code(): Int
+			case 43: // Http.get_resp_code(): Int
 				return Ival(((HttpConnection)args[0]).getResponseCode());
-			case 44: // def Http.get_resp_msg(): String
+			case 44: // Http.get_resp_msg(): String
 				return ((HttpConnection)args[0]).getResponseMessage();
-			case 45: // def Http.get_expires(): Long
+			case 45: // Http.get_expires(): Long
 				return Lval(((HttpConnection)args[0]).getExpiration());
-			case 46: // def Http.get_date(): Long
+			case 46: // Http.get_date(): Long
 				return Lval(((HttpConnection)args[0]).getDate());
-			case 47: // def Http.get_modified(): Long
+			case 47: // Http.get_modified(): Long
 				return Lval(((HttpConnection)args[0]).getLastModified());
-			case 48: // new_https(host: String): Https
-				return Connector.open("https://"+args[0]);
+			case 48: { // new_https(host: String): Https
+				Connection conn = Connector.open("https://"+args[0]);
+				c.addStream(conn);
+				return conn;
+			}
 			case 49: // Https.get_port(): Int
 				return Ival(((HttpsConnection)args[0]).getPort());
 			case 50: // Https.get_secinfo(): SecInfo
