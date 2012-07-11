@@ -29,6 +29,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Vector;
+import javax.microedition.io.Connection;
 
 /**
  * Program execution context.
@@ -470,9 +471,7 @@ public class Context {
 	 */
 	public void addStream(Object stream) {
 		if (streams == null) streams = new Vector();
-		if ((stream instanceof InputStream) || (stream instanceof OutputStream)) {
-			streams.addElement(stream);
-		}
+		streams.addElement(stream);
 	}
 
 	/**
@@ -567,6 +566,10 @@ public class Context {
 						} catch (IOException ioe) { }
 						try {
 							((OutputStream)stream).close();
+						} catch (IOException ioe) { }
+					} else if (stream instanceof Connection) {
+						try {
+							((Connection)stream).close();
 						} catch (IOException ioe) { }
 					}
 				}
