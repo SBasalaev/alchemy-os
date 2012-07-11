@@ -303,6 +303,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		String newfsname = (oldfsname.equals("rsfiles")) ? "rsfiles2" : "rsfiles";
 		alchemy.fs.rms.FS oldfs = new FS();
 		oldfs.init(oldfsname);
+		try {
+			RecordStore.deleteRecordStore(newfsname);
+		} catch (RecordStoreException rse) { }
 		alchemy.fs.rms.FS newfs = new FS();
 		newfs.init(newfsname);
 		// copying all files from the old FS to the new
