@@ -212,7 +212,7 @@ class LibCore30Func extends NativeFunction {
 				return Lval(c.fs().spaceFree());
 			case 60: // space_used(): Long
 				return Lval(c.fs().spaceUsed());
-			case 61: // to_str(a: Any): String
+			case 61: // Any.tostr(): String
 				return String.valueOf(args[0]);
 			case 62: // new_sb(): StrBuf
 				return new StringBuffer();
@@ -324,17 +324,18 @@ class LibCore30Func extends NativeFunction {
 				return Dval(Double.longBitsToDouble(lval(args[0])));
 			case 99: // d2lbits(d: Double): Long
 				return Lval(Double.doubleToLongBits(dval(args[0])));
-			case 100: // new_ht(): Hashtable
+			case 100: // new_dict(): Dict
 				return new Hashtable();
-			case 101: // ht_put(ht: Hashtable, key: Any, value: Any)
+			case 101: // Dict.set(key: Any, value: Any)
 				((Hashtable)args[0]).put(args[1], args[2]);
 				return null;
-			case 102: // ht_get(ht: Hashtable, key: Any): Any
+			case 102: // Dict.get(key: Any): Any
 				return ((Hashtable)args[0]).get(args[1]);
-			case 103: // ht_rm(ht: Hashtable, key: Any)
+			case 103: // Dict.remove(key: Any)
 				((Hashtable)args[0]).remove(args[1]);
 				return null;
-			case 104: // hash(a: Any): Int
+			case 104: // TODO: Deprecated, remove in 1.6
+				// hash(a: Any): Int
 				return Ival(args[0].hashCode());
 			case 105: // rnd(n: Int): Int
 				return Ival(rnd.nextInt(ival(args[0])));
@@ -390,7 +391,7 @@ class LibCore30Func extends NativeFunction {
 				return null;
 			case 122: // sprintf(fmt: String, args: Array): String
 				return IO.printf((String)args[0], (Object[])args[1]);
-			case 123: { // ht_keys(ht: Hashtable): Array
+			case 123: { // Dict.keys(): [Any]
 				Vector keyv = new Vector();
 				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
 					keyv.addElement(e.nextElement());
@@ -418,6 +419,11 @@ class LibCore30Func extends NativeFunction {
 				c.addStream(out);
 				return out;
 			}
+			case 128: // Dict.size(): Int
+				return Ival(((Hashtable)args[0]).size());
+			case 129: // Dict.clear()
+				((Hashtable)args[0]).clear();
+				return null;
 			default:
 				return null;
 		}

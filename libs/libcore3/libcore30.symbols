@@ -126,3 +126,5 @@ sleep
 Connection.close
 StreamConnection.open_input
 StreamConnection.open_output
+Dict.size
+Dict.clear
