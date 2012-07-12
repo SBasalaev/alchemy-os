@@ -20,8 +20,6 @@ package alchemy.libs;
 
 import alchemy.core.Context;
 import alchemy.nlib.NativeFunction;
-import java.io.InputStream;
-import java.io.OutputStream;
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
@@ -30,7 +28,6 @@ import javax.microedition.io.SecureConnection;
 import javax.microedition.io.SecurityInfo;
 import javax.microedition.io.ServerSocketConnection;
 import javax.microedition.io.SocketConnection;
-import javax.microedition.io.StreamConnection;
 import javax.microedition.pki.Certificate;
 
 /**
@@ -176,7 +173,7 @@ public class LibNet1Func extends NativeFunction {
 		}
 	}
 
-	public String toString() {
-		return "libnet.1.so:"+signature;
+	protected String soname() {
+		return "libnet.1.so";
 	}
 }

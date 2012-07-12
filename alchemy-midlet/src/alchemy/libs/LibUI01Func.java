@@ -342,7 +342,7 @@ class LibUI01Func extends NativeFunction {
 		return Font.getFont(mask & 0x60, mask & 0x7, mask & 0x18);
 	}
 
-	public String toString() {
-		return "libui0.1.so:"+signature;
+	public String soname() {
+		return "libui0.1.so";
 	}
 }

@@ -16,32 +16,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
-
-import alchemy.core.Function;
+package alchemy.libs;
 
 /**
- * Skeleton for functions loaded by native libraries.
- * For speed and compactness all functions of native
- * library are implemented in single class. exec()
- * function is a switch where requested function is
- * chosen by integer index.
+ * Wrapper to mark that functions are used through
+ * the deprecated interface.
  * 
  * @author Sergey Basalaev
+ * @deprecated This will be dropped in 1.6
  */
-public abstract class NativeFunction extends Function {
-	
-	/** Index of this function. */
-	protected final int index;
-	
-	public NativeFunction(String name, int index) {
-		super(name);
-		this.index = index;
+class LibCore20Func extends LibCore30Func {
+
+	public LibCore20Func(String name, int index) {
+		super(name, index);
 	}
-	
-	protected abstract String soname();
-	
-	public String toString() {
-		return soname()+':'+signature;
+
+	protected String soname() {
+		return "libcore.2.so";
 	}
 }

@@ -423,7 +423,7 @@ class LibCore30Func extends NativeFunction {
 		}
 	}
 	
-	public String toString() {
-		return "libcore.3.so:"+signature;
+	protected String soname() {
+		return "libcore.3.so";
 	}
 }
