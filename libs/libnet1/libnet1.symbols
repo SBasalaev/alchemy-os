@@ -1,6 +1,3 @@
-Connection.close
-StreamConnection.open_input
-StreamConnection.open_output
 new_socket
 Socket.get_host
 Socket.get_port

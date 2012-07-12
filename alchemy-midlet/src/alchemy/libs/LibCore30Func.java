@@ -31,17 +31,19 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
+import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
+import javax.microedition.io.StreamConnection;
 
 /**
  * Core runtime function set.
  * @author Sergey Basalaev
  */
-class LibCore20Func extends NativeFunction {
+class LibCore30Func extends NativeFunction {
 
 	private static final Random rnd = new Random(0);
 
-	public LibCore20Func(String name, int index) {
+	public LibCore30Func(String name, int index) {
 		super(name, index);
 	}
 
@@ -112,7 +114,7 @@ class LibCore20Func extends NativeFunction {
 				c.setCurDir(c.toFile((String)args[0]));
 				return null;
 			case 23: // relpath(f: String): String
-				return LibCore20.relPath(c, c.toFile((String)args[0]));
+				return LibCore30.relPath(c, c.toFile((String)args[0]));
 			case 24: // strlen(str: String): Int
 				return Ival(((String)args[0]).length());
 			case 25: // strchr(str: String, at: Int): Int
@@ -299,17 +301,17 @@ class LibCore20Func extends NativeFunction {
 			case 87: // sqrt(a: Double): Double
 				return Dval(Math.sqrt(dval(args[0])));
 			case 88: // ipow(a: Double, n: Int): Double
-				return Dval(LibCore20.ipow(dval(args[0]), ival(args[1])));
+				return Dval(LibCore30.ipow(dval(args[0]), ival(args[1])));
 			case 89: // exp(a: Double): Double
-				return Dval(LibCore20.exp(dval(args[0])));
+				return Dval(LibCore30.exp(dval(args[0])));
 			case 90: // log(a: Double): Double
-				return Dval(LibCore20.log(dval(args[0])));
+				return Dval(LibCore30.log(dval(args[0])));
 			case 91: // asin(a: Double): Double
-				return Dval(LibCore20.asin(dval(args[0])));
+				return Dval(LibCore30.asin(dval(args[0])));
 			case 92: // acos(a: Double): Double
-				return Dval(LibCore20.acos(dval(args[0])));
+				return Dval(LibCore30.acos(dval(args[0])));
 			case 93: // atan(a: Double): Double
-				return Dval(LibCore20.atan(dval(args[0])));
+				return Dval(LibCore30.atan(dval(args[0])));
 			case 94: // ca2str(chars: CArray): String
 				return new String((char[])args[0]);
 			case 95: // ba2utf(bytes: BArray): String
@@ -402,12 +404,26 @@ class LibCore20Func extends NativeFunction {
 			case 124: // sleep(millis: Int)
 				Thread.sleep(ival(args[0]));
 				return null;
+			case 125: // Connection.close()
+				((Connection)args[0]).close();
+				c.removeStream(args[0]);
+				return null;
+			case 126: { // StreamConnection.open_input(): IStream
+				InputStream in = ((StreamConnection)args[0]).openInputStream();
+				c.addStream(in);
+				return in;
+			}
+			case 127: { // StreamConnection.open_output(): OStream
+				OutputStream out = ((StreamConnection)args[0]).openOutputStream();
+				c.addStream(out);
+				return out;
+			}
 			default:
 				return null;
 		}
 	}
 	
 	public String toString() {
-		return "libcore.2.so:"+signature;
+		return "libcore.3.so:"+signature;
 	}
 }

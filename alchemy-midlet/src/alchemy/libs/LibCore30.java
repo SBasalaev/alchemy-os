@@ -28,9 +28,9 @@ import java.io.IOException;
  * Alchemy core runtime library.
  * 
  * @author Sergey Basalaev
- * @version 2.0
+ * @version 3.0
  */
-public class LibCore20 extends NativeLibrary {
+public class LibCore30 extends NativeLibrary {
 
 	/**
 	 * Constructor without parameters to load
@@ -38,12 +38,12 @@ public class LibCore20 extends NativeLibrary {
 	 * @throws IOException if I/O error occured while reading
 	 *         function definitions file
 	 */
-	public LibCore20() throws IOException {
-		super("/libcore20.symbols");
+	public LibCore30() throws IOException {
+		super("/libcore30.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {
-		return new LibCore20Func(name, index);
+		return new LibCore30Func(name, index);
 	}
 
 	/**
