@@ -34,7 +34,7 @@ import javax.microedition.pki.Certificate;
  * Functions for libnet.1.so
  * @author Sergey Basalaev
  */
-public class LibNet1Func extends NativeFunction {
+class LibNet1Func extends NativeFunction {
 
 	public LibNet1Func(String name, int index) {
 		super(name, index);
