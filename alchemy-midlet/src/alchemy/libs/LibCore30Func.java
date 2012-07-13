@@ -19,6 +19,7 @@
 package alchemy.libs;
 
 import alchemy.core.Context;
+import alchemy.core.Function;
 import alchemy.core.Library;
 import alchemy.nlib.NativeFunction;
 import alchemy.util.IO;
@@ -464,6 +465,8 @@ class LibCore30Func extends NativeFunction {
 				} catch (NumberFormatException nfe) {
 					return null;
 				}
+			case 138: // Function.curry(arg: Any): Function
+				return new PartiallyAppliedFunction((Function)args[0], args[1]);
 			default:
 				return null;
 		}

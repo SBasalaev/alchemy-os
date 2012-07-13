@@ -136,3 +136,4 @@ Int.tooct
 Int.tohex
 String.tointbase
 String.tolongbase
+Function.curry
