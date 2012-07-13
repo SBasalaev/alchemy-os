@@ -175,17 +175,13 @@ public final class IO {
 	public static String[] split(String str, char ch) {
 		//TODO: this is not how split is described in documentation! Rewrite it!!
 		Vector strings = new Vector();
-		int len = str.length();
-		int beg = 0;
-		while (beg < len && str.charAt(beg) == ch) beg++;
-		if (beg == len) return new String[0];
-		while (beg < len) {
-			int end = beg + 1;
-			while (end < len && str.charAt(end) != ch) end++;
-			strings.addElement(str.substring(beg,end));
-			beg = end + 1;
-			while (beg < len && str.charAt(beg) == ch) beg++;
+		int index = str.indexOf(ch);
+		while (index >= 0) {
+			strings.addElement(str.substring(0, index));
+			str = str.substring(index+1);
+			index = str.indexOf(ch);
 		}
+		strings.addElement(str);
 		String[] ret = new String[strings.size()];
 		for (int i=strings.size()-1; i>=0; i--) {
 			ret[i] = strings.elementAt(i).toString();
