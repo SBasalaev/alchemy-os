@@ -173,6 +173,7 @@ public final class IO {
 	 *   around given character
 	 */
 	public static String[] split(String str, char ch) {
+		//TODO: this is not how split is described in documentation! Rewrite it!!
 		Vector strings = new Vector();
 		int len = str.length();
 		int beg = 0;

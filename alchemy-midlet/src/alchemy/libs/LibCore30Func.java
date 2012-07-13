@@ -115,29 +115,29 @@ class LibCore30Func extends NativeFunction {
 				return null;
 			case 23: // relpath(f: String): String
 				return LibCore30.relPath(c, c.toFile((String)args[0]));
-			case 24: // strlen(str: String): Int
+			case 24: // String.len(): Int
 				return Ival(((String)args[0]).length());
-			case 25: // strchr(str: String, at: Int): Int
+			case 25: // String.ch(at: Int): Int
 				return Ival(((String)args[0]).charAt(ival(args[1])));
-			case 26: // strindex(str: String, ch: Int): Int
+			case 26: // String.indexof(ch: Int): Int
 				return Ival(((String)args[0]).indexOf(ival(args[1])));
-			case 27: // strlindex(str: String, ch: Int): Int
+			case 27: // String.lindexof(ch: Int): Int
 				return Ival(((String)args[0]).lastIndexOf(ival(args[1])));
-			case 28: // strstr(str: String, sub: String): Int
+			case 28: // String.find(sub: String): Int
 				return Ival(((String)args[0]).indexOf((String)args[1]));
-			case 29: // substr(str: String, from: Int, to: Int): String
+			case 29: // String.substr(from: Int, to: Int): String
 				return ((String)args[0]).substring(ival(args[1]), ival(args[2]));
-			case 30: // strucase(str: String): String
+			case 30: // String.ucase(): String
 				return ((String)args[0]).toUpperCase();
-			case 31: // strlcase(str: String): String
+			case 31: // String.lcase(): String
 				return ((String)args[0]).toLowerCase();
-			case 32: // strcat(s1: String, s2: String): String
+			case 32: // String.concat(str: String): String
 				return ((String)args[0]).concat((String)args[1]);
-			case 33: // strcmp(s1: String, s2: String): Int
+			case 33: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
-			case 34: // strchars(str: String): CArray
+			case 34: // String.chars(): CArray
 				return ((String)args[0]).toCharArray();
-			case 35: // strtrim(str: String): String
+			case 35: // String.trim(): String
 				return ((String)args[0]).trim();
 			case 36: // getenv(key: String): String
 				return c.getEnv(((String)args[0]));
@@ -183,22 +183,22 @@ class LibCore30Func extends NativeFunction {
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.SECOND));
 			}
-			case 47: // sb_append(sb: StrBuf, a: Any): StrBuf
+			case 47: // StrBuf.append(a: Any): StrBuf
 				return ((StringBuffer)args[0]).append(args[1]);
-			case 48: // sb_addch(sb: StrBuf, ch: Int): StrBuf
+			case 48: // StrBuf.addch(ch: Int): StrBuf
 				return ((StringBuffer)args[0]).append((char)ival(args[1]));
-			case 49: // sb_delete(sb: StrBuf, from: Int, to: Int): StrBuf
+			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
 				return ((StringBuffer)args[0]).delete(ival(args[1]), ival(args[2]));
-			case 50: // sb_delch(sb: StrBuf, at: Int): StrBuf
+			case 50: // StrBuf.delch(at: Int): StrBuf
 				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
-			case 51: // sb_insert(sb: StrBuf, at: Int, a: Any): StrBuf
+			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), args[2]);
-			case 52: // sb_insch(sb: StrBuf, at: Int, ch: Int): StrBuf
+			case 52: // StrBuf.insch(at: Int, ch: Int): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), (char)ival(args[2]));
-			case 53: // sb_setch(sb: StrBuf, at: Int, ch: Int): StrBuf
+			case 53: // StrBuf.setch(at: Int, ch: Int): StrBuf
 				((StringBuffer)args[0]).setCharAt(ival(args[1]), (char)ival(args[2]));
 				return args[0];
-			case 54: // sb_len(sb: StrBuf): Int
+			case 54: // StrBuf.len(): Int
 				return Ival(((StringBuffer)args[0]).length());
 			case 55: // millis(date: Long): Int
 				return Ival((int)(lval(args[0]) % 1000));
@@ -214,7 +214,7 @@ class LibCore30Func extends NativeFunction {
 				return Lval(c.fs().spaceUsed());
 			case 61: // Any.tostr(): String
 				return String.valueOf(args[0]);
-			case 62: // new_sb(): StrBuf
+			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
 			case 63: // fclose(stream: Any)
 				if (args[0] instanceof InputStream) {
@@ -374,22 +374,38 @@ class LibCore30Func extends NativeFunction {
 				System.arraycopy(struct, 0, clone, 0, struct.length);
 				return clone;
 			}
-			case 115: // strsplit(s: String): Array
+			case 115: // String.split(ch: Int): [String]
 				return IO.split((String)args[0], (char)ival(args[1]));
-			case 116: // parsei(s: String): Int
-				return Ival(Integer.parseInt((String)args[0]));
-			case 117: // parsel(s: String): Long
-				return Lval(Long.parseLong((String)args[0]));
-			case 118: // parsef(s: String): Float
-				return Fval(Float.parseFloat((String)args[0]));
-			case 119: // parsed(s: String): Double
-				return Dval(Double.parseDouble((String)args[0]));
+			case 116: // String.toint(): Int
+				try {
+					return Ival(Integer.parseInt((String)args[0]));
+				} catch (NumberFormatException nfe) {
+					return null;
+				}
+			case 117: // String.tolong(): Long
+				try {
+					return Lval(Long.parseLong((String)args[0]));
+				} catch (NumberFormatException nfe) {
+					return null;
+				}
+			case 118: // String.tofloat(): Float
+				try {
+					return Fval(Float.parseFloat((String)args[0]));
+				} catch (NumberFormatException nfe) {
+					return null;
+				}
+			case 119: // String.todouble(): Double
+				try {
+					return Dval(Double.parseDouble((String)args[0]));
+				} catch (NumberFormatException nfe) {
+					return null;
+				}
 			case 120: // !getstatic(key: Any): Any
 				return c.get(args[0]);
 			case 121: // !setstatic(key: Any, val: Any)
 				c.set(args[0], args[1]);
 				return null;
-			case 122: // sprintf(fmt: String, args: Array): String
+			case 122: // String.format(args: Array): String
 				return IO.printf((String)args[0], (Object[])args[1]);
 			case 123: { // Dict.keys(): [Any]
 				Vector keyv = new Vector();
@@ -424,6 +440,30 @@ class LibCore30Func extends NativeFunction {
 			case 129: // Dict.clear()
 				((Hashtable)args[0]).clear();
 				return null;
+			case 130: // StrBuf.ch(at: Int): Int
+				return Ival(((StringBuffer)args[0]).charAt(ival(args[1])));
+			case 131: // Int.tobase(base: Int): String
+				return Integer.toString(ival(args[0]), ival(args[1]));
+			case 132: // Long.tobase(base: Int): String
+				return Long.toString(lval(args[0]), ival(args[1]));
+			case 133: // Int.tobin():String
+				return Integer.toBinaryString(ival(args[0]));
+			case 134: // Int.tooct():String
+				return Integer.toOctalString(ival(args[0]));
+			case 135: // Int.tohex():String
+				return Integer.toHexString(ival(args[0]));
+			case 136: // String.tointbase(base: Int): Int
+				try {
+					return Ival(Integer.parseInt((String)args[0], ival(args[1])));
+				} catch (NumberFormatException nfe) {
+					return null;
+				}
+			case 137: // String.tolongbase(base: Int): Long
+				try {
+					return Lval(Long.parseLong((String)args[0], ival(args[1])));
+				} catch (NumberFormatException nfe) {
+					return null;
+				}
 			default:
 				return null;
 		}

@@ -23,7 +23,7 @@ fsize
 set_cwd
 relpath
 String.len
-String.chr
+String.ch
 String.indexof
 String.lindexof
 String.find
@@ -120,7 +120,7 @@ parsef
 parsed
 getstatic
 setstatic
-String.printf
+String.format
 Dict.keys
 sleep
 Connection.close
@@ -128,3 +128,11 @@ StreamConnection.open_input
 StreamConnection.open_output
 Dict.size
 Dict.clear
+StrBuf.ch
+Int.tobase
+Long.tobase
+Int.tobin
+Int.tooct
+Int.tohex
+String.tointbase
+String.tolongbase
