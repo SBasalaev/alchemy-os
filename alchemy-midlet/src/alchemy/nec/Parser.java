@@ -555,7 +555,12 @@ public class Parser {
 				for (int i=0; i<args.length; i++) {
 					args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
 				}
-				expr = new FCallExpr(expr, args);
+				FCallExpr fcexpr = new FCallExpr(expr, args);
+				if (expr.getClass() == ConstExpr.class) {
+					expr = processSpecialCasts(fcexpr);
+				} else {
+					expr = fcexpr;
+				}
 				continue;
 			} else if (ttype == '[') {
 				Type arrtype = expr.rettype();
@@ -646,7 +651,7 @@ public class Parser {
 					for (int i=0; i<args.length; i++) {
 						args[i] = cast((Expr)vargs.elementAt(i), method.type.args[i]);
 					}
-					expr = new FCallExpr(new ConstExpr(method), args);
+					expr = processSpecialCasts(new FCallExpr(new ConstExpr(method), args));
 					continue;
 				}
 				throw new ParseException("Type "+type+" has no member named "+member);
@@ -750,7 +755,7 @@ public class Parser {
 						if (vartype == null) {
 							vartype = varvalue.rettype();
 							if (vartype.equals(BuiltinType.NONE))
-								throw new ParseException("Cannot convert from [none] to Any");
+								throw new ParseException("Cannot convert from <none> to Any");
 						} else {
 							varvalue = cast(varvalue, vartype);
 						}
@@ -895,10 +900,9 @@ public class Parser {
 		expect(')');
 		Expr expr = parseExpr(scope);
 		if (toType.equals(expr.rettype())) {
-			warn("Cast to the same type");
-		}
-		if (toType.equals(BuiltinType.ANY)) {
-			warn("Cast to Any");
+			warn("Unnecessary cast to the same type");
+		} else if (toType.isSupertypeOf(expr.rettype())) {
+			warn("Unnecessary cast to the supertype");
 		}
 		if (expr.rettype().isSupertypeOf(toType)) {
 			return new CastExpr(toType, expr);
@@ -908,22 +912,24 @@ public class Parser {
 
 	private Expr cast(Expr expr, Type toType) throws ParseException {
 		Type fromType = expr.rettype();
-		if (fromType.equals(toType)) {
-			return expr;
+		if (fromType.equals(BuiltinType.NONE)) {
+			if (toType.equals(BuiltinType.NONE)) return expr;
+			else throw new ParseException("Cannot convert from <none> to "+toType);
 		}
 		if (toType.equals(BuiltinType.NONE)) {
 			return new DiscardExpr(expr);
 		}
 		if (toType.isSupertypeOf(fromType) || toType.equals(BuiltinType.ANY)) {
-			return new CastExpr(toType, expr);
+			return expr;
 		}
 		if (toType.getClass() == BuiltinType.class) {
 			return castPrimitive(expr, toType);
 		}
+		/* This should now be covered by isSupertypeOf
 		// null can be cast to any type
 		if (expr.getClass() == ConstExpr.class && ((ConstExpr)expr).value == null) {
 			return new CastExpr(toType, expr);
-		}
+		}*/
 		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
 	}
 
@@ -954,13 +960,56 @@ public class Parser {
 	}
 
 	/**
+	 * Does special type checkings and casts for the following functions:
+	 *   Function.curry   - checks if argument is acceptable, computes returned type
+	 *   Structure.clone  - the returned type is the same as of argument
+	 */
+	private Expr processSpecialCasts(FCallExpr expr) throws ParseException {
+		Func f = (Func)((ConstExpr)expr.fload).value;
+		if (f.signature.equals("Function.curry") && expr.args[0].rettype() instanceof FunctionType) {
+			// extra special for f.curry
+			if (expr.args[0] instanceof ConstExpr
+					&& ((Func)((ConstExpr)expr.args[0]).value).signature.equals("Function.curry")
+					&& expr.args[1].rettype() instanceof FunctionType) {
+				FunctionType ftype = (FunctionType)expr.args[1].rettype();
+				if (ftype.args.length == 0)
+					throw new ParseException("Cannot curry function that takes no arguments");
+				FunctionType redftype = new FunctionType();
+				redftype.rettype = ftype.rettype;
+				redftype.args = new Type[ftype.args.length-1];
+				System.arraycopy(ftype.args, 1, redftype.args, 0, redftype.args.length);
+				FunctionType newftype = new FunctionType();
+				newftype.rettype = redftype;
+				newftype.args = new Type[1];
+				newftype.args[0] = ftype.args[0];
+				return new CastExpr(newftype, expr);
+			}
+			FunctionType oldftype = (FunctionType)expr.args[0].rettype();
+			if (oldftype.args.length == 0)
+				throw new ParseException("Cannot curry function that takes no arguments");
+			// testing whether the second argument can be accepted
+			try {
+				cast(expr.args[1], oldftype.args[0]);
+			} catch (ParseException pe) {
+				throw new ParseException("Cannot curry with given argument: "+pe.getMessage());
+			}
+			// creating new type
+			FunctionType newftype = new FunctionType();
+			newftype.rettype = oldftype.rettype;
+			newftype.args = new Type[oldftype.args.length-1];
+			System.arraycopy(oldftype.args, 1, newftype.args, 0, newftype.args.length);
+			return new CastExpr(newftype, expr);
+		} else if (f.signature.equals("Structure.clone") && expr.args[0].rettype() instanceof StructureType) {
+			return new CastExpr(expr.args[0].rettype(), expr);
+		} else {
+			return expr;
+		}
+	}
+	
+	/**
 	 * Computes type to which LHS and RHS of operator should be cast.
 	 * <ul>
 	 *   <li>
-	 *     If types are the same then that type is returned.
-	 *   </li><li>
-	 *     if one of types is none then returned type is none
-	 *   </li><li>
 	 *     If both are numbers then returned type is first
 	 *     occured in the list: Double, Float, Long, Int.
 	 *   </li><li>
@@ -969,13 +1018,9 @@ public class Parser {
 	 * </ul>
 	 */
 	private Type binaryCastType(Type ltype, Type rtype) {
-		if (ltype.equals(rtype)) return ltype;
-		if (ltype.equals(BuiltinType.NONE) || rtype.equals(BuiltinType.NONE))
-			return BuiltinType.NONE;
 		if (ltype.getClass() == BuiltinType.class && rtype.getClass() == BuiltinType.class) {
 			int lindex = ((BuiltinType)ltype).numIndex();
 			int rindex = ((BuiltinType)rtype).numIndex();
-			if (lindex < 0 || rindex < 0) return BuiltinType.ANY;
 			switch (lindex > rindex ? lindex : rindex) {
 				case 1: return BuiltinType.INT;
 				case 2: return BuiltinType.LONG;

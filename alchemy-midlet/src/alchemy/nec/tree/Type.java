@@ -35,6 +35,7 @@ public abstract class Type {
 	public abstract Type superType();
 	
 	public final boolean isSupertypeOf(Type type) {
+		if (type.equals(BuiltinType.NULL)) return true;
 		while (type != null) {
 			if (this.equals(type)) return true;
 			type = type.superType();
@@ -47,10 +48,12 @@ public abstract class Type {
 	}
 	
 	public static Type commonSupertype(Type type1, Type type2) {
+		if (type1.equals(BuiltinType.NONE) || type2.equals(BuiltinType.NONE))
+			return BuiltinType.NONE;
 		while (type1 != null) {
 			if (type1.isSupertypeOf(type2)) return type1;
 			type1 = type1.superType();
 		}
-		return BuiltinType.NONE;
+		return BuiltinType.ANY;
 	}
 }

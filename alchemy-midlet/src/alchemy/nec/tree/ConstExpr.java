@@ -35,7 +35,7 @@ public class ConstExpr extends Expr {
 	public Type rettype() {
 		Class clz = value == null ? null : value.getClass();
 		if (clz == null) {
-			return BuiltinType.ANY;
+			return BuiltinType.NULL;
 		} else if (clz == Integer.class) {
 			return BuiltinType.INT;
 		} else if (clz == Long.class) {
