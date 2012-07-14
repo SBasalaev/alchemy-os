@@ -636,23 +636,34 @@ public class Parser {
 				}
 				if (method != null) {
 					method.hits++;
-					// parsing method call
-					expect('(');
-					Vector vargs = new Vector();
-					vargs.addElement(expr); //this
-					while (t.nextToken() != ')') {
-						t.pushBack();
-						if (vargs.size() > 1) expect(',');
-						vargs.addElement(parseExpr(scope));
-					}
-					if (method.type.args.length != vargs.size())
+					if (t.nextToken() == '(') {
+						// parsing method call
+						Vector vargs = new Vector();
+						vargs.addElement(expr); //this
+						while (t.nextToken() != ')') {
+							t.pushBack();
+							if (vargs.size() > 1) expect(',');
+							vargs.addElement(parseExpr(scope));
+						}
+						if (method.type.args.length != vargs.size())
 						throw new ParseException("Wrong number of arguments in call to "+method.signature+"()");
-					Expr[] args = new Expr[vargs.size()];
-					for (int i=0; i<args.length; i++) {
-						args[i] = cast((Expr)vargs.elementAt(i), method.type.args[i]);
+						Expr[] args = new Expr[vargs.size()];
+						for (int i=0; i<args.length; i++) {
+							args[i] = cast((Expr)vargs.elementAt(i), method.type.args[i]);
+						}
+						expr = processSpecialCasts(new FCallExpr(new ConstExpr(method), args));
+						continue;
+					} else {
+						t.pushBack();
+						// creating partially applied function
+						Func curry = unit.getFunc("Function.curry");
+						curry.hits++;
+						Expr[] args = new Expr[2];
+						args[0] = new ConstExpr(method);
+						args[1] = expr;
+						expr = processSpecialCasts(new FCallExpr(new ConstExpr(curry), args));
+						continue;
 					}
-					expr = processSpecialCasts(new FCallExpr(new ConstExpr(method), args));
-					continue;
 				}
 				throw new ParseException("Type "+type+" has no member named "+member);
 			} else {
