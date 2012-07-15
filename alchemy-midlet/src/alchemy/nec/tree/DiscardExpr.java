@@ -18,8 +18,6 @@
 
 package alchemy.nec.tree;
 
-import alchemy.nec.ParseException;
-
 /**
  * Expression that is computed but its result is discarded.
  * @author Sergey Basalaev
@@ -27,9 +25,7 @@ import alchemy.nec.ParseException;
 public class DiscardExpr extends Expr {
 	public Expr expr;
 
-	public DiscardExpr(Expr expr) throws ParseException {
-		if (expr.rettype().equals(BuiltinType.NONE))
-			throw new ParseException("Compiler error: attempting to pop *none*");
+	public DiscardExpr(Expr expr) {
 		this.expr = expr;
 	}
 
