@@ -18,6 +18,7 @@
 
 package alchemy.libs;
 
+import alchemy.libs.ui.UICanvas;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.midlet.UIServer;

@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.libs;
+package alchemy.libs.core;
 
 import alchemy.core.Context;
 import alchemy.core.Function;
@@ -27,7 +27,7 @@ import alchemy.core.Function;
  * 
  * @author Sergey Basalaev
  */
-class PartiallyAppliedFunction extends Function {
+public class PartiallyAppliedFunction extends Function {
 
 	private final Object argument;
 	private final Function f;

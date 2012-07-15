@@ -18,6 +18,7 @@
 
 package alchemy.libs;
 
+import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
@@ -217,7 +218,7 @@ class LibCore30Func extends NativeFunction {
 				return String.valueOf(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
-			case 63: // fclose(stream: Any)
+			case 63: // Stream.close()
 				if (args[0] instanceof InputStream) {
 					((InputStream)args[0]).close();
 					c.removeStream(args[0]);
@@ -229,19 +230,19 @@ class LibCore30Func extends NativeFunction {
 				} else {
 					throw new ClassCastException();
 				}
-			case 64: // fread(in: IStream): Int
+			case 64: // IStream.read(): Int
 				return Ival(((InputStream)args[0]).read());
-			case 65: // freadarray(in: IStream, buf: BArray, ofs: Int, len: Int): Int
+			case 65: // IStream.readarray(buf: BArray, ofs: Int, len: Int): Int
 				return Ival(((InputStream)args[0]).read((byte[])args[1], ival(args[2]), ival(args[3])));
-			case 66: // fskip(in: IStream, n: Long): Long
+			case 66: // IStream.skip(n: Long): Long
 				return Lval(((InputStream)args[0]).skip(lval(args[1])));
-			case 67: // fwrite(out: OStream, b: Int)
+			case 67: // OStream.write(b: Int)
 				((OutputStream)args[0]).write(ival(args[1]));
 				return null;
-			case 68: // fwritearray(out: OStream, buf: BArray, ofs: Int, len: Int)
+			case 68: // OStream.writearray(buf: BArray, ofs: Int, len: Int)
 				((OutputStream)args[0]).write((byte[])args[1], ival(args[2]), ival(args[3]));
 				return null;
-			case 69: // fflush(out: OStream)
+			case 69: // OStream.flush(out: OStream)
 				((OutputStream)args[0]).flush();
 				return null;
 			case 70: { // exec_wait(cmd: String, args: Array): Int

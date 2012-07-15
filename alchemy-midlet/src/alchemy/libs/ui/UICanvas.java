@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.libs;
+package alchemy.libs.ui;
 
 import alchemy.midlet.UIServer;
 import javax.microedition.lcdui.Canvas;
@@ -27,7 +27,7 @@ import javax.microedition.lcdui.Image;
  * Double buffered canvas implementation for Alchemy UI.
  * @author Sergey Basalaev
  */
-class UICanvas extends Canvas {
+public class UICanvas extends Canvas {
 	
 	private final Image buffer;
 	
