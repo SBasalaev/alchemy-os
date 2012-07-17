@@ -15,7 +15,7 @@ def String.tolongbase(base: Int): Long;
 def String.tofloat(): Float;
 def String.todouble(): Double;
 
-def String.len();
+def String.len(): Int;
 def String.ch(at: Int): Int;
 def String.indexof(ch: Int): Int;
 def String.lindexof(ch: Int): Int;
