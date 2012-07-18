@@ -24,6 +24,7 @@ def IStream.skip(num: Long): Long;
 def read(): Int;
 def readarray(buf: BArray, ofs: Int, len: Int): Int;
 def skip(num: Long): Long;
+def readline(): String;
 
 def OStream.write(b: Int);
 def OStream.writearray(buf: BArray, ofs: Int, len: Int);

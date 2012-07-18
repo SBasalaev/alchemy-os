@@ -1,6 +1,6 @@
-/* Implementation of StrBuf methods not found in j2me.
- * Copyright (c) 2012 Sergey Basalaev
- * Licensed under GPLv3 with linkage exception
+/* Core library: implementation of StrBuf functions not found in j2me
+ * (C) 2011-2012 Sergey Basalaev
+ * Licensed under GPL v3 with linkage exception
  */
 
 use "strbuf.eh"

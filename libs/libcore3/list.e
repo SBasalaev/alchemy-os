@@ -1,6 +1,6 @@
-/* Implementation of List.
- * Copyright (c) 2012, Sergey Basalaev
- * Licensed under GPL v3
+/* Core library: List implementation
+ * (C) 2011-2012, Sergey Basalaev
+ * Licensed under GPL v3 with linkage exception
  */
 
 use "sys.eh"
