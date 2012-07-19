@@ -22,6 +22,7 @@ import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
+import alchemy.fs.File;
 import alchemy.nlib.NativeFunction;
 import alchemy.util.IO;
 import java.io.IOException;
@@ -349,7 +350,8 @@ class LibCore30Func extends NativeFunction {
 				return Fval(rnd.nextFloat());
 			case 109: // rnddouble(): Double
 				return Dval(rnd.nextDouble());
-			case 110: { // netread(url: String): IStream
+			case 110: { // TODO: deprecated, remove in 1.6
+				// netread(url: String): IStream
 				String addr = (String)args[0];
 				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
 					throw new IOException("Unknown protocol in netread()");
@@ -357,7 +359,8 @@ class LibCore30Func extends NativeFunction {
 				c.addStream(stream);
 				return stream;
 			}
-			case 111: { // readresource(res: String): IStream
+			case 111: { // TODO: deprecated, remove in 1.6
+				// readresource(res: String): IStream
 				InputStream stream = Object.class.getResourceAsStream((String)args[0]);
 				if (stream != null) c.addStream(stream);
 				return stream;
@@ -368,9 +371,9 @@ class LibCore30Func extends NativeFunction {
 				} catch (Exception e) {
 					return null;
 				}
-			case 113: // loadfunc(lib: Library, sig: String): Any
+			case 113: // Library.getfunc(sig: String): Function
 				return ((Library)args[0]).getFunction((String)args[1]);
-			case 114: {// clone(struct: Any): Any
+			case 114: {// Structure.clone(): Structure
 				Object[] struct = (Object[])args[0];
 				Object[] clone = new Object[struct.length];
 				System.arraycopy(struct, 0, clone, 0, struct.length);
@@ -468,6 +471,26 @@ class LibCore30Func extends NativeFunction {
 				}
 			case 138: // Function.curry(arg: Any): Function
 				return new PartiallyAppliedFunction((Function)args[0], args[1]);
+			case 139: { // readurl(url: String): IStream
+				String url = (String)args[0];
+				int cl = url.indexOf(':');
+				if (cl < 0) throw new IllegalArgumentException("No protocol in given URL");
+				String protocol = url.substring(0, cl);
+				String addr = url.substring(cl+1);
+				InputStream in;
+				if (protocol.equals("file")) {
+					in = c.fs().read(new File(addr));
+				} else if (protocol.equals("res")) {
+					in = this.getClass().getResourceAsStream(addr);
+					if (in == null) throw new IOException("Resource not found: "+addr);
+				} else if (protocol.equals("http") || protocol.equals("https")) {
+					in = Connector.openInputStream(url);
+				} else {
+					throw new IllegalArgumentException("Unsupported protocol: "+protocol);
+				}
+				c.addStream(in);
+				return in;
+			}
 			default:
 				return null;
 		}

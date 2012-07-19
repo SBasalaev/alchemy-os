@@ -72,3 +72,5 @@ def set_cwd(dir: String);
 def space_total(): Long;
 def space_free(): Long;
 def space_used(): Long;
+
+def readurl(url: String): IStream;
