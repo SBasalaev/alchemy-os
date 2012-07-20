@@ -219,18 +219,9 @@ class LibCore30Func extends NativeFunction {
 				return String.valueOf(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
-			case 63: // Stream.close()
-				if (args[0] instanceof InputStream) {
-					((InputStream)args[0]).close();
-					c.removeStream(args[0]);
-					return null;
-				} else if (args[0] instanceof OutputStream) {
-					((OutputStream)args[0]).close();
-					c.removeStream(args[0]);
-					return null;
-				} else {
-					throw new ClassCastException();
-				}
+			case 63: // IStream.close()
+				((InputStream)args[0]).close();
+				return null;
 			case 64: // IStream.read(): Int
 				return Ival(((InputStream)args[0]).read());
 			case 65: // IStream.readarray(buf: BArray, ofs: Int, len: Int): Int
@@ -337,9 +328,9 @@ class LibCore30Func extends NativeFunction {
 			case 103: // Dict.remove(key: Any)
 				((Hashtable)args[0]).remove(args[1]);
 				return null;
-			case 104: // TODO: Deprecated, remove in 1.6
-				// hash(a: Any): Int
-				return Ival(args[0].hashCode());
+			case 104: // OStream.close
+				((OutputStream)args[0]).close();
+				return null;
 			case 105: // rnd(n: Int): Int
 				return Ival(rnd.nextInt(ival(args[0])));
 			case 106: // rndint(): Int
@@ -350,21 +341,28 @@ class LibCore30Func extends NativeFunction {
 				return Fval(rnd.nextFloat());
 			case 109: // rnddouble(): Double
 				return Dval(rnd.nextDouble());
-			case 110: { // TODO: deprecated, remove in 1.6
-				// netread(url: String): IStream
-				String addr = (String)args[0];
-				if (!addr.startsWith("http:")&&!addr.startsWith("https:"))
-					throw new IOException("Unknown protocol in netread()");
-				InputStream stream = Connector.openInputStream(addr);
-				c.addStream(stream);
-				return stream;
+			case 110: { // readurl(url: String): IStream
+				String url = (String)args[0];
+				int cl = url.indexOf(':');
+				if (cl < 0) throw new IllegalArgumentException("No protocol in given URL");
+				String protocol = url.substring(0, cl);
+				String addr = url.substring(cl+1);
+				InputStream in;
+				if (protocol.equals("file")) {
+					in = c.fs().read(new File(addr));
+				} else if (protocol.equals("res")) {
+					in = this.getClass().getResourceAsStream(addr);
+					if (in == null) throw new IOException("Resource not found: "+addr);
+				} else if (protocol.equals("http") || protocol.equals("https")) {
+					in = Connector.openInputStream(url);
+				} else {
+					throw new IllegalArgumentException("Unsupported protocol: "+protocol);
+				}
+				c.addStream(in);
+				return in;
 			}
-			case 111: { // TODO: deprecated, remove in 1.6
-				// readresource(res: String): IStream
-				InputStream stream = Object.class.getResourceAsStream((String)args[0]);
-				if (stream != null) c.addStream(stream);
-				return stream;
-			}
+			case 111: // Function.curry(arg: Any): Function
+				return new PartiallyAppliedFunction((Function)args[0], args[1]);
 			case 112: // loadlibrary(name: String): Library
 				try {
 					return c.loadLibrary((String)args[0]);
@@ -469,28 +467,6 @@ class LibCore30Func extends NativeFunction {
 				} catch (NumberFormatException nfe) {
 					return null;
 				}
-			case 138: // Function.curry(arg: Any): Function
-				return new PartiallyAppliedFunction((Function)args[0], args[1]);
-			case 139: { // readurl(url: String): IStream
-				String url = (String)args[0];
-				int cl = url.indexOf(':');
-				if (cl < 0) throw new IllegalArgumentException("No protocol in given URL");
-				String protocol = url.substring(0, cl);
-				String addr = url.substring(cl+1);
-				InputStream in;
-				if (protocol.equals("file")) {
-					in = c.fs().read(new File(addr));
-				} else if (protocol.equals("res")) {
-					in = this.getClass().getResourceAsStream(addr);
-					if (in == null) throw new IOException("Resource not found: "+addr);
-				} else if (protocol.equals("http") || protocol.equals("https")) {
-					in = Connector.openInputStream(url);
-				} else {
-					throw new IllegalArgumentException("Unsupported protocol: "+protocol);
-				}
-				c.addStream(in);
-				return in;
-			}
 			default:
 				return null;
 		}

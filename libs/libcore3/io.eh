@@ -2,12 +2,8 @@
 
 const EOF = -1
 
-type Stream < Any;
-
-def Stream.close();
-
-type IStream < Stream;
-type OStream < Stream;
+type IStream < Any;
+type OStream < Any;
 
 def stdin(): IStream;
 def stdout(): OStream;
@@ -20,6 +16,7 @@ def seterr(err: OStream);
 def IStream.read(): Int;
 def IStream.readarray(buf: BArray, ofs: Int, len: Int): Int;
 def IStream.skip(num: Long): Long;
+def IStream.close();
 
 def read(): Int;
 def readarray(buf: BArray, ofs: Int, len: Int): Int;
@@ -32,6 +29,7 @@ def OStream.print(a: Any);
 def OStream.println(a: Any);
 def OStream.flush();
 def OStream.printf(fmt: String, args: Array);
+def OStream.close();
 
 def write(b: Int);
 def writearray(buf: BArray, ofs: Int, len: Int);
