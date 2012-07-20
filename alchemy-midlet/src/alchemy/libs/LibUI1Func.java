@@ -43,12 +43,12 @@ import javax.microedition.lcdui.TextBox;
 import javax.microedition.lcdui.TextField;
 
 /**
- * libui.0.1.so functions.
+ * libui.1.so functions.
  * @author Sergey Basalaev
  */
-class LibUI01Func extends NativeFunction {
+class LibUI1Func extends NativeFunction {
 
-	public LibUI01Func(String name, int index) {
+	public LibUI1Func(String name, int index) {
 		super(name, index);
 	}
 
@@ -344,6 +344,6 @@ class LibUI01Func extends NativeFunction {
 	}
 
 	public String soname() {
-		return "libui0.1.so";
+		return "libui.1.so";
 	}
 }

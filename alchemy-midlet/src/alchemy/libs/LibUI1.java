@@ -27,13 +27,13 @@ import java.io.IOException;
  * @author Sergey Basalaev
  * @version 0.1.0
  */
-public class LibUI01 extends NativeLibrary {
+public class LibUI1 extends NativeLibrary {
 	
-	public LibUI01() throws IOException {
-		super("/libui01.symbols");
+	public LibUI1() throws IOException {
+		super("/libui1.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {
-		return new LibUI01Func(name, index);
+		return new LibUI1Func(name, index);
 	}
 }
