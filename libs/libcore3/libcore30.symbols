@@ -137,3 +137,4 @@ Int.tohex
 String.tointbase
 String.tolongbase
 Function.curry
+readurl
