@@ -18,27 +18,23 @@
 
 package alchemy.nec.tree;
 
+import java.util.Vector;
+
 /**
- * Loop expression with precondition.
- * <pre>
- * <b>while</b> (<i>condition</i>) <i>expr</i>;
- * </pre>
+ *
  * @author Sergey Basalaev
  */
-public class WhileExpr extends Expr {
-	public Expr condition;
-	public Expr body;
-
-	public WhileExpr(Expr condition, Expr body) {
-		this.condition = condition;
-		this.body = body;
-	}
+public class ConcatExpr extends Expr {
+	
+	public Vector exprs = new Vector();
+	
+	public ConcatExpr() { }
 
 	public Type rettype() {
-		return BuiltinType.NONE;
+		return BuiltinType.STRING;
 	}
 
 	public Object accept(ExprVisitor v, Object data) {
-		return v.visitWhile(this, data);
+		return v.visitConcat(this, data);
 	}
 }

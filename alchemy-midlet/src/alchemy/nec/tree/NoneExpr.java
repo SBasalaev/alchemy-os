@@ -26,6 +26,8 @@ package alchemy.nec.tree;
  */
 public class NoneExpr extends Expr {
 
+	public NoneExpr() { }
+	
 	public Type rettype() {
 		return BuiltinType.NONE;
 	}

@@ -19,17 +19,17 @@
 package alchemy.nec.tree;
 
 /**
- * Loop expression with precondition.
- * <pre>
- * <b>while</b> (<i>condition</i>) <i>expr</i>;
- * </pre>
+ * Loop expression with postcondition.
+ * <pre><b>do</b> <i>expr</i> <b>while</b> (<i>cond</i>);</pre>
+ * 
  * @author Sergey Basalaev
  */
-public class WhileExpr extends Expr {
+public class DoWhileExpr extends Expr {
+	
 	public Expr condition;
 	public Expr body;
 
-	public WhileExpr(Expr condition, Expr body) {
+	public DoWhileExpr(Expr condition, Expr body) {
 		this.condition = condition;
 		this.body = body;
 	}
@@ -39,6 +39,6 @@ public class WhileExpr extends Expr {
 	}
 
 	public Object accept(ExprVisitor v, Object data) {
-		return v.visitWhile(this, data);
+		return v.visitDoWhile(this, data);
 	}
 }

@@ -20,6 +20,7 @@ package alchemy.nec.tree;
 
 /**
  * Unary operator preceding expression.
+ * One of '+', '-', '~', '!'.
  * 
  * @author Sergey Basalaev
  */

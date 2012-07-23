@@ -39,5 +39,4 @@ public class NewArrayByEnumExpr extends Expr {
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitNewArrayByEnum(this, data);
 	}
-	
 }

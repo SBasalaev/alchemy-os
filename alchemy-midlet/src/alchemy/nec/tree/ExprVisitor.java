@@ -30,15 +30,17 @@ public interface ExprVisitor {
 	Object visitBinary(BinaryExpr binary, Object data);
 	Object visitBlock(BlockExpr block, Object data);
 	Object visitCast(CastExpr cast, Object data);
-	Object visitCastPrimitive(CastPrimitiveExpr cast, Object data);
+	Object visitComparison(ComparisonExpr cmp, Object data);
+	Object visitConcat(ConcatExpr concat, Object data);
 	Object visitConst(ConstExpr cexpr, Object data);
 	Object visitDiscard(DiscardExpr disc, Object data);
+	Object visitDoWhile(DoWhileExpr wexpr, Object data);
 	Object visitFCall(FCallExpr fcall, Object data);
 	Object visitIf(IfExpr ifexpr, Object data);
 	Object visitNewArray(NewArrayExpr newarray, Object data);
 	Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object data);
 	Object visitNone(NoneExpr none, Object data);
-	Object visitUnary(UnaryExpr expr, Object data);
+	Object visitUnary(UnaryExpr unary, Object data);
 	Object visitVar(VarExpr vexpr, Object data);
 	Object visitWhile(WhileExpr wexpr, Object data);
 }

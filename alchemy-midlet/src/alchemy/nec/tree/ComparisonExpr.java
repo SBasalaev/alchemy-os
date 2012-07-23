@@ -19,26 +19,27 @@
 package alchemy.nec.tree;
 
 /**
- * Loop expression with precondition.
- * <pre>
- * <b>while</b> (<i>condition</i>) <i>expr</i>;
- * </pre>
+ * Comparison expression.
+ * 
  * @author Sergey Basalaev
  */
-public class WhileExpr extends Expr {
-	public Expr condition;
-	public Expr body;
+public class ComparisonExpr extends Expr {
+	
+	public Expr lvalue;
+	public int operator;
+	public Expr rvalue;
 
-	public WhileExpr(Expr condition, Expr body) {
-		this.condition = condition;
-		this.body = body;
+	public ComparisonExpr(Expr lvalue, int operator, Expr rvalue) {
+		this.lvalue = lvalue;
+		this.operator = operator;
+		this.rvalue = rvalue;
 	}
 
 	public Type rettype() {
-		return BuiltinType.NONE;
+		return BuiltinType.BOOL;
 	}
 
 	public Object accept(ExprVisitor v, Object data) {
-		return v.visitWhile(this, data);
+		return v.visitComparison(this, data);
 	}
 }

@@ -33,22 +33,21 @@ public class ConstExpr extends Expr {
 	}
 
 	public Type rettype() {
-		Class clz = value == null ? null : value.getClass();
-		if (clz == null) {
+		if (value == null) {
 			return BuiltinType.NULL;
-		} else if (clz == Integer.class) {
+		} else if (value instanceof Integer) {
 			return BuiltinType.INT;
-		} else if (clz == Long.class) {
+		} else if (value instanceof Long) {
 			return BuiltinType.LONG;
-		} else if (clz == Float.class) {
+		} else if (value instanceof Float) {
 			return BuiltinType.FLOAT;
-		} else if (clz == Double.class) {
+		} else if (value instanceof Double) {
 			return BuiltinType.DOUBLE;
-		} else if (clz == String.class) {
+		} else if (value instanceof String) {
 			return BuiltinType.STRING;
-		} else if (clz == Boolean.class) {
+		} else if (value instanceof Boolean) {
 			return BuiltinType.BOOL;
-		} else if (clz == Func.class) {
+		} else if (value instanceof Func) {
 			return ((Func)value).type;
 		} else {
 			return null;

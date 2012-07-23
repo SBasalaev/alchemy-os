@@ -23,8 +23,7 @@ package alchemy.nec.tree;
  * Valid binary operators are <code>+</code>,
  * <code>-</code>, <code>*</code>, <code>/</code>,
  * <code>%</code>, <code>&amp;</code>, <code>|</code>,
- * <code>^</code>, <code>TT_LTLT</code>, <code>TT_GTGT</code>
- * and <code>=</code> the latter being comparison operator.
+ * <code>^</code>, <code>TT_LTLT</code>, <code>TT_GTGT</code>.
  *
  * @author Sergey Basalaev
  */
@@ -41,8 +40,7 @@ public class BinaryExpr extends Expr {
 	}
 
 	public Type rettype() {
-		if (operator == '=') return BuiltinType.INT;
-		else return lvalue.rettype();
+		return lvalue.rettype();
 	}
 
 	public Object accept(ExprVisitor v, Object data) {
