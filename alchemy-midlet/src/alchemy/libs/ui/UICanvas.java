@@ -45,6 +45,10 @@ public class UICanvas extends Canvas {
 		return buffer.getGraphics();
 	}
 
+	public boolean isDoubleBuffered() {
+		return true;
+	}
+
 	/** Generates key event. */
 	protected void keyPressed(int keyCode) {
 		UIServer.pushEvent(this, UIServer.EVENT_KEY_PRESS, new Integer(keyCode));

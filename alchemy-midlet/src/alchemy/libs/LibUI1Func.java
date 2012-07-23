@@ -56,7 +56,7 @@ class LibUI1Func extends NativeFunction {
 		switch (index) {
 			case 0: // new_image(w: Int, h: Int): Image
 				return Image.createImage(ival(args[0]), ival(args[1]));
-			case 1: // image_graphics(im: Image): Graphics
+			case 1: // Image.graphics(): Graphics
 				return ((Image)args[0]).getGraphics();
 			case 2: { // image_from_argb(argb: Array, w: Int, h: Int, alpha: Bool): Image
 				Object[] data = (Object[])args[0];
@@ -74,7 +74,7 @@ class LibUI1Func extends NativeFunction {
 			}
 			case 5: // image_from_image(im: Image, x: Int, y: Int, w: Int, h: Int): Image
 				return Image.createImage((Image)args[0], ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), 0);
-			case 6: { // get_image_argb(im: Image, argb: Array, ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int)
+			case 6: { // Image.get_argb(argb: Array, ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int)
 				Object[] data = (Object[])args[1];
 				int ofs = ival(args[2]);
 				int scanlen = ival(args[3]);
@@ -89,59 +89,59 @@ class LibUI1Func extends NativeFunction {
 				}
 				return null;
 			}
-			case 7: // get_color(g: Graphics): Int
+			case 7: // Graphics.get_color(): Int
 				return Ival(((Graphics)args[0]).getColor());
-			case 8: // set_color(g: Graphics, rgb: Int)
+			case 8: // Graphics.set_color(rgb: Int)
 				((Graphics)args[0]).setColor(ival(args[1]));
 				return null;
-			case 9: // get_font(g: Graphics): Int
+			case 9: // Graphics.get_font(): Int
 				return Ival(font2int(((Graphics)args[0]).getFont()));
-			case 10: // set_font(g: Graphics, font: Int)
+			case 10: // Graphics.set_font(font: Int)
 				((Graphics)args[0]).setFont(int2font(ival(args[1])));
 				return null;
 			case 11: // str_width(font: Int, str: String): Int
 				return Ival(int2font(ival(args[0])).stringWidth((String)args[1]));
 			case 12: // font_height(font: Int): Int
 				return Ival(int2font(ival(args[0])).getHeight());
-			case 13: // draw_line(g: Graphics, x1: Int, y1: Int, x2: Int, y2: Int)
+			case 13: // Graphics.draw_line(x1: Int, y1: Int, x2: Int, y2: Int)
 				((Graphics)args[0]).drawLine(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]));
 				return null;
-			case 14: // draw_rect(g: Graphics, x: Int, y: Int, w: Int, h: Int)
+			case 14: // Graphics.draw_rect(x: Int, y: Int, w: Int, h: Int)
 				((Graphics)args[0]).drawRect(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]));
 				return null;
-			case 15: // fill_rect(g: Graphics, x: Int, y: Int, w: Int, h: Int)
+			case 15: // Graphics.fill_rect(x: Int, y: Int, w: Int, h: Int)
 				((Graphics)args[0]).fillRect(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]));
 				return null;
-			case 16: // draw_roundrect(g: Graphics, x: Int, y: Int, w: Int, h: Int, arcw: Int, arch: Int)
+			case 16: // Graphics.draw_roundrect(x: Int, y: Int, w: Int, h: Int, arcw: Int, arch: Int)
 				((Graphics)args[0]).drawRoundRect(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]));
 				return null;
-			case 17: // fill_roundrect(g: Graphics, x: Int, y: Int, w: Int, h: Int, arcw: Int, arch: Int)
+			case 17: // Graphics.fill_roundrect(x: Int, y: Int, w: Int, h: Int, arcw: Int, arch: Int)
 				((Graphics)args[0]).fillRoundRect(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]));
 				return null;
-			case 18: // draw_arc(g: Graphics, x: Int, y: Int, w: Int, h: Int, sta: Int, a: Int)
+			case 18: // Graphics.draw_arc(x: Int, y: Int, w: Int, h: Int, sta: Int, a: Int)
 				((Graphics)args[0]).drawArc(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]));
 				return null;
-			case 19: // fill_arc(g: Graphics, x: Int, y: Int, w: Int, h: Int, sta: Int, a: Int)
+			case 19: // Graphics.fill_arc(x: Int, y: Int, w: Int, h: Int, sta: Int, a: Int)
 				((Graphics)args[0]).fillArc(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]));
 				return null;
-			case 20: // fill_triangle(g: Graphics, x1: Int, y1: Int, x2: Int, y2: Int, x3: Int, y3: Int)
+			case 20: // Graphics.fill_triangle(x1: Int, y1: Int, x2: Int, y2: Int, x3: Int, y3: Int)
 				((Graphics)args[0]).fillTriangle(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]));
 				return null;
-			case 21: // draw_string(g: Graphics, str: String, x: Int, y: Int)
+			case 21: // Graphics.draw_string(str: String, x: Int, y: Int)
 				((Graphics)args[0]).drawString((String)args[1], ival(args[2]), ival(args[3]), 0);
 				return null;
-			case 22: // draw_image(g: Graphics, im: Image, x: Int, y: Int)
+			case 22: // Graphics.draw_image(im: Image, x: Int, y: Int)
 				((Graphics)args[0]).drawImage((Image)args[1], ival(args[2]), ival(args[3]), 0);
 				return null;
-			case 23: // copy_area(g: Graphics, xsrc: Int, ysrc: Int, w: Int, h: Int, xdst: Int, ydst: Int)
+			case 23: // Graphics.copy_area(xsrc: Int, ysrc: Int, w: Int, h: Int, xdst: Int, ydst: Int)
 				((Graphics)args[0]).copyArea(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]), 0);
 				return null;
-			case 24: // new_canvas(full: Bool): Screen
+			case 24: // new_canvas(full: Bool): Canvas
 				return new UICanvas(bval(args[0]));
-			case 25: { // canvas_graphics(cnv: Screen): Graphics
+			case 25: { // Canvas.graphics(): Graphics
 				return ((UICanvas)args[0]).getGraphics();
 			}
-			case 26: { // canvas_read_key(cnv: Screen): Int
+			case 26: { // Canvas.read_key(): Int
 				// compatibility function with previous non-event canvas behavior
 				Object[] event = (Object[])UIServer.readEvent(c, false);
 				if (event != null && event[0] == UIServer.EVENT_KEY_PRESS && event[1] == args[0]) {
@@ -158,33 +158,33 @@ class LibUI1Func extends NativeFunction {
 				}
 				return null;
 			}
-			case 28: // screen_height(scr: Screen): Int
+			case 28: // Screen.get_height(): Int
 				return Ival(((Displayable)args[0]).getHeight());
-			case 29: // screen_width(scr: Screen): Int
+			case 29: // Screen.get_width(): Int
 				return Ival(((Displayable)args[0]).getWidth());
-			case 30: // screen_get_title(scr: Screen): String
+			case 30: // Screen.get_title(): String
 				return ((Displayable)args[0]).getTitle();
-			case 31: { // screen_set_title(scr: Screen, title: String)
+			case 31: { // Screen.set_title(title: String)
 				((Displayable)args[0]).setTitle((String)args[1]);
 				return null;
 			}
-			case 32: // screen_shown(scr: Screen): Bool
+			case 32: // Screen.is_shown(): Bool
 				return Ival(((Displayable)args[0]).isShown());
-			case 33: // canvas_refresh(cnv: Screen)
+			case 33: // Canvas.refresh()
 				((UICanvas)args[0]).repaint();
 				return null;
 			case 34: // ui_read_event(): UIEvent
 				return UIServer.readEvent(c, false);
 			case 35: // ui_wait_event(): UIEvent
 				return UIServer.readEvent(c, true);
-			case 36: // new_editbox(mode: Int): Screen
+			case 36: // new_editbox(mode: Int): EditBox
 				return new TextBox(null, null, Short.MAX_VALUE, ival(args[0]));
-			case 37: // editbox_get_text(box: Screen): String
+			case 37: // EditBox.get_text(): String
 				return ((TextBox)args[0]).getString();
-			case 38: // editbox_set_text(box: Screen, text: String)
+			case 38: // EditBox.set_text(text: String)
 				((TextBox)args[0]).setString((String)args[1]);
 				return null;
-			case 39: { // new_listbox(strings: Array, images: Array, select: Menu): Screen
+			case 39: { // new_listbox(strings: [String], images: [Image], select: Menu): ListBox
 				Object[] str = (Object[])args[0];
 				String[] strings = new String[str.length];
 				System.arraycopy(str, 0, strings, 0, str.length);
@@ -198,138 +198,163 @@ class LibUI1Func extends NativeFunction {
 				list.setSelectCommand((Command)args[2]);
 				return list;
 			}
-			case 40: // listbox_get_index(list: Screen): Int
+			case 40: // ListBox.get_index(): Int
 				return Ival(((List)args[0]).getSelectedIndex());
-			case 41: // listbox_set_index(list: Screen, index: Int)
+			case 41: // ListBox.set_index(index: Int)
 				((List)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
 			case 42: // ui_get_screen(): Screen
 				return UIServer.getScreen(c);
 			case 43: // new_menu(text: String, priority: Int): Menu
 				return new Command((String)args[0], Command.SCREEN, ival(args[1]));
-			case 44: // menu_get_text(menu: Menu): String
+			case 44: // Menu.get_text(): String
 				return ((Command)args[0]).getLabel();
-			case 45: // menu_get_priority(menu: Menu): Int
+			case 45: // Menu.get_priority(): Int
 				return Ival(((Command)args[0]).getPriority());
-			case 46: // screen_add_menu(scr: Screen, menu: Menu)
+			case 46: // Screen.add_menu(menu: Menu)
 				((Displayable)args[0]).addCommand((Command)args[1]);
 				return null;
-			case 47: // screen_remove_menu(scr: Screen, menu: Menu)
+			case 47: // Screen.remove_menu(menu: Menu)
 				((Displayable)args[0]).removeCommand((Command)args[1]);
 				return null;
-			case 48: // new_form(): Screen
+			case 48: // new_form(): Form
 				return new Form(null);
-			case 49: // form_add(form: Screen, item: Item)
+			case 49: // Form.add(item: Item)
 				((Form)args[0]).append((Item)args[1]);
 				return null;
-			case 50: // form_get(form: Screen, at: Int): Item
+			case 50: // Form.get(at: Int): Item
 				return ((Form)args[0]).get(ival(args[1]));
-			case 51: // form_set(form: Screen, at: Int, item: Item)
+			case 51: // Form.set(at: Int, item: Item)
 				((Form)args[0]).set(ival(args[1]), (Item)args[2]);
 				return null;
-			case 52: // form_insert(form: Screen, at: Int, item: Item)
+			case 52: // Form.insert(at: Int, item: Item)
 				((Form)args[0]).insert(ival(args[1]), (Item)args[2]);
 				return null;
-			case 53: // form_remove(form: Screen, at: Int)
+			case 53: // Form.remove(at: Int)
 				((Form)args[0]).delete(ival(args[1]));
 				return null;
-			case 54: // form_size(form: Screen): Int
+			case 54: // Form.size(): Int
 				return Ival(((Form)args[0]).size());
-			case 55: // form_clear(form: Screen)
+			case 55: // Form.clear()
 				((Form)args[0]).deleteAll();
 				return null;
-			case 56: // item_get_label(item: Item): String
+			case 56: // Item.get_label(): String
 				return ((Item)args[0]).getLabel();
-			case 57: // item_set_label(item: Item, label: String)
+			case 57: // Item.set_label(label: String)
 				((Item)args[0]).setLabel((String)args[1]);
 				return null;
-			case 58: // new_textitem(label: String, text: String): Item
+			case 58: // new_textitem(label: String, text: String): TextItem
 				return new StringItem((String)args[0], String.valueOf(args[1])+'\n');
-			case 59: // textitem_get_text(item: Item): String
+			case 59: // TextItem.get_text(): String
 				return ((StringItem)args[0]).getText();
-			case 60: // textitem_set_text(item: Item, text: String)
+			case 60: // TextItem.set_text(text: String)
 				((StringItem)args[0]).setText(String.valueOf(args[1])+'\n');
 				return null;
-			case 61: // textitem_get_font(item: Item): Int
+			case 61: // TextItem.get_font(): Int
 				return Ival(font2int(((StringItem)args[0]).getFont()));
-			case 62: // textitem_set_font(item: Item, font: Int)
+			case 62: // TextItem.set_font(font: Int)
 				((StringItem)args[0]).setFont(int2font(ival(args[1])));
 				return null;
-			case 63: // new_imageitem(label: String, img: Image): Item
+			case 63: // new_imageitem(label: String, img: Image): ImageItem
 				return new ImageItem((String)args[0], (Image)args[1], Item.LAYOUT_NEWLINE_AFTER, null);
-			case 64: // imageitem_get_image(item: Item): Image
+			case 64: // ImageItem.get_image(): Image
 				return ((ImageItem)args[0]).getImage();
-			case 65: // imageitem_set_image(item: Item, img: Image)
+			case 65: // ImageItem.set_image(img: Image)
 				((ImageItem)args[0]).setImage((Image)args[1]);
 				return null;
-			case 66: // new_edititem(label: String, text: String, mode: Int, size: Int): Item
+			case 66: // new_edititem(label: String, text: String, mode: Int, size: Int): EditItem
 				return new TextField((String)args[0], (String)args[1], ival(args[3]), ival(args[2]));
-			case 67: // edititem_get_text(item: Item): String
+			case 67: // EditItem.get_text(): String
 				return ((TextField)args[0]).getString();
-			case 68: // edititem_set_text(item: Item, text: String)
+			case 68: // EditItem.set_text(text: String)
 				((TextField)args[0]).setString((String)args[0]);
 				return null;
-			case 69: // new_gaugeitem(label: String, max: Int, init: Int): Item
+			case 69: // new_gaugeitem(label: String, max: Int, init: Int): GaugeItem
 				return new Gauge((String)args[0], true, ival(args[1]), ival(args[2]));
-			case 70: // gaugeitem_get_value(item: Item): Int
+			case 70: // GaugeItem.get_value(): Int
 				return Ival(((Gauge)args[0]).getValue());
-			case 71: // gaugeitem_set_value(item: Item, val: Int)
+			case 71: // GaugeItem.set_value(val: Int)
 				((Gauge)args[0]).setValue(ival(args[1]));
 				return null;
-			case 72: // gaugeitem_get_maxvalue(item: Item): Int
+			case 72: // GaugeItem.get_maxvalue(): Int
 				return Ival(((Gauge)args[0]).getMaxValue());
-			case 73: // gaugeitem_set_maxvalue(item: Item, val: Int)
+			case 73: // GaugeItem.set_maxvalue(val: Int)
 				((Gauge)args[0]).setMaxValue(ival(args[1]));
 				return null;
-			case 74: // new_dateitem(label: String, mode: Int): Item
+			case 74: // new_dateitem(label: String, mode: Int): DateItem
 				return new DateField((String)args[0], ival(args[1]));
-			case 75: { // dateitem_get_date(item: Item): Long
+			case 75: { // DateItem.get_date(item: Item): Long
 				Date date = ((DateField)args[0]).getDate();
 				return (date == null) ? null : Lval(date.getTime());
 			}
-			case 76: // dateitem_set_date(item: Item, date: Long)
+			case 76: // DateItem.set_date(date: Long)
 				((DateField)args[0]).setDate(new Date(lval(args[1])));
 				return null;
-			case 77: { // new_checkitem(label: String, text: String, checked: Bool): Item
+			case 77: { // new_checkitem(label: String, text: String, checked: Bool): CheckItem
 				ChoiceGroup check = new ChoiceGroup((String)args[0], Choice.MULTIPLE);
 				check.append((String)args[1], null);
 				check.setSelectedIndex(0, bval(args[2]));
 				return check;
 			}
-			case 78: { // checkitem_get_checked(item: Item): Bool
+			case 78: { // CheckItem.get_checked(): Bool
 				boolean[] checked = new boolean[1];
 				((ChoiceGroup)args[0]).getSelectedFlags(checked);
 				return Ival(checked[0]);
 			}
-			case 79: // checkitem_set_checked(item: Item, checked: Bool)
+			case 79: // CheckItem.set_checked(checked: Bool)
 				((ChoiceGroup)args[0]).setSelectedIndex(0, bval(args[1]));
 				return null;
-			case 80: // checkitem_get_text(item: Item): String
+			case 80: // CheckItem.get_text(): String
 				return ((ChoiceGroup)args[0]).getString(0);
-			case 81: // checkitem_set_text(item: Item, text: String)
+			case 81: // CheckItem.set_text(text: String)
 				((ChoiceGroup)args[0]).set(0, (String)args[1], null);
 				return null;
-			case 82: { // new_radioitem(label: String, strings: Array): Item
+			case 82: { // new_radioitem(label: String, strings: [String]): RadioItem
 				Object[] array = (Object[])args[1];
 				String[] strings = new String[array.length];
 				System.arraycopy(array, 0, strings, 0, array.length);
 				return new ChoiceGroup((String)args[0], Choice.EXCLUSIVE, strings, null);
 			}
-			case 83: // radioitem_get_index(item: Item): Int
+			case 83: // RadioItem.get_index(): Int
 				return Ival(((ChoiceGroup)args[0]).getSelectedIndex());
-			case 84: // radioitem_set_index(item: Item, index: String)
+			case 84: // RadioItem.set_index(index: String)
 				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
-			case 85: { // new_textbox(text: String): Screen
+			case 85: { // new_textbox(text: String): TextBox
 				Form box = new Form(null);
 				box.append(new StringItem(null, (String)args[0]));
 				return box;
 			}
-			case 86: // textbox_get_text(box: Screen): String
+			case 86: // TextBox.get_text(): String
 				return ((StringItem)((Form)args[0]).get(0)).getText();
-			case 87: // textbox_set_text(box: Screen, text: String)
+			case 87: // TextBox.set_text(text: String)
 				((StringItem)((Form)args[0]).get(0)).setText((String)args[1]);
 				return null;
+			case 88: // font_baseline(font: Int): Int
+				return Ival(int2font(ival(args[0])).getBaselinePosition());
+			case 89: // Graphics.get_stroke(): Int
+				return Ival(((Graphics)args[0]).getStrokeStyle());
+			case 90: // Graphics.set_stroke(stroke: Int)
+				((Graphics)args[0]).setStrokeStyle(ival(args[1]));
+				return null;
+			case 91: // Graphics.draw_region(im: Image, xsrc: Int, ysrc: Int, w: Int, h: Int, trans: Int, xdst: Int, ydst: Int)
+				((Graphics)args[0]).drawRegion((Image)args[1], ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]), ival(args[7]), ival(args[8]), 0);
+				return null;
+			case 92: { // Graphics.draw_rgb(rgb: [Int], ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int, alpha: Bool)
+				Object[] rgbInts = (Object[])args[1];
+				int[] rgb = new int[rgbInts.length];
+				for (int i=rgb.length-1; i>=0; i--) {
+					rgb[i] = ival(rgbInts[i]);
+				}
+				((Graphics)args[0]).drawRGB(rgb, ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]), ival(args[7]), bval(args[8]));
+				return null;
+			}
+			case 93: // Canvas.action_code(key: Int): Int
+				return Ival(((UICanvas)args[0]).getGameAction(ival(args[1])));
+			case 94: // Canvas.has_ptr_events(): Bool
+				return Ival(((UICanvas)args[0]).hasPointerEvents());
+			case 95: // Canvas.has_ptrdrag_event(): Bool
+				return Ival(((UICanvas)args[0]).hasPointerMotionEvents());
 			default:
 				return null;
 		}
@@ -341,6 +366,11 @@ class LibUI1Func extends NativeFunction {
 	
 	private static Font int2font(int mask) {
 		return Font.getFont(mask & 0x60, mask & 0x7, mask & 0x18);
+	}
+	
+	private static String titleFor(Context c) {
+		Object title = String.valueOf(c.get("ui.title"));
+		return (title != null) ? title.toString() : c.getName();
 	}
 
 	public String soname() {
