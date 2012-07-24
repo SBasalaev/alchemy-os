@@ -23,34 +23,25 @@ package alchemy.nec.tree;
  * @author Sergey Basalaev
  */
 public class BuiltinType extends NamedType {
-
-	private final int numindex;
 	
-	private BuiltinType(String name, Type superType, int numindex) {
+	private BuiltinType(String name, Type superType) {
 		super(name, superType);
-		this.numindex = numindex;
 	}
 
-	/** Returns numeric index of this type.
-	 * @return 1 for Int, 2 for Long, 3 for Float, 4 for Double, -1 for other types
-	 */
-	public int numIndex() {
-		return numindex;
-	}
-
-	static public final BuiltinType ANY = new BuiltinType("Any", null, -1);
-	static public final BuiltinType INT = new BuiltinType("Int", ANY, 1);
-	static public final BuiltinType LONG = new BuiltinType("Long", ANY, 2);
-	static public final BuiltinType FLOAT = new BuiltinType("Float", ANY, 3);
-	static public final BuiltinType DOUBLE = new BuiltinType("Double", ANY, 4);
-	static public final BuiltinType STRING = new BuiltinType("String", ANY, -1);
-	static public final BuiltinType BOOL = new BuiltinType("Bool", ANY, -1);
-	static public final BuiltinType ARRAY = new BuiltinType("Array", ANY, -1);
-	static public final BuiltinType BARRAY = new BuiltinType("BArray", ANY, -1);
-	static public final BuiltinType CARRAY = new BuiltinType("CArray", ANY, -1);
-	static public final BuiltinType FUNCTION = new BuiltinType("Function", ANY, -1);
-	static public final BuiltinType STRUCTURE = new BuiltinType("Structure", ANY, -1);
-	static public final BuiltinType NULL = new BuiltinType("Null", ANY, -1);
+	static public final BuiltinType ANY = new BuiltinType("Any", null);
+	static public final BuiltinType NUMBER = new BuiltinType("<number>", ANY);
+	static public final BuiltinType INT = new BuiltinType("Int", NUMBER);
+	static public final BuiltinType LONG = new BuiltinType("Long", NUMBER);
+	static public final BuiltinType FLOAT = new BuiltinType("Float", NUMBER);
+	static public final BuiltinType DOUBLE = new BuiltinType("Double", NUMBER);
+	static public final BuiltinType STRING = new BuiltinType("String", ANY);
+	static public final BuiltinType BOOL = new BuiltinType("Bool", ANY);
+	static public final BuiltinType ARRAY = new BuiltinType("Array", ANY);
+	static public final BuiltinType BARRAY = new BuiltinType("BArray", ANY);
+	static public final BuiltinType CARRAY = new BuiltinType("CArray", ANY);
+	static public final BuiltinType FUNCTION = new BuiltinType("Function", ANY);
+	static public final BuiltinType STRUCTURE = new BuiltinType("Structure", ANY);
+	static public final BuiltinType NULL = new BuiltinType("Null", ANY);
 	/* A special type which is used when expression does not return a value. */
-	static public final BuiltinType NONE = new BuiltinType("*none*", null, -1);
+	static public final BuiltinType NONE = new BuiltinType("<none>", null);
 }
