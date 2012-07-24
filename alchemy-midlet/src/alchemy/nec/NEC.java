@@ -29,7 +29,7 @@ import java.io.OutputStream;
  * @author Sergey Basalaev
  */
 public class NEC extends NativeApp {
-
+	
 	static private final String VERSION =
 			"Native E Compiler version 1.4";
 
@@ -102,7 +102,7 @@ public class NEC extends NativeApp {
 				outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(c, target);
+		Parser parser = new Parser(c);
 		Unit unit = null;
 		try {
 			unit = parser.parse(c.toFile(fname));
@@ -111,12 +111,13 @@ public class NEC extends NativeApp {
 		}
 		if (unit == null) return -1;
 		//optimizing
-		if (optimize) new Optimizer().visitUnit(unit);
+		// if (optimize) new Optimizer().visitUnit(unit);
 		//writing object code
-		CodeWriter wr = new CodeWriter(c, unit);
+		new VarIndexer().visitUnit(unit);
+		EAsmWriter wr = new EAsmWriter();
 		try {
 			OutputStream out = c.fs().write(c.toFile(outname));
-			wr.write(out);
+			wr.writeTo(unit, out);
 			out.close();
 		} catch (Exception e) {
 			IO.println(c.stderr, "Error: "+e);

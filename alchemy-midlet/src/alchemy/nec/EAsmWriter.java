@@ -24,6 +24,9 @@ import alchemy.nec.asm.Label;
 import alchemy.nec.asm.Opcodes;
 import alchemy.nec.asm.UnitWriter;
 import alchemy.nec.tree.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Vector;
 
 // FIXME: variable indices should be assigned first
 
@@ -32,9 +35,26 @@ import alchemy.nec.tree.*;
  * @author Sergey Basalaev
  */
 public class EAsmWriter implements ExprVisitor {
-	private UnitWriter uw;
 	private FunctionWriter writer;
-
+	
+	public EAsmWriter() {
+	}
+	
+	public void writeTo(Unit unit, OutputStream out) throws IOException {
+		UnitWriter uw = new UnitWriter();
+		uw.visitVersion(0x0200);
+		Vector funcs = unit.funcs;
+		for (int i=0; i<funcs.size(); i++) {
+			Func f = (Func)funcs.elementAt(i);
+			if (f.body != null && f.hits > 0) {
+				writer = uw.visitFunction(f.signature, f.type.args.length);
+				f.body.accept(this, null);
+				writer.visitEnd();
+			}
+		}
+		uw.writeTo(out);
+	}
+	
 	public Object visitALen(ALenExpr alen, Object unused) {
 		alen.arrayexpr.accept(this, unused);
 		Type artype = alen.arrayexpr.rettype();
