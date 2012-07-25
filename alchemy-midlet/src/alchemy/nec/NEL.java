@@ -325,7 +325,7 @@ public class NEL extends NativeApp {
 
 	private LibInfo loadFromECode(InputStream in) throws Exception {
 		DataInputStream data = new DataInputStream(in);
-		if (data.readUnsignedShort() > 0x0101)
+		if (data.readUnsignedShort() > 0x0200)
 			throw new Exception("Unsupported format version");
 		LibInfo info = new LibInfo();
 		Vector symbols = new Vector();

@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Vector;
 
-// FIXME: variable indices should be assigned first
-
 /**
  *
  * @author Sergey Basalaev
@@ -257,7 +255,13 @@ public class EAsmWriter implements ExprVisitor {
 			Expr str2 = (Expr)concat.exprs.elementAt(1);
 			writer.visitLdcInsn(new FuncObject("String.concat"));
 			str1.accept(this, unused);
-			str2.accept(this, unused);
+			if (str2.rettype().equals(BuiltinType.STRING)) {
+				str2.accept(this, unused);
+			} else {
+				writer.visitLdcInsn(new FuncObject("Any.tostr"));
+				str2.accept(this, unused);
+				writer.visitCallInsn(Opcodes.CALL, 1);
+			}
 			writer.visitCallInsn(Opcodes.CALL, 2);
 		} else {
 			writer.visitLdcInsn(new FuncObject("Any.tostr"));
@@ -277,7 +281,7 @@ public class EAsmWriter implements ExprVisitor {
 				((Expr)concat.exprs.elementAt(i)).accept(this, unused);
 				writer.visitCallInsn(Opcodes.CALL, 2);
 			}
-			writer.visitCallInsn(Opcodes.CALL, 0);
+			writer.visitCallInsn(Opcodes.CALL, 1);
 		}
 		return null;
 	}

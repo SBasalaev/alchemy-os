@@ -19,15 +19,21 @@
 package alchemy.nec;
 
 import alchemy.nec.tree.*;
+import java.util.Vector;
 
 /**
  * Simple optimizer.
  * Folds constants and eliminates dead code.
+ * <p>
+ * Visiting methods accept Scope as argument and
+ * return optimized tree.
+ * </p>
+ * 
  * @author Sergey Basalaev
  */
-class Optimizer implements ExprVisitor {
-
-	/** Flag set if optimization takes place. */
+public class Optimizer implements ExprVisitor {
+	
+	/** Flag set if there were optimizations. */
 	private boolean optimized;
 	
 	public void visitUnit(Unit u) {
@@ -46,7 +52,7 @@ class Optimizer implements ExprVisitor {
 			}
 		}
 	}
-
+	
 	public void visitFunc(Func f) {
 		if (f.body != null) {
 			f.body = (Expr)f.body.accept(this, f);
@@ -67,234 +73,132 @@ class Optimizer implements ExprVisitor {
 	public Object visitAStore(AStoreExpr astore, Object scope) {
 		astore.arrayexpr = (Expr)astore.arrayexpr.accept(this, scope);
 		astore.indexexpr = (Expr)astore.indexexpr.accept(this, scope);
-		astore.assignexpr = (Expr)astore.assignexpr.accept(this, scope);
+		astore.assignexpr = (Expr)astore.accept(this, scope);
 		return astore;
 	}
 
 	public Object visitAssign(AssignExpr assign, Object scope) {
-		assign.expr = (Expr)assign.expr.accept(this, scope);
+		assign.expr = (Expr)assign.accept(this, scope);
 		return assign;
 	}
 
 	/**
 	 * CF:
-	 *   const op const   =>   const
+	 *   const op const  =>  const
 	 */
 	public Object visitBinary(BinaryExpr binary, Object scope) {
 		binary.lvalue = (Expr)binary.lvalue.accept(this, scope);
 		binary.rvalue = (Expr)binary.rvalue.accept(this, scope);
-		if (binary.lvalue.getClass() == ConstExpr.class
-		 && binary.rvalue.getClass() == ConstExpr.class) {
-			// optimize if both constants
-			Object lval = ((ConstExpr)binary.lvalue).value;
-			Object rval = ((ConstExpr)binary.rvalue).value;
-			if (lval == null || rval == null) {
-				if (binary.operator == '=') {
-					optimized = true;
-					if (lval == rval) return new ConstExpr(new Integer(0));
-					else return new ConstExpr(new Integer(1));
-				} else {
-					// warn about operation with null
-				}
-			} else if (lval.getClass() == Integer.class) {
-				switch (binary.operator) {
-					case '+':
-						lval = new Integer(((Integer)lval).intValue() + ((Integer)rval).intValue());
-						break;
-					case '-':
-						lval = new Integer(((Integer)lval).intValue() - ((Integer)rval).intValue());
-						break;
-					case '*':
-						lval = new Integer(((Integer)lval).intValue() * ((Integer)rval).intValue());
-						break;
-					case '/':
-						if (((Integer)rval).intValue() != 0) {
-							lval = new Integer(((Integer)lval).intValue() / ((Integer)rval).intValue());
-						} else {
-							return binary;
-						}
-						break;
-					case '%':
-						if (((Integer)rval).intValue() != 0) {
-							lval = new Integer(((Integer)lval).intValue() % ((Integer)rval).intValue());
-						} else {
-							return binary;
-						}
-						break;
-					case '=':
-						if (lval.equals(rval)) {
-							lval = new Integer(0);
-						} else if (((Integer)lval).intValue() < ((Integer)rval).intValue()) {
-							lval = new Integer(-1);
-						} else {
-							lval = new Integer(1);
-						}
-						break;
-					case '&':
-						lval = new Integer(((Integer)lval).intValue() & ((Integer)rval).intValue());
-						break;
-					case '|':
-						lval = new Integer(((Integer)lval).intValue() | ((Integer)rval).intValue());
-						break;
-					case '^':
-						lval = new Integer(((Integer)lval).intValue() ^ ((Integer)rval).intValue());
-						break;
-					case Tokenizer.TT_LTLT:
-						lval = new Integer(((Integer)lval).intValue() << ((Integer)rval).intValue());
-						break;
-					case Tokenizer.TT_GTGT:
-						lval = new Integer(((Integer)lval).intValue() >> ((Integer)rval).intValue());
-						break;
-					case Tokenizer.TT_GTGTGT:
-						lval = new Integer(((Integer)lval).intValue() >>> ((Integer)rval).intValue());
-						break;
-				}
-			} else if (lval.getClass() == Long.class) {
-				switch (binary.operator) {
-					case '+':
-						lval = new Long(((Long)lval).longValue() + ((Long)rval).longValue());
-						break;
-					case '-':
-						lval = new Long(((Long)lval).longValue() - ((Long)rval).longValue());
-						break;
-					case '*':
-						lval = new Long(((Long)lval).longValue() * ((Long)rval).longValue());
-						break;
-					case '/':
-						if (((Long)rval).longValue() != 0) {
-							lval = new Long(((Long)lval).longValue() / ((Long)rval).longValue());
-						} else {
-							return binary;
-						}
-						break;
-					case '%':
-						if (((Long)rval).longValue() != 0) {
-							lval = new Long(((Long)lval).longValue() % ((Long)rval).longValue());
-						} else {
-							return binary;
-						}
-						break;
-					case '=':
-						if (lval.equals(rval)) {
-							lval = new Integer(0);
-						} else if (((Long)lval).longValue() < ((Long)rval).longValue()) {
-							lval = new Integer(-1);
-						} else {
-							lval = new Integer(1);
-						}
-						break;
-					case '&':
-						lval = new Long(((Long)lval).longValue() & ((Long)rval).longValue());
-						break;
-					case '|':
-						lval = new Long(((Long)lval).longValue() | ((Long)rval).longValue());
-						break;
-					case '^':
-						lval = new Long(((Long)lval).longValue() ^ ((Long)rval).longValue());
-						break;
-					case Tokenizer.TT_LTLT:
-						lval = new Long(((Long)lval).longValue() << ((Integer)rval).intValue());
-						break;
-					case Tokenizer.TT_GTGT:
-						lval = new Long(((Long)lval).longValue() >> ((Integer)rval).intValue());
-						break;
-					case Tokenizer.TT_GTGTGT:
-						lval = new Long(((Long)lval).longValue() >>> ((Integer)rval).intValue());
-						break;
-				}
-			} else if (lval.getClass() == Float.class) {
-				switch (binary.operator) {
-					case '+':
-						lval = new Float(((Float)lval).floatValue() + ((Float)rval).floatValue());
-						break;
-					case '-':
-						lval = new Float(((Float)lval).floatValue() - ((Float)rval).floatValue());
-						break;
-					case '*':
-						lval = new Float(((Float)lval).floatValue() * ((Float)rval).floatValue());
-						break;
-					case '/':
-						lval = new Float(((Float)lval).floatValue() / ((Float)rval).floatValue());
-						break;
-					case '%':
-						lval = new Float(((Float)lval).floatValue() % ((Float)rval).floatValue());
-						break;
-					case '=':
-						if (lval.equals(rval)) {
-							lval = new Integer(0);
-						} else if (((Float)lval).longValue() < ((Float)rval).longValue()) {
-							lval = new Integer(-1);
-						} else {
-							lval = new Integer(1);
-						}
-						break;
-				}
-			} else if (lval.getClass() == Double.class) {
-				switch (binary.operator) {
-					case '+':
-						lval = new Double(((Double)lval).doubleValue() + ((Double)rval).doubleValue());
-						break;
-					case '-':
-						lval = new Double(((Double)lval).doubleValue() - ((Double)rval).doubleValue());
-						break;
-					case '*':
-						lval = new Double(((Double)lval).doubleValue() * ((Double)rval).doubleValue());
-						break;
-					case '/':
-						lval = new Double(((Double)lval).doubleValue() / ((Double)rval).doubleValue());
-						break;
-					case '%':
-						lval = new Double(((Double)lval).doubleValue() % ((Double)rval).doubleValue());
-						break;
-					case '=':
-						if (lval.equals(rval)) {
-							lval = new Integer(0);
-						} else if (((Long)lval).longValue() < ((Long)rval).longValue()) {
-							lval = new Integer(-1);
-						} else {
-							lval = new Integer(1);
-						}
-						break;
-				}
-			} else if (lval.getClass() == Boolean.class) {
-				switch (binary.operator) {
-					case '&':
-						lval = (((Boolean)lval).booleanValue() & ((Boolean)rval).booleanValue()
-								? Boolean.TRUE : Boolean.FALSE);
-						break;
-					case '|':
-						lval = (((Boolean)lval).booleanValue() | ((Boolean)rval).booleanValue()
-								? Boolean.TRUE : Boolean.FALSE);
-						break;
-					case '^':
-						lval = (((Boolean)lval).booleanValue() ^ ((Boolean)rval).booleanValue()
-								? Boolean.TRUE : Boolean.FALSE);
-						break;
-					case '=':
-						if (lval.equals(rval)) {
-							lval = new Integer(0);
-						} else {
-							lval = new Integer(1);
-						}
-						break;
-				}
-			}
+		if (binary.lvalue instanceof ConstExpr && binary.rvalue instanceof ConstExpr) {
+			Object c1 = ((ConstExpr)binary.lvalue).value;
+			Object c2 = ((ConstExpr)binary.rvalue).value;
 			optimized = true;
-			return new ConstExpr(lval);
-		} else if (binary.operator == '=' && binary.rvalue.getClass() == ConstExpr.class) {
-			Object cnst = ((ConstExpr)binary.rvalue).value;
-			if (new Integer(0).equals(cnst)) {
-				// if (val <> 0)   =>   if (val)
-				optimized = true;
-				return binary.lvalue;
+			switch (binary.operator) {
+				case '+':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() + ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() + ((Long)c2).longValue());
+					} else if (c1 instanceof Float) {
+						c1 = new Float(((Float)c1).floatValue() + ((Float)c2).floatValue());
+					} else if (c1 instanceof Double) {
+						c1 = new Double(((Double)c1).doubleValue() + ((Double)c2).doubleValue());
+					}
+					break;
+				case '-':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() - ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() - ((Long)c2).longValue());
+					} else if (c1 instanceof Float) {
+						c1 = new Float(((Float)c1).floatValue() - ((Float)c2).floatValue());
+					} else if (c1 instanceof Double) {
+						c1 = new Double(((Double)c1).doubleValue() - ((Double)c2).doubleValue());
+					}
+					break;
+				case '*':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() * ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() * ((Long)c2).longValue());
+					} else if (c1 instanceof Float) {
+						c1 = new Float(((Float)c1).floatValue() * ((Float)c2).floatValue());
+					} else if (c1 instanceof Double) {
+						c1 = new Double(((Double)c1).doubleValue() * ((Double)c2).doubleValue());
+					}
+					break;
+				case '/':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() / ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() / ((Long)c2).longValue());
+					} else if (c1 instanceof Float) {
+						c1 = new Float(((Float)c1).floatValue() / ((Float)c2).floatValue());
+					} else if (c1 instanceof Double) {
+						c1 = new Double(((Double)c1).doubleValue() / ((Double)c2).doubleValue());
+					}
+					break;
+				case '%':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() % ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() % ((Long)c2).longValue());
+					} else if (c1 instanceof Float) {
+						c1 = new Float(((Float)c1).floatValue() % ((Float)c2).floatValue());
+					} else if (c1 instanceof Double) {
+						c1 = new Double(((Double)c1).doubleValue() % ((Double)c2).doubleValue());
+					}
+					break;
+				case '&':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() & ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() & ((Long)c2).longValue());
+					} else if (c1 instanceof Boolean) {
+						c1 = c1.equals(Boolean.TRUE) ? c2 : Boolean.FALSE;
+					}
+					break;
+				case '|':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() | ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() | ((Long)c2).longValue());
+					} else if (c1 instanceof Boolean) {
+						c1 = c1.equals(Boolean.TRUE) ? Boolean.TRUE : c2;
+					}
+					break;
+				case '^':
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() ^ ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() ^ ((Long)c2).longValue());
+					} else if (c1 instanceof Boolean) {
+						c1 = c1.equals(c2) ? Boolean.FALSE : Boolean.TRUE;
+					}
+					break;
+				case Tokenizer.TT_LTLT:
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() << ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() << ((Integer)c2).intValue());
+					}
+					break;
+				case Tokenizer.TT_GTGT:
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() >> ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() >> ((Integer)c2).intValue());
+					}
+					break;
+				case Tokenizer.TT_GTGTGT:
+					if (c1 instanceof Integer) {
+						c1 = new Integer(((Integer)c1).intValue() >>> ((Integer)c2).intValue());
+					} else if (c1 instanceof Long) {
+						c1 = new Long(((Long)c1).longValue() >>> ((Integer)c2).intValue());
+					}
+					break;
 			}
-		} else if (binary.operator == '=' && binary.lvalue.getClass() == ConstExpr.class) {
-			Object cnst = ((ConstExpr)binary.lvalue).value;
-			if (new Integer(0).equals(cnst)) {
-				// if (0 <> val)   =>   if (-val)
-				optimized = true;
-				return new UnaryExpr('-', binary.rvalue);
-			}
+			return new ConstExpr(c1);
 		}
 		return binary;
 	}
@@ -332,65 +236,166 @@ class Optimizer implements ExprVisitor {
 				return block;
 		}
 	}
-
-	public Object visitCast(CastExpr cast, Object scope) {
-		cast.expr = (Expr)cast.expr.accept(this, scope);
-		return cast;
-	}
-
+	
 	/**
 	 * CF:
-	 *   cast(type) number   =>   castednumber
+	 *   cast (Number) const  =>  const
 	 */
-	public Object visitCastPrimitive(CastPrimitiveExpr cast, Object scope) {
+	public Object visitCast(CastExpr cast, Object scope) {
 		cast.expr = (Expr)cast.expr.accept(this, scope);
-		if (cast.expr.getClass() == ConstExpr.class) {
-			Object cnst = ((ConstExpr)cast.expr).value;
-			switch (cast.casttype) {
-				case CastPrimitiveExpr.I2L:
-					cnst = new Long(((Integer)cnst).longValue());
-					break;
-				case CastPrimitiveExpr.I2F:
-					cnst = new Float(((Integer)cnst).floatValue());
-					break;
-				case CastPrimitiveExpr.I2D:
-					cnst = new Double(((Integer)cnst).doubleValue());
-					break;
-				case CastPrimitiveExpr.L2I:
-					cnst = new Integer((int)((Long)cnst).longValue());
-					break;
-				case CastPrimitiveExpr.L2F:
-					cnst = new Float(((Long)cnst).floatValue());
-					break;
-				case CastPrimitiveExpr.L2D:
-					cnst = new Double(((Long)cnst).doubleValue());
-					break;
-				case CastPrimitiveExpr.F2I:
-					cnst = new Integer(((Float)cnst).intValue());
-					break;
-				case CastPrimitiveExpr.F2L:
-					cnst = new Long(((Float)cnst).longValue());
-					break;
-				case CastPrimitiveExpr.F2D:
-					cnst = new Double(((Float)cnst).doubleValue());
-					break;
-				case CastPrimitiveExpr.D2I:
-					cnst = new Integer(((Double)cnst).intValue());
-					break;
-				case CastPrimitiveExpr.D2L:
-					cnst = new Long(((Double)cnst).longValue());
-					break;
-				case CastPrimitiveExpr.D2F:
-					cnst = new Float(((Double)cnst).floatValue());
-					break;
-			}
+		if (cast.expr instanceof ConstExpr && cast.toType.isSubtypeOf(BuiltinType.NUMBER)) {
 			optimized = true;
+			Type toType = cast.toType;
+			Object cnst = ((ConstExpr)cast.expr).value;
+			if (cnst instanceof Integer) {
+				int i = ((Integer)cnst).intValue();
+				if (toType.equals(BuiltinType.DOUBLE)) {
+					cnst = new Double(i);
+				} else if (toType.equals(BuiltinType.FLOAT)) {
+					cnst = new Float(i);
+				} else if (toType.equals(BuiltinType.LONG)) {
+					cnst = new Long(i);
+				}
+			} else if (cnst instanceof Long) {
+				long l = ((Long)cnst).longValue();
+				if (toType.equals(BuiltinType.DOUBLE)) {
+					cnst = new Double(l);
+				} else if (toType.equals(BuiltinType.FLOAT)) {
+					cnst = new Float(l);
+				} else if (toType.equals(BuiltinType.INT)) {
+					cnst = new Integer((int)l);
+				}
+			} else if (cnst instanceof Float) {
+				float f = ((Float)cnst).floatValue();
+				if (toType.equals(BuiltinType.DOUBLE)) {
+					cnst = new Double(f);
+				} else if (toType.equals(BuiltinType.LONG)) {
+					cnst = new Long((long)f);
+				} else if (toType.equals(BuiltinType.INT)) {
+					cnst = new Integer((int)f);
+				}
+			} else if (cnst instanceof Double) {
+				double d = ((Double)cnst).doubleValue();
+				if (toType.equals(BuiltinType.FLOAT)) {
+					cnst = new Float(d);
+				} else if (toType.equals(BuiltinType.LONG)) {
+					cnst = new Long((long)d);
+				} else if (toType.equals(BuiltinType.INT)) {
+					cnst = new Integer((int)d);
+				}
+			}
 			return new ConstExpr(cnst);
 		}
 		return cast;
 	}
 
-	public Object visitConst(ConstExpr cexpr, Object scope) {
+	/**
+	 * CF:
+	 *  const op const  =>  const
+	 */
+	public Object visitComparison(ComparisonExpr cmp, Object scope) {
+		cmp.lvalue = (Expr)cmp.lvalue.accept(this, scope);
+		cmp.rvalue = (Expr)cmp.rvalue.accept(this, scope);
+		if (cmp.lvalue instanceof ConstExpr && cmp.rvalue instanceof ConstExpr) {
+			Object c1 = ((ConstExpr)cmp.lvalue).value;
+			Object c2 = ((ConstExpr)cmp.rvalue).value;
+			optimized = true;
+			switch (cmp.operator) {
+				case Tokenizer.TT_EQEQ:
+					if (c1 == null) {
+						c1 = (c2 == null) ? Boolean.TRUE : Boolean.FALSE;
+					} else {
+						c1 = (c1.equals(c2)) ? Boolean.TRUE : Boolean.FALSE;
+					}
+					break;
+				case Tokenizer.TT_NOTEQ:
+					if (c1 == null) {
+						c1 = (c2 == null) ? Boolean.FALSE : Boolean.TRUE;
+					} else {
+						c1 = (c1.equals(c2)) ? Boolean.FALSE : Boolean.TRUE;
+					}
+					break;
+				case '<':
+					if (c1 instanceof Integer) {
+						c1 = ((Integer)c1).intValue() < ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Long) {
+						c1 = ((Long)c1).longValue() < ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float) {
+						c1 = ((Float)c1).floatValue() < ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Integer) {
+						c1 = ((Double)c1).doubleValue() < ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					}
+					break;
+				case '>':
+					if (c1 instanceof Integer) {
+						c1 = ((Integer)c1).intValue() > ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Long) {
+						c1 = ((Long)c1).longValue() > ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float) {
+						c1 = ((Float)c1).floatValue() > ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Integer) {
+						c1 = ((Double)c1).doubleValue() > ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					}
+					break;
+				case Tokenizer.TT_LTEQ:
+					if (c1 instanceof Integer) {
+						c1 = ((Integer)c1).intValue() <= ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Long) {
+						c1 = ((Long)c1).longValue() <= ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float) {
+						c1 = ((Float)c1).floatValue() <= ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Integer) {
+						c1 = ((Double)c1).doubleValue() <= ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					}
+					break;
+				case Tokenizer.TT_GTEQ:
+					if (c1 instanceof Integer) {
+						c1 = ((Integer)c1).intValue() >= ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Long) {
+						c1 = ((Long)c1).longValue() >= ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float) {
+						c1 = ((Float)c1).floatValue() >= ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Integer) {
+						c1 = ((Double)c1).doubleValue() >= ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					}
+					break;
+			}
+			return new ConstExpr(c1);
+		}
+		return cmp;
+	}
+
+	/**
+	 * CF:
+	 *   "str"+const  =>  "strconst"
+	 */
+	public Object visitConcat(ConcatExpr concat, Object scope) {
+		Vector exprs = concat.exprs;
+		for (int i=0; i<exprs.size(); i++) {
+			Expr e = (Expr)((Expr)exprs.elementAt(i)).accept(this, scope);
+			exprs.setElementAt(e, i);
+		}
+		int i=0;
+		while (i < exprs.size()-1) {
+			Expr e1 = (Expr)exprs.elementAt(i);
+			Expr e2 = (Expr)exprs.elementAt(i+1);
+			if (e1 instanceof ConstExpr && e2 instanceof ConstExpr) {
+				Object o1 = ((ConstExpr)e1).value;
+				Object o2 = ((ConstExpr)e2).value;
+				if (!(o1 instanceof Func) && !(o2 instanceof Func)) {
+					exprs.setElementAt(new ConstExpr(String.valueOf(o1)+o2), i);
+					exprs.removeElementAt(i+1);
+				} else {
+					i++;
+				}
+			} else {
+				i++;
+			}
+		}
+		return concat;
+	}
+
+	public Object visitConst(ConstExpr cexpr, Object data) {
 		return cexpr;
 	}
 
@@ -401,7 +406,7 @@ class Optimizer implements ExprVisitor {
 	 */
 	public Object visitDiscard(DiscardExpr disc, Object scope) {
 		disc.expr = (Expr)disc.expr.accept(this, scope);
-		if (disc.expr.getClass() == ConstExpr.class || disc.expr.getClass() == VarExpr.class) {
+		if (disc.expr instanceof ConstExpr || disc.expr instanceof VarExpr) {
 			optimized = true;
 			return new NoneExpr();
 		}
@@ -410,34 +415,42 @@ class Optimizer implements ExprVisitor {
 
 	/**
 	 * CF:
-	 *   to_str(const)   =>   "const"
-	 *   strcat("str1", "str2")   =>   "str1str2"
-	 *   remove calls to constant/empty functions
+	 *  do expr; while (false)  =>  expr;
+	 */
+	public Object visitDoWhile(DoWhileExpr wexpr, Object scope) {
+		wexpr.condition = (Expr)wexpr.condition.accept(this, scope);
+		wexpr.body = (Expr)wexpr.body.accept(this, scope);
+		if (wexpr.condition instanceof ConstExpr) {
+			Object cnst = ((ConstExpr)wexpr.condition).value;
+			if (cnst.equals(Boolean.FALSE)) {
+				optimized = true;
+				return wexpr.body;
+			}
+		}
+		return wexpr;
+	}
+
+	/**
+	 * CF:
+	 *   const.tostr()  =>  "const"
+	 *   remove calls to empty and constant functions
 	 */
 	public Object visitFCall(FCallExpr fcall, Object scope) {
 		fcall.fload = (Expr)fcall.fload.accept(this, scope);
 		for (int i=0; i<fcall.args.length; i++) {
 			fcall.args[i] = (Expr)fcall.args[i].accept(this, scope);
 		}
-		if (fcall.fload.getClass() == ConstExpr.class) {
+		if (fcall.fload instanceof ConstExpr) {
 			Func f = (Func)((ConstExpr)fcall.fload).value;
-			if (f.signature.equals("to_str")
-			 && fcall.args[0].getClass() == ConstExpr.class) {
+			if (f.signature.equals("Any.tostr") && fcall.args[0] instanceof ConstExpr) {
+				f.hits--;
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
-				if (cnst == null || cnst.getClass() != Func.class) {
-					f.hits--;
+				if (!(cnst instanceof Func)) {
 					optimized = true;
 					return new ConstExpr(String.valueOf(cnst));
 				}
-			} else if (f.signature.equals("strcat")
-			        && fcall.args[0].getClass() == ConstExpr.class
-					&& fcall.args[1].getClass() == ConstExpr.class) {
-				Object c1 = ((ConstExpr)fcall.args[0]).value;
-				Object c2 = ((ConstExpr)fcall.args[1]).value;
-				f.hits--;
-				optimized = true;
-				return new ConstExpr(String.valueOf(c1).concat(String.valueOf(c2)));
-			} else if (f.body != null && (f.body.getClass() == ConstExpr.class || f.body.getClass() == NoneExpr.class)) {
+			}
+			if (f.body != null && (f.body instanceof ConstExpr || f.body instanceof NoneExpr)) {
 				// we don't need to call function but we still
 				// need to calculate its arguments
 				f.hits--;
@@ -455,95 +468,32 @@ class Optimizer implements ExprVisitor {
 
 	/**
 	 * DCE:
-	 *   if (true)  expr1 else expr2   =>   expr1
-	 *   if (false) expr1 else expr2   =>   expr2
+	 *  if (true) e1 else e2   =>  e1
+	 *  if (false) e1 else e2  =>  e2
 	 * CF:
-	 *   if (if? true else false) expr1 else expr2  =>  if? expr1 else expr2
-	 *   // the latter is common due to implementation of comparison
+	 *  if (!expr) e1 else e2  =>  if (expr) e2 else e1
 	 */
-	public Object visitIf(IfExpr expr, Object scope) {
-		//optimize children
-		expr.condition = (Expr)expr.condition.accept(this, scope);
-		expr.ifexpr = (Expr)expr.ifexpr.accept(this, scope);
-		expr.elseexpr = (Expr)expr.elseexpr.accept(this, scope);
-		//test condition
-		if (expr.condition.getClass() == ConstExpr.class) {
+	public Object visitIf(IfExpr ifexpr, Object scope) {
+		ifexpr.condition = (Expr)ifexpr.condition.accept(this, scope);
+		ifexpr.ifexpr = (Expr)ifexpr.ifexpr.accept(this, scope);
+		ifexpr.elseexpr = (Expr)ifexpr.elseexpr.accept(this, scope);
+		if (ifexpr.condition instanceof ConstExpr) {
 			optimized = true;
-			Object cond = ((ConstExpr)expr.condition).value;
-			switch (expr.type) {
-				case IfExpr.TRUE:
-					if (Boolean.TRUE.equals(cond)) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.FALSE:
-					if (Boolean.FALSE.equals(cond)) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.NULL:
-					if (cond == null) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.NOTNULL:
-					if (cond != null) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.ZERO:
-					if (((Integer)cond).intValue() == 0) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.NOTZERO:
-					if (((Integer)cond).intValue() != 0) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.NEG:
-					if (((Integer)cond).intValue() < 0) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.NOTNEG:
-					if (((Integer)cond).intValue() >= 0) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.POS:
-					if (((Integer)cond).intValue() > 0) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-				case IfExpr.NOTPOS:
-					if (((Integer)cond).intValue() <= 0) {
-						return expr.ifexpr;
-					} else {
-						return expr.elseexpr;
-					}
-			}
-		} else if (expr.condition.getClass() == IfExpr.class) {
-			IfExpr innerif = (IfExpr)expr.condition;
-			if (innerif.ifexpr.getClass() == ConstExpr.class
-			 && ((ConstExpr)innerif.ifexpr).value == Boolean.TRUE
-			 && innerif.elseexpr.getClass() == ConstExpr.class
-			 && ((ConstExpr)innerif.elseexpr).value == Boolean.FALSE) {
-				expr.condition = innerif.condition;
-				expr.type = innerif.type;
-				optimized = true;
+			if (((ConstExpr)ifexpr.condition).value.equals(Boolean.TRUE)) {
+				return ifexpr.ifexpr;
+			} else {
+				return ifexpr.elseexpr;
 			}
 		}
-		return expr;
+		if (ifexpr.condition instanceof UnaryExpr) {
+			optimized = true;
+			ifexpr.condition = ((UnaryExpr)ifexpr.condition).expr;
+			Expr tmp = ifexpr.ifexpr;
+			ifexpr.ifexpr = ifexpr.elseexpr;
+			ifexpr.elseexpr = tmp;
+			return ifexpr;
+		}
+		return ifexpr;
 	}
 
 	public Object visitNewArray(NewArrayExpr newarray, Object scope) {
@@ -563,59 +513,74 @@ class Optimizer implements ExprVisitor {
 		return none;
 	}
 
-	/** CF:
-	 *   !const   =>   const
-	 *   -const   =>   const
+	/**
+	 * CF:
+	 *  +expr   =>  expr
+	 *  -const  =>  const
+	 *  ~const  =>  const
+	 *  !const  =>  const
 	 */
 	public Object visitUnary(UnaryExpr unary, Object scope) {
 		unary.expr = (Expr)unary.expr.accept(this, scope);
-		if (unary.expr.getClass() == ConstExpr.class) {
+		if (unary.operator == '+') {
+			optimized = true;
+			return unary.expr;
+		}
+		if (unary.expr instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)unary.expr).value;
-			if (unary.operator == '!') {
-				optimized = true;
-				return new ConstExpr(cnst.equals(Boolean.TRUE) ? Boolean.FALSE : Boolean.TRUE);
-			} else if (unary.operator == '-') {
-				if (cnst.getClass() == Integer.class) {
-					int oldval = ((Integer)cnst).intValue();
-					optimized = true;
-					return new ConstExpr(new Integer(-oldval));
-				} else if (cnst.getClass() == Long.class) {
-					long oldval = ((Long)cnst).longValue();
-					optimized = true;
-					return new ConstExpr(new Long(-oldval));
-				} else if (cnst.getClass() == Float.class) {
-					float oldval = ((Float)cnst).floatValue();
-					optimized = true;
-					return new ConstExpr(new Float(-oldval));
-				} else if (cnst.getClass() == Double.class) {
-					double oldval = ((Double)cnst).doubleValue();
-					optimized = true;
-					return new ConstExpr(new Double(-oldval));
-				}
+			switch (unary.operator) {
+				case '!':
+					if (cnst.equals(Boolean.TRUE)) cnst = Boolean.FALSE;
+					else cnst = Boolean.TRUE;
+					break;
+				case '-':
+					if (cnst instanceof Integer) {
+						int i = ((Integer)cnst).intValue();
+						cnst = new Integer(-i);
+					} else if (cnst instanceof Long) {
+						long l = ((Long)cnst).longValue();
+						cnst = new Long(-l);
+					} else if (cnst instanceof Float) {
+						float f = ((Float)cnst).floatValue();
+						cnst = new Float(-f);
+					} else if (cnst instanceof Double) {
+						double d = ((Double)cnst).doubleValue();
+						cnst = new Double(-d);
+					}
+					break;
+				case '~':
+					if (cnst instanceof Integer) {
+						int i = ((Integer)cnst).intValue();
+						cnst = new Integer(~i);
+					} else if (cnst instanceof Long) {
+						long l = ((Long)cnst).longValue();
+						cnst = new Long(~l);
+					}
+					break;
 			}
+			optimized = true;
+			return new ConstExpr(cnst);
 		}
 		return unary;
 	}
-
+	
 	public Object visitVar(VarExpr vexpr, Object scope) {
 		return vexpr;
 	}
-
+	
 	/**
 	 * DCE:
 	 *  while (false) expr;   =>   none
 	 */
 	public Object visitWhile(WhileExpr wexpr, Object scope) {
-		//optimize children
 		wexpr.condition = (Expr)wexpr.condition.accept(this, scope);
 		wexpr.body = (Expr)wexpr.body.accept(this, scope);
-		//test condition
-		if (wexpr.condition.getClass() == ConstExpr.class) {
-			ConstExpr boolConst = (ConstExpr)wexpr.condition;
-			if (boolConst.value.equals(Boolean.FALSE)) {
+		if (wexpr.condition instanceof ConstExpr) {
+			Object cnst = ((ConstExpr)wexpr.condition).value;
+			if (cnst.equals(Boolean.FALSE)) {
 				optimized = true;
 				return new NoneExpr();
-			} //TODO: while(true) cycle
+			}
 		}
 		return wexpr;
 	}

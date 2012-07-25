@@ -111,7 +111,7 @@ public class NEC extends NativeApp {
 		}
 		if (unit == null) return -1;
 		//optimizing
-		// if (optimize) new Optimizer().visitUnit(unit);
+		if (optimize) new Optimizer().visitUnit(unit);
 		//writing object code
 		new VarIndexer().visitUnit(unit);
 		EAsmWriter wr = new EAsmWriter();

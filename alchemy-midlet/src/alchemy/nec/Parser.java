@@ -147,8 +147,7 @@ public class Parser {
 					throw new ParseException("Constant name expected after 'const'");
 				String name = t.svalue;
 				expect('=');
-				// FIXME: Expr expr = (Expr)parseExpr(unit).accept(new Optimizer(), unit);
-				Expr expr = parseExpr(unit);
+				Expr expr = (Expr)parseExpr(unit).accept(new Optimizer(), unit);
 				if (!(expr instanceof ConstExpr))
 					throw new ParseException("Could not evaluate value of global constant");
 				Var cnst = new Var(name, expr.rettype());
@@ -172,7 +171,10 @@ public class Parser {
 					case ';':
 						break;
 					case '<': { // defining subtype
-						unit.putType(new NamedType(typename, parseType(unit)));
+						Type superType = parseType(unit);
+						if (superType instanceof BuiltinType && !superType.equals(BuiltinType.ANY))
+							throw new ParseException("Cannot make a subtype of builtin type.");
+						unit.putType(new NamedType(typename, superType));
 						break;
 					}
 					case '{': { // structure type
@@ -459,11 +461,7 @@ public class Parser {
 			} else if ("+-/*%".indexOf(op) >= 0) {
 				if (ltype.isSubtypeOf(BuiltinType.STRING)) {
 					// string concatenation
-					if (!right.rettype().equals(BuiltinType.STRING)) {
-						Func to_str = unit.getFunc("Any.tostr");
-						to_str.hits++;
-						right = new FCallExpr(new ConstExpr(to_str), new Expr[] { cast(right, BuiltinType.ANY) });
-					}
+					right = cast(right, BuiltinType.ANY);
 					if (left instanceof ConcatExpr) {
 						((ConcatExpr)left).exprs.addElement(right);
 						newexpr = left;
