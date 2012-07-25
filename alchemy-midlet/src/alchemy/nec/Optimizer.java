@@ -73,12 +73,12 @@ public class Optimizer implements ExprVisitor {
 	public Object visitAStore(AStoreExpr astore, Object scope) {
 		astore.arrayexpr = (Expr)astore.arrayexpr.accept(this, scope);
 		astore.indexexpr = (Expr)astore.indexexpr.accept(this, scope);
-		astore.assignexpr = (Expr)astore.accept(this, scope);
+		astore.assignexpr = (Expr)astore.assignexpr.accept(this, scope);
 		return astore;
 	}
 
 	public Object visitAssign(AssignExpr assign, Object scope) {
-		assign.expr = (Expr)assign.accept(this, scope);
+		assign.expr = (Expr)assign.expr.accept(this, scope);
 		return assign;
 	}
 
@@ -214,7 +214,7 @@ public class Optimizer implements ExprVisitor {
 		while (i < block.exprs.size()) {
 			Expr ex = (Expr)block.exprs.elementAt(i);
 			ex = (Expr)ex.accept(this, block);
-			if (ex.getClass() == NoneExpr.class) {
+			if (ex instanceof NoneExpr) {
 				block.exprs.removeElementAt(i);
 			} else {
 				block.exprs.setElementAt(ex, i);
