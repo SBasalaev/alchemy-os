@@ -1,40 +1,36 @@
-// operations on strings
-// and string buffers
+use "/inc/string.eh"
+use "/inc/strbuf.eh"
 
-type StrBuf;
+const to_str = `Any.tostr`
 
-def to_str(a: Any): String;
+const strlen = `String.len`
+const strchr = `String.ch`
+const strindex = `String.indexof`
+const strlindex = `String.lindexof`
+const strstr = `String.find`
+const substr = `String.substr`
+const strucase = `String.ucase`
+const strlcase = `String.lcase`
+const strcat = `String.concat`
+const strcmp = `String.cmp`
+const strtrim = `String.trim`
+const strsplit = `String.split`
+const sprintf = `String.format`
 
-def strlen(s: String): Int;
-def strchr(s: String, at: Int): Int;
-def strindex(s: String, ch: Int): Int;
-def strlindex(s: String, ch: Int): Int;
-def strstr(s: String, sub: String): Int;
-def substr(s: String, from: Int, to: Int): String;
-def strucase(s: String): String;
-def strlcase(s: String): String;
-def strcat(s1: String, s2: String): String;
-def strcmp(s1: String, s2: String): Int;
-def strtrim(s: String): String;
-def strsplit(s: String, ch: Int): [String];
-def sprintf(fmt: String, args: Array): String;
+const strchars = `String.chars`
+const utfbytes = `String.utfbytes`
 
-def strchars(s1: String): CArray;
-def utfbytes(s: String): BArray;
-def ca2str(ca: CArray): String;
-def ba2utf(ba: BArray): String;
+const parsei = `String.toint`
+const parsel = `String.tolong`
+const parsef = `String.tofloat`
+const parsed = `String.todouble`
 
-def parsei(s: String): Int;
-def parsel(s: String): Long;
-def parsef(s: String): Float;
-def parsed(s: String): Double;
-
-def new_sb(): StrBuf;
-def sb_append(sb: StrBuf, a: Any): StrBuf;
-def sb_addch(sb: StrBuf, ch: Int): StrBuf;
-def sb_delete(sb: StrBuf, from: Int, to: Int): StrBuf;
-def sb_delch(sb: StrBuf, ch: Int): StrBuf;
-def sb_insert(sb: StrBuf, at: Int, a: Any): StrBuf;
-def sb_insch(sb: StrBuf, at: Int, ch: Int): StrBuf;
-def sb_setch(sb: StrBuf, at: Int, ch: Int): StrBuf;
-def sb_len(sb: StrBuf): Int;
+const new_sb = new_strbuf
+const sb_append = `StrBuf.append`
+const sb_addch = `StrBuf.addch`
+const sb_delete = `StrBuf.delete`
+const sb_delch = `StrBuf.delch`
+const sb_insert = `StrBuf.insert`
+const sb_insch = `StrBuf.insch`
+const sb_setch = `StrBuf.setch`
+const sb_len = `StrBuf.len`

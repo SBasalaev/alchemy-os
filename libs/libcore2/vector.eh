@@ -1,14 +1,14 @@
-// vector - growable array
+use "/inc/list.eh"
 
-type Vector;
+type Vector < List;
 
-def new_vector(): Vector;
-def v_size(v: Vector): Int;
-def v_get(v: Vector, at: Int): Any;
-def v_set(v: Vector, at: Int, a: Any);
-def v_remove(v: Vector, at: Int);
-def v_add(v: Vector, a: Any);
-def v_insert(v: Vector, at: Int, a: Any);
-def v_indexof(v: Vector, a: Any): Int;
-def v_lindexof(v: Vector, a: Any): Int;
-def v_toarray(v: Vector): [Any];
+def new_vector(): Vector = cast (Vector) new_list()
+const v_size = `List.size`
+const v_get = `List.get`
+const v_set = `List.set`
+const v_remove = `List.remove`
+const v_add = `List.add`
+const v_insert = `List.insert`
+const v_indexof = `List.indexof`
+const v_lindexof = `List.lindexof`
+const v_toarray = `List.toarray`

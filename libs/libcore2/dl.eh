@@ -1,6 +1,5 @@
 //dynamic loading
 
-type Library < Any;
+use "/inc/dl.eh"
 
-def loadlibrary(libname: String): Library;
-def loadfunc(lib: Library, sig: String) : Function;
+const loadfunc = `Library.getfunc`

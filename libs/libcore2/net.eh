@@ -1,5 +1,5 @@
 //internet utilities
 
-use "io";
+use "/int/io.eh"
 
-def netread(url: String): IStream;
+const netread = readurl

@@ -1,9 +1,11 @@
 //work with hashtables
 
-type Hashtable;
+use "/inc/dict.eh"
 
-def new_ht(): Hashtable;
-def ht_put(ht: Hashtable, k: Any, v: Any);
-def ht_get(ht: Hashtable, k: Any): Any;
-def ht_rm(ht: Hashtable, k: Any);
-def ht_keys(ht: Hashtable): [Any];
+type Hashtable < Dict;
+
+def new_ht(): Hashtable = cast (Hashtable) new_dict()
+const ht_put = `Dict.set`
+const ht_get = `Dict.get`
+const ht_rm = `Dict.remove`
+const ht_keys = `Dict.keys`

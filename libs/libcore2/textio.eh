@@ -1,47 +1,25 @@
 // text I/O routines
 
-use "io.eh"
+use "/inc/textio.eh"
 
-type Reader {
-  in: IStream,
-  dec: (IStream):Int
-}
+const freadch = `Reader.read`
+const freadstr = `Reader.readstr`
+const freadca = `Reader.readarray`
+const freadline = `Reader.readline`
 
-type Writer {
-  out: OStream,
-  enc: (OStream,Int)
-}
+def readstr(len: Int): String = utfreader(stdin()).readstr(len)
+def readca(ca: CArray, ofs: Int, len: Int) = utfreader(stdin()).readarray(ca, ofs, len)
 
-def new_reader(in: IStream, dec: (IStream):Int): Reader;
-def new_writer(out: OStream, enc: (OStream,Int)): Writer;
+const fwritech = `Writer.write`
+const fwritestr = `Writer.print`
+const fwriteca = `Writer.writearray`
 
-def freadch(r: Reader): Int;
-def freadstr(r: Reader, len: Int): String;
-def freadca(r: Reader, ca: CArray, ofs: Int, len: Int): Int;
-def freadline(r: Reader): String;
-
-def readstr(len: Int): String;
-def readca(ca: CArray, ofs: Int, len: Int);
-def readline(): String;
-
-def fwritech(w: Writer, ch: Int);
-def fwritestr(w: Writer, str: String);
-def fwriteca(w: Writer, ca: CArray, ofs: Int, len: Int);
-
-def writech(ch: Int);
-const writestr = print;
-def writeca(ca: CArray, ofs: Int, len: Int);
-
-/* UTF-8 encoding */
-def utfreader(in: IStream): Reader;
-def utfwriter(out: OStream): Writer;
+def writech(ch: Int) = utfwriter(stdout()).write(ch)
+const writestr = print
+def writeca(ca: CArray, ofs: Int, len: Int) = utfwriter(stdout()).writearray(ca, ofs, len)
 
 def readch_utf8(in: IStream): Int;
 def writech_utf8(out: OStream, ch: Int);
-
-/* ISO 8859-1 encoding. */
-def latin1reader(in: IStream): Reader;
-def latin1writer(out: OStream): Writer;
 
 def readch_latin1(in: IStream): Int;
 def writech_latin1(out: OStream, ch: Int);
