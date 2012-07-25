@@ -27,7 +27,7 @@ def String.concat(str: String): String;
 def String.cmp(str: String): Int;
 def String.trim(): String;
 def String.split(ch: Int): [String];
-def String.format(args: [Any]): String;
+def String.format(args: Array): String;
 def String.chars(): CArray;
 def String.utfbytes(): BArray;
 

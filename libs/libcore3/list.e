@@ -5,6 +5,7 @@
 
 use "sys.eh"
 use "strbuf.eh"
+use "string.eh"
 
 type List {
   size: Int,
@@ -32,7 +33,6 @@ def List.set(at: Int, val: Any) {
   if (at >= 0 && at < this.size)
     this.data[at] = val
 }
-
 
 def List.insert(at: Int, val: Any) {
   var size = this.size

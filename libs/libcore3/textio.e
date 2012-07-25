@@ -27,7 +27,7 @@ def Reader.readarray(buf: CArray, ofs: Int, len: Int): Int {
     var n = 0
     var ch = this.read()
     while (ch >= 0 && n < len) {
-      ca[ofs+n] = ch
+      buf[ofs+n] = ch
       n = n+1
       ch = this.read()
     }
@@ -103,7 +103,7 @@ def Writer.writearray(buf: CArray, ofs: Int, len: Int) {
 }
 
 def Writer.print(str: String) {
-  var chars = str.chars
+  var chars = str.chars()
   this.writearray(chars, 0, chars.len)
 }
 
@@ -172,7 +172,7 @@ def utfwriter(out: OStream): Writer = new_writer(out, writech_utf8)
 def readch_latin1(in: IStream): Int = in.read()
 def writech_latin1(out: OStream, ch: Int) = out.write(ch)
 
-def latin1reader(in: IStream): Reader = new_reader(out, readch_latin1)
+def latin1reader(in: IStream): Reader = new_reader(in, readch_latin1)
 def latin1writer(out: OStream): Writer = new_writer(out, writech_latin1)
 
 /* UTF-16 encoding */

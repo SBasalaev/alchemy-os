@@ -3,6 +3,7 @@
  * Licensed under GPL v3 with linkage exception
  */
 
+use "string.eh"
 use "textio.eh"
 
 def read(): Int = stdin().read()
@@ -17,4 +18,4 @@ def println(a: Any) = stdout().println(a)
 def flush() = stdout().flush()
 
 def OStream.printf(fmt: String, args: Array) = this.print(fmt.format(args))
-def printf(fmt: String, args: Array) = stdin().printf(fmt, args)
+def printf(fmt: String, args: Array) = stdout().printf(fmt, args)

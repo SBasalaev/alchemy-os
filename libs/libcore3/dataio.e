@@ -99,7 +99,7 @@ def IStream.readutf(): String {
     null
   } else {
     var buf = new BArray(len)
-    if (freadarray(in, buf, 0, len) < len) {
+    if (this.readarray(buf, 0, len) < len) {
       null
     } else {
       ba2utf(buf)
@@ -158,7 +158,7 @@ def OStream.writedouble(d: Double) {
 }
 
 def OStream.writeutf(str: String) {
-  var buf = utfbytes(str)
+  var buf = str.utfbytes()
   this.writeshort(buf.len)
   this.writearray(buf, 0, buf.len)
 }
