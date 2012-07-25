@@ -411,47 +411,47 @@ class EFunction extends Function {
 			//BRANCHING
 				case (byte) 0x61: { //ifeq <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) == 0) ct += itmp;
+					if (ival(stack[head--]) == 0) ct = itmp;
 					break;
 				}
 				case (byte) 0x62: { //ifne <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) != 0) ct += itmp;
+					if (ival(stack[head--]) != 0) ct = itmp;
 					break;
 				}
 				case (byte) 0x63: { //iflt <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) < 0) ct += itmp;
+					if (ival(stack[head--]) < 0) ct = itmp;
 					break;
 				}
 				case (byte) 0x64: { //ifge <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) >= 0) ct += itmp;
+					if (ival(stack[head--]) >= 0) ct = itmp;
 					break;
 				}
 				case (byte) 0x65: { //ifgt <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) > 0) ct += itmp;
+					if (ival(stack[head--]) > 0) ct = itmp;
 					break;
 				}
 				case (byte) 0x66: { //ifle <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) <= 0) ct += itmp;
+					if (ival(stack[head--]) <= 0) ct = itmp;
 					break;
 				}
 				case (byte) 0x67: { //goto <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					ct += itmp;
+					ct = itmp;
 					break;
 				}
 				case (byte) 0x68: { //ifnull <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (stack[head--] == null) ct += itmp;
+					if (stack[head--] == null) ct = itmp;
 					break;
 				}
 				case (byte) 0x69: { //ifnnull <short>
 					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
-					if (stack[head--] != null) ct += itmp;
+					if (stack[head--] != null) ct = itmp;
 					break;
 				}
 

@@ -47,21 +47,20 @@ public class ELibBuilder implements LibBuilder {
 	 * version must be equal to or less than this value.
 	 * </ul>
 	 */
-	static public final int VERSION = 0x0101;
+	static public final int VERSION = 0x0200;
 
 	/*
 	 * New in format 1.1
 	 *  Instructions: call calv newarray aload astore alen newba
 	 *                baload bastore balen newca caload castore calen
+	 * New in format 2.0
+	 *  Simplify format to be loaded and processed faster
 	 */
 
-	/** Determines whether this library has dependencies. */
-	static private final int LFLAG_DEPS = 1;
-	/** Determines whether this library defines a soname. */
-	static private final int LFLAG_SONAME = 4;
-
-	/** Determines whether the function has relocation table. */
-	static private final int FFLAG_RELOC = 1;
+	/** Object type for libraries. */
+	static private final int EOBJ_LIB = 1;
+	/** Object type for libraries with a soname. */
+	static private final int EOBJ_SHLIB = 5;
 
 	public Library build(Context c, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
@@ -69,22 +68,22 @@ public class ELibBuilder implements LibBuilder {
 		//reading format version
 		int ver = data.readUnsignedShort();
 		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
-			throw new InstantiationException("Incompatible file format");
-		//reading flags
-		int lflags = data.readUnsignedByte();
+			throw new InstantiationException("Incompatible executable format: "+ver);
+		//reading object type
+		int etype = data.readUnsignedByte();
+		if ((etype != EOBJ_LIB) && (etype != EOBJ_SHLIB))
+			throw new InstantiationException("Unknown executable type: "+etype);
 		//reading soname
 		String libname = null;
-		if ((lflags & LFLAG_SONAME) != 0) {
+		if (etype  == EOBJ_SHLIB) {
 			libname = data.readUTF();
 		}
 		//loading dependency libs
 		Library[] libdeps = null;
-		if ((lflags & LFLAG_DEPS) != 0) {
-			int depcount = data.readUnsignedShort();
-			libdeps = new Library[depcount];
-			for (int i=0; i<depcount; i++) {
-				libdeps[i] = c.loadLibrary(data.readUTF());
-			}
+		int depcount = data.readUnsignedShort();
+		libdeps = new Library[depcount];
+		for (int i=0; i<depcount; i++) {
+			libdeps[i] = c.loadLibrary(data.readUTF());
 		}
 		//constructing constant pool
 		int ccount = data.readUnsignedShort();
@@ -111,38 +110,27 @@ public class ELibBuilder implements LibBuilder {
 					break;
 				case 'E': { //external function
 					int libref = data.readUnsignedShort();
-					int nameref = data.readUnsignedShort();
-					cpool[cindex] = libdeps[libref].getFunction((String)cpool[nameref]);
+					String name = data.readUTF();
+					cpool[cindex] = libdeps[libref].getFunction(name);
 				} break;
 				case 'H':   //private function
 				case 'P': { //public function
 					//reading data
-					int nameref = data.readUnsignedShort();
-					int fflags = data.readUnsignedByte();
+					String fname = data.readUTF();
 					int stacksize = data.readUnsignedByte();
 					int localsize = data.readUnsignedByte();
 					int codesize = data.readUnsignedShort();
 					byte[] code = new byte[codesize];
 					data.readFully(code);
-					//skipping relocation table
-					if ((fflags & FFLAG_RELOC) != 0) {
-						int relcount = data.readUnsignedShort();
-						data.skipBytes(relcount << 1);
-					}
 					//constructing function
-					Function func = new EFunction(libname, (String)cpool[nameref], cpool, stacksize, localsize, code);
+					Function func = new EFunction(libname, fname, cpool, stacksize, localsize, code);
 					cpool[cindex] = func;
 					if (ctype == 'P') lib.putFunc(func);
 				} break;
-				case 'U': { //unresolved function
-					int nameref = data.readUnsignedShort();
-					throw new InstantiationException("Unresolved function: "+cpool[nameref]);
-				}
 				default:
-					throw new InstantiationException("Unknown data type: "+String.valueOf(ctype));
+					throw new InstantiationException("Unknown data type: "+ctype);
 			}
 		}
-		in.close();
 		lib.lock();
 		return lib;
 	}
