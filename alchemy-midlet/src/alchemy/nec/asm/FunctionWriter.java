@@ -43,6 +43,7 @@ public class FunctionWriter implements Opcodes {
 			case ACMP:
 			case ALOAD:
 			case BALOAD:
+			case CALOAD:
 			case DADD:
 			case DCMP:
 			case DDIV:
@@ -240,17 +241,19 @@ public class FunctionWriter implements Opcodes {
 		if (opcode != GOTO) {
 			visitStack(-1);
 		}
-		if (label.stackpos < 0) label.stackpos = stackpos;
-		else if (label.stackpos != stackpos) {
+		if (label.stackpos < 0) {
+			label.stackpos = stackpos;
+		} else if (label.stackpos != stackpos) {
 			throw new IllegalStateException("Stack inconsistency");
 		}
 	}
 	
 	public void visitLabel(Label label) {
-		if (label.addr >= 0) throw new IllegalStateException();
-		if (label.stackpos < 0) label.stackpos = stackpos;
-		else if (label.stackpos != stackpos) {
-			throw new IllegalStateException("Stack inconsistency");
+		if (label.addr >= 0) throw new IllegalStateException("Label already visited");
+		if (label.stackpos < 0) {
+			label.stackpos = stackpos;
+		} else {
+			stackpos = label.stackpos;
 		}
 		label.addr = data.size();
 	}

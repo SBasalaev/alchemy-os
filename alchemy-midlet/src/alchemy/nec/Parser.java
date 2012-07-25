@@ -71,11 +71,7 @@ public class Parser {
 			unit.putType(BuiltinType.FUNCTION);
 			unit.putType(BuiltinType.STRUCTURE);		
 			// adding builtin functions
-			/// Any.tostr(): String
-			/// String.toint(): Int
-			/// String.tolong(): Long
-			/// String.tofloat(): Float
-			/// String.todouble(): Double
+			parseFile(new File("/res/nec/embed.eh"));
 			// parsing
 			parseFile(source);
 		} catch (ParseException pe) {
@@ -1012,8 +1008,10 @@ public class Parser {
 	 * Computes return type of binary operator.
 	 */
 	private Type binaryCastType(Type ltype, Type rtype) {
+		if (ltype.equals(BuiltinType.NULL)) return rtype;
+		if (rtype.equals(BuiltinType.NULL)) return ltype;
+		if (ltype.isSubtypeOf(BuiltinType.NUMBER) && rtype.isSubtypeOf(BuiltinType.NUMBER)) {
 		int choice = 0;
-		if (ltype.isSubtypeOf(BuiltinType.NUMBER)) {
 			if (ltype.isSubtypeOf(BuiltinType.DOUBLE)) choice = 4;
 			else if (ltype.isSubtypeOf(BuiltinType.FLOAT)) choice = 3;
 			else if (ltype.isSubtypeOf(BuiltinType.LONG)) choice = 2;

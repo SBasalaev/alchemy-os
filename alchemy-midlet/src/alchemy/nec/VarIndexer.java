@@ -35,11 +35,13 @@ public class VarIndexer implements ExprVisitor {
 		Vector funcs = u.funcs;
 		for (int i=0; i<funcs.size(); i++) {
 			Func f = (Func)funcs.elementAt(i);
-			for (int vi=0;  vi<f.locals.size(); vi++) {
-				Var v = (Var)f.locals.elementAt(vi);
-				v.index = i;
+			if (f.body != null) {
+				for (int vi=0;  vi<f.locals.size(); vi++) {
+					Var v = (Var)f.locals.elementAt(vi);
+					v.index = vi;
+				}
+				f.body.accept(this, new Integer(f.locals.size()));
 			}
-			f.body.accept(this, new Integer(f.locals.size()));
 		}
 	}
 

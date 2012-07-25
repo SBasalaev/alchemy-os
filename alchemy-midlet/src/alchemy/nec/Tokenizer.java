@@ -201,7 +201,7 @@ class Tokenizer {
 					ch = readChar();
 					if (ch == 'l' || ch == 'L') {
 						try {
-							lvalue = Long.parseLong(number.toString(), 16);
+							lvalue = parseulong16(number.toString());
 						} catch (Exception nfe) {
 							throw new ParseException("Integer number too large: "+number);
 						}
@@ -209,7 +209,7 @@ class Tokenizer {
 					} else {
 						nextch = ch;
 						try {
-							ivalue = Integer.parseInt(number.toString(), 16);
+							ivalue = parseuint16(number.toString());
 						} catch (Exception nfe) {
 							throw new ParseException("Integer number too large: "+number);
 						}
@@ -516,5 +516,31 @@ class Tokenizer {
 	 */
 	public int lineNumber() {
 		return linenumber;
+	}
+	
+	private int parseuint16(String hex) {
+		hex = hex.toLowerCase();
+		if (hex.length() > 8) throw new NumberFormatException("Integer number too large: "+hex);
+		int num=0;
+		for (int i=0; i<hex.length(); i++) {
+			num <<= 4;
+			char ch = hex.charAt(i);
+			if (ch >= '0' && ch <= '9') num |= ch-'0';
+			else if (ch >= 'a' && ch <= 'f') num |= ch-'a';
+		}
+		return num;
+	}
+
+	private long parseulong16(String hex) {
+		hex = hex.toLowerCase();
+		if (hex.length() > 16) throw new NumberFormatException("Integer number too large: "+hex);
+		long num=0;
+		for (int i=0; i<hex.length(); i++) {
+			num <<= 4;
+			char ch = hex.charAt(i);
+			if (ch >= '0' && ch <= '9') num |= ch-'0';
+			else if (ch >= 'a' && ch <= 'f') num |= ch-'a';
+		}
+		return num;
 	}
 }

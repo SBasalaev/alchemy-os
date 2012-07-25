@@ -21,14 +21,15 @@ public class UnitWriter {
 	}
 	
 	public void visitSymbol(String symbol) {
-		ExtFunc f = new ExtFunc(symbol);
+		FuncObject f = new FuncObject(symbol);
 		// if function is already in object, just skip it.
 		if (!objects.contains(f)) objects.addElement(f);
 	}
 	
-	public FunctionWriter visitFunction(String name, int arglen) {
-		int index = objects.indexOf(new ExtFunc(name));
+	public FunctionWriter visitFunction(String name, boolean shared, int arglen) {
+		int index = objects.indexOf(new FuncObject(name));
 		AsmFunc func = new AsmFunc(name);
+		func.shared = shared;
 		if (index < 0) {
 			objects.addElement(func);
 		} else {
@@ -63,9 +64,9 @@ public class UnitWriter {
 			} else if (obj.getClass() == String.class) {
 				out.writeByte('S');
 				out.writeUTF((String)obj);
-			} else if (obj.getClass() == ExtFunc.class) {
+			} else if (obj.getClass() == FuncObject.class) {
 				out.writeByte('U');
-				out.writeUTF(((ExtFunc)obj).value);
+				out.writeUTF(((FuncObject)obj).value);
 			} else if (obj.getClass() == AsmFunc.class) {
 				AsmFunc f = (AsmFunc)obj;
 				out.writeByte(f.shared ? 'P' : 'H');

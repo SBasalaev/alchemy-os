@@ -15,15 +15,6 @@ public class FuncObject {
 	}
 }
 
-/* External function reference (unresolved). */
-class ExtFunc extends FuncObject {
-
-	public ExtFunc(String value) {
-		super(value);
-	}
-	
-}
-
 /* Assembler function. */
 class AsmFunc extends FuncObject {
 	boolean shared;

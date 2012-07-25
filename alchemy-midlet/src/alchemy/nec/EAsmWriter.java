@@ -47,8 +47,13 @@ public class EAsmWriter implements ExprVisitor {
 		for (int i=0; i<funcs.size(); i++) {
 			Func f = (Func)funcs.elementAt(i);
 			if (f.body != null && f.hits > 0) {
-				writer = uw.visitFunction(f.signature, f.type.args.length);
+				writer = uw.visitFunction(f.signature, true, f.type.args.length);
 				f.body.accept(this, null);
+				if (f.type.rettype.equals(BuiltinType.NONE)) {
+					writer.visitInsn(Opcodes.RET_NULL);
+				} else {
+					writer.visitInsn(Opcodes.RETURN);
+				}
 				writer.visitEnd();
 			}
 		}
@@ -62,7 +67,7 @@ public class EAsmWriter implements ExprVisitor {
 			writer.visitInsn(Opcodes.BALEN);
 		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CALEN);
-		} else if (artype.isSubtypeOf(BuiltinType.ARRAY)) {
+		} else {
 			writer.visitInsn(Opcodes.ALEN);
 		}
 		return null;
@@ -76,7 +81,7 @@ public class EAsmWriter implements ExprVisitor {
 			writer.visitInsn(Opcodes.BALOAD);
 		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CALOAD);
-		} else if (artype.isSubtypeOf(BuiltinType.ARRAY)) {
+		} else {
 			writer.visitInsn(Opcodes.ALOAD);
 		}
 		return null;
@@ -91,7 +96,7 @@ public class EAsmWriter implements ExprVisitor {
 			writer.visitInsn(Opcodes.BASTORE);
 		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CASTORE);
-		} else if (artype.isSubtypeOf(BuiltinType.ARRAY)) {
+		} else {
 			writer.visitInsn(Opcodes.ASTORE);
 		}
 		return null;
