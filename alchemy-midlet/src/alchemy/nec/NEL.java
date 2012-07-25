@@ -42,10 +42,10 @@ public class NEL extends NativeApp {
 	/** Highest supported library file format version.
 	 * @see ELibBuilder#VERSION
 	 */
-	static private final int SUPPORTED = 0x0101;
+	static private final int SUPPORTED = 0x0200;
 
 	static private final String VERSION =
-			"Native E linker version 1.2";
+			"Native E linker version 1.3";
 
 	static private final String HELP =
 			"Usage: el [options] <input>...\nOptions:\n" +
@@ -121,7 +121,7 @@ public class NEL extends NativeApp {
 				offset = count;
 				File infile = c.toFile(infiles.elementAt(fi).toString());
 				DataInputStream data = new DataInputStream(c.fs().read(infile));
-				if (data.readInt() != 0xC0DE0101)
+				if (data.readInt() != 0xC0DE0200)
 					throw new Exception("Unsupported object format in "+infile);
 				int lflags = data.readUnsignedByte();
 				if (lflags != 0)
@@ -150,8 +150,7 @@ public class NEL extends NativeApp {
 							obj = data.readUTF();
 							break;
 						case 'U': {
-							int index = reloctable[offset+data.readUnsignedShort()];
-							String id = pool.elementAt(index).toString();
+							String id = data.readUTF();
 							LibInfo info = (LibInfo)symbols.get(id);
 							if (info != null) {
 								obj = new ExFunc(id, info);
@@ -161,16 +160,11 @@ public class NEL extends NativeApp {
 							}
 							break;
 						}
-						case 'E':
-							throw new Exception("Partial linkage is not supported");
 						case 'H':
 						case 'P': {
-							String name = pool.elementAt(reloctable[offset+data.readUnsignedShort()]).toString();
+							String name = data.readUTF();
 							InFunc f = new InFunc(name);
 							f.type = type;
-							f.flags = data.readUnsignedByte();
-							if ((f.flags & 1) == 0)
-								throw new Exception("Missing relocation table in "+f.name);
 							f.stack = data.readUnsignedByte();
 							f.locals = data.readUnsignedByte();
 							f.code = new byte[data.readUnsignedShort()];
@@ -246,7 +240,7 @@ public class NEL extends NativeApp {
 			//writing output
 			File outfile = c.toFile(outname);
 			DataOutputStream out = new DataOutputStream(c.fs().write(outfile));
-			out.writeInt(0xC0DE0101);
+			out.writeInt(0xC0DE0200);
 			if (soname != null) {
 				out.writeByte(5);
 				out.writeUTF(soname);
@@ -285,12 +279,11 @@ public class NEL extends NativeApp {
 					out.writeByte('E');
 					ExFunc ef = (ExFunc)obj;
 					out.writeShort(ef.info.index);
-					out.writeShort(pool.indexOf(ef.name));
+					out.writeUTF(ef.name);
 				} else if (obj instanceof InFunc) {
 					InFunc func = (InFunc)obj;
 					out.writeByte(func.type);
-					out.writeShort(pool.indexOf(func.name));
-					out.writeByte(func.flags & 0xfe); //no relocs
+					out.writeUTF(func.name);
 					out.writeByte(func.stack);
 					out.writeByte(func.locals);
 					out.writeShort(func.code.length);
@@ -368,24 +361,19 @@ public class NEL extends NativeApp {
 					symbolstr[i] = data.readUTF();
 					break;
 				case 'E':
-					data.skipBytes(4);
+					data.skipBytes(2);
+					data.skipBytes(data.readUnsignedShort());
 					break;
 				case 'H':
 				case 'P': {
-					int nameref = data.readUnsignedShort();
-					if (ch == 'P') symbols.addElement(symbolstr[nameref]);
-					int fflags = data.readUnsignedByte();
+					String name = data.readUTF();
+					if (ch == 'P') symbols.addElement(name);
 					data.skipBytes(2);
 					data.skipBytes(data.readUnsignedShort());
-					if ((fflags & 1) != 0) {
-						data.skipBytes(data.readUnsignedShort() << 1);
-					}
 					break;
 				}
-				case 'U':
-					throw new Exception("Unresolved symbol: "+data.readUTF());
 				default:
-					throw new Exception("Unknown object type: "+String.valueOf(ch));
+					throw new Exception("Unknown object type: "+ch);
 			}
 		}
 		in.close();
