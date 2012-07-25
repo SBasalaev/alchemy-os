@@ -577,9 +577,11 @@ public class Optimizer implements ExprVisitor {
 		wexpr.body = (Expr)wexpr.body.accept(this, scope);
 		if (wexpr.condition instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)wexpr.condition).value;
+			optimized = true;
 			if (cnst.equals(Boolean.FALSE)) {
-				optimized = true;
 				return new NoneExpr();
+			} else if (cnst.equals(Boolean.TRUE)) {
+				return new DoWhileExpr(wexpr.condition, wexpr.body);
 			}
 		}
 		return wexpr;
