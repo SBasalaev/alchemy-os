@@ -1,5 +1,6 @@
 package alchemy.nec.asm;
 
+import alchemy.evm.Opcodes;
 import java.io.ByteArrayOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;

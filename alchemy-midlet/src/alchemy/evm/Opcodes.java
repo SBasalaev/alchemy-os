@@ -1,4 +1,4 @@
-package alchemy.nec.asm;
+package alchemy.evm;
 
 /**
  * Assembler opcodes.

@@ -18,10 +18,10 @@
 
 package alchemy.nec;
 
+import alchemy.evm.Opcodes;
 import alchemy.nec.asm.FuncObject;
 import alchemy.nec.asm.FunctionWriter;
 import alchemy.nec.asm.Label;
-import alchemy.nec.asm.Opcodes;
 import alchemy.nec.asm.UnitWriter;
 import alchemy.nec.tree.*;
 import java.io.IOException;
