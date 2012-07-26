@@ -18,6 +18,7 @@
 
 package alchemy.nec;
 
+import alchemy.core.Function;
 import alchemy.evm.Opcodes;
 import alchemy.nec.asm.FuncObject;
 import alchemy.nec.asm.FunctionWriter;
@@ -207,21 +208,56 @@ public class EAsmWriter implements ExprVisitor {
 	 * is fulfilled, otherwise jump is performed when condition fails.
 	 */
 	private void visitCmpInIf(ComparisonExpr cmp, Label jumpto, boolean cond) {
-		if (cmp.lvalue instanceof ConstExpr && ((ConstExpr)cmp.lvalue).value == null) {
-			// if LHS is null
-			cmp.rvalue.accept(this, null);
-			if (cmp.operator == Tokenizer.TT_EQEQ) {
-				writer.visitJumpInsn(cond ? Opcodes.IFNULL : Opcodes.IFNNULL, jumpto);
-			} else {
-				writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
-			}
-		} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value == null) {
-			// if RHS is null
+		if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value == null) {
+			// comparison with null
 			cmp.lvalue.accept(this, null);
 			if (cmp.operator == Tokenizer.TT_EQEQ) {
 				writer.visitJumpInsn(cond ? Opcodes.IFNULL : Opcodes.IFNNULL, jumpto);
 			} else {
 				writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
+			}
+		} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Function.ZERO)
+		        && cmp.lvalue.rettype().isSubtypeOf(BuiltinType.INT)) {
+			// integer comparison with zero
+			cmp.lvalue.accept(this, null);
+			switch (cmp.operator) {
+				case '<':
+					writer.visitJumpInsn(cond ? Opcodes.IFLT : Opcodes.IFGE, jumpto);
+					break;
+				case '>':
+					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLE, jumpto);
+					break;
+				case Tokenizer.TT_LTEQ:
+					writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
+					break;
+				case Tokenizer.TT_GTEQ:
+					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLT, jumpto);
+					break;
+				case Tokenizer.TT_EQEQ:
+					writer.visitJumpInsn(cond ? Opcodes.IFEQ : Opcodes.IFNE, jumpto);
+					break;
+				case Tokenizer.TT_NOTEQ:
+					writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
+					break;
+			}
+		} else if ((cmp.lvalue.rettype().isSubtypeOf(BuiltinType.INT) || cmp.rvalue.rettype().isSubtypeOf(BuiltinType.INT))
+				&& cmp.operator != Tokenizer.TT_EQEQ && cmp.operator != Tokenizer.TT_NOTEQ) {
+			// integer comparison
+			cmp.lvalue.accept(this, null);
+			cmp.rvalue.accept(this, null);
+			switch (cmp.operator) {
+				case '<':
+					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPLT : Opcodes.IF_ICMPGE, jumpto);
+					break;
+				case '>':
+					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGT : Opcodes.IF_ICMPLE, jumpto);
+					break;
+				case Tokenizer.TT_LTEQ:
+					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPLE : Opcodes.IF_ICMPGT, jumpto);
+					break;
+				case Tokenizer.TT_GTEQ:
+					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGE : Opcodes.IF_ICMPLT, jumpto);
+					break;
 			}
 		} else {
 			// general comparison

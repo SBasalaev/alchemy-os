@@ -18,6 +18,7 @@
 
 package alchemy.nec;
 
+import alchemy.core.Function;
 import alchemy.nec.tree.*;
 import java.util.Vector;
 
@@ -361,6 +362,23 @@ public class Optimizer implements ExprVisitor {
 					break;
 			}
 			return new ConstExpr(c1);
+		} else if (cmp.lvalue instanceof ConstExpr) {
+			Object cnst = ((ConstExpr)cmp.lvalue).value;
+			if (cnst == null || cnst.equals(Function.ZERO)) {
+				// to not duplicate code in EAsmWriter and
+				// allow it to make assumptions only on rvalue
+				optimized = true;
+				Expr tmp = cmp.lvalue;
+				cmp.lvalue = cmp.rvalue;
+				cmp.rvalue = tmp;
+				switch (cmp.operator) {
+					case '<': cmp.operator = '>'; break;
+					case '>': cmp.operator = '<'; break;
+					case Tokenizer.TT_LTEQ: cmp.operator = Tokenizer.TT_GTEQ; break;
+					case Tokenizer.TT_GTEQ: cmp.operator = Tokenizer.TT_LTEQ; break;
+				}
+				return cmp;
+			}
 		}
 		return cmp;
 	}
@@ -581,6 +599,7 @@ public class Optimizer implements ExprVisitor {
 			if (cnst.equals(Boolean.FALSE)) {
 				return new NoneExpr();
 			} else if (cnst.equals(Boolean.TRUE)) {
+				// do-while is shorter when writing native code
 				return new DoWhileExpr(wexpr.condition, wexpr.body);
 			}
 		}

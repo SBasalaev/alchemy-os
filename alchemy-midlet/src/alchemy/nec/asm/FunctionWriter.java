@@ -239,8 +239,27 @@ public class FunctionWriter implements Opcodes {
 			data.write(-1);
 			data.write(-1);
 		}
-		if (opcode != GOTO) {
-			visitStack(-1);
+		switch (opcode) {
+			case GOTO:
+				break;
+			case IFEQ:
+			case IFGE:
+			case IFGT:
+			case IFLE:
+			case IFLT:
+			case IFNE:
+			case IFNULL:
+			case IFNNULL:
+				visitStack(-1);
+				break;
+			case IF_ICMPGE:
+			case IF_ICMPGT:
+			case IF_ICMPLE:
+			case IF_ICMPLT:
+				visitStack(-2);
+				break;
+			default:
+				throw new IllegalArgumentException();
 		}
 		if (label.stackpos < 0) {
 			label.stackpos = stackpos;
