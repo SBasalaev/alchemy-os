@@ -30,6 +30,7 @@ public class FunctionWriter implements Opcodes {
 	private void visitStack(int inc) {
 		stackpos += inc;
 		if (inc > 0 && stackmax < stackpos) stackmax = stackpos;
+		if (stackpos < 0) throw new IllegalStateException("Stack inconsistency");
 	}
 	
 	/** Visit instruction without arguments. */
@@ -139,7 +140,7 @@ public class FunctionWriter implements Opcodes {
 	/** Visit LOAD or STORE instruction. */
 	public void visitVarInsn(int opcode, int var) {
 		if (var < 0 || var > 255) throw new IllegalArgumentException();
-		if (var > varcount) varcount = var;
+		if (var >= varcount) varcount = var+1;
 		if (var < 8) {
 			if (opcode == LOAD) data.write(LOAD_0 + var);
 			else data.write(STORE_0 + var);

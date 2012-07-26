@@ -962,7 +962,10 @@ public class Parser {
 			ArrayType toarray = (ArrayType)expr.args[2].rettype();
 			if (expr.args[0].rettype() instanceof ArrayType) {
 				ArrayType fromarray = (ArrayType)expr.args[0].rettype();
-				if (!toarray.elementType().isSupertypeOf(fromarray.elementType())) {
+				if (toarray.elementType().isSubtypeOf(fromarray.elementType())
+					&& !toarray.elementType().equals(fromarray.elementType())) {
+					warn(W_TYPESAFE, "Unsafe type cast when copying from "+fromarray+" to "+toarray);
+				} else if (!toarray.elementType().isSupertypeOf(fromarray.elementType())) {
 					throw new ParseException("Cast to the incompatible type when copying from "+fromarray+" to "+toarray);
 				}
 			} else if (!toarray.elementType().equals(BuiltinType.ANY)) {
