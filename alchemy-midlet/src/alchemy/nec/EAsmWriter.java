@@ -143,15 +143,15 @@ public class EAsmWriter implements ExprVisitor {
 				else if (type.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DMOD);
 				break;
 			case '&':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IAND);
+				if (type.isSubtypeOf(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IAND);
 				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LAND);
 				break;
 			case '|':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IOR);
+				if (type.isSubtypeOf(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IOR);
 				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LOR);
 				break;
 			case '^':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IXOR);
+				if (type.isSubtypeOf(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IXOR);
 				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LXOR);
 				break;
 			case Tokenizer.TT_LTLT:
