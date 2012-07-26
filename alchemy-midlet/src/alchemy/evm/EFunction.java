@@ -456,22 +456,22 @@ class EFunction extends Function {
 				}
 				case Opcodes.IF_ICMPLT: { //if_icmplt <ushort>
 					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) >= ival(stack[head--])) ct = itmp;
+					if (ival(stack[head--]) > ival(stack[head--])) ct = itmp;
 					break;
 				}
 				case Opcodes.IF_ICMPGE: { //if_icmpge <ushort>
 					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) < ival(stack[head--])) ct = itmp;
+					if (ival(stack[head--]) <= ival(stack[head--])) ct = itmp;
 					break;
 				}
 				case Opcodes.IF_ICMPGT: { //if_icmpgt <ushort>
 					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) <= ival(stack[head--])) ct = itmp;
+					if (ival(stack[head--]) < ival(stack[head--])) ct = itmp;
 					break;
 				}
 				case Opcodes.IF_ICMPLE: { //if_icmple <ushort>
 					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) > ival(stack[head--])) ct = itmp;
+					if (ival(stack[head--]) >= ival(stack[head--])) ct = itmp;
 					break;
 				}
 			//FUNCTION CALLS
