@@ -56,6 +56,7 @@ public class ELibBuilder implements LibBuilder {
 	 * New in format 2.0
 	 *  Simplify format to be loaded and processed faster
 	 *  Instructions: if_icmpge if_icmpgt if_icmple if_icmplt
+	 *                tableswitch lookupswitch
 	 */
 
 	/** Object type for libraries. */

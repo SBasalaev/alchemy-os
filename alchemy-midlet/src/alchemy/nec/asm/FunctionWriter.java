@@ -30,7 +30,7 @@ public class FunctionWriter implements Opcodes {
 	private void visitStack(int inc) {
 		stackpos += inc;
 		if (inc > 0 && stackmax < stackpos) stackmax = stackpos;
-		if (stackpos < 0) throw new IllegalStateException("Stack inconsistency");
+		if (stackpos < 0) throw new IllegalStateException("Stack inconsistency: empty stack");
 	}
 	
 	/** Visit instruction without arguments. */
@@ -225,8 +225,10 @@ public class FunctionWriter implements Opcodes {
 		visitStack(1);
 	}
 	
-	public void visitJumpInsn(int opcode, Label label) {
-		data.write(opcode);
+	/**
+	 * Marks current code position as containing label address.
+	 */
+	private void visitLabelPtr(Label label) {
 		if (label.addr >= 0) {
 			data.write(label.addr >> 8);
 			data.write(label.addr);
@@ -240,6 +242,15 @@ public class FunctionWriter implements Opcodes {
 			data.write(-1);
 			data.write(-1);
 		}
+		if (label.stackpos < 0) {
+			label.stackpos = stackpos;
+		} else if (label.stackpos != stackpos) {
+			throw new IllegalStateException("Stack inconsistency: other jump expects different stack");
+		}
+	}
+	
+	public void visitJumpInsn(int opcode, Label label) {
+		data.write(opcode);
 		switch (opcode) {
 			case GOTO:
 				break;
@@ -262,10 +273,38 @@ public class FunctionWriter implements Opcodes {
 			default:
 				throw new IllegalArgumentException();
 		}
-		if (label.stackpos < 0) {
-			label.stackpos = stackpos;
-		} else if (label.stackpos != stackpos) {
-			throw new IllegalStateException("Stack inconsistency");
+		visitLabelPtr(label);
+	}
+	
+	public void visitTableSwitch(int min, int max, Label dflt, Label[] jumps) {
+		data.write(Opcodes.TABLESWITCH);
+		visitStack(-1);
+		visitLabelPtr(dflt);
+		data.write(min >> 24);
+		data.write(min >> 16);
+		data.write(min >> 8);
+		data.write(min);
+		data.write(max >> 24);
+		data.write(max >> 16);
+		data.write(max >> 8);
+		data.write(max);
+		for (int i=0; i<=max-min; i++) {
+			visitLabelPtr(jumps[i]);
+		}
+	}
+	
+	public void visitLookupSwitch(Label dflt, int[] cases, Label[] jumps) {
+		data.write(Opcodes.LOOKUPSWITCH);
+		visitStack(-1);
+		visitLabelPtr(dflt);
+		data.write(cases.length >> 8);
+		data.write(cases.length);
+		for (int i=0; i<cases.length; i++) {
+			data.write(cases[i] >> 24);
+			data.write(cases[i] >> 16);
+			data.write(cases[i] >> 8);
+			data.write(cases[i]);
+			visitLabelPtr(jumps[i]);
 		}
 	}
 	

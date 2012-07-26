@@ -585,6 +585,46 @@ class EFunction extends Function {
 					break;
 				}
 
+			//SWITCH BRANCHING
+				case Opcodes.TABLESWITCH: {
+					int dflt = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
+					int min = ((code[ct++] & 0xff) << 24)
+					        | ((code[ct++] & 0xff) << 16)
+					        | ((code[ct++] & 0xff) << 8)
+					        | (code[ct++] & 0xff);
+					int max = ((code[ct++] & 0xff) << 24)
+					        | ((code[ct++] & 0xff) << 16)
+					        | ((code[ct++] & 0xff) << 8)
+					        | (code[ct++] & 0xff);
+					int val = ival(stack[head--]);
+					if (val >= min && val <= max) {
+						ct += (val-min)*2;
+						ct = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
+					} else {
+						ct = dflt;
+					}
+					break;
+				}
+				case Opcodes.LOOKUPSWITCH: {
+					int dflt = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
+					int count = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
+					int val = ival(stack[head--]);
+					boolean matched = false;
+					for (int i=0; i<count && !matched; i++) {
+						int cand = ((code[ct++] & 0xff) << 24)
+					             | ((code[ct++] & 0xff) << 16)
+					             | ((code[ct++] & 0xff) << 8)
+					             | (code[ct++] & 0xff);
+						if (val == cand) {
+							ct = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
+							matched = true;
+						} else {
+							ct += 2;
+						}
+					}
+					if (!matched) ct = dflt;
+					break;
+				}
 			//OTHERS
 				case Opcodes.ACMP: {
 					boolean btmp = stack[head] == null ? stack[head-1] == null : stack[head].equals(stack[head-1]);

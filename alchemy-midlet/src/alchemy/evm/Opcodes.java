@@ -145,7 +145,8 @@ public interface Opcodes {
 	byte CALOAD      = (byte)0xF9;
 	byte CASTORE     = (byte)0xFA;
 	byte CALEN       = (byte)0xFB;
-	// 0xFD
+	byte TABLESWITCH = (byte)0xFC;
+	byte LOOKUPSWITCH= (byte)0xFD;
 	// 0xFE
 	// 0xFF
 }
