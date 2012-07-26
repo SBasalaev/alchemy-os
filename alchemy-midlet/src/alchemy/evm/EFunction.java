@@ -60,418 +60,437 @@ class EFunction extends Function {
 			int instr = code[ct++];
 			switch (instr) {
 			// CONSTANTS
-				case (byte) 0x01: { // aconst_null
+				case Opcodes.ACONST_NULL: {
 					stack[++head] = null;
 					break;
 				}
-				case (byte) 0x02: { // iconst_m1
+				case Opcodes.ICONST_M1: {
 					stack[++head] = Function.M_ONE;
 					break;
 				}
-				case (byte) 0x03: { // iconst_0
+				case Opcodes.ICONST_0: {
 					stack[++head] = Function.ZERO;
 					break;
 				}
-				case (byte) 0x04: { // iconst_1
+				case Opcodes.ICONST_1: {
 					stack[++head] = Function.ONE;
 					break;
 				}
-				case (byte) 0x05: { // iconst_2
+				case Opcodes.ICONST_2: {
 					stack[++head] = Ival(2);
 					break;
 				}
-				case (byte) 0x06: { // iconst_3
+				case Opcodes.ICONST_3: {
 					stack[++head] = Ival(3);
 					break;
 				}
-				case (byte) 0x07: { // iconst_4
+				case Opcodes.ICONST_4: {
 					stack[++head] = Ival(4);
 					break;
 				}
-				case (byte) 0x08: { // iconst_5
+				case Opcodes.ICONST_5: {
 					stack[++head] = Ival(5);
 					break;
 				}
-				case (byte) 0x09: { // lconst_0
+				case Opcodes.LCONST_0: {
 					stack[++head] = Lval(0l);
 					break;
 				}
-				case (byte) 0x0A: { // lconst_1
+				case Opcodes.LCONST_1: {
 					stack[++head] = Lval(1l);
 					break;
 				}
-				case (byte) 0x0B: { // fconst_0
+				case Opcodes.FCONST_0: {
 					stack[++head] = Fval(0f);
 					break;
 				}
-				case (byte) 0x0C: { // fconst_1
+				case Opcodes.FCONST_1: {
 					stack[++head] = Fval(1f);
 					break;
 				}
-				case (byte) 0x0D: { // fconst_2
+				case Opcodes.FCONST_2: {
 					stack[++head] = Fval(2f);
 					break;
 				}
-				case (byte) 0x0E: { // dconst_0
+				case Opcodes.DCONST_0: {
 					stack[++head] = Dval(0d);
 					break;
 				}
-				case (byte) 0x0F: { // dconst_1
+				case Opcodes.DCONST_1: {
 					stack[++head] = Dval(1d);
 					break;
 				}
 				
 			//CONVERSIONS
-				case (byte) 0x37: { // i2l
+				case Opcodes.I2L: {
 					stack[head] = Lval(ival(stack[head]));
 					break;
 				}
-				case (byte) 0x38: { // i2f
+				case Opcodes.I2F: {
 					stack[head] = Fval(ival(stack[head]));
 					break;
 				}
-				case (byte) 0x39: { // i2d
+				case Opcodes.I2D: {
 					stack[head] = Dval(ival(stack[head]));
 					break;
 				}
-				case (byte) 0x3A: { // l2f
+				case Opcodes.L2F: {
 					stack[head] = Fval(lval(stack[head]));
 					break;
 				}
-				case (byte) 0x3B: { // l2d
+				case Opcodes.L2D: {
 					stack[head] = Dval(lval(stack[head]));
 					break;
 				}
-				case (byte) 0x3C: { // l2i
+				case Opcodes.L2I: {
 					stack[head] = Ival((int)lval(stack[head]));
 					break;
 				}
-				case (byte) 0x47: { // f2d
+				case Opcodes.F2D: {
 					stack[head] = Dval(fval(stack[head]));
 					break;
 				}
-				case (byte) 0x48: { // f2i
+				case Opcodes.F2I: {
 					stack[head] = Ival((int)fval(stack[head]));
 					break;
 				}
-				case (byte) 0x49: { // f2l
+				case Opcodes.F2L: {
 					stack[head] = Lval((long)fval(stack[head]));
 					break;
 				}
-				case (byte) 0x4A: { // d2i
+				case Opcodes.D2I: {
 					stack[head] = Ival((int)dval(stack[head]));
 					break;
 				}
-				case (byte) 0x4B: { // d2l
+				case Opcodes.D2L: {
 					stack[head] = Lval((long)dval(stack[head]));
 					break;
 				}
-				case (byte) 0x4C: { // d2f
+				case Opcodes.D2F: {
 					stack[head] = Fval((float)dval(stack[head]));
 					break;
 				}
 
 			//INTEGER ARITHMETICS
-				case (byte) 0x10: { // iadd
+				case Opcodes.IADD: {
 					Object atmp = Ival(ival(stack[--head]) + ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x11: { // isub
+				case Opcodes.ISUB: {
 					Object atmp = Ival(ival(stack[--head]) - ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x12: { // imul
+				case Opcodes.IMUL: {
 					Object atmp = Ival(ival(stack[--head]) * ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x13: { // idiv
+				case Opcodes.IDIV: {
 					Object atmp = Ival(ival(stack[--head]) / ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x14: { // imod
+				case Opcodes.IMOD: {
 					Object atmp = Ival(ival(stack[--head]) % ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x15: { // ineg
+				case Opcodes.INEG: {
 					stack[head] = Ival(-ival(stack[head]));
 					break;
 				}
-				case (byte) 0x16: { // icmp
+				case Opcodes.ICMP: {
 					int itmp = ival(stack[--head]) - ival(stack[++head]);
 					stack[--head] = (itmp > 0) ? Function.ONE : (itmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
-				case (byte) 0x17: { // ishl
+				case Opcodes.ISHL: {
 					Object atmp = Ival(ival(stack[--head]) << ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x18: { // ishr
+				case Opcodes.ISHR: {
 					Object atmp = Ival(ival(stack[--head]) >> ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x19: { //iushr
+				case Opcodes.IUSHR: {
 					Object atmp = Ival(ival(stack[--head]) >>> ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x1A: { // iand
+				case Opcodes.IAND: {
 					Object atmp = Ival(ival(stack[--head]) & ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x1B: { // ior
+				case Opcodes.IOR: {
 					Object atmp = Ival(ival(stack[--head]) | ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x1C: { // ixor
+				case Opcodes.IXOR: {
 					Object atmp = Ival(ival(stack[--head]) ^ ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
 
 			//LONG ARITHMETICS
-				case (byte) 0x20: { // ladd
+				case Opcodes.LADD: {
 					Object atmp = Lval(lval(stack[--head]) + lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x21: { // lsub
+				case Opcodes.LSUB: {
 					Object atmp = Lval(lval(stack[--head]) - lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x22: { // lmul
+				case Opcodes.LMUL: {
 					Object atmp = Lval(lval(stack[--head]) * lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x23: { // ldiv
+				case Opcodes.LDIV: {
 					Object atmp = Lval(lval(stack[--head]) / lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x24:  { // lmod
+				case Opcodes.LMOD:  {
 					Object atmp = Lval(lval(stack[--head]) % lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x25: { // lneg
+				case Opcodes.LNEG: {
 					stack[head] = Lval(-lval(stack[head]));
 					break;
 				}
-				case (byte) 0x26: { // lcmp
+				case Opcodes.LCMP: {
 					long ltmp = lval(stack[--head]) - lval(stack[++head]);
 					stack[--head] = (ltmp > 0) ? Function.ONE : (ltmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
-				case (byte) 0x27: { // lshl
+				case Opcodes.LSHL: {
 					Object atmp = Lval(lval(stack[--head]) << ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x28: { // lshr
+				case Opcodes.LSHR: {
 					Object atmp = Lval(lval(stack[--head]) >> ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x29: { // lushr
+				case Opcodes.LUSHR: {
 					Object atmp = Lval(lval(stack[--head]) >>> ival(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x2A: { // land
+				case Opcodes.LAND: {
 					Object atmp = Lval(lval(stack[--head]) & lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x2B: { // lor
+				case Opcodes.LOR: {
 					Object atmp = Lval(lval(stack[--head]) | lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x2C: { // lxor
+				case Opcodes.LXOR: {
 					Object atmp = Lval(lval(stack[--head]) ^ lval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
 
 			//FLOAT ARITHMETICS
-				case (byte) 0x30: { // fadd
+				case Opcodes.FADD: {
 					Object atmp = Fval(fval(stack[--head]) + fval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x31: { // fsub
+				case Opcodes.FSUB: {
 					Object atmp = Fval(fval(stack[--head]) - fval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x32: { // fmul
+				case Opcodes.FMUL: {
 					Object atmp = Fval(fval(stack[--head]) * fval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x33: { // fdiv
+				case Opcodes.FDIV: {
 					Object atmp = Fval(fval(stack[--head]) / fval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x34: { // fmod
+				case Opcodes.FMOD: {
 					Object atmp = Fval(fval(stack[--head]) % fval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x35: { // fneg
+				case Opcodes.FNEG: {
 					stack[head] = Fval(-fval(stack[head]));
 					break;
 				}
-				case (byte) 0x36: { // fcmp
+				case Opcodes.FCMP: {
 					float ftmp = fval(stack[--head]) - fval(stack[++head]);
 					stack[--head] = (ftmp > 0) ? Function.ONE : (ftmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
 
 			//DOUBLE ARITHMETICS
-				case (byte) 0x40: { // dadd
+				case Opcodes.DADD: {
 					Object atmp = Dval(dval(stack[--head]) + dval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x41: { // dsub
+				case Opcodes.DSUB: {
 					Object atmp = Dval(dval(stack[--head]) - dval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x42: { // dmul
+				case Opcodes.DMUL: {
 					Object atmp = Dval(dval(stack[--head]) * dval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x43: { // ddiv
+				case Opcodes.DDIV: {
 					Object atmp = Dval(dval(stack[--head]) / dval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x44: { // dmod
+				case Opcodes.DMOD: {
 					Object atmp = Dval(dval(stack[--head]) % dval(stack[++head]));
 					stack[--head] = atmp;
 					break;
 				}
-				case (byte) 0x45: { // dneg
+				case Opcodes.DNEG: {
 					stack[head] = Dval(-dval(stack[head]));
 					break;
 				}
-				case (byte) 0x46: { // dcmp
+				case Opcodes.DCMP: {
 					double dtmp = dval(stack[--head]) - dval(stack[++head]);
 					stack[--head] = (dtmp > 0) ? Function.ONE : (dtmp == 0 ? Function.ZERO : Function.M_ONE);
 					break;
 				}
 
 			//LOCALS LOADERS AND SAVERS
-				case (byte) 0x50: // load_0
-				case (byte) 0x51: // load_1
-				case (byte) 0x52: // load_2
-				case (byte) 0x53: // load_3
-				case (byte) 0x54: // load_4
-				case (byte) 0x55: // load_5
-				case (byte) 0x56: // load_6
-				case (byte) 0x57: // load_7
+				case Opcodes.LOAD_0:
+				case Opcodes.LOAD_1:
+				case Opcodes.LOAD_2:
+				case Opcodes.LOAD_3:
+				case Opcodes.LOAD_4:
+				case Opcodes.LOAD_5:
+				case Opcodes.LOAD_6:
+				case Opcodes.LOAD_7:
 					stack[++head] = locals[instr & 7]; break;
-				case (byte) 0x3D: { //load <ubyte>
+				case Opcodes.LOAD: { //load <ubyte>
 					stack[++head] = locals[code[ct++] & 0xff];
 					break;
 				}
 				//variable savers
-				case (byte) 0x58: // store_0
-				case (byte) 0x59: // store_1
-				case (byte) 0x5A: // store_2
-				case (byte) 0x5B: // store_3
-				case (byte) 0x5C: // store_4
-				case (byte) 0x5D: // store_5
-				case (byte) 0x5E: // store_6
-				case (byte) 0x5F:{// store_7
+				case Opcodes.STORE_0:
+				case Opcodes.STORE_1:
+				case Opcodes.STORE_2:
+				case Opcodes.STORE_3:
+				case Opcodes.STORE_4:
+				case Opcodes.STORE_5:
+				case Opcodes.STORE_6:
+				case Opcodes.STORE_7:{
 					locals[instr & 7] = stack[head];
 					head--;
 					break;
 				}
-				case (byte) 0x3E: { //store <ubyte>
+				case Opcodes.STORE: { //store <ubyte>
 					locals[code[ct++] & 0xff] = stack[head];
 					head--;
 					break;
 				}
 
 			//BRANCHING
-				case (byte) 0x61: { //ifeq <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFEQ: { //ifeq <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (ival(stack[head--]) == 0) ct = itmp;
 					break;
 				}
-				case (byte) 0x62: { //ifne <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFNE: { //ifne <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (ival(stack[head--]) != 0) ct = itmp;
 					break;
 				}
-				case (byte) 0x63: { //iflt <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFLT: { //iflt <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (ival(stack[head--]) < 0) ct = itmp;
 					break;
 				}
-				case (byte) 0x64: { //ifge <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFGE: { //ifge <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (ival(stack[head--]) >= 0) ct = itmp;
 					break;
 				}
-				case (byte) 0x65: { //ifgt <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFGT: { //ifgt <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (ival(stack[head--]) > 0) ct = itmp;
 					break;
 				}
-				case (byte) 0x66: { //ifle <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFLE: { //ifle <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (ival(stack[head--]) <= 0) ct = itmp;
 					break;
 				}
-				case (byte) 0x67: { //goto <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.GOTO: { //goto <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					ct = itmp;
 					break;
 				}
-				case (byte) 0x68: { //ifnull <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFNULL: { //ifnull <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (stack[head--] == null) ct = itmp;
 					break;
 				}
-				case (byte) 0x69: { //ifnnull <short>
-					int itmp = (code[ct++]) << 8 | (code[ct++] & 0xff);
+				case Opcodes.IFNNULL: { //ifnnull <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
 					if (stack[head--] != null) ct = itmp;
 					break;
 				}
-
+				case Opcodes.IF_ICMPLT: { //if_icmplt <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
+					if (ival(stack[head--]) >= ival(stack[head--])) ct = itmp;
+					break;
+				}
+				case Opcodes.IF_ICMPGE: { //if_icmpge <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
+					if (ival(stack[head--]) < ival(stack[head--])) ct = itmp;
+					break;
+				}
+				case Opcodes.IF_ICMPGT: { //if_icmpgt <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
+					if (ival(stack[head--]) <= ival(stack[head--])) ct = itmp;
+					break;
+				}
+				case Opcodes.IF_ICMPLE: { //if_icmple <ushort>
+					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
+					if (ival(stack[head--]) > ival(stack[head--])) ct = itmp;
+					break;
+				}
 			//FUNCTION CALLS
-				case (byte) 0x70: // call_0
-				case (byte) 0x71: // call_1
-				case (byte) 0x72: // call_2
-				case (byte) 0x73: // call_3
-				case (byte) 0x74: // call_4
-				case (byte) 0x75: // call_5
-				case (byte) 0x76: // call_6
-				case (byte) 0x77: // call_7
-				case (byte) 0x78: // calv_0
-				case (byte) 0x79: // calv_1
-				case (byte) 0x7A: // calv_2
-				case (byte) 0x7B: // calv_3
-				case (byte) 0x7C: // calv_4
-				case (byte) 0x7D: // calv_5
-				case (byte) 0x7E: // calv_6
-				case (byte) 0x7F: {//calv_7
+				case Opcodes.CALL_0:
+				case Opcodes.CALL_1:
+				case Opcodes.CALL_2:
+				case Opcodes.CALL_3:
+				case Opcodes.CALL_4:
+				case Opcodes.CALL_5:
+				case Opcodes.CALL_6:
+				case Opcodes.CALL_7:
+				case Opcodes.CALV_0:
+				case Opcodes.CALV_1:
+				case Opcodes.CALV_2:
+				case Opcodes.CALV_3:
+				case Opcodes.CALV_4:
+				case Opcodes.CALV_5:
+				case Opcodes.CALV_6:
+				case Opcodes.CALV_7: {
 					int paramlen = instr & 7;
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
@@ -480,7 +499,7 @@ class EFunction extends Function {
 					if ((instr & 8) != 0) head--;
 					break;
 				}
-				case (byte) 0x4D: {//call <ubyte>
+				case Opcodes.CALL: {//call <ubyte>
 					int paramlen = code[ct++] & 0xff;
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
@@ -488,7 +507,7 @@ class EFunction extends Function {
 					stack[head] = ((Function)stack[head]).call(c, params);
 					break;
 				}
-				case (byte) 0x4E: {//calv <ubyte>
+				case Opcodes.CALV: {//calv <ubyte>
 					int paramlen = code[ct++] & 0xff;
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
@@ -499,17 +518,17 @@ class EFunction extends Function {
 				}
 
 			//ARRAY INSTRUCTIONS
-				case (byte) 0xF0: {// newarray
+				case Opcodes.NEWARRAY: {
 					stack[head] = new Object[ival(stack[head])];
 					break;
 				}
-				case (byte) 0xF1: {// aload
+				case Opcodes.ALOAD: {
 					int at = ival(stack[head]);
 					head--;
 					stack[head] = ((Object[])stack[head])[at];
 					break;
 				}
-				case (byte) 0xF2: {// astore
+				case Opcodes.ASTORE: {
 					Object val = stack[head];
 					int at = ival(stack[head-1]);
 					Object[] array = (Object[])stack[head-2];
@@ -517,21 +536,21 @@ class EFunction extends Function {
 					head -= 3;
 					break;
 				}
-				case (byte) 0xF3: {// alen
+				case Opcodes.ALEN: {
 					stack[head] = Ival(((Object[])stack[head]).length);
 					break;
 				}
-				case (byte) 0xF4: {// newba
+				case Opcodes.NEWBA: {
 					stack[head] = new byte[ival(stack[head])];
 					break;
 				}
-				case (byte) 0xF5: {// baload
+				case Opcodes.BALOAD: {
 					int at = ival(stack[head]);
 					head--;
 					stack[head] = Ival( ((byte[])stack[head])[at] );
 					break;
 				}
-				case (byte) 0xF6: {// bastore
+				case Opcodes.BASTORE: {
 					int val = ival(stack[head]);
 					int at = ival(stack[head-1]);
 					byte[] array = (byte[])stack[head-2];
@@ -539,21 +558,21 @@ class EFunction extends Function {
 					head -= 3;
 					break;
 				}
-				case (byte) 0xF7: {// balen
+				case Opcodes.BALEN: {
 					stack[head] = Ival(((byte[])stack[head]).length);
 					break;
 				}
-				case (byte) 0xF8: {// newca
+				case Opcodes.NEWCA: {
 					stack[head] = new char[ival(stack[head])];
 					break;
 				}
-				case (byte) 0xF9: {// caload
+				case Opcodes.CALOAD: {
 					int at = ival(stack[head]);
 					head--;
 					stack[head] = Ival( ((char[])stack[head])[at] );
 					break;
 				}
-				case (byte) 0xFA: {// castore
+				case Opcodes.CASTORE: {
 					int val = ival(stack[head]);
 					int at = ival(stack[head-1]);
 					char[] array = (char[])stack[head-2];
@@ -561,50 +580,50 @@ class EFunction extends Function {
 					head -= 3;
 					break;
 				}
-				case (byte) 0xFB: {// calen
+				case Opcodes.CALEN: {
 					stack[head] = Ival(((char[])stack[head]).length);
 					break;
 				}
 
 			//OTHERS
-				case (byte) 0x4F: {// acmp
+				case Opcodes.ACMP: {
 					boolean btmp = stack[head] == null ? stack[head-1] == null : stack[head].equals(stack[head-1]);
 					stack[--head] = Ival(!btmp);
 					break;
 				}
-				case (byte) 0x1D: // throw
+				case Opcodes.THROW:
 					throw (Exception)stack[head];
-				case (byte) 0x1E: // ret_null
+				case Opcodes.RET_NULL:
 					return null;
-				case (byte) 0x1F: // return
+				case Opcodes.RETURN:
 					return stack[head];
-				case (byte) 0x2D: { //dup
+				case Opcodes.DUP: {
 					stack[head+1] = stack[head];
 					head++;
 					break;
 				}
-				case (byte) 0x2E: { //dup2
+				case Opcodes.DUP2: {
 					stack[head+2] = stack[head+1] = stack[head];
 					head += 2;
 					break;
 				}
-				case (byte) 0x2F: { //swap
+				case Opcodes.SWAP: {
 					Object atmp = stack[head-1];
 					stack[head-1] = stack[head];
 					stack[head] = atmp;
 					break;
 				}
-				case (byte) 0x3F: { //ldc <ushort>
+				case Opcodes.LDC: { //ldc <ushort>
 					stack[++head] = cpool[((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff)];
 					break;
 				}
-				case (byte) 0x60: //pop
+				case Opcodes.POP:
 					head--;
 					break;
-				case (byte) 0x6E: //bipush <byte>
+				case Opcodes.BIPUSH: //bipush <byte>
 					stack[++head] = Ival(code[ct++]);
 					break;
-				case (byte) 0x6F: //sipush <short>
+				case Opcodes.SIPUSH: //sipush <short>
 					stack[++head] = Ival((code[ct++] << 8) | (code[ct++]& 0xff));
 					break;
 			} /* the big switch */

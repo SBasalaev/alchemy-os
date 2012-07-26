@@ -55,6 +55,7 @@ public class ELibBuilder implements LibBuilder {
 	 *                baload bastore balen newca caload castore calen
 	 * New in format 2.0
 	 *  Simplify format to be loaded and processed faster
+	 *  Instructions: if_icmpge if_icmpgt if_icmple if_icmplt
 	 */
 
 	/** Object type for libraries. */

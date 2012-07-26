@@ -111,10 +111,10 @@ public interface Opcodes {
 	byte GOTO        = (byte)0x67;
 	byte IFNULL      = (byte)0x68;
 	byte IFNNULL     = (byte)0x69;
-	// 0x6A
-	// 0x6B
-	// 0x6C
-	// 0x6D
+	byte IF_ICMPLT   = (byte)0x6A;
+	byte IF_ICMPGE   = (byte)0x6B;
+	byte IF_ICMPGT   = (byte)0x6C;
+	byte IF_ICMPLE   = (byte)0x6D;
 	byte BIPUSH      = (byte)0x6E;
 	byte SIPUSH      = (byte)0x6F;
 	byte CALL_0      = (byte)0x70;
@@ -145,7 +145,6 @@ public interface Opcodes {
 	byte CALOAD      = (byte)0xF9;
 	byte CASTORE     = (byte)0xFA;
 	byte CALEN       = (byte)0xFB;
-	// 0xFC
 	// 0xFD
 	// 0xFE
 	// 0xFF
