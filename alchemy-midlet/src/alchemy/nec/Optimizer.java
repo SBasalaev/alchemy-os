@@ -418,15 +418,80 @@ public class Optimizer implements ExprVisitor {
 	}
 
 	/**
-	 * DCE:
-	 *   const;   =>   none
-	 *   var;     =>   none
+	 * DCE: (unused operations)
+	 *   const;       =>  none
+	 *   var;         =>  none
+	 *   ex1 op ex1;  =>  {ex1; ex2;}
+	 *   op ex;       =>  ex;
+	 *   array.len;   =>  array;
+	 *   array[i];    =>  {array; i;}
+	 * CF: (to ease further DCE)
+	 *   {...; eN};   =>  {...; eN; }
 	 */
 	public Object visitDiscard(DiscardExpr disc, Object scope) {
 		disc.expr = (Expr)disc.expr.accept(this, scope);
 		if (disc.expr instanceof ConstExpr || disc.expr instanceof VarExpr) {
 			optimized = true;
 			return new NoneExpr();
+		} else if (disc.expr instanceof UnaryExpr) {
+			optimized = true;
+			disc.expr = ((UnaryExpr)disc.expr).expr;
+			return disc;
+		} else if (disc.expr instanceof BinaryExpr) {
+			optimized = true;
+			BinaryExpr binary = (BinaryExpr)disc.expr;
+			BlockExpr block = new BlockExpr((Scope)scope);
+			block.exprs.addElement(new DiscardExpr(binary.lvalue));
+			block.exprs.addElement(new DiscardExpr(binary.rvalue));
+			return block;
+		} else if (disc.expr instanceof ComparisonExpr) {
+			optimized = true;
+			ComparisonExpr cmp = (ComparisonExpr)disc.expr;
+			BlockExpr block = new BlockExpr((Scope)scope);
+			block.exprs.addElement(new DiscardExpr(cmp.lvalue));
+			block.exprs.addElement(new DiscardExpr(cmp.rvalue));
+			return block;
+		} else if (disc.expr instanceof BlockExpr) {
+			optimized = true;
+			BlockExpr block = (BlockExpr)disc.expr;
+			disc.expr = (Expr)block.exprs.lastElement();
+			block.exprs.setElementAt(disc, block.exprs.size()-1);
+			return block;
+		} else if (disc.expr instanceof ALenExpr) {
+			optimized = true;
+			disc.expr = ((ALenExpr)disc.expr).arrayexpr;
+			return disc;
+		} else if (disc.expr instanceof ALoadExpr) {
+			optimized = true;
+			ALoadExpr aload = (ALoadExpr)disc.expr;
+			BlockExpr block = new BlockExpr((Scope)scope);
+			block.exprs.addElement(new DiscardExpr(aload.arrayexpr));
+			block.exprs.addElement(new DiscardExpr(aload.indexexpr));
+			return block;
+		} else if (disc.expr instanceof CastExpr) {
+			optimized = true;
+			disc.expr = ((CastExpr)disc.expr).expr;
+			return disc;
+		} else if (disc.expr instanceof ConcatExpr) {
+			optimized = true;
+			Vector exprs = ((ConcatExpr)disc.expr).exprs;
+			BlockExpr block = new BlockExpr((Scope)scope);
+			for (int i=0; i<exprs.size(); i++) {
+				block.exprs.addElement(new DiscardExpr((Expr)exprs.elementAt(i)));
+			}
+			return block;
+		} else if (disc.expr instanceof NewArrayExpr) {
+			optimized = true;
+			disc.expr = ((NewArrayExpr)disc.expr).lengthexpr;
+			return disc;
+		} else if (disc.expr instanceof NewArrayByEnumExpr) {
+			optimized = true;
+			Expr[] exprs = ((NewArrayByEnumExpr)disc.expr).initializers;
+			BlockExpr block = new BlockExpr((Scope)scope);
+			for (int i=0; i<exprs.length; i++) {
+				if (exprs[i] != null) block.exprs.addElement(new DiscardExpr(exprs[i]));
+			}
+			return block;
 		}
 		return disc;
 	}
