@@ -317,7 +317,7 @@ class Tokenizer {
 			    id.equals("use") || id.equals("do") || id.equals("while")||
 				id.equals("cast")|| id.equals("var")|| id.equals("type") ||
 				id.equals("null")|| id.equals("new")|| id.equals("for")  ||
-				id.equals("const"))
+				id.equals("const")|| id.equals("switch"))
 				return ttype = TT_KEYWORD;
 			return ttype = TT_IDENTIFIER;
 		}

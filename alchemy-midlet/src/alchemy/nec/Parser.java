@@ -666,6 +666,74 @@ public class Parser {
 			}
 			Type btype = binaryCastType(ifexpr.rettype(), elseexpr.rettype());
 			return new IfExpr(cond, cast(ifexpr, btype), cast(elseexpr, btype));
+		} else if (keyword.equals("switch")) {
+			expect('(');
+			// do not cast, other numeric type may be put here by mistake
+			Expr indexexpr = parseExpr(scope);
+			if (!indexexpr.rettype().isSubtypeOf(BuiltinType.INT))
+				throw new ParseException("Index of switch must be Int");
+			expect(')');
+			expect('{');
+			// parsing switch body
+			Expr elseexpr = null;
+			Vector keys = new Vector(); // int[]
+			Vector keysunique = new Vector(); // Integer
+			Vector exprs = new Vector(); // Expr
+			while (t.nextToken() != '}') {
+				if (t.ttype == Tokenizer.TT_KEYWORD && t.svalue.equals("else")) {
+					if (elseexpr != null)
+						throw new ParseException("else branch is already defined in this switch");
+					expect(':');
+					elseexpr = parseExpr(scope);
+				} else {
+					Vector branchkeyv = new Vector();
+					do {
+						t.pushBack();
+						if (!branchkeyv.isEmpty()) expect(',');
+						Expr branchindex = (Expr)parseExpr(scope).accept(new Optimizer(), scope);
+						if (!(branchindex instanceof ConstExpr))
+							throw new ParseException("Constant expression expected in switch key");
+						if (!branchindex.rettype().isSubtypeOf(BuiltinType.INT))
+							throw new ParseException("switch key is required to be integer");
+						Integer idx = (Integer)((ConstExpr)branchindex).value;
+						if (keysunique.contains(idx))
+							throw new ParseException("branch for "+idx+" is already defined in this switch");
+						branchkeyv.addElement(idx);
+					} while (t.nextToken() != ':');
+					int[] branchkeys = new int[branchkeyv.size()];
+					for (int i=0; i<branchkeys.length; i++) {
+						Integer idx = (Integer)branchkeyv.elementAt(i);
+						branchkeys[i] = idx.intValue();
+					}
+					keys.addElement(branchkeys);
+					exprs.addElement(parseExpr(scope));
+				}
+			}
+			// obtaining common type
+			Type type;
+			if (elseexpr != null) {
+				type = elseexpr.rettype();
+			} else if (!exprs.isEmpty()) {
+				type = ((Expr)exprs.firstElement()).rettype();
+			} else {
+				throw new ParseException("switch body is empty");
+			}
+			for (int i=0; i<exprs.size(); i++) {
+				Expr e = (Expr)exprs.elementAt(i);
+				type = binaryCastType(type, e.rettype());
+			}
+			// casting all to common type
+			if (elseexpr != null) elseexpr = cast(elseexpr, type);
+			for (int i=0; i<exprs.size(); i++) {
+				Expr e = (Expr)exprs.elementAt(i);
+				exprs.setElementAt(cast(e, type), i);
+			}
+			SwitchExpr swexpr = new SwitchExpr();
+			swexpr.indexexpr = indexexpr;
+			swexpr.elseexpr = elseexpr;
+			swexpr.keys = keys;
+			swexpr.exprs = exprs;
+			return swexpr;
 		} else if (keyword.equals("var") || keyword.equals("const")) {
 			boolean isConst = keyword.equals("const");
 			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)

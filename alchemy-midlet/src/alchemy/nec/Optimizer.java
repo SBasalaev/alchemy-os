@@ -596,6 +596,16 @@ public class Optimizer implements ExprVisitor {
 		return none;
 	}
 
+	public Object visitSwitch(SwitchExpr swexpr, Object scope) {
+		swexpr.indexexpr = (Expr)swexpr.indexexpr.accept(this, scope);
+		for (int i=0; i<swexpr.exprs.size(); i++) {
+			Expr e = (Expr)swexpr.exprs.elementAt(i);
+			swexpr.exprs.setElementAt(e.accept(this, scope), i);
+		}
+		if (swexpr.elseexpr != null) swexpr.elseexpr = (Expr)swexpr.elseexpr.accept(this, scope);
+		return swexpr;
+	}
+
 	/**
 	 * CF:
 	 *  +expr   =>  expr

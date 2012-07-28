@@ -45,37 +45,37 @@ public class VarIndexer implements ExprVisitor {
 		}
 	}
 
-	public Object visitALen(ALenExpr alen, Object i) {
-		alen.arrayexpr.accept(this, i);
+	public Object visitALen(ALenExpr alen, Object offset) {
+		alen.arrayexpr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitALoad(ALoadExpr aload, Object i) {
-		aload.arrayexpr.accept(this, i);
-		aload.indexexpr.accept(this, i);
+	public Object visitALoad(ALoadExpr aload, Object offset) {
+		aload.arrayexpr.accept(this, offset);
+		aload.indexexpr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitAStore(AStoreExpr astore, Object i) {
-		astore.arrayexpr.accept(this, i);
-		astore.assignexpr.accept(this, i);
-		astore.indexexpr.accept(this, i);
+	public Object visitAStore(AStoreExpr astore, Object offset) {
+		astore.arrayexpr.accept(this, offset);
+		astore.assignexpr.accept(this, offset);
+		astore.indexexpr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitAssign(AssignExpr assign, Object i) {
-		assign.expr.accept(this, i);
+	public Object visitAssign(AssignExpr assign, Object offset) {
+		assign.expr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitBinary(BinaryExpr binary, Object i) {
-		binary.lvalue.accept(this, i);
-		binary.rvalue.accept(this, i);
+	public Object visitBinary(BinaryExpr binary, Object offset) {
+		binary.lvalue.accept(this, offset);
+		binary.rvalue.accept(this, offset);
 		return null;
 	}
 
-	public Object visitBlock(BlockExpr block, Object i) {
-		int start = ((Integer)i).intValue();
+	public Object visitBlock(BlockExpr block, Object offset) {
+		int start = ((Integer)offset).intValue();
 		int size = block.locals.size();
 		for (int vi=0; vi<size; vi++) {
 			Var v = (Var)block.locals.elementAt(vi);
@@ -87,83 +87,92 @@ public class VarIndexer implements ExprVisitor {
 		return null;
 	}
 
-	public Object visitCast(CastExpr cast, Object i) {
-		cast.expr.accept(this, i);
+	public Object visitCast(CastExpr cast, Object offset) {
+		cast.expr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitComparison(ComparisonExpr cmp, Object i) {
-		cmp.lvalue.accept(this, i);
-		cmp.rvalue.accept(this, i);
+	public Object visitComparison(ComparisonExpr cmp, Object offset) {
+		cmp.lvalue.accept(this, offset);
+		cmp.rvalue.accept(this, offset);
 		return null;
 	}
 
-	public Object visitConcat(ConcatExpr concat, Object i) {
+	public Object visitConcat(ConcatExpr concat, Object offset) {
 		for (int ei=0; ei<concat.exprs.size(); ei++) {
-			((Expr)concat.exprs.elementAt(ei)).accept(this, i);
+			((Expr)concat.exprs.elementAt(ei)).accept(this, offset);
 		}
 		return null;
 	}
 
-	public Object visitConst(ConstExpr cexpr, Object i) {
+	public Object visitConst(ConstExpr cexpr, Object offset) {
 		return null;
 	}
 
-	public Object visitDiscard(DiscardExpr disc, Object i) {
-		disc.expr.accept(this, i);
+	public Object visitDiscard(DiscardExpr disc, Object offset) {
+		disc.expr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitDoWhile(DoWhileExpr wexpr, Object i) {
-		wexpr.condition.accept(this, i);
-		wexpr.body.accept(this, i);
+	public Object visitDoWhile(DoWhileExpr wexpr, Object offset) {
+		wexpr.condition.accept(this, offset);
+		wexpr.body.accept(this, offset);
 		return null;
 	}
 
-	public Object visitFCall(FCallExpr fcall, Object i) {
-		fcall.fload.accept(this, i);
+	public Object visitFCall(FCallExpr fcall, Object offset) {
+		fcall.fload.accept(this, offset);
 		for (int ei=0; ei<fcall.args.length; ei++) {
-			fcall.args[ei].accept(this, new Integer(ei));
+			fcall.args[ei].accept(this, offset);
 		}
 		return null;
 	}
 
-	public Object visitIf(IfExpr ifexpr, Object i) {
-		ifexpr.condition.accept(this, i);
-		ifexpr.ifexpr.accept(this, i);
-		ifexpr.elseexpr.accept(this, i);
+	public Object visitIf(IfExpr ifexpr, Object offset) {
+		ifexpr.condition.accept(this, offset);
+		ifexpr.ifexpr.accept(this, offset);
+		ifexpr.elseexpr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitNewArray(NewArrayExpr newarray, Object i) {
-		newarray.lengthexpr.accept(this, i);
+	public Object visitNewArray(NewArrayExpr newarray, Object offset) {
+		newarray.lengthexpr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object i) {
+	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object offset) {
 		for (int ei=0; ei<newarray.initializers.length; ei++) {
 			if (newarray.initializers[ei] != null)
-				newarray.initializers[ei].accept(this, i);
+				newarray.initializers[ei].accept(this, offset);
 		}
 		return null;
 	}
 
-	public Object visitNone(NoneExpr none, Object i) {
+	public Object visitNone(NoneExpr none, Object offset) {
 		return null;
 	}
 
-	public Object visitUnary(UnaryExpr unary, Object i) {
-		unary.expr.accept(this, i);
+	public Object visitSwitch(SwitchExpr swexpr, Object offset) {
+		swexpr.indexexpr.accept(this, offset);
+		for (int vi=0; vi<swexpr.exprs.size(); vi++) {
+			((Expr)swexpr.exprs.elementAt(vi)).accept(this, offset);
+		}
+		if (swexpr.elseexpr != null) swexpr.elseexpr.accept(this, offset);
+		return null;
+	}
+	
+	public Object visitUnary(UnaryExpr unary, Object offset) {
+		unary.expr.accept(this, offset);
 		return null;
 	}
 
-	public Object visitVar(VarExpr vexpr, Object i) {
+	public Object visitVar(VarExpr vexpr, Object offset) {
 		return null;
 	}
 
-	public Object visitWhile(WhileExpr wexpr, Object i) {
-		wexpr.condition.accept(this, i);
-		wexpr.body.accept(this, i);
+	public Object visitWhile(WhileExpr wexpr, Object offset) {
+		wexpr.condition.accept(this, offset);
+		wexpr.body.accept(this, offset);
 		return null;
 	}
 }

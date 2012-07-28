@@ -466,6 +466,92 @@ public class EAsmWriter implements ExprVisitor {
 		return null;
 	}
 
+	public Object visitSwitch(SwitchExpr swexpr, Object unused) {
+		swexpr.indexexpr.accept(this, unused);
+		// computing count of numbers, min, max
+		int count = 0;
+		int min = 0;
+		int max = 0;
+		Vector vkeys = swexpr.keys;
+		for (int i=0; i<vkeys.size(); i++) {
+			int[] ik = (int[])vkeys.elementAt(i);
+			if (i==0) {
+				min = ik[0];
+				max = ik[0];
+			}
+			for (int j=0; j<ik.length; j++) {
+				min = Math.min(min, ik[j]);
+				max = Math.max(max, ik[j]);
+			}
+			count += ik.length;
+		}
+		// preparing labels
+		Label lafter = new Label();
+		Label ldflt = new Label();
+		Label[] labelsunique = new Label[vkeys.size()];
+		for (int i=0; i<labelsunique.length; i++) {
+			labelsunique[i] = new Label();
+		}
+		// writing switch instruction.
+		int tablelen = 4 + 4 + 2*(max-min+1);
+		int lookuplen = 2 + count*6;
+		if (tablelen <= lookuplen) {
+			// do tableswitch
+			Label[] labels = new Label[max-min+1];
+			for (int i=0; i<labels.length; i++) {
+				labels[i] = (swexpr.elseexpr != null) ? ldflt : lafter;
+			}
+			for (int ei=0; ei<labelsunique.length; ei++) {
+				int[] ik = (int[])vkeys.elementAt(ei);
+				for (int i=0; i<ik.length; i++) {
+					labels[ik[i]-min] = labelsunique[ei];
+				}
+			}
+			// write it
+			if (swexpr.elseexpr != null) {
+				writer.visitTableSwitch(min, max, ldflt, labels);
+				writer.visitLabel(ldflt);
+				swexpr.elseexpr.accept(this, unused);
+				writer.visitJumpInsn(Opcodes.GOTO, lafter);
+			} else {
+				writer.visitTableSwitch(min, max, lafter, labels);
+			}
+		} else {
+			// do lookupswitch
+			int[] keys = new int[count];
+			Label[] labels = new Label[count];
+			int ofs = 0;
+			for (int ei=0; ei<labelsunique.length; ei++) {
+				int[] ik = (int[])vkeys.elementAt(ei);
+				System.arraycopy(ik, 0, keys, ofs, ik.length);
+				for (int j=0; j<ik.length; j++) {
+					labels[ofs+j] = labelsunique[ei];
+				}
+				ofs += ik.length;
+			}
+			// write it
+			if (swexpr.elseexpr != null) {
+				writer.visitLookupSwitch(ldflt, keys, labels);
+				writer.visitLabel(ldflt);
+				swexpr.elseexpr.accept(this, unused);
+				writer.visitJumpInsn(Opcodes.GOTO, lafter);
+			} else {
+				writer.visitLookupSwitch(lafter, keys, labels);
+			}
+		}
+		// write expressions
+		for (int i=0; i<labelsunique.length; i++) {
+			Expr e = (Expr)swexpr.exprs.elementAt(i);
+			writer.visitLabel(labelsunique[i]);
+			e.accept(this, unused);
+			if (i != labelsunique.length-1) {
+				writer.visitJumpInsn(Opcodes.GOTO, lafter);
+			}
+		}
+		writer.visitLabel(lafter);
+		return null;
+	}
+
 	public Object visitUnary(UnaryExpr unary, Object unused) {
 		Type type = unary.rettype();
 		switch (unary.operator) {
