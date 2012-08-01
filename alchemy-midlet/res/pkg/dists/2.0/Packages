@@ -6,12 +6,11 @@ Summary: application menu
 File: appmenu_0.3-1.pkg
 
 Package: coreutils
-Version: 0.4.1-1
+Version: 0.4.2-1
 Section: utils
-Homepage: http://code.google.com/p/alchemy-os/
 Summary: core Alchemy utilities
-Depends: libcore2
-File: coreutils_0.4.1-1.pkg
+Depends: libcore3
+File: coreutils_0.4.2-1.pkg
 
 Package: edit
 Version: 0.9-1
@@ -34,18 +33,18 @@ Summary: file properties viewer
 Depends: libcore2, libui0.1, libfiletype1
 File: fileinfo_1.2-4.pkg
 
-Package: libcore2
-Version: 2.1.1-1
-Summary: core library
+Package: libcore3
+Version: 2.9-1
 Section: libs
-File: libcore2_2.1.1-1.pkg
+Summary: system library for Alchemy OS
+File: libcore3_2.9-1.pkg
 
 Package: libcore-dev
-Version: 2.1.1-1
-Summary: core development headers
+Version: 2.9-1
 Section: libdevel
-Depends: libcore2
-File: libcore-dev_2.1.1-1.pkg
+Depends: libcore3
+Summary: system development headers for Alchemy OS
+File: libcore-dev_2.9-1.pkg
 
 Package: libfiletype1
 Version: 1.0-2
