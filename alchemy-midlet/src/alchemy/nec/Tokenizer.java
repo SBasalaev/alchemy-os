@@ -526,7 +526,7 @@ class Tokenizer {
 			num <<= 4;
 			char ch = hex.charAt(i);
 			if (ch >= '0' && ch <= '9') num |= ch-'0';
-			else if (ch >= 'a' && ch <= 'f') num |= ch-'a';
+			else if (ch >= 'a' && ch <= 'f') num |= ch-'a'+10;
 		}
 		return num;
 	}
@@ -539,7 +539,7 @@ class Tokenizer {
 			num <<= 4;
 			char ch = hex.charAt(i);
 			if (ch >= '0' && ch <= '9') num |= ch-'0';
-			else if (ch >= 'a' && ch <= 'f') num |= ch-'a';
+			else if (ch >= 'a' && ch <= 'f') num |= ch-'a'+10;
 		}
 		return num;
 	}
