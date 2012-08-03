@@ -34,10 +34,10 @@ Depends: libcore2, libui0.1, libfiletype1
 File: fileinfo_1.2-4.pkg
 
 Package: libcore3
-Version: 2.9-1
+Version: 2.9-2
 Section: libs
 Summary: system library for Alchemy OS
-File: libcore3_2.9-1.pkg
+File: libcore3_2.9-2.pkg
 
 Package: libcore-dev
 Version: 2.9-1
@@ -90,7 +90,7 @@ Package: pkg
 Version: 0.1.1-1
 Section: admin
 Summary: Alchemy package manager
-Depends: libpkg0, libcore2
+Depends: libpkg0, libcore3
 File: pkg_0.1.1-1.pkg
 
 Package: sh
@@ -108,7 +108,7 @@ File: terminal_1.0-2.pkg
 Package: alchemy-core
 Version: 1
 Section: admin
-Depends: libcore2, libui0.1, sh, terminal, edit, coreutils, pkg
+Depends: libcore3, libui0.1, sh, terminal, edit, coreutils, pkg
 Summary: this package depends on all core components of Alchemy OS, it is recommended not to remove it to ensure safe upgrades
 File: alchemy-core_1.pkg
 
@@ -122,13 +122,13 @@ File: alchemy-gui_4.pkg
 Package: alpaca
 Version: 0.2.1-1
 Section: admin
-Depends: libcore2, libui0.1, libpkg0
+Depends: libcore3, libui0.1, libpkg0
 Summary: GUI for Alchemy package manager
 File: alpaca_0.2.1-1.pkg
 
 Package: imgview
 Version: 0.1-1
 Section: gui
-Depends: libcore2, libui0.1
+Depends: libcore3, libui0.1
 Summary: simple image viewer
 File: imgview_0.1-1.pkg
