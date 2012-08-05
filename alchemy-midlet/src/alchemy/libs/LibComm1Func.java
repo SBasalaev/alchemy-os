@@ -35,7 +35,7 @@ class LibComm1Func extends NativeFunction {
 		super(name, index);
 	}
 
-	protected Object exec(Context c, Object[] args) throws Exception {
+	protected Object execNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: { // list_commports(): [String]
 				String ports = System.getProperty("microedition.commports");

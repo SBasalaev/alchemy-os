@@ -50,7 +50,7 @@ class LibCore30Func extends NativeFunction {
 		super(name, index);
 	}
 
-	protected Object exec(Context c, Object[] args) throws Exception {
+	protected Object execNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // pathfile(f: String): String
 				return c.toFile((String)args[0]).name();

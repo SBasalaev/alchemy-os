@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Stack;
 import java.util.Vector;
 import javax.microedition.io.Connection;
 
@@ -134,11 +133,6 @@ public class Context {
 	 * By default stream of parent context is used.
 	 */
 	public OutputStream stderr;
-
-	/* PACKAGE PRIVATE FIELDS */
-
-	/** Stack of function calls. */
-	final Stack callStack = new Stack();
 
 	/* PRIVATE FIELDS */
 
@@ -517,20 +511,6 @@ public class Context {
 		if (listeners != null) listeners.removeElement(l);
 	}
 
-	/**
-	 * Dumps stack of function calls.
-	 * @return newline separated list of function calls
-	 */
-	public String dumpCallStack() {
-		StringBuffer sb = new StringBuffer();
-		//synchronized (callStack) {
-		for (int i=callStack.size()-1; i>=0; i--) {
-			sb.append('@').append(callStack.elementAt(i)).append('\n');
-		}
-		//}
-		return sb.toString();
-	}
-
 	private class ContextThread extends Thread {
 
 		private final Function main;
@@ -544,12 +524,11 @@ public class Context {
 
 		public void run() {
 			try {
-				Integer r = (Integer)main.call(Context.this, new Object[] {cmdArgs});
+				Integer r = (Integer)main.exec(Context.this, new Object[] {cmdArgs});
 				exitcode = r == null ? 0 : r.intValue();
 			} catch (Throwable t) {
 				error = t;
 				IO.println(stderr, t);
-				IO.println(stderr, dumpCallStack());
 				//t.printStackTrace();
 			}
 			setState(ENDED);
@@ -590,12 +569,18 @@ public class Context {
 			this.args = args;
 		}
 		
-		protected Object exec(Context c, Object[] params) throws Exception {
+		public Object exec(Context c, Object[] params) throws AlchemyException {
 			String[] givenargs = (String[])(params[0]);
 			String[] cmdargs = new String[args.length + givenargs.length];
 			System.arraycopy(args, 0, cmdargs, 0, args.length);
 			System.arraycopy(givenargs, 0, cmdargs, args.length, givenargs.length);
-			return Ival(new Context(c).startAndWait(progname, cmdargs));
+			try {
+				return Ival(new Context(c).startAndWait(progname, cmdargs));
+			} catch (Exception e) {
+				AlchemyException ae = new AlchemyException(e);
+				ae.addTraceElement(this, progname+":1");
+				throw ae;
+			}
 		}
 	}
 }

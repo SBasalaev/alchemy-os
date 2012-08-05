@@ -18,6 +18,8 @@
 
 package alchemy.nlib;
 
+import alchemy.core.AlchemyException;
+import alchemy.core.Context;
 import alchemy.core.Function;
 
 /**
@@ -43,5 +45,17 @@ public abstract class NativeFunction extends Function {
 	
 	public String toString() {
 		return soname()+':'+signature;
+	}
+	
+	protected abstract Object execNative(Context c, Object[] args) throws Exception;
+
+	public final Object exec(Context c, Object[] args) throws AlchemyException {
+		try {
+			return execNative(c, args);
+		} catch (Exception e) {
+			AlchemyException ae = new AlchemyException(e);
+			ae.addTraceElement(this, "native");
+			throw ae;
+		}
 	}
 }

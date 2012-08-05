@@ -18,6 +18,7 @@
 
 package alchemy.evm;
 
+import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
 
@@ -48,7 +49,7 @@ class EFunction extends Function {
 		this.cpool = cpool;
 	}
 
-	protected Object exec(Context c, Object[] args) throws Exception {
+	public Object exec(Context c, Object[] args) throws AlchemyException {
 		//initializing
 		final Object[] stack = new Object[stacksize];
 		int head = -1;
@@ -56,6 +57,7 @@ class EFunction extends Function {
 		final Object[] locals = new Object[localsize];
 		System.arraycopy(args, 0, locals, 0, args.length);
 		int ct = 0;
+		try {
 		while (true) {
 			int instr = code[ct++];
 			switch (instr) {
@@ -495,7 +497,7 @@ class EFunction extends Function {
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
-					stack[head] = ((Function)stack[head]).call(c, params);
+					stack[head] = ((Function)stack[head]).exec(c, params);
 					if ((instr & 8) != 0) head--;
 					break;
 				}
@@ -504,7 +506,7 @@ class EFunction extends Function {
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
-					stack[head] = ((Function)stack[head]).call(c, params);
+					stack[head] = ((Function)stack[head]).exec(c, params);
 					break;
 				}
 				case Opcodes.CALV: {//calv <ubyte>
@@ -512,7 +514,7 @@ class EFunction extends Function {
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
-					((Function)stack[head]).call(c, params);
+					((Function)stack[head]).exec(c, params);
 					head--;
 					break;
 				}
@@ -631,8 +633,8 @@ class EFunction extends Function {
 					stack[--head] = Ival(!btmp);
 					break;
 				}
-				case Opcodes.THROW:
-					throw (Exception)stack[head];
+				//case Opcodes.THROW:
+				//	throw (Exception)stack[head];
 				case Opcodes.RET_NULL:
 					return null;
 				case Opcodes.RETURN:
@@ -668,6 +670,14 @@ class EFunction extends Function {
 					break;
 			} /* the big switch */
 		} /* the great while */
+		} catch (AlchemyException ae) {
+			ae.addTraceElement(this, "+"+(ct-1));
+			throw ae;
+		} catch (Exception e) {
+			AlchemyException ae = new AlchemyException(e);
+			ae.addTraceElement(this, "+"+(ct-1));
+			throw ae;
+		}
 	}
 
 	public String toString() {

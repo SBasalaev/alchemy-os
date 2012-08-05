@@ -57,28 +57,7 @@ public abstract class Function {
 	 * @return function result
 	 * @throws Exception if an exception occurs
 	 */
-	protected abstract Object exec(Context c, Object[] args) throws Exception;
-
-	/**
-	 * Calls this function with given arguments.
-	 * This method registers function on context call stack and should
-	 * be used in preference of <code>exec</code> in function calls.
-	 * 
-	 * @param c    execution context
-	 * @param args function arguments
-	 * @return function result
-	 * @throws Exception if an exception occurs during execution of function
-	 */
-	public final Object call(Context c, Object[] args) throws Exception {
-		//synchronized (c.callStack) {
-		c.callStack.push(this);
-		//}
-		Object result = exec(c, args);
-		//synchronized (c.callStack) {
-		c.callStack.pop();
-		//}
-		return result;
-	}
+	public abstract Object exec(Context c, Object[] args) throws AlchemyException;
 
 	/**
 	 * Returns string representation of this object.

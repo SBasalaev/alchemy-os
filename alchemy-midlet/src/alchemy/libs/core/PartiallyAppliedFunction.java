@@ -18,6 +18,7 @@
 
 package alchemy.libs.core;
 
+import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
 
@@ -38,10 +39,19 @@ public class PartiallyAppliedFunction extends Function {
 		this.f = f;
 	}
 
-	protected Object exec(Context c, Object[] args) throws Exception {
-		Object[] newargs = new Object[args.length+1];
-		System.arraycopy(args, 0, newargs, 1, args.length);
-		newargs[0] = argument;
-		return f.call(c, newargs);
+	public Object exec(Context c, Object[] args) throws AlchemyException {
+		try {
+			Object[] newargs = new Object[args.length+1];
+			System.arraycopy(args, 0, newargs, 1, args.length);
+			newargs[0] = argument;
+			return f.exec(c, newargs);
+		} catch (AlchemyException ae) {
+			ae.addTraceElement(this, "native");
+			throw ae;
+		} catch (Exception e) {
+			AlchemyException ae = new AlchemyException(e);
+			ae.addTraceElement(this, "native");
+			throw ae;
+		}
 	}
 }

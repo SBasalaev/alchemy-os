@@ -94,7 +94,6 @@ public class Console extends NativeApp {
 			return result;
 		} catch (Exception e) {
 			form.print(e.toString());
-			form.print(child.dumpCallStack());
 			return 1;
 		} finally {
 			UIServer.removeScreen(c);

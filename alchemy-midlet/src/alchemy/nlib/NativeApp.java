@@ -18,6 +18,7 @@
 
 package alchemy.nlib;
 
+import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
@@ -51,8 +52,14 @@ public abstract class NativeApp extends Library {
 			super("main");
 		}
 
-		protected Object exec(Context c, Object[] args) throws Exception {
-			return Ival(main(c, (String[])args[0]));
+		public Object exec(Context c, Object[] args) throws AlchemyException {
+			try {
+				return Ival(main(c, (String[])args[0]));
+			} catch (Exception e) {
+				AlchemyException ae = new AlchemyException(e);
+				ae.addTraceElement(this, "native");
+				throw ae;
+			}
 		}
 	}
 }
