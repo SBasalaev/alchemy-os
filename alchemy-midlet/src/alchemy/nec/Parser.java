@@ -218,7 +218,7 @@ public class Parser {
 					fvar.constValue = new ConstExpr(fdef);
 					unit.addVar(fvar);
 				} else if (!fvar.type.equals(fdef.type)) {
-					if (fvar.type.getClass() == FunctionType.class)
+					if (fvar.type instanceof FunctionType)
 						throw new ParseException("Definition of function "+fdef.signature+" conflicts with previous definition.");
 					else
 						throw new ParseException("Variable "+fdef.signature+" is already defined");
@@ -552,6 +552,31 @@ public class Parser {
 				expect(')');
 				return expr;
 			}
+			case '[': {
+				// reading elements
+				Vector exprs = new Vector();
+				while (t.nextToken() != ']') {
+					t.pushBack();
+					if (!exprs.isEmpty()) expect(',');
+					exprs.addElement(parseExpr(scope));
+				}
+				// calculating common type
+				Type eltype = BuiltinType.NULL;
+				for (int i=0; i<exprs.size(); i++) {
+					Expr e = (Expr)exprs.elementAt(i);
+					eltype = binaryCastType(eltype, e.rettype());
+				}
+				if (eltype.equals(BuiltinType.NULL))
+					eltype = BuiltinType.ANY;
+				else if (eltype.equals(BuiltinType.NONE))
+					throw new ParseException("Cannot create array of <none>.");
+				// building expression
+				Expr[] init = new Expr[exprs.size()];
+				for (int i=0; i<init.length; i++) {
+					init[i] = (Expr)exprs.elementAt(i);
+				}
+				return new NewArrayByEnumExpr(new ArrayType(eltype), init);
+			}
 			case Tokenizer.TT_INT:
 				return new ConstExpr(new Integer(t.ivalue));
 			case Tokenizer.TT_LONG:
@@ -831,6 +856,56 @@ public class Parser {
 			} else {
 				throw new ParseException("Applying 'new' to neither array nor structure");
 			}
+		} else if (keyword.equals("def")) {
+			// anonymous function
+			Func func = new Func(unit); // TODO: I probably need to use scope here instead
+			// parsing args
+			expect('(');
+			Vector args = new Vector();
+			boolean first = true;
+			while (t.nextToken() != ')') {
+				t.pushBack();
+				if (first) first = false;
+				else expect(',');
+				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+					throw new ParseException("Variable name expected, got "+t);
+				String varname = t.svalue;
+				expect(':');
+				Type vartype = parseType(func);
+				args.addElement(new Var(varname, vartype));
+			}
+			Type rettype;
+			if (t.nextToken() == ':') {
+				rettype = parseType(func);
+			} else {
+				t.pushBack();
+				rettype = BuiltinType.NONE;
+			}
+			//populating fields
+			func.locals = args;
+			FunctionType ftype = new FunctionType();
+			ftype.rettype = rettype;
+			ftype.args = new Type[args.size()];
+			for (int i=args.size()-1; i>=0; i--) {
+				ftype.args[i] = ((Var)args.elementAt(i)).type;
+			}
+			int lnum = 1;
+			while (unit.getFunc(scope.funcName()+'$'+lnum) != null) lnum++;
+			func.signature = scope.funcName()+'$'+lnum;
+			func.type = ftype;
+			func.hits++;
+			switch (t.nextToken()) {
+				case '=':
+					func.body = cast(parseExpr(func), rettype);
+					break;
+				case '{':
+					func.body = cast(parseBlock(func), rettype);
+					break;
+				default:
+					throw new ParseException("Function body expected, got "+t);
+			}
+			unit.funcs.addElement(func);
+			return new ConstExpr(func);
 		} else {
 			throw new ParseException(t.toString()+" unexpected here");
 		}
@@ -982,7 +1057,7 @@ public class Parser {
 			return block;
 		}
 	}
-
+	
 	/**
 	 * Does special type checkings and casts for the following functions:
 	 *   Function.curry   - checks if argument is acceptable, computes returned type
@@ -1066,6 +1141,7 @@ public class Parser {
 			for (int i=0; i<toF.args.length && cancast; i++) {
 				cancast &= toF.args[i].isSubtypeOf(fromF.args[i]);
 			}
+			if (cancast) return expr;
 		}
 		if (fromType.isSubtypeOf(BuiltinType.NUMBER) && toType.isSubtypeOf(BuiltinType.NUMBER)) {
 			return new CastExpr(toType, expr);

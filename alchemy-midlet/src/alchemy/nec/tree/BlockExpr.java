@@ -83,4 +83,8 @@ public class BlockExpr extends Expr implements Scope {
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitBlock(this, data);
 	}
+
+	public String funcName() {
+		return parent.funcName();
+	}
 }

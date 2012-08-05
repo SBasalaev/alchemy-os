@@ -51,4 +51,10 @@ public interface Scope {
 	 * Returns true if variable is defined and is local.
 	 */
 	boolean isLocal(String id);
+	
+	/**
+	 * Returns name of the current function. For unit scope
+	 * returns null.
+	 */
+	String funcName();
 }

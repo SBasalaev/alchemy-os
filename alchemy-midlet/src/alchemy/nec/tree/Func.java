@@ -75,4 +75,8 @@ public class Func implements Scope {
 	public NamedType getType(String alias) {
 		return unit.getType(alias);
 	}
+
+	public String funcName() {
+		return signature;
+	}
 }

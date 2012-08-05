@@ -81,4 +81,8 @@ public class Unit implements Scope {
 		}
 		return null;
 	}
+
+	public String funcName() {
+		return "";
+	}
 }
