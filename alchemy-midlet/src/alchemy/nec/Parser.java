@@ -1164,10 +1164,10 @@ public class Parser {
 			FunctionType fromF = (FunctionType)fromType;
 			FunctionType toF = (FunctionType)toType;
 			boolean cancast = fromF.args.length == toF.args.length;
-			cancast &= toF.rettype.isSupertypeOf(fromType);
 			for (int i=0; i<toF.args.length && cancast; i++) {
-				cancast &= toF.args[i].isSubtypeOf(fromF.args[i]);
+				cancast = toF.args[i].isSubtypeOf(fromF.args[i]);
 			}
+			if (cancast) cancast = toF.rettype.isSupertypeOf(fromF.rettype);
 			if (cancast) return expr;
 		}
 		if (fromType.isSubtypeOf(BuiltinType.NUMBER) && toType.isSubtypeOf(BuiltinType.NUMBER)) {
