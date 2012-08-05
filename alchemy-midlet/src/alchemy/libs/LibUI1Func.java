@@ -355,6 +355,14 @@ class LibUI1Func extends NativeFunction {
 				return Ival(((UICanvas)args[0]).hasPointerEvents());
 			case 95: // Canvas.has_ptrdrag_event(): Bool
 				return Ival(((UICanvas)args[0]).hasPointerMotionEvents());
+			case 96: { // image_from_file(file: String): Image
+				InputStream in = c.fs().read(c.toFile((String)args[0]));
+				c.addStream(in);
+				Image img = Image.createImage(in);
+				in.close();
+				c.removeStream(in);
+				return img;
+			}
 			default:
 				return null;
 		}
