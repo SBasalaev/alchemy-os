@@ -939,46 +939,78 @@ public class Parser {
 		for (int i=0; i<args.length; i++) {
 			args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
 		}
-		FCallExpr fcexpr = new FCallExpr(fload, args);
 		if (fload instanceof ConstExpr) {
-			return processSpecialCasts(fcexpr);
+			return fcall((Func)((ConstExpr)fload).value, args);
 		} else {
-			return fcexpr;
+			return new FCallExpr(fload, args);
 		}
 	}
 	
 	/**
-	 * Parses expression part after '[' (array load or store).
+	 * Parses expression part after '['.
 	 */
 	private Expr parseBrackets(Scope scope, Expr arexpr) throws IOException, ParseException {
-		Type arrtype = arexpr.rettype();
-		if (!arrtype.isSubtypeOf(BuiltinType.ARRAY)
-		 && !arrtype.isSubtypeOf(BuiltinType.BARRAY)
-		 && !arrtype.isSubtypeOf(BuiltinType.CARRAY)) {
-			throw new ParseException("Applying [] to non-array expression");
-		}
-		Expr indexexpr = cast(parseExpr(scope), BuiltinType.INT);
+		Type artype = arexpr.rettype();
+		Expr indexexpr = parseExpr(scope);
 		expect(']');
-		if (t.nextToken() == '=') {
-			Expr assignexpr = parseExpr(scope);
-			if (arrtype.isSubtypeOf(BuiltinType.BARRAY) || arrtype.isSubtypeOf(BuiltinType.CARRAY)) {
-				assignexpr = cast(assignexpr, BuiltinType.INT);
-			} else if (arrtype instanceof ArrayType) {
-				assignexpr = cast(assignexpr, ((ArrayType)arrtype).elementType());
+		if (artype.isSubtypeOf(BuiltinType.ARRAY)
+		 || artype.equals(BuiltinType.BARRAY)
+		 || artype.equals(BuiltinType.CARRAY)) {
+			indexexpr = cast(indexexpr, BuiltinType.INT);
+			expect(']');
+			if (t.nextToken() == '=') {
+				Expr assignexpr = parseExpr(scope);
+				if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
+					assignexpr = cast(assignexpr, BuiltinType.INT);
+				} else if (artype instanceof ArrayType) {
+					assignexpr = cast(assignexpr, ((ArrayType)artype).elementType());
+				} else {
+					assignexpr = cast(assignexpr, BuiltinType.ANY);
+				}
+				return new AStoreExpr(arexpr, indexexpr, assignexpr);
 			} else {
-				assignexpr = cast(assignexpr, BuiltinType.ANY);
+				t.pushBack();
+				if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
+					return new ALoadExpr(arexpr, indexexpr, BuiltinType.INT);
+				} else if (artype instanceof ArrayType) {
+					return new ALoadExpr(arexpr, indexexpr, ((ArrayType)artype).elementType());
+				} else {
+					return new ALoadExpr(arexpr, indexexpr, BuiltinType.ANY);
+				}
 			}
-			return new AStoreExpr(arexpr, indexexpr, assignexpr);
 		} else {
-			t.pushBack();
-			if (arrtype.isSubtypeOf(BuiltinType.BARRAY) || arrtype.isSubtypeOf(BuiltinType.CARRAY)) {
-				return new ALoadExpr(arexpr, indexexpr, BuiltinType.INT);
-			} else if (arrtype instanceof ArrayType) {
-				return new ALoadExpr(arexpr, indexexpr, ((ArrayType)arrtype).elementType());
+			if (t.nextToken() == '=') {
+				Func method = findMethod(artype, "set");
+				if (method == null)
+					throw new ParseException("Method "+artype+".set not found");
+				if (method.type.args.length != 3)
+					throw new ParseException("Method "+artype+".set must accept exactly two arguments to use [] notation");
+				indexexpr = cast(indexexpr, method.type.args[1]);
+				Expr assignexpr = cast(parseExpr(scope), method.type.args[2]);
+				method.hits++;
+				return fcall(method, new Expr[] {arexpr, indexexpr, assignexpr});
 			} else {
-				return new ALoadExpr(arexpr, indexexpr, BuiltinType.ANY);
+				t.pushBack();
+				Func method = findMethod(artype, "get");
+				if (method == null)
+					throw new ParseException("Method "+artype+".get not found");
+				if (method.type.args.length != 2)
+					throw new ParseException("Method "+artype+".get must accept exactly one argument to use [] notation");
+				indexexpr = cast(indexexpr, method.type.args[1]);
+				method.hits++;
+				return fcall(method, new Expr[] {arexpr, indexexpr});
 			}
 		}
+	}
+	
+	private Func findMethod(Type type, String name) {
+		Type stype = type;
+		while (stype != null) {
+			Func method = unit.getFunc(stype.toString()+'.'+name);
+			if (method != null) return method;
+			stype = stype.superType();
+		}
+		return null;
 	}
 	
 	private Expr parseDot(Scope scope, Expr expr) throws IOException, ParseException {
@@ -1014,12 +1046,7 @@ public class Parser {
 		}
 		// neither Array.len nor structure field
 		// trying to find method
-		Func method = null;
-		Type stype = type;
-		while (method == null && stype != null) {
-			method = unit.getFunc(stype.toString()+'.'+member);
-			stype = stype.superType();
-		}
+		Func method = findMethod(type, member);
 		if (method != null) {
 			method.hits++;
 			if (t.nextToken() == '(') {
@@ -1032,7 +1059,7 @@ public class Parser {
 				Expr[] args = new Expr[2];
 				args[0] = new ConstExpr(method);
 				args[1] = expr;
-				return processSpecialCasts(new FCallExpr(new ConstExpr(curry), args));
+				return fcall(curry, args);
 			}
 		}
 		throw new ParseException("Type "+type+" has no member named "+member);
@@ -1064,14 +1091,14 @@ public class Parser {
 	 *   Structure.clone  - the returned type is the same as of argument
 	 *   acopy            - checks types of arrays
 	 */
-	private Expr processSpecialCasts(FCallExpr expr) throws ParseException {
-		Func f = (Func)((ConstExpr)expr.fload).value;
-		if (f.signature.equals("Function.curry") && expr.args[0].rettype() instanceof FunctionType) {
+	private Expr fcall(Func f, Expr[] args) throws ParseException {
+		FCallExpr expr = new FCallExpr(new ConstExpr(f), args);
+		if (f.signature.equals("Function.curry") && args[0].rettype() instanceof FunctionType) {
 			// extra special for f.curry
-			if (expr.args[0] instanceof ConstExpr
-					&& ((Func)((ConstExpr)expr.args[0]).value).signature.equals("Function.curry")
-					&& expr.args[1].rettype() instanceof FunctionType) {
-				FunctionType ftype = (FunctionType)expr.args[1].rettype();
+			if (args[0] instanceof ConstExpr
+					&& ((Func)((ConstExpr)args[0]).value).signature.equals("Function.curry")
+					&& args[1].rettype() instanceof FunctionType) {
+				FunctionType ftype = (FunctionType)args[1].rettype();
 				if (ftype.args.length == 0)
 					throw new ParseException("Cannot curry function that takes no arguments");
 				FunctionType redftype = new FunctionType();
@@ -1084,12 +1111,12 @@ public class Parser {
 				newftype.args[0] = ftype.args[0];
 				return new CastExpr(newftype, expr);
 			}
-			FunctionType oldftype = (FunctionType)expr.args[0].rettype();
+			FunctionType oldftype = (FunctionType)args[0].rettype();
 			if (oldftype.args.length == 0)
 				throw new ParseException("Cannot curry function that takes no arguments");
 			// testing whether the second argument can be accepted
 			try {
-				cast(expr.args[1], oldftype.args[0]);
+				cast(args[1], oldftype.args[0]);
 			} catch (ParseException pe) {
 				throw new ParseException("Cannot curry with given argument: "+pe.getMessage());
 			}
@@ -1099,12 +1126,12 @@ public class Parser {
 			newftype.args = new Type[oldftype.args.length-1];
 			System.arraycopy(oldftype.args, 1, newftype.args, 0, newftype.args.length);
 			return new CastExpr(newftype, expr);
-		} else if (f.signature.equals("Structure.clone") && expr.args[0].rettype() instanceof StructureType) {
-			return new CastExpr(expr.args[0].rettype(), expr);
-		} else if (f.signature.equals("acopy") && expr.args[2].rettype() instanceof ArrayType) {
-			ArrayType toarray = (ArrayType)expr.args[2].rettype();
-			if (expr.args[0].rettype() instanceof ArrayType) {
-				ArrayType fromarray = (ArrayType)expr.args[0].rettype();
+		} else if (f.signature.equals("Structure.clone") && args[0].rettype() instanceof StructureType) {
+			return new CastExpr(args[0].rettype(), expr);
+		} else if (f.signature.equals("acopy") && args[2].rettype() instanceof ArrayType) {
+			ArrayType toarray = (ArrayType)args[2].rettype();
+			if (args[0].rettype() instanceof ArrayType) {
+				ArrayType fromarray = (ArrayType)args[0].rettype();
 				if (toarray.elementType().isSubtypeOf(fromarray.elementType())
 					&& !toarray.elementType().equals(fromarray.elementType())) {
 					warn(W_TYPESAFE, "Unsafe type cast when copying from "+fromarray+" to "+toarray);
