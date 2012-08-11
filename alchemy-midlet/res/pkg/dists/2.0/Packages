@@ -1,97 +1,97 @@
 Package: appmenu
-Version: 0.3-1
+Version: 0.3.1-1
 Section: gui
-Depends: libcore2, libui0.1
+Depends: libcore3, libui1
 Summary: application menu
-File: appmenu_0.3-1.pkg
+File: appmenu_0.3.1-1.pkg
 
 Package: coreutils
 Version: 0.4.2-1
 Section: utils
-Summary: core Alchemy utilities
+Summary: essential utilities for Alchemy OS
 Depends: libcore3
 File: coreutils_0.4.2-1.pkg
 
 Package: edit
-Version: 0.9-1
+Version: 0.9.1-1
 Section: gui
 Summary: simple text editor
-Depends: libcore2, libui0.1
-File: edit_0.9-1.pkg
+Depends: libcore3, libui1
+File: edit_0.9.1-1.pkg
 
 Package: ex
-Version: 1.0-1
+Version: 1.0.1-1
 Section: devel
-Copyright: (C) 2012, Sergey Basalaev
-Summary: Alchemy unified compiler/linker
-File: ex_1.0-1.pkg
+Depends: nec, libcore3
+Summary: source building tool
+File: ex_1.0.1-1.pkg
 
 Package: fileinfo
-Version: 1.2-4
+Version: 1.2.1-1
 Section: gui
 Summary: file properties viewer
-Depends: libcore2, libui0.1, libfiletype1
-File: fileinfo_1.2-4.pkg
+Depends: libcore3, libui1, libfiletype1
+File: fileinfo_1.2.1-1.pkg
 
 Package: libcore3
-Version: 2.9-2
+Version: 2.90-1
 Section: libs
 Summary: system library for Alchemy OS
-File: libcore3_2.9-2.pkg
+File: libcore3_2.90-1.pkg
 
 Package: libcore-dev
-Version: 2.9-1
+Version: 2.90-1
 Section: libdevel
 Depends: libcore3
 Summary: system development headers for Alchemy OS
-File: libcore-dev_2.9-1.pkg
+File: libcore-dev_2.90-1.pkg
 
 Package: libfiletype1
-Version: 1.0-2
+Version: 1.0.1-1
 Section: libs
-Depends: libcore2
+Depends: libcore3
 Summary: library to detect file type
-File: libfiletype1_1.0-2.pkg
+File: libfiletype1_1.0.1-1.pkg
 
 Package: libpkg0
-Version: 0.3.2-1
+Version: 0.3.3-1
 Section: libs
 Summary: package management library
-Depends: libcore2
-File: libpkg0_0.3.2-1.pkg
+Depends: libcore3
+File: libpkg0_0.3.3-1.pkg
 
-Package: libui0.1
-Version: 0.1-1
+Package: libui1
+Version: 0.90-1
 Section: libs
-Summary: user interface library
-File: libui0.1_0.1-1.pkg
+Summary: graphical interface library
+File: libui1_0.90-1.pkg
 
 Package: libui-dev
-Version: 0.1-1
+Version: 0.90-1
 Section: libdevel
-Depends: libui0.1
-Summary: headers for user interface library
-File: libui-dev_0.1-1.pkg
+Depends: libui1
+Summary: headers for graphical interface library
+File: libui-dev_0.90-1.pkg
 
 Package: navigator
-Version: 0.3.1-1
+Version: 0.3.2-1
 Section: gui
-Depends: libcore2, libui0.1, libfiletype1, edit, imgview, fileinfo, coreutils
-Summary: file manager for Alchemy
-File: navigator_0.3.1-1.pkg
+Depends: libcore3, libui1, libfiletype1, edit, imgview, fileinfo, coreutils
+Summary: file manager
+File: navigator_0.3.2-1.pkg
 
 Package: nec
-Version: 1.4-1
+Version: 1.90-1
 Section: devel
-Summary: Alchemy builtin compiler and linker
-File: nec_1.4-1.pkg
+Summary: builtin compiler and linker for Alchemy OS
+File: nec_1.90-1.pkg
 
 Package: pkg
-Version: 0.1.1-1
+Version: 0.1.3-1
 Section: admin
 Summary: Alchemy package manager
 Depends: libpkg0, libcore3
-File: pkg_0.1.1-1.pkg
+File: pkg_0.1.3-1.pkg
 
 Package: sh
 Version: 1.0-1
@@ -106,11 +106,11 @@ Summary: Alchemy builtin terminal
 File: terminal_1.0-2.pkg
 
 Package: alchemy-core
-Version: 1
+Version: 2
 Section: admin
-Depends: libcore3, libui0.1, sh, terminal, edit, coreutils, pkg
+Depends: libcore3, libui1, sh, terminal, edit, coreutils, pkg
 Summary: this package depends on all core components of Alchemy OS, it is recommended not to remove it to ensure safe upgrades
-File: alchemy-core_1.pkg
+File: alchemy-core_2.pkg
 
 Package: alchemy-gui
 Version: 4
@@ -120,15 +120,15 @@ Summary: this package depends on all packages that constitute Alchemy GUI, it is
 File: alchemy-gui_4.pkg
 
 Package: alpaca
-Version: 0.2.1-1
+Version: 0.2.3-1
 Section: admin
-Depends: libcore3, libui0.1, libpkg0
+Depends: libcore3, libui1, libpkg0
 Summary: GUI for Alchemy package manager
-File: alpaca_0.2.1-1.pkg
+File: alpaca_0.2.3-1.pkg
 
 Package: imgview
-Version: 0.1-1
+Version: 0.1.1-1
 Section: gui
-Depends: libcore3, libui0.1
+Depends: libcore3, libui1
 Summary: simple image viewer
-File: imgview_0.1-1.pkg
+File: imgview_0.1.1-1.pkg
