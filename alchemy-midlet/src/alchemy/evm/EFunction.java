@@ -34,13 +34,7 @@ class EFunction extends Function {
 	private final Object[] cpool;
 	private final String libname;
 
-	public EFunction(String libname,
-			          String funcname,
-					  Object[] cpool,
-					  int stacksize,
-					  int localsize,
-					  byte[] code
-					  ) {
+	public EFunction(String libname, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code) {
 		super(funcname);
 		this.libname = libname;
 		this.stacksize = stacksize;
@@ -633,8 +627,6 @@ class EFunction extends Function {
 					stack[--head] = Ival(!btmp);
 					break;
 				}
-				//case Opcodes.THROW:
-				//	throw (Exception)stack[head];
 				case Opcodes.RET_NULL:
 					return null;
 				case Opcodes.RETURN:
@@ -670,11 +662,8 @@ class EFunction extends Function {
 					break;
 			} /* the big switch */
 		} /* the great while */
-		} catch (AlchemyException ae) {
-			ae.addTraceElement(this, "+"+(ct-1));
-			throw ae;
 		} catch (Exception e) {
-			AlchemyException ae = new AlchemyException(e);
+			AlchemyException ae = (e instanceof AlchemyException) ? (AlchemyException)e : new AlchemyException(e);
 			ae.addTraceElement(this, "+"+(ct-1));
 			throw ae;
 		}

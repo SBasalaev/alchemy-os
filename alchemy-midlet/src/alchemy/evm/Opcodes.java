@@ -5,6 +5,13 @@ package alchemy.evm;
  * @author Sergey Basalaev
  */
 public interface Opcodes {
+	int LFLAG_SONAME = 1;  /* Library has soname. */
+	int LFLAG_DEPS = 2;    /* Library has dependencies. */
+	
+	int FFLAG_SHARED = 1;  /* Function is shared. */
+	int FFLAG_RELOCS = 2;  /* Function has relocation table. */
+	int FFLAG_DEBUG  = 4;  /* Function has debugging info. */
+	
 	byte NOP         = (byte)0x00;
 	byte ACONST_NULL = (byte)0x01;
 	byte ICONST_M1   = (byte)0x02;
@@ -34,7 +41,7 @@ public interface Opcodes {
 	byte IAND        = (byte)0x1A;
 	byte IOR         = (byte)0x1B;
 	byte IXOR        = (byte)0x1C;
-	byte THROW       = (byte)0x1D;
+	// 0x1D
 	byte RET_NULL    = (byte)0x1E;
 	byte RETURN      = (byte)0x1F;
 	byte LADD        = (byte)0x20;

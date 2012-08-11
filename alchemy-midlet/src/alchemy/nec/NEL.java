@@ -20,6 +20,7 @@ package alchemy.nec;
 
 import alchemy.core.Context;
 import alchemy.evm.ELibBuilder;
+import alchemy.evm.Opcodes;
 import alchemy.fs.File;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -160,11 +161,10 @@ public class NEL extends NativeApp {
 							}
 							break;
 						}
-						case 'H':
 						case 'P': {
 							String name = data.readUTF();
 							InFunc f = new InFunc(name);
-							f.type = type;
+							f.flags = data.readUnsignedByte();
 							f.stack = data.readUnsignedByte();
 							f.locals = data.readUnsignedByte();
 							f.code = new byte[data.readUnsignedShort()];
@@ -242,10 +242,10 @@ public class NEL extends NativeApp {
 			DataOutputStream out = new DataOutputStream(c.fs().write(outfile));
 			out.writeInt(0xC0DE0200);
 			if (soname != null) {
-				out.writeByte(5);
+				out.writeByte(Opcodes.LFLAG_SONAME | Opcodes.LFLAG_DEPS);
 				out.writeUTF(soname);
 			} else {
-				out.writeByte(1);
+				out.writeByte(Opcodes.LFLAG_DEPS);
 			}
 			out.writeShort(libinfos.size());
 			for (int i=0; i < libinfos.size(); i++) {
@@ -282,8 +282,9 @@ public class NEL extends NativeApp {
 					out.writeUTF(ef.name);
 				} else if (obj instanceof InFunc) {
 					InFunc func = (InFunc)obj;
-					out.writeByte(func.type);
+					out.writeByte('P');
 					out.writeUTF(func.name);
+					out.writeByte(func.flags & ~Opcodes.FFLAG_RELOCS);
 					out.writeByte(func.stack);
 					out.writeByte(func.locals);
 					out.writeShort(func.code.length);
@@ -294,7 +295,7 @@ public class NEL extends NativeApp {
 			c.fs().setExec(outfile, true);
 		} catch (Exception e) {
 			IO.println(c.stderr, "Error: "+e);
-			//e.printStackTrace();
+			e.printStackTrace();
 			return 1;
 		}
 		return 0;
@@ -330,10 +331,7 @@ public class NEL extends NativeApp {
 		LibInfo info = new LibInfo();
 		Vector symbols = new Vector();
 		int lflags = data.readUnsignedByte();
-		if ((lflags & 1) == 0) { //not linked
-			throw new Exception("Not shared object passed to -l");
-		}
-		if ((lflags & 4) != 0) { //has soname
+		if ((lflags & Opcodes.LFLAG_SONAME) != 0) { //has soname
 			info.soname = data.readUTF();
 		}
 		//skipping dependencies
@@ -343,7 +341,6 @@ public class NEL extends NativeApp {
 		}
 		//reading pool
 		int poolsize = data.readUnsignedShort();
-		String[] symbolstr = new String[poolsize];
 		for (int i=0; i<poolsize; i++) {
 			int ch = data.readUnsignedByte();
 			switch (ch) {
@@ -358,16 +355,18 @@ public class NEL extends NativeApp {
 					data.skipBytes(8);
 					break;
 				case 'S':
-					symbolstr[i] = data.readUTF();
+					data.skipBytes(data.readUnsignedShort());
 					break;
 				case 'E':
 					data.skipBytes(2);
 					data.skipBytes(data.readUnsignedShort());
 					break;
-				case 'H':
 				case 'P': {
 					String name = data.readUTF();
-					if (ch == 'P') symbols.addElement(name);
+					int flags = data.readUnsignedByte();
+					if ((flags & Opcodes.FFLAG_SHARED) != 0) {
+						symbols.addElement(name);
+					}
 					data.skipBytes(2);
 					data.skipBytes(data.readUnsignedShort());
 					break;
@@ -439,7 +438,6 @@ class NELFunc {
 
 /** Internal function. */
 class InFunc extends NELFunc {
-	int type;
 	int stack;
 	int locals;
 	int flags;

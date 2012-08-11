@@ -84,7 +84,6 @@ public class FunctionWriter implements Opcodes {
 			case LXOR:
 			case POP:
 			case RETURN:
-			case THROW:
 				visitStack(-1);
 				break;
 			case ALEN:

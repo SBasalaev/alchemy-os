@@ -1,5 +1,6 @@
 package alchemy.nec.asm;
 
+import alchemy.evm.Opcodes;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -45,7 +46,7 @@ public class UnitWriter {
 		DataOutputStream out = new DataOutputStream(stream);
 		out.writeShort(0xC0DE);
 		out.writeShort(vmversion);
-		out.writeByte(0); // flags for relocatable object
+		out.writeByte(0);
 		out.writeShort(objects.size());
 		for (int i=0; i<objects.size(); i++) {
 			Object obj = objects.elementAt(i);
@@ -69,8 +70,9 @@ public class UnitWriter {
 				out.writeUTF(((FuncObject)obj).value);
 			} else if (obj.getClass() == AsmFunc.class) {
 				AsmFunc f = (AsmFunc)obj;
-				out.writeByte(f.shared ? 'P' : 'H');
+				out.writeByte('P');
 				out.writeUTF(f.value);
+				out.writeByte(f.shared ? Opcodes.FFLAG_SHARED | Opcodes.FFLAG_RELOCS : Opcodes.FFLAG_RELOCS);
 				out.writeByte(f.stacksize);
 				out.writeByte(f.varcount);
 				out.writeShort(f.code.length);

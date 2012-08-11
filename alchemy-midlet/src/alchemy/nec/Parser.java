@@ -957,7 +957,6 @@ public class Parser {
 		 || artype.equals(BuiltinType.BARRAY)
 		 || artype.equals(BuiltinType.CARRAY)) {
 			indexexpr = cast(indexexpr, BuiltinType.INT);
-			expect(']');
 			if (t.nextToken() == '=') {
 				Expr assignexpr = parseExpr(scope);
 				if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {

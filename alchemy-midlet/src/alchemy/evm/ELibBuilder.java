@@ -58,12 +58,7 @@ public class ELibBuilder implements LibBuilder {
 	 *  Instructions: if_icmpge if_icmpgt if_icmple if_icmplt
 	 *                tableswitch lookupswitch
 	 */
-
-	/** Object type for libraries. */
-	static private final int EOBJ_LIB = 1;
-	/** Object type for libraries with a soname. */
-	static private final int EOBJ_SHLIB = 5;
-
+	
 	public Library build(Context c, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
 		HashLibrary lib = new HashLibrary();
@@ -72,20 +67,20 @@ public class ELibBuilder implements LibBuilder {
 		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
 			throw new InstantiationException("Incompatible executable format: "+ver);
 		//reading object type
-		int etype = data.readUnsignedByte();
-		if ((etype != EOBJ_LIB) && (etype != EOBJ_SHLIB))
-			throw new InstantiationException("Unknown executable type: "+etype);
+		int lflags = data.readUnsignedByte();
 		//reading soname
 		String libname = null;
-		if (etype  == EOBJ_SHLIB) {
+		if ((lflags & Opcodes.LFLAG_SONAME) != 0) {
 			libname = data.readUTF();
 		}
 		//loading dependency libs
 		Library[] libdeps = null;
-		int depcount = data.readUnsignedShort();
-		libdeps = new Library[depcount];
-		for (int i=0; i<depcount; i++) {
-			libdeps[i] = c.loadLibrary(data.readUTF());
+		if ((lflags & Opcodes.LFLAG_DEPS) != 0) {
+			int depcount = data.readUnsignedShort();
+			libdeps = new Library[depcount];
+			for (int i=0; i<depcount; i++) {
+				libdeps[i] = c.loadLibrary(data.readUTF());
+			}
 		}
 		//constructing constant pool
 		int ccount = data.readUnsignedShort();
@@ -115,19 +110,22 @@ public class ELibBuilder implements LibBuilder {
 					String name = data.readUTF();
 					cpool[cindex] = libdeps[libref].getFunction(name);
 				} break;
-				case 'H':   //private function
-				case 'P': { //public function
+				case 'P': { // function
 					//reading data
 					String fname = data.readUTF();
+					int fflags = data.readUnsignedByte();
 					int stacksize = data.readUnsignedByte();
 					int localsize = data.readUnsignedByte();
 					int codesize = data.readUnsignedShort();
 					byte[] code = new byte[codesize];
 					data.readFully(code);
+					if ((fflags & Opcodes.FFLAG_RELOCS) != 0) {
+						data.skipBytes(data.readUnsignedShort()*2);
+					}
 					//constructing function
 					Function func = new EFunction(libname, fname, cpool, stacksize, localsize, code);
 					cpool[cindex] = func;
-					if (ctype == 'P') lib.putFunc(func);
+					if ((fflags & Opcodes.FFLAG_SHARED) != 0) lib.putFunc(func);
 				} break;
 				default:
 					throw new InstantiationException("Unknown data type: "+ctype);
