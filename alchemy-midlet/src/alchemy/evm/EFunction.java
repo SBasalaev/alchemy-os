@@ -47,9 +47,14 @@ class EFunction extends Function {
 		//initializing
 		final Object[] stack = new Object[stacksize];
 		int head = -1;
-		byte[] code = this.bcode;
-		final Object[] locals = new Object[localsize];
-		System.arraycopy(args, 0, locals, 0, args.length);
+		final byte[] code = this.bcode;
+		Object[] locals;
+		if (args.length == localsize) {
+			locals = args;
+		} else {
+			locals = new Object[localsize];
+			System.arraycopy(args, 0, locals, 0, args.length);
+		}
 		int ct = 0;
 		try {
 		while (true) {
