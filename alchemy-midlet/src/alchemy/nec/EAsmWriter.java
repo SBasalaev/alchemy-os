@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Function;
+import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.asm.FuncObject;
 import alchemy.nec.asm.FunctionWriter;
@@ -216,7 +217,7 @@ public class EAsmWriter implements ExprVisitor {
 			} else {
 				writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
 			}
-		} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Function.ZERO)
+		} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Int.ZERO)
 		        && cmp.lvalue.rettype().isSubtypeOf(BuiltinType.INT)) {
 			// integer comparison with zero
 			cmp.lvalue.accept(this, null);
@@ -435,7 +436,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object unused) {
-		writer.visitLdcInsn(new Integer(newarray.initializers.length));
+		writer.visitLdcInsn(new Int(newarray.initializers.length));
 		Type artype = newarray.rettype();
 		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.NEWBA);
@@ -448,7 +449,7 @@ public class EAsmWriter implements ExprVisitor {
 			Expr e = newarray.initializers[i];
 			if (e != null) {
 				writer.visitInsn(Opcodes.DUP);
-				writer.visitLdcInsn(new Integer(i));
+				writer.visitLdcInsn(new Int(i));
 				e.accept(this, unused);
 				if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
 					writer.visitInsn(Opcodes.BASTORE);
@@ -568,7 +569,7 @@ public class EAsmWriter implements ExprVisitor {
 			case '~':
 				unary.expr.accept(this, unused);
 				if (type.isSubtypeOf(BuiltinType.INT)) {
-					writer.visitLdcInsn(new Integer(-1));
+					writer.visitLdcInsn(new Int(-1));
 					writer.visitInsn(Opcodes.IXOR);
 				} else if (type.isSubtypeOf(BuiltinType.LONG)) {
 					writer.visitLdcInsn(new Long(-1));
@@ -576,7 +577,7 @@ public class EAsmWriter implements ExprVisitor {
 				}
 				break;
 			case '!':
-				writer.visitLdcInsn(new Integer(1));
+				writer.visitLdcInsn(new Int(1));
 				unary.expr.accept(this, unused);
 				writer.visitInsn(Opcodes.ISUB);
 				break;

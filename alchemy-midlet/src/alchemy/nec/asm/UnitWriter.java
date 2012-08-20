@@ -1,5 +1,6 @@
 package alchemy.nec.asm;
 
+import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -50,9 +51,9 @@ public class UnitWriter {
 		out.writeShort(objects.size());
 		for (int i=0; i<objects.size(); i++) {
 			Object obj = objects.elementAt(i);
-			if (obj.getClass() == Integer.class) {
+			if (obj.getClass() == Int.class) {
 				out.writeByte('i');
-				out.writeInt(((Integer)obj).intValue());
+				out.writeInt(((Int)obj).value);
 			} else if (obj.getClass() == Long.class) {
 				out.writeByte('l');
 				out.writeLong(((Long)obj).longValue());

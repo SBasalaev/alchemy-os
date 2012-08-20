@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
+import alchemy.core.Int;
 import alchemy.fs.File;
 import alchemy.nec.tree.*;
 import alchemy.util.IO;
@@ -396,8 +397,8 @@ public class Parser {
 			'*', '/', '%', 0
 		};
 
-	private int getPriority(Integer operator) {
-		int op = operator.intValue();
+	private int getPriority(Int operator) {
+		int op = operator.value;
 		for (int i=0; i<priorops.length; i++) {
 			if (priorops[i] == op) return i/4;
 		}
@@ -415,7 +416,7 @@ public class Parser {
 			int opchar = t.nextToken();
 			if (opchar == ';') break;
 			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || opchar <= -20) {
-				operators.addElement(new Integer(opchar));
+				operators.addElement(new Int(opchar));
 			} else {
 				t.pushBack();
 				break;
@@ -425,13 +426,13 @@ public class Parser {
 			int index = 0;
 			int priority = 0;
 			for (int i = 0; i < operators.size(); i++) {
-				int p = getPriority((Integer)operators.elementAt(i));
+				int p = getPriority((Int)operators.elementAt(i));
 				if (p > priority) {
 					priority = p;
 					index = i;
 				}
 			}
-			int op = ((Integer)operators.elementAt(index)).intValue();
+			int op = ((Int)operators.elementAt(index)).value;
 			Expr left = (Expr)exprs.elementAt(index);
 			Type ltype = left.rettype();
 			Expr right = (Expr)exprs.elementAt(index+1);
@@ -578,7 +579,7 @@ public class Parser {
 				return new NewArrayByEnumExpr(new ArrayType(eltype), init);
 			}
 			case Tokenizer.TT_INT:
-				return new ConstExpr(new Integer(t.ivalue));
+				return new ConstExpr(new Int(t.ivalue));
 			case Tokenizer.TT_LONG:
 				return new ConstExpr(new Long(t.lvalue));
 			case Tokenizer.TT_FLOAT:
@@ -702,7 +703,7 @@ public class Parser {
 			// parsing switch body
 			Expr elseexpr = null;
 			Vector keys = new Vector(); // int[]
-			Vector keysunique = new Vector(); // Integer
+			Vector keysunique = new Vector(); // Int
 			Vector exprs = new Vector(); // Expr
 			while (t.nextToken() != '}') {
 				if (t.ttype == Tokenizer.TT_KEYWORD && t.svalue.equals("else")) {
@@ -720,15 +721,15 @@ public class Parser {
 							throw new ParseException("Constant expression expected in switch key");
 						if (!branchindex.rettype().isSubtypeOf(BuiltinType.INT))
 							throw new ParseException("switch key is required to be integer");
-						Integer idx = (Integer)((ConstExpr)branchindex).value;
+						Int idx = (Int)((ConstExpr)branchindex).value;
 						if (keysunique.contains(idx))
 							throw new ParseException("branch for "+idx+" is already defined in this switch");
 						branchkeyv.addElement(idx);
 					} while (t.nextToken() != ':');
 					int[] branchkeys = new int[branchkeyv.size()];
 					for (int i=0; i<branchkeys.length; i++) {
-						Integer idx = (Integer)branchkeyv.elementAt(i);
-						branchkeys[i] = idx.intValue();
+						Int idx = (Int)branchkeyv.elementAt(i);
+						branchkeys[i] = idx.value;
 					}
 					keys.addElement(branchkeys);
 					exprs.addElement(parseExpr(scope));
@@ -1033,7 +1034,7 @@ public class Parser {
 				}
 			}
 			if (index >= 0) {
-				ConstExpr indexexpr = new ConstExpr(new Integer(index));
+				ConstExpr indexexpr = new ConstExpr(new Int(index));
 				if (t.nextToken() == '=') {
 					Expr assignexpr = cast(parseExpr(scope), fields[index].type);
 					return new AStoreExpr(expr, indexexpr, assignexpr);

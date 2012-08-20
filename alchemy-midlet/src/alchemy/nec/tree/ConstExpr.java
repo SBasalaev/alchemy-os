@@ -18,6 +18,8 @@
 
 package alchemy.nec.tree;
 
+import alchemy.core.Int;
+
 /**
  * Constant expression.
  * Includes all literal expressions and global constants.
@@ -35,7 +37,7 @@ public class ConstExpr extends Expr {
 	public Type rettype() {
 		if (value == null) {
 			return BuiltinType.NULL;
-		} else if (value instanceof Integer) {
+		} else if (value instanceof Int) {
 			return BuiltinType.INT;
 		} else if (value instanceof Long) {
 			return BuiltinType.LONG;

@@ -524,8 +524,8 @@ public class Context {
 
 		public void run() {
 			try {
-				Integer r = (Integer)main.exec(Context.this, new Object[] {cmdArgs});
-				exitcode = r == null ? 0 : r.intValue();
+				Int r = (Int)main.exec(Context.this, new Object[] {cmdArgs});
+				exitcode = r == null ? 0 : r.value;
 			} catch (Throwable t) {
 				error = t;
 				IO.println(stderr, t);

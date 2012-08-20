@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Function;
+import alchemy.core.Int;
 import alchemy.nec.tree.*;
 import java.util.Vector;
 
@@ -96,8 +97,8 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			switch (binary.operator) {
 				case '+':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() + ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value + ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() + ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -107,8 +108,8 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '-':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() - ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value - ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() - ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -118,8 +119,8 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '*':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() * ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value * ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() * ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -129,8 +130,8 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '/':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() / ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value / ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() / ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -140,8 +141,8 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '%':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() % ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value % ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() % ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -151,8 +152,8 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '&':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() & ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value & ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() & ((Long)c2).longValue());
 					} else if (c1 instanceof Boolean) {
@@ -160,8 +161,8 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '|':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() | ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value | ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() | ((Long)c2).longValue());
 					} else if (c1 instanceof Boolean) {
@@ -169,8 +170,8 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '^':
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() ^ ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value ^ ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() ^ ((Long)c2).longValue());
 					} else if (c1 instanceof Boolean) {
@@ -178,24 +179,24 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case Tokenizer.TT_LTLT:
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() << ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value << ((Int)c2).value);
 					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() << ((Integer)c2).intValue());
+						c1 = new Long(((Long)c1).longValue() << ((Int)c2).value);
 					}
 					break;
 				case Tokenizer.TT_GTGT:
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() >> ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value >> ((Int)c2).value);
 					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() >> ((Integer)c2).intValue());
+						c1 = new Long(((Long)c1).longValue() >> ((Int)c2).value);
 					}
 					break;
 				case Tokenizer.TT_GTGTGT:
-					if (c1 instanceof Integer) {
-						c1 = new Integer(((Integer)c1).intValue() >>> ((Integer)c2).intValue());
+					if (c1 instanceof Int) {
+						c1 = new Int(((Int)c1).value >>> ((Int)c2).value);
 					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() >>> ((Integer)c2).intValue());
+						c1 = new Long(((Long)c1).longValue() >>> ((Int)c2).value);
 					}
 					break;
 			}
@@ -248,8 +249,8 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			Type toType = cast.toType;
 			Object cnst = ((ConstExpr)cast.expr).value;
-			if (cnst instanceof Integer) {
-				int i = ((Integer)cnst).intValue();
+			if (cnst instanceof Int) {
+				int i = ((Int)cnst).value;
 				if (toType.equals(BuiltinType.DOUBLE)) {
 					cnst = new Double(i);
 				} else if (toType.equals(BuiltinType.FLOAT)) {
@@ -264,7 +265,7 @@ public class Optimizer implements ExprVisitor {
 				} else if (toType.equals(BuiltinType.FLOAT)) {
 					cnst = new Float(l);
 				} else if (toType.equals(BuiltinType.INT)) {
-					cnst = new Integer((int)l);
+					cnst = new Int((int)l);
 				}
 			} else if (cnst instanceof Float) {
 				float f = ((Float)cnst).floatValue();
@@ -273,7 +274,7 @@ public class Optimizer implements ExprVisitor {
 				} else if (toType.equals(BuiltinType.LONG)) {
 					cnst = new Long((long)f);
 				} else if (toType.equals(BuiltinType.INT)) {
-					cnst = new Integer((int)f);
+					cnst = new Int((int)f);
 				}
 			} else if (cnst instanceof Double) {
 				double d = ((Double)cnst).doubleValue();
@@ -282,7 +283,7 @@ public class Optimizer implements ExprVisitor {
 				} else if (toType.equals(BuiltinType.LONG)) {
 					cnst = new Long((long)d);
 				} else if (toType.equals(BuiltinType.INT)) {
-					cnst = new Integer((int)d);
+					cnst = new Int((int)d);
 				}
 			}
 			return new ConstExpr(cnst);
@@ -317,46 +318,46 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '<':
-					if (c1 instanceof Integer) {
-						c1 = ((Integer)c1).intValue() < ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int) {
+						c1 = ((Int)c1).value < ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Long) {
 						c1 = ((Long)c1).longValue() < ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Float) {
 						c1 = ((Float)c1).floatValue() < ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Integer) {
+					} else if (c1 instanceof Double) {
 						c1 = ((Double)c1).doubleValue() < ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
 				case '>':
-					if (c1 instanceof Integer) {
-						c1 = ((Integer)c1).intValue() > ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int) {
+						c1 = ((Int)c1).value > ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Long) {
 						c1 = ((Long)c1).longValue() > ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Float) {
 						c1 = ((Float)c1).floatValue() > ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Integer) {
+					} else if (c1 instanceof Double) {
 						c1 = ((Double)c1).doubleValue() > ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
 				case Tokenizer.TT_LTEQ:
-					if (c1 instanceof Integer) {
-						c1 = ((Integer)c1).intValue() <= ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int) {
+						c1 = ((Int)c1).value <= ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Long) {
 						c1 = ((Long)c1).longValue() <= ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Float) {
 						c1 = ((Float)c1).floatValue() <= ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Integer) {
+					} else if (c1 instanceof Double) {
 						c1 = ((Double)c1).doubleValue() <= ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
 				case Tokenizer.TT_GTEQ:
-					if (c1 instanceof Integer) {
-						c1 = ((Integer)c1).intValue() >= ((Integer)c2).intValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int) {
+						c1 = ((Int)c1).value >= ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Long) {
 						c1 = ((Long)c1).longValue() >= ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Float) {
 						c1 = ((Float)c1).floatValue() >= ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Integer) {
+					} else if (c1 instanceof Double) {
 						c1 = ((Double)c1).doubleValue() >= ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
@@ -364,7 +365,7 @@ public class Optimizer implements ExprVisitor {
 			return new ConstExpr(c1);
 		} else if (cmp.lvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)cmp.lvalue).value;
-			if (cnst == null || cnst.equals(Function.ZERO)) {
+			if (cnst == null || cnst.equals(Int.ZERO)) {
 				// to not duplicate code in EAsmWriter and
 				// allow it to make assumptions only on rvalue
 				optimized = true;
@@ -627,9 +628,9 @@ public class Optimizer implements ExprVisitor {
 					else cnst = Boolean.TRUE;
 					break;
 				case '-':
-					if (cnst instanceof Integer) {
-						int i = ((Integer)cnst).intValue();
-						cnst = new Integer(-i);
+					if (cnst instanceof Int) {
+						int i = ((Int)cnst).value;
+						cnst = new Int(-i);
 					} else if (cnst instanceof Long) {
 						long l = ((Long)cnst).longValue();
 						cnst = new Long(-l);
@@ -642,9 +643,9 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 				case '~':
-					if (cnst instanceof Integer) {
-						int i = ((Integer)cnst).intValue();
-						cnst = new Integer(~i);
+					if (cnst instanceof Int) {
+						int i = ((Int)cnst).value;
+						cnst = new Int(~i);
 					} else if (cnst instanceof Long) {
 						long l = ((Long)cnst).longValue();
 						cnst = new Long(~l);

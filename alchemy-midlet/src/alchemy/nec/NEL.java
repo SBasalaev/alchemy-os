@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
+import alchemy.core.Int;
 import alchemy.evm.ELibBuilder;
 import alchemy.evm.Opcodes;
 import alchemy.fs.File;
@@ -136,7 +137,7 @@ public class NEL extends NativeApp {
 							obj = null;
 							break;
 						case 'i':
-							obj = new Integer(data.readInt());
+							obj = new Int(data.readInt());
 							break;
 						case 'l':
 							obj = new Long(data.readLong());
@@ -256,10 +257,10 @@ public class NEL extends NativeApp {
 				Object obj = e.nextElement();
 				if (obj == null) {
 					out.writeByte('0');
-				} else if (obj.getClass() == Integer.class) {
+				} else if (obj.getClass() == Int.class) {
 					out.writeByte('i');
-					Integer ival = (Integer)obj;
-					out.writeInt(ival.intValue());
+					Int ival = (Int)obj;
+					out.writeInt(ival.value);
 				} else if (obj.getClass() == Long.class) {
 					out.writeByte('l');
 					Long lval = (Long)obj;

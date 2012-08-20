@@ -20,6 +20,7 @@ package alchemy.midlet;
 
 import alchemy.core.Context;
 import alchemy.core.ContextListener;
+import alchemy.core.Int;
 import java.util.Vector;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
@@ -47,19 +48,19 @@ import javax.microedition.lcdui.List;
  */
 public final class UIServer {
 	/** Event type for gaining focus. */
-	public static final Integer EVENT_SHOW = new Integer(-1);
+	public static final Int EVENT_SHOW = Int.M_ONE;
 	/** Event type for losing focus. */
-	public static final Integer EVENT_HIDE = new Integer(-2);
+	public static final Int EVENT_HIDE = Int.toInt(-2);
 	/** Event type for command activation. */
-	public static final Integer EVENT_MENU = new Integer(1);
+	public static final Int EVENT_MENU = Int.ONE;
 	/** Event type for canvas key press. */
-	public static final Integer EVENT_KEY_PRESS = new Integer(3);
+	public static final Int EVENT_KEY_PRESS = Int.toInt(3);
 	/** Event type for canvas pointer press. */
-	public static final Integer EVENT_PTR_PRESS = new Integer(6);
+	public static final Int EVENT_PTR_PRESS = Int.toInt(6);
 	/** Event type for canvas pointer release. */
-	public static final Integer EVENT_PTR_RELEASE = new Integer(7);
+	public static final Int EVENT_PTR_RELEASE = Int.toInt(7);
 	/** Event type for canvas pointer drag. */
-	public static final Integer EVENT_PTR_DRAG = new Integer(8);
+	public static final Int EVENT_PTR_DRAG = Int.toInt(8);
 	
 	/** Display set by Alchemy MIDlet. */
 	static Display display;
@@ -160,7 +161,7 @@ public final class UIServer {
 	}
 	
 	/** Adds given event to the event queue. */
-	public static synchronized void pushEvent(Displayable d, Integer kind, Object value) {
+	public static synchronized void pushEvent(Displayable d, Int kind, Object value) {
 		int i = frameIndex(d);
 		if (i >= 0) {
 			final UIFrame frame = (UIFrame)frames.elementAt(i);

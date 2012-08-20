@@ -21,6 +21,7 @@ package alchemy.evm;
 import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
+import alchemy.core.Int;
 
 /**
  * Embedded Virtual Machine.
@@ -66,31 +67,31 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.ICONST_M1: {
-					stack[++head] = Function.M_ONE;
+					stack[++head] = Int.M_ONE;
 					break;
 				}
 				case Opcodes.ICONST_0: {
-					stack[++head] = Function.ZERO;
+					stack[++head] = Int.ZERO;
 					break;
 				}
 				case Opcodes.ICONST_1: {
-					stack[++head] = Function.ONE;
+					stack[++head] = Int.ONE;
 					break;
 				}
 				case Opcodes.ICONST_2: {
-					stack[++head] = Ival(2);
+					stack[++head] = Int.toInt(2);
 					break;
 				}
 				case Opcodes.ICONST_3: {
-					stack[++head] = Ival(3);
+					stack[++head] = Int.toInt(3);
 					break;
 				}
 				case Opcodes.ICONST_4: {
-					stack[++head] = Ival(4);
+					stack[++head] = Int.toInt(4);
 					break;
 				}
 				case Opcodes.ICONST_5: {
-					stack[++head] = Ival(5);
+					stack[++head] = Int.toInt(5);
 					break;
 				}
 				case Opcodes.LCONST_0: {
@@ -204,7 +205,7 @@ class EFunction extends Function {
 				}
 				case Opcodes.ICMP: {
 					int itmp = ival(stack[--head]) - ival(stack[++head]);
-					stack[--head] = (itmp > 0) ? Function.ONE : (itmp == 0 ? Function.ZERO : Function.M_ONE);
+					stack[--head] = (itmp > 0) ? Int.ONE : (itmp == 0 ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 				case Opcodes.ISHL: {
@@ -270,7 +271,7 @@ class EFunction extends Function {
 				}
 				case Opcodes.LCMP: {
 					long ltmp = lval(stack[--head]) - lval(stack[++head]);
-					stack[--head] = (ltmp > 0) ? Function.ONE : (ltmp == 0 ? Function.ZERO : Function.M_ONE);
+					stack[--head] = (ltmp > 0) ? Int.ONE : (ltmp == 0 ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 				case Opcodes.LSHL: {
@@ -336,7 +337,7 @@ class EFunction extends Function {
 				}
 				case Opcodes.FCMP: {
 					float ftmp = fval(stack[--head]) - fval(stack[++head]);
-					stack[--head] = (ftmp > 0) ? Function.ONE : (ftmp == 0 ? Function.ZERO : Function.M_ONE);
+					stack[--head] = (ftmp > 0) ? Int.ONE : (ftmp == 0 ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 
@@ -372,7 +373,7 @@ class EFunction extends Function {
 				}
 				case Opcodes.DCMP: {
 					double dtmp = dval(stack[--head]) - dval(stack[++head]);
-					stack[--head] = (dtmp > 0) ? Function.ONE : (dtmp == 0 ? Function.ZERO : Function.M_ONE);
+					stack[--head] = (dtmp > 0) ? Int.ONE : (dtmp == 0 ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 

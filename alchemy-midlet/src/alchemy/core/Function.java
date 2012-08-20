@@ -73,21 +73,17 @@ public abstract class Function {
 		return signature;
 	}
 
-	public static final Integer ONE = new Integer(1);
-	public static final Integer ZERO = new Integer(0);
-	public static final Integer M_ONE = new Integer(-1);
-
 	/** Boxing method for integer values. */
-	protected static final Integer Ival(int value) {
-		return new Integer(value);
+	protected static final Int Ival(int value) {
+		return Int.toInt(value);
 	}
 
 	/** Boxing method for boolean values.
-	 * Method converts <code>true</code> to <code>Integer(1)</code>
-	 * and <code>false</code> to <code>Integer(0)</code>.
+	 * Method converts <code>true</code> to <code>Int(1)</code>
+	 * and <code>false</code> to <code>Int(0)</code>.
 	 */
-	protected static final Integer Ival(boolean value) {
-		return value ? ONE : ZERO;
+	protected static final Int Ival(boolean value) {
+		return value ? Int.ONE : Int.ZERO;
 	}
 
 	/** Boxing method for long values. */
@@ -105,19 +101,19 @@ public abstract class Function {
 		return new Double(value);
 	}
 
-	/** Unboxing method for Integer values. */
+	/** Unboxing method for Int values. */
 	protected static final int ival(Object obj) {
 		if (obj == null) return 0;
-		return ((Integer)obj).intValue();
+		return ((Int)obj).value;
 	}
 
-	/** Unboxing method for Integer values.
+	/** Unboxing method for Int values.
 	 * Method returns <code>false</code> iff <code>obj</code>
-	 * is <code>Integer(0)</code>.
+	 * is <code>Int(0)</code>.
 	 */
 	protected static final boolean bval(Object obj) {
 		if (obj == null) return false;
-		return ((Integer)obj).intValue() != 0;
+		return ((Int)obj).value != 0;
 	}
 
 	/** Unboxing method for Long values. */

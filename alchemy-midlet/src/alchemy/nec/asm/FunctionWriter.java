@@ -1,5 +1,6 @@
 package alchemy.nec.asm;
 
+import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import java.io.ByteArrayOutputStream;
 import java.util.Enumeration;
@@ -152,7 +153,7 @@ public class FunctionWriter implements Opcodes {
 	
 	/** Visit LDC instruction with given object.
 	 * The class of argument must be one of null,
-	 * Boolean, Integer, Long, Float, Double,
+	 * Boolean, Int, Long, Float, Double,
 	 * String, FuncObject.
 	 */
 	public void visitLdcInsn(Object cnst) {
@@ -164,8 +165,8 @@ public class FunctionWriter implements Opcodes {
 			if (cnst.equals(Boolean.TRUE)) data.write(ICONST_1);
 			else data.write(ICONST_0);
 			written = true;
-		} else if (cnst instanceof Integer) {
-			int i = ((Integer)cnst).intValue();
+		} else if (cnst instanceof Int) {
+			int i = ((Int)cnst).value;
 			if (i >= -1 && i <= 5) {
 				data.write(ICONST_0 + i);
 				written = true;

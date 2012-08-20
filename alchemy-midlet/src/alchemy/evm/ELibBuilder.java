@@ -21,6 +21,7 @@ package alchemy.evm;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.HashLibrary;
+import alchemy.core.Int;
 import alchemy.core.LibBuilder;
 import alchemy.core.Library;
 import java.io.DataInputStream;
@@ -91,7 +92,7 @@ public class ELibBuilder implements LibBuilder {
 				case '0': //null, aligning object
 					break;
 				case 'i': //integer
-					cpool[cindex] = new Integer(data.readInt());
+					cpool[cindex] = new Int(data.readInt());
 					break;
 				case 'l': //long
 					cpool[cindex] = new Long(data.readLong());

@@ -18,6 +18,7 @@
 
 package alchemy.nec;
 
+import alchemy.core.Int;
 import alchemy.nec.tree.*;
 import java.util.Vector;
 
@@ -40,7 +41,7 @@ public class VarIndexer implements ExprVisitor {
 					Var v = (Var)f.locals.elementAt(vi);
 					v.index = vi;
 				}
-				f.body.accept(this, new Integer(f.locals.size()));
+				f.body.accept(this, new Int(f.locals.size()));
 			}
 		}
 	}
@@ -75,14 +76,14 @@ public class VarIndexer implements ExprVisitor {
 	}
 
 	public Object visitBlock(BlockExpr block, Object offset) {
-		int start = ((Integer)offset).intValue();
+		int start = ((Int)offset).value;
 		int size = block.locals.size();
 		for (int vi=0; vi<size; vi++) {
 			Var v = (Var)block.locals.elementAt(vi);
 			v.index = start+vi;
 		}
 		for (int ei=0; ei<block.exprs.size(); ei++) {
-			((Expr)block.exprs.elementAt(ei)).accept(this, new Integer(start+size));
+			((Expr)block.exprs.elementAt(ei)).accept(this, new Int(start+size));
 		}
 		return null;
 	}

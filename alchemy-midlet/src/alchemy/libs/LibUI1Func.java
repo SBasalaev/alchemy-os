@@ -20,7 +20,7 @@ package alchemy.libs;
 
 import alchemy.libs.ui.UICanvas;
 import alchemy.core.Context;
-import alchemy.core.Function;
+import alchemy.core.Int;
 import alchemy.midlet.UIServer;
 import alchemy.nlib.NativeFunction;
 import java.io.InputStream;
@@ -147,7 +147,7 @@ class LibUI1Func extends NativeFunction {
 				if (event != null && event[0] == UIServer.EVENT_KEY_PRESS && event[1] == args[0]) {
 					return event[2];
 				} else {
-					return Function.ZERO;
+					return Int.ZERO;
 				}
 			}
 			case 27: { // ui_set_screen(scr: Screen)

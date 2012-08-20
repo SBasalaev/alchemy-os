@@ -18,9 +18,7 @@
 
 package alchemy.core;
 
-import alchemy.util.IO;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Vector;
 
 /**
