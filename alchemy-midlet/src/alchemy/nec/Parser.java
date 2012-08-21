@@ -70,7 +70,8 @@ public class Parser {
 			unit.putType(BuiltinType.BARRAY);
 			unit.putType(BuiltinType.CARRAY);
 			unit.putType(BuiltinType.FUNCTION);
-			unit.putType(BuiltinType.STRUCTURE);		
+			unit.putType(BuiltinType.STRUCTURE);
+			unit.putType(BuiltinType.ERROR);
 			// adding builtin functions
 			parseFile(new File("/res/nec/embed.eh"));
 			// parsing
@@ -907,6 +908,27 @@ public class Parser {
 			}
 			unit.funcs.addElement(func);
 			return new ConstExpr(func);
+		} else if (keyword.equals("try")) {
+			Expr tryexpr = parseExpr(scope);
+			if (t.nextToken() != Tokenizer.TT_KEYWORD || !t.svalue.equals("catch"))
+				throw new ParseException("'catch' expected after 'try <expr>'");
+			expect('(');
+			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+				throw new ParseException("Identifier expected");
+			Var v = new Var(t.svalue, BuiltinType.ERROR);
+			expect(')');
+			BlockExpr catchblock = new BlockExpr(scope);
+			if (catchblock.addVar(v)) {
+				warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
+			}
+			Expr catchexpr = parseExpr(catchblock);
+			Type commontype = binaryCastType(tryexpr.rettype(), catchexpr.rettype());
+			catchblock.exprs.addElement(cast(catchexpr, commontype));
+			TryCatchExpr trycatch = new TryCatchExpr();
+			trycatch.tryexpr = cast(tryexpr, commontype);
+			trycatch.catchexpr = catchblock;
+			trycatch.catchvar = v;
+			return trycatch;
 		} else {
 			throw new ParseException(t.toString()+" unexpected here");
 		}

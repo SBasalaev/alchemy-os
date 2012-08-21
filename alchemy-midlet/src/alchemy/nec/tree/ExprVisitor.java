@@ -41,6 +41,7 @@ public interface ExprVisitor {
 	Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object data);
 	Object visitNone(NoneExpr none, Object data);
 	Object visitSwitch(SwitchExpr swexpr, Object data);
+	Object visitTryCatch(TryCatchExpr trycatch, Object data);
 	Object visitUnary(UnaryExpr unary, Object data);
 	Object visitVar(VarExpr vexpr, Object data);
 	Object visitWhile(WhileExpr wexpr, Object data);

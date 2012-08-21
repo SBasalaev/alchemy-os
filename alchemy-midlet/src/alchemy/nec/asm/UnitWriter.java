@@ -73,16 +73,27 @@ public class UnitWriter {
 				AsmFunc f = (AsmFunc)obj;
 				out.writeByte('P');
 				out.writeUTF(f.value);
-				out.writeByte(f.shared ? Opcodes.FFLAG_SHARED | Opcodes.FFLAG_RELOCS : Opcodes.FFLAG_RELOCS);
+				int fflags = 0;
+				if (f.shared) fflags |= Opcodes.FFLAG_SHARED;
+				if (f.relocs != null) fflags |= Opcodes.FFLAG_RELOCS;
+				if (f.dbgtable != null) fflags |= Opcodes.FFLAG_LNUM;
+				if (f.errtable != null) fflags |= Opcodes.FFLAG_ERRTBL;
+				out.writeByte(fflags);
 				out.writeByte(f.stacksize);
 				out.writeByte(f.varcount);
 				out.writeShort(f.code.length);
 				out.write(f.code);
-				out.writeShort(f.relocs.length);
-				for (int ri=0; ri<f.relocs.length; ri++) {
-					out.writeChar(f.relocs[ri]);
-				}
+				if (f.relocs != null) writeChars(out, f.relocs);
+				if (f.dbgtable != null) writeChars(out, f.dbgtable);
+				if (f.errtable != null) writeChars(out, f.errtable);
 			}
+		}
+	}
+	
+	private static void writeChars(DataOutputStream out, char[] chars) throws IOException {
+		out.writeShort(chars.length);
+		for (int i=0; i<chars.length; i++) {
+			out.writeChar(chars[i]);
 		}
 	}
 }

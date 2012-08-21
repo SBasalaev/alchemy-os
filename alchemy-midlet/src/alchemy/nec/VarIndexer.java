@@ -161,6 +161,12 @@ public class VarIndexer implements ExprVisitor {
 		if (swexpr.elseexpr != null) swexpr.elseexpr.accept(this, offset);
 		return null;
 	}
+
+	public Object visitTryCatch(TryCatchExpr trycatch, Object offset) {
+		trycatch.tryexpr.accept(this, offset);
+		trycatch.catchexpr.accept(this, offset);
+		return null;
+	}
 	
 	public Object visitUnary(UnaryExpr unary, Object offset) {
 		unary.expr.accept(this, offset);

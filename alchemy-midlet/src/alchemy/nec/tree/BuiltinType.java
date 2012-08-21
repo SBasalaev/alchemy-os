@@ -41,6 +41,7 @@ public class BuiltinType extends NamedType {
 	static public final BuiltinType CARRAY = new BuiltinType("CArray", ANY);
 	static public final BuiltinType FUNCTION = new BuiltinType("Function", ANY);
 	static public final BuiltinType STRUCTURE = new BuiltinType("Structure", ANY);
+	static public final BuiltinType ERROR = new BuiltinType("Error", ANY);
 	static public final BuiltinType NULL = new BuiltinType("Null", ANY);
 	/* A special type which is used when expression does not return a value. */
 	static public final BuiltinType NONE = new BuiltinType("<none>", null);

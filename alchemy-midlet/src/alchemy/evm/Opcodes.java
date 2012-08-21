@@ -10,7 +10,8 @@ public interface Opcodes {
 	
 	int FFLAG_SHARED = 1;  /* Function is shared. */
 	int FFLAG_RELOCS = 2;  /* Function has relocation table. */
-	int FFLAG_DEBUG  = 4;  /* Function has debugging info. */
+	int FFLAG_LNUM   = 4;  /* Function has line number table. */
+	int FFLAG_ERRTBL = 8;  /* Function has error table. */
 	
 	byte NOP         = (byte)0x00;
 	byte ACONST_NULL = (byte)0x01;

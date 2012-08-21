@@ -175,6 +175,18 @@ public class NEL extends NativeApp {
 								f.relocs[i] = data.readUnsignedShort();
 							}
 							f.reloffset = offset;
+							if ((f.flags & Opcodes.FFLAG_LNUM) != 0) {
+								f.lnumtable = new char[data.readUnsignedShort()];
+								for (int j=0; j< f.lnumtable.length; j++) {
+									f.lnumtable[j] = data.readChar();
+								}
+							}
+							if ((f.flags & Opcodes.FFLAG_ERRTBL) != 0) {
+								f.errtable = new char[data.readUnsignedShort()];
+								for (int j=0; j< f.errtable.length; j++) {
+									f.errtable[j] = data.readChar();
+								}
+							}
 							obj = f;
 							break;
 						}
@@ -290,13 +302,25 @@ public class NEL extends NativeApp {
 					out.writeByte(func.locals);
 					out.writeShort(func.code.length);
 					out.write(func.code);
+					if ((func.flags & Opcodes.FFLAG_LNUM) != 0) {
+						out.writeShort(func.lnumtable.length);
+						for (int j=0; j<func.lnumtable.length; j++) {
+							out.writeChar(func.lnumtable[j]);
+						}
+					}
+					if ((func.flags & Opcodes.FFLAG_ERRTBL) != 0) {
+						out.writeShort(func.errtable.length);
+						for (int j=0; j<func.errtable.length; j++) {
+							out.writeChar(func.errtable[j]);
+						}
+					}
 				}
 			}
 			out.close();
 			c.fs().setExec(outfile, true);
 		} catch (Exception e) {
 			IO.println(c.stderr, "Error: "+e);
-			e.printStackTrace();
+			// e.printStackTrace();
 			return 1;
 		}
 		return 0;
@@ -365,11 +389,17 @@ public class NEL extends NativeApp {
 				case 'P': {
 					String name = data.readUTF();
 					int flags = data.readUnsignedByte();
+					data.skipBytes(2);
+					data.skipBytes(data.readUnsignedShort());
 					if ((flags & Opcodes.FFLAG_SHARED) != 0) {
 						symbols.addElement(name);
 					}
-					data.skipBytes(2);
-					data.skipBytes(data.readUnsignedShort());
+					if ((flags & Opcodes.FFLAG_LNUM) != 0) {
+						data.skipBytes(data.readUnsignedShort()*2);
+					}
+					if ((flags & Opcodes.FFLAG_ERRTBL) != 0) {
+						data.skipBytes(data.readUnsignedShort()*2);
+					}
 					break;
 				}
 				default:
@@ -445,6 +475,9 @@ class InFunc extends NELFunc {
 	byte[] code;
 	int[] relocs;
 	int reloffset;
+	
+	char[] lnumtable;
+	char[] errtable;
 
 	public InFunc(String name) {
 		super(name);

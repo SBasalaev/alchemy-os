@@ -31,16 +31,16 @@ public class AlchemyException extends Exception {
 	private Vector functions = new Vector();
 	private Vector dbgInfo = new Vector();
 
-	private final int errcode;
+	public final int errcode;
 	
 	public static final int SUCCESS = 0;
-	public static final int ERR_NULL = -1;
-	public static final int ERR_IO = -2;
-	public static final int ERR_ILLARG = -3;
-	public static final int ERR_ILLSTATE = -4;
-	public static final int ERR_SECURITY = -5;
-	public static final int ERR_RANGE = -6;
-	public static final int ERR_SYSTEM = -100;
+	public static final int ERR_NULL = 100;
+	public static final int ERR_IO = 101;
+	public static final int ERR_RANGE = 102;
+	public static final int ERR_ILLARG = 103;
+	public static final int ERR_ILLSTATE = 104;
+	public static final int ERR_SECURITY = 105;
+	public static final int ERR_SYSTEM = 200;
 	
 	public AlchemyException(Exception cause) {
 		super(cause.getMessage());
@@ -72,7 +72,7 @@ public class AlchemyException extends Exception {
 			case ERR_SECURITY: sb.append("Permission denied"); break;
 			case ERR_ILLARG:   sb.append("Illegal argument"); break;
 			case ERR_ILLSTATE: sb.append("Illegal state"); break;
-			default:           sb.append("System error");
+			case ERR_SYSTEM:   sb.append("System error");
 		}
 		if (getMessage() != null) {
 			sb.append(": ").append(getMessage());

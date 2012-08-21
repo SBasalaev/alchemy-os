@@ -15,6 +15,9 @@ public class FunctionWriter implements Opcodes {
 
 	private ByteArrayOutputStream data = new ByteArrayOutputStream();
 	private StringBuffer relocdata = new StringBuffer();
+	private StringBuffer dbgtable = new StringBuffer();
+	/** Keeps sequence of labels (from, to, handle). */
+	private Vector errdata = new Vector();
 	private Hashtable labeldata = new Hashtable();
 	private int stackpos = 0;
 	private int stackmax = 0;
@@ -32,6 +35,25 @@ public class FunctionWriter implements Opcodes {
 		stackpos += inc;
 		if (inc > 0 && stackmax < stackpos) stackmax = stackpos;
 		if (stackpos < 0) throw new IllegalStateException("Stack inconsistency: empty stack");
+	}
+	
+	/** Visit name of the source file. */
+	public void visitSource(String name) {
+		if (dbgtable.length() > 0) throw new IllegalStateException("Source already visited");
+		int index = objects.indexOf(name);
+		if (index < 0) {
+			index = objects.size();
+			objects.addElement(name);
+		}
+		dbgtable.append((char)index);
+	}
+	
+	/** Visit number of the line in the source file. */
+	public void visitLine(int num) {
+		if (dbgtable.length() == 0) throw new IllegalStateException("Source is not visited");
+		if (dbgtable.length() < 2 || dbgtable.charAt(dbgtable.length()-2) != num) {
+			dbgtable.append((char)num).append((char)data.size());
+		}
 	}
 	
 	/** Visit instruction without arguments. */
@@ -214,8 +236,8 @@ public class FunctionWriter implements Opcodes {
 		if (!written) {
 			int index = objects.indexOf(cnst);
 			if (index < 0) {
+				index = objects.size();
 				objects.addElement(cnst);
-				index = objects.size()-1;
 			}
 			data.write(LDC);
 			relocdata.append((char)data.size());
@@ -226,7 +248,7 @@ public class FunctionWriter implements Opcodes {
 	}
 	
 	/**
-	 * Marks current code position as containing label address.
+	 * Marks current code position as pointer with label address.
 	 */
 	private void visitLabelPtr(Label label) {
 		if (label.addr >= 0) {
@@ -318,6 +340,15 @@ public class FunctionWriter implements Opcodes {
 		label.addr = data.size();
 	}
 	
+	public void visitTryCatchHandler(Label from, Label to) {
+		visitStack(1);
+		Label handler = new Label();
+		visitLabel(handler);
+		errdata.addElement(from);
+		errdata.addElement(to);
+		errdata.addElement(handler);
+	}
+	
 	public void visitEnd() {
 		byte[] code = data.toByteArray();
 		for (Enumeration e = labeldata.keys(); e.hasMoreElements(); ) {
@@ -333,8 +364,19 @@ public class FunctionWriter implements Opcodes {
 		func.code = code;
 		func.stacksize = this.stackmax;
 		func.varcount = this.varcount;
-		int reloclen = relocdata.length();
-		func.relocs = new char[reloclen];
-		relocdata.getChars(0, reloclen, func.relocs, 0);
+		func.relocs = new char[relocdata.length()];
+		relocdata.getChars(0, relocdata.length(), func.relocs, 0);
+		if (dbgtable.length() > 0) {
+			func.dbgtable = new char[dbgtable.length()];
+			dbgtable.getChars(0, dbgtable.length(), func.dbgtable, 0);
+		}
+		if (errdata.size() > 0) {
+			func.errtable = new char[errdata.size()];
+			for (int i=0; i<errdata.size(); i++) {
+				Label label = (Label)errdata.elementAt(i);
+				if (label.addr < 0) throw new IllegalStateException("Label not visited");
+				func.errtable[i] = (char)label.addr;
+			}
+		}
 	}
 }

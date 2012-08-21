@@ -315,9 +315,10 @@ class Tokenizer {
 				return ttype = TT_BOOL;
 			if (id.equals("def") || id.equals("if") || id.equals("else") ||
 			    id.equals("use") || id.equals("do") || id.equals("while")||
-				id.equals("cast")|| id.equals("var")|| id.equals("type") ||
-				id.equals("null")|| id.equals("new")|| id.equals("for")  ||
-				id.equals("const")|| id.equals("switch"))
+			    id.equals("cast")|| id.equals("var")|| id.equals("type") ||
+			    id.equals("null")|| id.equals("new")|| id.equals("for")  ||
+			    id.equals("try") || id.equals("catch") || id.equals("const")||
+			    id.equals("switch"))
 				return ttype = TT_KEYWORD;
 			return ttype = TT_IDENTIFIER;
 		}

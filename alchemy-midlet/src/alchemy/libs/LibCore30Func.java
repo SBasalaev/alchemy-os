@@ -18,6 +18,7 @@
 
 package alchemy.libs;
 
+import alchemy.core.AlchemyException;
 import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.core.Context;
 import alchemy.core.Function;
@@ -467,11 +468,17 @@ class LibCore30Func extends NativeFunction {
 				} catch (NumberFormatException nfe) {
 					return null;
 				}
+			case 138: // Error.code(): Int
+				return Ival(((AlchemyException)args[0]).errcode);
+			case 139: // Error.msg(): String
+				return ((AlchemyException)args[0]).getMessage();
+			case 140: // error(code: Int, msg: String)
+				throw new AlchemyException(ival(args[0]), (String)args[1]);
 			default:
 				return null;
 		}
 	}
-	
+
 	protected String soname() {
 		return "libcore.3.so";
 	}

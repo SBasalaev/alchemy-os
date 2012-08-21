@@ -32,16 +32,20 @@ class EFunction extends Function {
 	private final int stacksize;
 	private final int localsize;
 	private final byte[] bcode;
+	private final char[] dbgtable;
+	private final char[] errtable;
 	private final Object[] cpool;
 	private final String libname;
 
-	public EFunction(String libname, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code) {
+	public EFunction(String libname, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
 		super(funcname);
 		this.libname = libname;
 		this.stacksize = stacksize;
 		this.localsize = localsize;
 		this.bcode = code;
 		this.cpool = cpool;
+		this.dbgtable = dbgtable;
+		this.errtable = errtable;
 	}
 
 	public Object exec(Context c, Object[] args) throws AlchemyException {
@@ -57,8 +61,8 @@ class EFunction extends Function {
 			System.arraycopy(args, 0, locals, 0, args.length);
 		}
 		int ct = 0;
-		try {
 		while (true) {
+		try {
 			int instr = code[ct++];
 			switch (instr) {
 			// CONSTANTS
@@ -667,12 +671,35 @@ class EFunction extends Function {
 					stack[++head] = Ival((code[ct++] << 8) | (code[ct++]& 0xff));
 					break;
 			} /* the big switch */
-		} /* the great while */
 		} catch (Exception e) {
+			// the instruction on which error occured
+			ct--;
+			// filling exception with debug info
 			AlchemyException ae = (e instanceof AlchemyException) ? (AlchemyException)e : new AlchemyException(e);
-			ae.addTraceElement(this, "+"+(ct-1));
-			throw ae;
+			if (dbgtable != null) {
+				int srcline = 0;
+				for (int i=1; i<dbgtable.length; i += 2) {
+					if (dbgtable[i] <= ct) srcline = dbgtable[i+1];
+				}
+				ae.addTraceElement(this, cpool[dbgtable[0]]+":"+srcline);
+			} else {
+				ae.addTraceElement(this, "+"+ct);
+			}
+			// catching or rethrowing
+			int jumpto = -1;
+			if (errtable != null) {
+				for (int i=0; i<errtable.length && jumpto < 0; i += 3) {
+					if (ct >= errtable[i] && ct <= errtable[i+1]) jumpto = errtable[i+2];
+				}
+			}
+			if (jumpto >= 0) {
+				stack[++head] = ae;
+				ct = jumpto;
+			} else {
+				throw ae;
+			}
 		}
+		} /* the great while */
 	}
 
 	public String toString() {

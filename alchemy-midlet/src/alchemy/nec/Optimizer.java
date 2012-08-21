@@ -18,7 +18,6 @@
 
 package alchemy.nec;
 
-import alchemy.core.Function;
 import alchemy.core.Int;
 import alchemy.nec.tree.*;
 import java.util.Vector;
@@ -605,6 +604,12 @@ public class Optimizer implements ExprVisitor {
 		}
 		if (swexpr.elseexpr != null) swexpr.elseexpr = (Expr)swexpr.elseexpr.accept(this, scope);
 		return swexpr;
+	}
+
+	public Object visitTryCatch(TryCatchExpr trycatch, Object scope) {
+		trycatch.tryexpr = (Expr)trycatch.tryexpr.accept(this, scope);
+		trycatch.catchexpr = (Expr)trycatch.catchexpr.accept(this, scope);
+		return trycatch;
 	}
 
 	/**

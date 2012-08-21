@@ -22,6 +22,8 @@ class AsmFunc extends FuncObject {
 	int varcount;
 	byte[] code;
 	char[] relocs;
+	char[] dbgtable;
+	char[] errtable;
 
 	public AsmFunc(String value) {
 		super(value);

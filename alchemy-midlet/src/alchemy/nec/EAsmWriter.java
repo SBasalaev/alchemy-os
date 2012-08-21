@@ -18,7 +18,6 @@
 
 package alchemy.nec;
 
-import alchemy.core.Function;
 import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.asm.FuncObject;
@@ -553,6 +552,25 @@ public class EAsmWriter implements ExprVisitor {
 		return null;
 	}
 
+	public Object visitTryCatch(TryCatchExpr trycatch, Object unused) {
+		Label trystart = new Label();
+		Label tryend = new Label();
+		Label aftertry = new Label();
+		writer.visitLabel(trystart);
+		trycatch.tryexpr.accept(this, unused);
+		writer.visitJumpInsn(Opcodes.GOTO, aftertry);
+		writer.visitLabel(tryend);
+		writer.visitTryCatchHandler(trystart, tryend);
+		if (trycatch.catchexpr instanceof NoneExpr) {
+			writer.visitInsn(Opcodes.POP);
+		} else {
+			writer.visitVarInsn(Opcodes.STORE, trycatch.catchvar.index);
+			trycatch.catchexpr.accept(this, unused);
+		}
+		writer.visitLabel(aftertry);
+		return null;
+	}
+	
 	public Object visitUnary(UnaryExpr unary, Object unused) {
 		Type type = unary.rettype();
 		switch (unary.operator) {

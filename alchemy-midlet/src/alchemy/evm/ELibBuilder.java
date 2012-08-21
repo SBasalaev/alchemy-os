@@ -119,12 +119,26 @@ public class ELibBuilder implements LibBuilder {
 					int localsize = data.readUnsignedByte();
 					int codesize = data.readUnsignedShort();
 					byte[] code = new byte[codesize];
+					char[] lnumtable = null;
+					char[] errtable = null;
 					data.readFully(code);
 					if ((fflags & Opcodes.FFLAG_RELOCS) != 0) {
 						data.skipBytes(data.readUnsignedShort()*2);
 					}
+					if ((fflags & Opcodes.FFLAG_LNUM) != 0) {
+						lnumtable = new char[data.readUnsignedShort()];
+						for (int j=0; j < lnumtable.length; j++) {
+							lnumtable[j] = data.readChar();
+						}
+					}
+					if ((fflags & Opcodes.FFLAG_ERRTBL) != 0) {
+						errtable = new char[data.readUnsignedShort()];
+						for (int j=0; j < errtable.length; j++) {
+							errtable[j] = data.readChar();
+						}
+					}
 					//constructing function
-					Function func = new EFunction(libname, fname, cpool, stacksize, localsize, code);
+					Function func = new EFunction(libname, fname, cpool, stacksize, localsize, code, lnumtable, errtable);
 					cpool[cindex] = func;
 					if ((fflags & Opcodes.FFLAG_SHARED) != 0) lib.putFunc(func);
 				} break;
