@@ -388,24 +388,31 @@ public class Context {
 			//parsing link
 			if (magic == (short)(('#'<<8)|'=')) {
 				String fname = new UTFReader(in).readLine();
+				in.close();
 				if (fname.charAt(0) != '/') {
 					fname = libfile.parent().path()+'/'+fname;
 				}
-				return loadLibForPath(fname, pathlist);
+				lib = loadLibForPath(fname, pathlist);
+				art.cache.putLibrary(libfile, tstamp, lib);
+				return lib;
+			//parsing shebang
 			} else if (magic == (short)(('#'<<8)|'!')) {
 				String[] args = IO.split(new UTFReader(in).readLine(), ' ');
+				in.close();
 				String progname = args[0];
 				System.arraycopy(args, 1, args, 0, args.length-1);
 				args[args.length-1] = libfile.toString();
 				HashLibrary hl = new HashLibrary();
 				hl.putFunc(new ShebangFunction(progname, args));
 				hl.lock();
+				art.cache.putLibrary(libfile, tstamp, hl);
 				return hl;
 			}
 			LibBuilder builder = art.builders.get((short)magic);
 			if (builder == null)
 				throw new InstantiationException("Unknown library format");
 			lib = builder.build(this, in);
+			in.close();
 			//caching
 			art.cache.putLibrary(libfile, tstamp, lib);
 		} finally {
@@ -553,6 +560,8 @@ public class Context {
 				IO.println(stderr, dumpCallStack());
 				//t.printStackTrace();
 			}
+			try { stdout.flush(); } catch (IOException e) { }
+			try { stderr.flush(); } catch (IOException e) { }
 			setState(ENDED);
 			if (streams != null) {
 				for (Enumeration e = streams.elements(); e.hasMoreElements(); ) {
@@ -571,8 +580,6 @@ public class Context {
 					}
 				}
 			}
-			try { stdout.flush(); } catch (IOException e) { }
-			try { stderr.flush(); } catch (IOException e) { }
 		}
 	}
 	

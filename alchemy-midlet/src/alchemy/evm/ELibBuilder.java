@@ -142,7 +142,6 @@ public class ELibBuilder implements LibBuilder {
 					throw new InstantiationException("Unknown data type: "+String.valueOf(ctype));
 			}
 		}
-		in.close();
 		lib.lock();
 		return lib;
 	}
