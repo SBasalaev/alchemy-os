@@ -53,6 +53,7 @@ public class Shell extends NativeApp {
 					cmdline.append(' ').append(args[i]);
 				}
 				scriptinput = new ByteArrayInputStream(IO.utfEncode(cmdline.toString()));
+				c.addStream(scriptinput);
 			} else {
 				scriptinput = c.fs().read(c.toFile(args[0]));
 				c.addStream(scriptinput);
@@ -101,7 +102,6 @@ public class Shell extends NativeApp {
 					Context child = new Context(c);
 					if (cc.in != null) {
 						child.stdin = c.fs().read(c.toFile(cc.in));
-						child.addStream(child.stdin);
 					}
 					if (cc.out != null) {
 						File outfile = c.toFile(cc.out);
@@ -110,7 +110,6 @@ public class Shell extends NativeApp {
 						} else {
 							child.stdout = c.fs().write(outfile);
 						}
-						child.addStream(child.stdout);
 					}
 					if (cc.err != null) {
 						File errfile = c.toFile(cc.err);
@@ -119,12 +118,14 @@ public class Shell extends NativeApp {
 						} else {
 							child.stderr = c.fs().write(errfile);
 						}
-						child.addStream(child.stderr);
 					}
 					if (c.stdin instanceof ConsoleInputStream) {
 						((ConsoleInputStream)c.stdin).setPrompt("");
 					}
 					child.startAndWait(cc.cmd, cc.args);
+					if (cc.in != null) child.stdin.close();
+					if (cc.out != null) child.stdout.close();
+					if (cc.err != null) child.stderr.close();
 					if (c.stdin instanceof ConsoleInputStream) {
 						((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 					}
