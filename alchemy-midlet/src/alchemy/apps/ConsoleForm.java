@@ -28,29 +28,26 @@ import java.io.PrintStream;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.Item;
-import javax.microedition.lcdui.ItemCommandListener;
 import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextField;
 
 /**
- * A form for the native console.
+ * A form for the native terminal.
  * @author Sergey Basalaev
  */
-class ConsoleForm extends Form implements ItemCommandListener {
+class ConsoleForm extends Form {
 
 	final InputStream in = new ConsoleInputStream();
 	final PrintStream out = new PrintStream(new ConsoleOutputStream());
 
 	private final TextField input = new TextField(">", null, 1024, TextField.ANY);
-	private final Command cmdInput = new Command("Execute", Command.OK, 1);
+	private final Command cmdInput;
 	private final Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
 	private boolean inputvisible = false;
 
-	public ConsoleForm() {
+	public ConsoleForm(Command input) {
 		super("Terminal");
-		input.addCommand(cmdInput);
-		input.setItemCommandListener(this);
+		cmdInput = input;
 	}
 
 	public void print(String msg) {
@@ -64,31 +61,21 @@ class ConsoleForm extends Form implements ItemCommandListener {
 	 * Blocks current thread until some text is put
 	 * into text field and "input" button is pressed.
 	 */
-	private String waitForInput() {
-		synchronized (input) {
+	private synchronized String waitForInput() {
 			input.setString("");
 			append(input);
 			inputvisible = true;
+			addCommand(cmdInput);
 			try {
-				input.wait();
+				wait();
 			} catch (InterruptedException ie) {
 				print("interrupted");
 			}
 			delete(size()-1);
 			append(new StringItem(input.getLabel(), input.getString()+'\n'));
 			inputvisible = false;
+			removeCommand(cmdInput);
 			return input.getString()+'\n';
-		}
-	}
-
-	public void commandAction(Command c, Item item) {
-		if (c == cmdInput) {
-			//means we're finished reading
-			//notify thread that awaits for input
-			synchronized (input) {
-				input.notify();
-			}
-		}
 	}
 
 	private class ConsoleOutputStream extends OutputStream {
