@@ -25,7 +25,7 @@ import alchemy.util.IO;
 import javax.microedition.lcdui.Command;
 
 /**
- * Native console.
+ * Native terminal.
  *
  * @author Sergey Basalaev
  */
@@ -60,7 +60,8 @@ public class Console extends NativeApp {
 				return 1;
 			}
 		}
-		ConsoleForm form = new ConsoleForm();
+		final Command cmdInput = new Command("Input", Command.OK, 1);
+		final ConsoleForm form = new ConsoleForm(cmdInput);
 		UIServer.setScreen(c, form);
 		Context child = new Context(c);
 		try {
@@ -83,7 +84,14 @@ public class Console extends NativeApp {
 			child.stdin = form.in;
 			child.stdout = form.out;
 			child.stderr = form.out;
-			int result = child.startAndWait(childCmd, childArgs);
+			child.start(childCmd, childArgs);
+			while (child.getState() != Context.ENDED) {
+				Object[] event = (Object[])UIServer.readEvent(c, false);
+				if (event != null && event[2] == cmdInput) synchronized (form) {
+					form.notify();
+				}
+				Thread.sleep(100);
+			}
 			if (keep) {
 				form.addCommand(cmdClose);
 				Object[] event;
@@ -91,7 +99,7 @@ public class Console extends NativeApp {
 					event = (Object[])UIServer.readEvent(c, true);
 				} while (event[2] != cmdClose);
 			}
-			return result;
+			return child.getExitCode();
 		} catch (Exception e) {
 			form.print(e.toString());
 			form.print(child.dumpCallStack());
