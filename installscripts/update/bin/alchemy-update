@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo 'Updating Alchemy OS to 1.4.3'
+echo 'Updating Alchemy OS to 1.4.4'
 
 echo 'Updating core components...'
 echo >> /cfg/pkg/db/sources/installed
@@ -12,8 +12,8 @@ pkg update
 #echo Removing deprecated components...
 
 echo 'Adding software sources...'
-echo 'http://pkg.alchemy-os.googlecode.com/git  1.4' >> /cfg/pkg/sources
-echo 'http://pkg.alchemy-os.googlecode.com/git  1.4-nonfree' >> /cfg/pkg/sources
+echo 'http://alchemy-os.org/pkg  1.4' >> /cfg/pkg/sources
+echo 'http://alchemy-os.org/pkg  1.4-nonfree' >> /cfg/pkg/sources
 
 echo 'appmenu' > /cfg/init
 
