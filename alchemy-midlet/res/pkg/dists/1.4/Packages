@@ -55,11 +55,11 @@ Summary: library to detect file type
 File: libfiletype1_1.0-2.pkg
 
 Package: libpkg0
-Version: 0.3.3-1
+Version: 0.3.3-2
 Section: libs
 Summary: package management library
 Depends: libcore2
-File: libpkg0_0.3.3-1.pkg
+File: libpkg0_0.3.3-2.pkg
 
 Package: libui0.1
 Version: 0.1-1
