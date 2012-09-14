@@ -47,6 +47,7 @@ class ConsoleForm extends Form {
 
 	public ConsoleForm(Command input) {
 		super("Terminal");
+		this.input.setInitialInputMode("MIDP_LOWERCASE_LATIN");
 		cmdInput = input;
 	}
 
