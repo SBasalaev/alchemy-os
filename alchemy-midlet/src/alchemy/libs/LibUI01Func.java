@@ -268,7 +268,7 @@ class LibUI01Func extends Function {
 			case 67: // edititem_get_text(item: Item): String
 				return ((TextField)args[0]).getString();
 			case 68: // edititem_set_text(item: Item, text: String)
-				((TextField)args[0]).setString((String)args[0]);
+				((TextField)args[0]).setString((String)args[1]);
 				return null;
 			case 69: // new_gaugeitem(label: String, max: Int, init: Int): Item
 				return new Gauge((String)args[0], true, ival(args[1]), ival(args[2]));
