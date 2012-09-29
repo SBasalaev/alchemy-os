@@ -68,6 +68,9 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 	}
 
 	private void runApp() {
+		//#ifdef DEBUGLOG
+		Logger.log("Start: Alchemy");
+		//#endif
 		Display.getDisplay(this).callSerially(
 			new Runnable() {
 				public void run() {

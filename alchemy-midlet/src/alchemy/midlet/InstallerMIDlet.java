@@ -50,16 +50,22 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	/** Commands for main screen. */
 	private final Command cmdQuit = new Command("Quit", Command.EXIT, 10);
-	private final Command cmdAbout = new Command("About", Command.OK, 8);
-	private final Command cmdInstall = new Command("Install", Command.OK, 1);
-	private final Command cmdUpdate = new Command("Update", Command.OK, 2);
-	private final Command cmdUninstall = new Command("Uninstall", Command.OK, 5);
-	private final Command cmdRebuild = new Command("Rebuild FS", Command.OK, 3);
+	private final Command cmdAbout = new Command("About", Command.SCREEN, 9);
+	private final Command cmdInstall = new Command("Install", Command.SCREEN, 1);
+	private final Command cmdUpdate = new Command("Update", Command.SCREEN, 2);
+	private final Command cmdUninstall = new Command("Uninstall", Command.SCREEN, 5);
+	private final Command cmdRebuild = new Command("Rebuild FS", Command.SCREEN, 3);
 	
 	/** Command for dialogs. */
 	private final Command cmdChoose = new Command("Choose", Command.OK, 2);
 	private final Command cmdOpenDir = new Command("Open", Command.ITEM, 1);
-
+	
+	//#ifdef DEBUGLOG
+	/** Commands for debug log. */
+	private final Command cmdShowLog = new Command("Show log", Command.SCREEN, 7);
+	private final Command cmdClearLog = new Command("Clear log", Command.SCREEN, 8);
+	//#endif
+	
 	private Properties setupCfg;
 
 	public InstallerMIDlet() {
@@ -80,6 +86,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			"A copy of the GNU GPL may be found at http://www.gnu.org/licenses/\n";
 
 		new InstallerThread(0).start();
+		//#ifdef DEBUGLOG
+		Logger.log("Start: Installer");
+		//#endif
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
@@ -100,6 +109,13 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		} else if (c == cmdAbout) {
 			messages.deleteAll();
 			messages.append(ABOUT_TEXT);
+		//#ifdef DEBUGLOG
+		} else if (c == cmdShowLog) {
+			messages.deleteAll();
+			messages.append(Logger.getLog());
+		} else if (c == cmdClearLog) {
+			Logger.clearLog();
+		//#endif
 		} else if (c == cmdInstall) {
 			new InstallerThread(1).start();
 		} else if (c == cmdUninstall) {
@@ -376,6 +392,10 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.removeCommand(cmdUninstall);
 			messages.removeCommand(cmdUpdate);
 			messages.removeCommand(cmdRebuild);
+			//#ifdef DEBUGLOG
+			messages.removeCommand(cmdShowLog);
+			messages.removeCommand(cmdClearLog);
+			//#endif
 			try {
 				switch(action) {
 					case 0: check(); break;
@@ -390,6 +410,10 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			}
 			messages.addCommand(cmdQuit);
 			messages.addCommand(cmdAbout);
+			//#ifdef DEBUGLOG
+			messages.addCommand(cmdShowLog);
+			messages.addCommand(cmdClearLog);
+			//#endif
 		}
 	}
 }

@@ -49,7 +49,7 @@ class FSNavigator extends List {
 	}
 	
 	private final Filesystem fs;
-	private File currentDir;	
+	private File currentDir;
 	
 	FSNavigator(Filesystem fs) {
 		super("Choose path", Choice.IMPLICIT);
