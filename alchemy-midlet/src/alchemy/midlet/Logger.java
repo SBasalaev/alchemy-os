@@ -1,4 +1,4 @@
-//#condition DEBUGLOG
+//#condition DEBUGLOG=="true"
 //# 
 //# /*
 //#  * This file is a part of Alchemy OS project.

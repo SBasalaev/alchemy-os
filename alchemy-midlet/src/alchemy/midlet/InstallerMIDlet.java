@@ -60,7 +60,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private final Command cmdChoose = new Command("Choose", Command.OK, 2);
 	private final Command cmdOpenDir = new Command("Open", Command.ITEM, 1);
 
-//#ifdef DEBUGLOG
+//#if DEBUGLOG=="true"
 //# 	private final Command cmdShowLog = new Command("Show log", Command.SCREEN, 7);
 //# 	private final Command cmdClearLog = new Command("Clear log", Command.SCREEN, 8);
 //#endif
@@ -68,7 +68,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private Properties setupCfg;
 
 	public InstallerMIDlet() {
-//#ifdef DEBUGLOG
+//#if DEBUGLOG=="true"
 //# 		Logger.log("Start: Installer");
 //#endif
 		display = Display.getDisplay(this);
@@ -108,7 +108,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		} else if (c == cmdAbout) {
 			messages.deleteAll();
 			messages.append(ABOUT_TEXT);
-		//#ifdef DEBUGLOG
+		//#if DEBUGLOG=="true"
 //# 		} else if (c == cmdShowLog) {
 //# 			messages.deleteAll();
 //# 			messages.append(Logger.getLog());
@@ -391,7 +391,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.removeCommand(cmdUninstall);
 			messages.removeCommand(cmdUpdate);
 			messages.removeCommand(cmdRebuild);
-//#ifdef DEBUGLOG
+//#if DEBUGLOG=="true"
 //# 			messages.removeCommand(cmdShowLog);
 //# 			messages.removeCommand(cmdClearLog);
 //#endif
@@ -409,7 +409,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			}
 			messages.addCommand(cmdQuit);
 			messages.addCommand(cmdAbout);
-//#ifdef DEBUGLOG
+//#if DEBUGLOG=="true"
 //# 			messages.addCommand(cmdShowLog);
 //# 			messages.addCommand(cmdClearLog);
 //#endif
