@@ -27,8 +27,13 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.io.Connector;
+//#if SIEMENSFS=="true"
+//# import com.siemens.mp.io.file.FileConnection;
+//# import com.siemens.mp.io.file.FileSystemRegistry;
+//#else
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
+//#endif
 
 /**
  * Filesystem using JSR75 specification.
