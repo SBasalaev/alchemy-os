@@ -267,7 +267,7 @@ class LibUI1Func extends NativeFunction {
 			case 67: // EditItem.get_text(): String
 				return ((TextField)args[0]).getString();
 			case 68: // EditItem.set_text(text: String)
-				((TextField)args[0]).setString((String)args[0]);
+				((TextField)args[0]).setString((String)args[1]);
 				return null;
 			case 69: // new_gaugeitem(label: String, max: Int, init: Int): GaugeItem
 				return new Gauge((String)args[0], true, ival(args[1]), ival(args[2]));
