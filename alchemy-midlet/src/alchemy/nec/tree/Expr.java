@@ -24,6 +24,12 @@ package alchemy.nec.tree;
  */
 public abstract class Expr {
 
+	public final int line;
+	
+	public Expr(int lnum) {
+		this.line = lnum;
+	}
+	
 	/** Type that this expression returns. */
 	public abstract Type rettype();
 

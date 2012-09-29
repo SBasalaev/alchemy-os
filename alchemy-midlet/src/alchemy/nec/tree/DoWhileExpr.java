@@ -29,7 +29,8 @@ public class DoWhileExpr extends Expr {
 	public Expr condition;
 	public Expr body;
 
-	public DoWhileExpr(Expr condition, Expr body) {
+	public DoWhileExpr(int lnum, Expr condition, Expr body) {
+		super(lnum);
 		this.condition = condition;
 		this.body = body;
 	}

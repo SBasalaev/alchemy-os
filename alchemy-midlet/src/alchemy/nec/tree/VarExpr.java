@@ -26,7 +26,8 @@ public class VarExpr extends Expr {
 
 	public Var var;
 
-	public VarExpr(Var v) {
+	public VarExpr(int lnum, Var v) {
+		super(lnum);
 		this.var = v;
 	}
 

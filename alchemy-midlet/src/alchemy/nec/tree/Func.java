@@ -28,6 +28,8 @@ import java.util.Vector;
 public class Func implements Scope {
 	private final Unit unit;
 
+	/** Name of the source file for the function. */
+	public final String source;
 	/** Function signature. Not neccessarily equals variable name. */
 	public String signature;
 	/** Type of this function. */
@@ -42,8 +44,9 @@ public class Func implements Scope {
 	 */
 	public int hits;
 	
-	public Func(Unit u) {
+	public Func(Unit u, String source) {
 		this.unit = u;
+		this.source = source;
 	}
 
 	public boolean isLocal(String id) {

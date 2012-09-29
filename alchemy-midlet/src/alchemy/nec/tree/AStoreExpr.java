@@ -29,7 +29,8 @@ public class AStoreExpr extends Expr {
 	public Expr indexexpr;
 	public Expr assignexpr;
 
-	public AStoreExpr(Expr arrayexpr, Expr indexexpr, Expr assignexpr) {
+	public AStoreExpr(int lnum, Expr arrayexpr, Expr indexexpr, Expr assignexpr) {
+		super(lnum);
 		this.arrayexpr = arrayexpr;
 		this.indexexpr = indexexpr;
 		this.assignexpr = assignexpr;

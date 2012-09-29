@@ -44,7 +44,9 @@ public class SwitchExpr extends Expr {
 	
 	public Vector exprs = new Vector();
 	
-	public SwitchExpr() { }
+	public SwitchExpr(int lnum) {
+		super(lnum);
+	}
 
 	public Type rettype() {
 		return ((Expr)exprs.firstElement()).rettype();

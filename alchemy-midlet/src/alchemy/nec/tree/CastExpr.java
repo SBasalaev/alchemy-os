@@ -28,7 +28,8 @@ public class CastExpr extends Expr {
 	public Type toType;
 	public Expr expr;
 
-	public CastExpr(Type toType, Expr expr) {
+	public CastExpr(int lnum, Type toType, Expr expr) {
+		super(lnum);
 		this.toType = toType;
 		this.expr = expr;
 	}

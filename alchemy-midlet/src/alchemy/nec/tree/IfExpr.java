@@ -35,7 +35,8 @@ public class IfExpr extends Expr {
 	public Expr ifexpr;
 	public Expr elseexpr;
 
-	public IfExpr(Expr condition, Expr ifexpr, Expr elseexpr) {
+	public IfExpr(int lnum, Expr condition, Expr ifexpr, Expr elseexpr) {
+		super(lnum);
 		this.condition = condition;
 		this.ifexpr = ifexpr;
 		this.elseexpr = elseexpr;

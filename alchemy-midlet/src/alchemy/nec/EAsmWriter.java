@@ -35,6 +35,7 @@ import java.util.Vector;
  */
 public class EAsmWriter implements ExprVisitor {
 	private FunctionWriter writer;
+	private final boolean debug = true;
 	
 	public EAsmWriter() {
 	}
@@ -47,6 +48,7 @@ public class EAsmWriter implements ExprVisitor {
 			Func f = (Func)funcs.elementAt(i);
 			if (f.body != null && f.hits > 0) {
 				writer = uw.visitFunction(f.signature, true, f.type.args.length);
+				if (debug) writer.visitSource(f.source);
 				f.body.accept(this, null);
 				if (f.type.rettype.equals(BuiltinType.NONE)) {
 					writer.visitInsn(Opcodes.RET_NULL);
@@ -61,6 +63,7 @@ public class EAsmWriter implements ExprVisitor {
 	
 	public Object visitALen(ALenExpr alen, Object unused) {
 		alen.arrayexpr.accept(this, unused);
+		if (debug) writer.visitLine(alen.line);
 		Type artype = alen.arrayexpr.rettype();
 		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.BALEN);
@@ -75,6 +78,7 @@ public class EAsmWriter implements ExprVisitor {
 	public Object visitALoad(ALoadExpr aload, Object unused) {
 		aload.arrayexpr.accept(this, unused);
 		aload.indexexpr.accept(this, unused);
+		if (debug) writer.visitLine(aload.line);
 		Type artype = aload.arrayexpr.rettype();
 		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.BALOAD);
@@ -90,6 +94,7 @@ public class EAsmWriter implements ExprVisitor {
 		astore.arrayexpr.accept(this, unused);
 		astore.indexexpr.accept(this, unused);
 		astore.assignexpr.accept(this, unused);
+		if (debug) writer.visitLine(astore.line);
 		Type artype = astore.arrayexpr.rettype();
 		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.BASTORE);
@@ -103,6 +108,7 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitAssign(AssignExpr assign, Object unused) {
 		assign.expr.accept(this, unused);
+		if (debug) writer.visitLine(assign.line);
 		writer.visitVarInsn(Opcodes.STORE, assign.var.index);
 		return null;
 	}
@@ -180,6 +186,7 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitCast(CastExpr cast, Object unused) {
 		cast.expr.accept(this, unused);
+		if (debug) writer.visitLine(cast.line);
 		Type from = cast.expr.rettype();
 		Type to = cast.rettype();
 		if (from.isSubtypeOf(BuiltinType.INT)) {
@@ -351,6 +358,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitConst(ConstExpr cexpr, Object unused) {
+		if (debug) writer.visitLine(cexpr.line);
 		Object obj = cexpr.value;
 		if (obj instanceof Func) {
 			obj = new FuncObject(((Func)obj).signature);
@@ -604,6 +612,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitVar(VarExpr vexpr, Object unused) {
+		if (debug) writer.visitLine(vexpr.line);
 		writer.visitVarInsn(Opcodes.LOAD, vexpr.var.index);
 		return null;
 	}

@@ -27,7 +27,8 @@ public class NewArrayExpr extends Expr {
 	private final Type type;
 	public Expr lengthexpr;
 
-	public NewArrayExpr(Type type, Expr lengthexpr) {
+	public NewArrayExpr(int lnum, Type type, Expr lengthexpr) {
+		super(lnum);
 		this.type = type;
 		this.lengthexpr = lengthexpr;
 	}

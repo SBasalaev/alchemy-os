@@ -28,7 +28,9 @@ public class ConcatExpr extends Expr {
 	
 	public Vector exprs = new Vector();
 	
-	public ConcatExpr() { }
+	public ConcatExpr(int lnum) {
+		super(lnum);
+	}
 
 	public Type rettype() {
 		return BuiltinType.STRING;

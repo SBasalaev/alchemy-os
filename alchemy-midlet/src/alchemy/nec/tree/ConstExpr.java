@@ -30,7 +30,8 @@ public class ConstExpr extends Expr {
 
 	public final Object value;
 
-	public ConstExpr(Object obj) {
+	public ConstExpr(int lnum, Object obj) {
+		super(lnum);
 		value = obj;
 	}
 

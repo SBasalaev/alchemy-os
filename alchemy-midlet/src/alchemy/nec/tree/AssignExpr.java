@@ -29,7 +29,8 @@ public class AssignExpr extends Expr {
 	public Var var;
 	public Expr expr;
 
-	public AssignExpr(Var v, Expr e) {
+	public AssignExpr(int lnum, Var v, Expr e) {
+		super(lnum);
 		this.var = v;
 		this.expr = e;
 	}
