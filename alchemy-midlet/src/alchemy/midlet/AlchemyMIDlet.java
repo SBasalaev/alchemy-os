@@ -22,11 +22,12 @@ import alchemy.core.Art;
 import alchemy.core.Context;
 import alchemy.core.ContextListener;
 import alchemy.evm.ELibBuilder;
-import alchemy.fs.File;
+import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeLibBuilder;
 import alchemy.util.Closeable;
 import alchemy.util.IO;
+import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
@@ -48,15 +49,17 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 				kernelPanic("Alchemy is not installed.");
 				return;
 			}
+			Properties prop = InstallInfo.read();
+			FSManager.mount("", prop.get("fs.type"), prop.get("fs.init"));
 			//setting up environment
-			runtime = new Art(InstallInfo.getFilesystem());
+			runtime = new Art();
 			runtime.setLibBuilder((short)0xC0DE, new ELibBuilder());
 			runtime.setLibBuilder((short)(('#'<<8)|'@'), new NativeLibBuilder());
 			Context root = runtime.rootContext();
 			root.setEnv("PATH", "/bin");
 			root.setEnv("LIBPATH", "/lib");
 			root.setEnv("INCPATH", "/inc");
-			root.setCurDir(new File("/home"));
+			root.setCurDir("/home");
 			root.addContextListener(this);
 			runApp();
 		} catch (Throwable t) {
@@ -70,7 +73,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 				public void run() {
 					try {
 						Filesystem fs = InstallInfo.getFilesystem();
-						UTFReader r = new UTFReader(fs.read(new File("/cfg/init")));
+						UTFReader r = new UTFReader(fs.read("/cfg/init"));
 						String[] cmd = IO.split(r.readLine(), ' ');
 						r.close();
 						String[] cmdargs = new String[cmd.length-1];

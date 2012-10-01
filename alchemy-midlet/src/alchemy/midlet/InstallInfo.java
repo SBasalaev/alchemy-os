@@ -125,6 +125,7 @@ class InstallInfo {
 	/**
 	 * Returns filesystem set up by installation.
 	 * Returns null if Alchemy is not installed
+	 * @deprecated We should use FSManager instead
 	 */
 	public static Filesystem getFilesystem() throws IOException {
 		if (props == null && !exists()) return null;

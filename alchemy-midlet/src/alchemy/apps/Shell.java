@@ -19,7 +19,6 @@
 package alchemy.apps;
 
 import alchemy.core.Context;
-import alchemy.fs.File;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
@@ -86,7 +85,7 @@ public class Shell extends NativeApp {
 					return ret;
 				} else if (cc.cmd.equals("cd")) {
 					if (cc.args.length > 0) {
-						File newdir = c.toFile(cc.args[0]);
+						String newdir = c.toFile(cc.args[0]);
 						c.setCurDir(newdir);
 						if (c.stdin instanceof ConsoleInputStream) {
 							((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
@@ -104,7 +103,7 @@ public class Shell extends NativeApp {
 						child.stdin = c.fs().read(c.toFile(cc.in));
 					}
 					if (cc.out != null) {
-						File outfile = c.toFile(cc.out);
+						String outfile = c.toFile(cc.out);
 						if (cc.appendout) {
 							child.stdout = c.fs().append(outfile);
 						} else {
@@ -112,7 +111,7 @@ public class Shell extends NativeApp {
 						}
 					}
 					if (cc.err != null) {
-						File errfile = c.toFile(cc.err);
+						String errfile = c.toFile(cc.err);
 						if (cc.appenderr) {
 							child.stderr = c.fs().append(errfile);
 						} else {

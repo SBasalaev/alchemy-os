@@ -18,7 +18,6 @@
 
 package alchemy.midlet;
 
-import alchemy.fs.File;
 import alchemy.fs.Filesystem;
 import java.io.IOException;
 import javax.microedition.lcdui.Choice;
@@ -49,16 +48,16 @@ class FSNavigator extends List {
 	}
 	
 	private final Filesystem fs;
-	private File currentDir;	
+	private String currentDir;	
 	
 	FSNavigator(Filesystem fs) {
 		super("Choose path", Choice.IMPLICIT);
 		this.fs = fs;
 	}
 	
-	public void setCurrentDir(File dir) throws IOException {
+	public void setCurrentDir(String dir) throws IOException {
 		deleteAll();
-		if (dir.path().length() == 0) {
+		if (dir.length() == 0) {
 			String[] roots = fs.listRoots();
 			for (int i=0; i<roots.length; i++) {
 				append(roots[i], iconDisk);
@@ -73,7 +72,7 @@ class FSNavigator extends List {
 		currentDir = dir;
 	}
 	
-	public File getCurrentDir()  {
+	public String getCurrentDir()  {
 		return currentDir;
 	}
 }

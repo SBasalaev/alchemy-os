@@ -19,7 +19,6 @@
 package alchemy.libs;
 
 import alchemy.core.Context;
-import alchemy.fs.File;
 import alchemy.nlib.NativeFunction;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
@@ -52,14 +51,14 @@ public class LibCore30 extends NativeLibrary {
 	 * @param f file to calculate path from
 	 * @return string with relative path
 	 */
-	public static String relPath(Context c, File f) {
+	public static String relPath(Context c, String f) {
 		if (c.getCurDir().equals(f)) return ".";
 		//initializing cpath and fpath
-		String tmp = c.getCurDir().path();
-		if (tmp.length() == 0) return f.path().substring(1);
+		String tmp = c.getCurDir();
+		if (tmp.length() == 0) return f.substring(1);
 		char[] cpath = new char[tmp.length()+1];
 		tmp.getChars(0, tmp.length(), cpath, 0);
-		tmp = f.path();
+		tmp = f;
 		char[] fpath = new char[tmp.length()+1];
 		tmp.getChars(0, tmp.length(), fpath, 0);
 		int cind = 0;

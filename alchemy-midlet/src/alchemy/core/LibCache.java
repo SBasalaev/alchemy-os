@@ -18,7 +18,6 @@
 
 package alchemy.core;
 
-import alchemy.fs.File;
 import java.lang.ref.WeakReference;
 import java.util.Hashtable;
 
@@ -41,7 +40,7 @@ class LibCache {
 	 * If library with given parameters is not cached
 	 * then <code>null</code> is returned.
 	 */
-	public synchronized Library getLibrary(File file, long tstamp) {
+	public synchronized Library getLibrary(String file, long tstamp) {
 		LibCacheEntry entry = (LibCacheEntry)cache.get(file);
 		if (entry == null) return null;
 		if (entry.tstamp < tstamp) return null;
@@ -56,22 +55,21 @@ class LibCache {
 	/**
 	 * Puts library in cache.
 	 */
-	public synchronized void putLibrary(File file, long tstamp, Library lib) {
+	public synchronized void putLibrary(String file, long tstamp, Library lib) {
 		cache.put(file, new LibCacheEntry(new WeakReference(lib), tstamp));
 	}
-}
 
-/**
- * Library, cached in <code>LibCache</code>.
- *
- * @author Sergey Basalaev
- */
-class LibCacheEntry {
-	WeakReference lib;
-	long tstamp;
 
-	public LibCacheEntry(WeakReference lib, long tstamp) {
-		this.lib = lib;
-		this.tstamp = tstamp;
+	/**
+	 * Library, cached in <code>LibCache</code>.
+	 */
+	private static class LibCacheEntry {
+		public final WeakReference lib;
+		public final long tstamp;
+
+		public LibCacheEntry(WeakReference lib, long tstamp) {
+			this.lib = lib;
+			this.tstamp = tstamp;
+		}
 	}
 }

@@ -18,7 +18,7 @@
 
 package alchemy.core;
 
-import alchemy.fs.File;
+import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
@@ -145,7 +145,7 @@ public class Context {
 	/** Context storage, initialized on demand. */
 	private Hashtable objects;
 	/** Current directory. */
-	private File curdir;
+	private String curdir;
 	/** The thread of this context. */
 	private Thread thread;
 	/** State of the context. */
@@ -167,7 +167,7 @@ public class Context {
 	Context(Art runtime) {
 		stdin = new NullInputStream();
 		stderr = stdout = System.out;
-		curdir = new File("");
+		curdir = "";
 		art = runtime;
 	}
 
@@ -225,7 +225,7 @@ public class Context {
 	 * Returns current working directory of context.
 	 * @see #setCurDir(File)
 	 */
-	public File getCurDir() {
+	public String getCurDir() {
 		return curdir;
 	}
 
@@ -236,8 +236,8 @@ public class Context {
 	 *   directory or if I/O error occurs
 	 * @see #getCurDir() 
 	 */
-	public void setCurDir(File newdir) throws IOException {
-		if (!art.fs.isDirectory(newdir)) throw new IOException("Not a directory: "+newdir);
+	public void setCurDir(String newdir) throws IOException {
+		if (!FSManager.fs().isDirectory(newdir)) throw new IOException("Not a directory: "+newdir);
 		curdir = newdir;
 	}
 
@@ -366,7 +366,7 @@ public class Context {
 	 */
 	private Library loadLibForPath(String libname, String pathlist) throws IOException, InstantiationException {
 		//resolving file
-		File libfile = resolveFile(libname, pathlist);
+		String libfile = resolveFile(libname, pathlist);
 		//checking permissions
 		if (!fs().canExec(libfile))
 			throw new InstantiationException("Permission denied: "+libfile);
@@ -385,7 +385,7 @@ public class Context {
 				String fname = new UTFReader(in).readLine();
 				in.close();
 				if (fname.charAt(0) != '/') {
-					fname = libfile.parent().path()+'/'+fname;
+					fname = Filesystem.fparent(libfile)+'/'+fname;
 				}
 				lib = loadLibForPath(fname, pathlist);
 				art.cache.putLibrary(libfile, tstamp, lib);
@@ -424,8 +424,8 @@ public class Context {
 	 * @return file that exists in a file system
 	 * @throws IOException  if file is not found
 	 */
-	public File resolveFile(String name, String pathlist) throws IOException {
-		File f;
+	public String resolveFile(String name, String pathlist) throws IOException {
+		String f;
 		if (name.indexOf('/') >= 0) {
 			f = toFile(name);
 			if (fs().exists(f)) return f;
@@ -443,9 +443,10 @@ public class Context {
 
 	/**
 	 * Convenience method to access runtime filesystem.
+	 * @deprecated FSManager.fs() should be used
 	 */
 	public Filesystem fs() {
-		return art.fs;
+		return FSManager.fs();
 	}
 
 	/**
@@ -456,12 +457,9 @@ public class Context {
 	 * @param path path to the file
 	 * @return file for given path
 	 */
-	public File toFile(String path) {
-		int l = path.length();
-		while (l > 0 && path.charAt(l-1) == '/') l--;
-		path = path.substring(0,l);
-		if (path.length() == 0 || path.charAt(0) == '/') return new File(path);
-		else return new File(curdir, path);
+	public String toFile(String path) {
+		if (path.length() == 0 || path.charAt(0) == '/') return FSManager.normalize(path);
+		else return FSManager.normalize(curdir + '/' + path);
 	}
 
 	/**

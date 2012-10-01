@@ -18,7 +18,7 @@
 
 package alchemy.fs.jsr75;
 
-import alchemy.fs.File;
+import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.util.Initable;
 import java.io.IOException;
@@ -36,7 +36,7 @@ import javax.microedition.io.file.FileSystemRegistry;
 //#endif
 
 /**
- * Filesystem using JSR75 specification.
+ * FS driver for JSR 75 / Siemens filesystems.
  *
  * @author Sergey Basalaev
  */
@@ -57,27 +57,20 @@ public class FS extends Filesystem implements Initable {
 	 * @param root root directory
 	 */
 	public void init(String root) {
-		//normalizing path
-		String path = root;
-		if (path.startsWith("file:")) path = path.substring(5);
-		path = "/"+path+"/.";
-		path = new File(path).toString();
-		this.root = "file://"+path;
+		this.root = "file://"+FSManager.normalize(root);
 	}
 	
 	/**
 	 * Returns native path for the file.
 	 */
-	private String pathFor(File file) {
-		if (file.path().equals("")) return root+'/';
-		else return root+file.path();
+	private String pathFor(String file) {
+		if (file.length() == 0) return root+'/';
+		else return root+file;
 	}
 
-	public OutputStream append(File file) throws IOException {
+	public OutputStream append(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			if (!fc.exists()) fc.create();
 			return fc.openOutputStream(fc.fileSize());
 		} finally {
@@ -85,11 +78,9 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public OutputStream write(File file) throws IOException {
+	public OutputStream write(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			if (!fc.exists()) fc.create();
 			fc.truncate(0);
 			return fc.openOutputStream();
@@ -98,7 +89,7 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public InputStream read(File file) throws IOException {
+	public InputStream read(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
 			if (!fc.exists()) throw new IOException("File not found: "+file);
@@ -108,11 +99,11 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public boolean canExec(File file) {
+	public boolean canExec(String file) {
 		return true;
 	}
 
-	public boolean canRead(File file) {
+	public boolean canRead(String file) {
 		try {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
@@ -125,7 +116,7 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public boolean canWrite(File file) {
+	public boolean canWrite(String file) {
 		try {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
@@ -138,39 +129,34 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public void create(File file) throws IOException {
+	public void create(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			fc.create();
 		} finally {
 			fc.close();
 		}
 	}
 
-	public void mkdir(File file) throws IOException {
+	public void mkdir(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ_WRITE);
 		try {
-			File parent = file.parent();
-			if (parent != null && !exists(parent)) throw new IOException("File not found: "+parent);
 			fc.mkdir();
 		} finally {
 			fc.close();
 		}
 	}
 
-	public void remove(File file) throws IOException {
+	public void remove(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
-			if (file.path().length() == 0) throw new SecurityException("Cannot delete root directory");
 			if (fc.exists()) fc.delete();
 		} finally {
 			fc.close();
 		}
 	}
 
-	public boolean exists(File file) {
+	public boolean exists(String file) {
 		try {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
@@ -183,7 +169,7 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public boolean isDirectory(File file) {
+	public boolean isDirectory(String file) {
 		try {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
@@ -196,35 +182,28 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public int size(File file) throws IOException {
+	public long size(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
-			if (fc.isDirectory()) return 0;
-			else {
-				long size = fc.fileSize();
-				if (size > Integer.MAX_VALUE) return Integer.MAX_VALUE;
-				else return (int)size;
-			}
+			if (fc.isDirectory()) return fc.directorySize(false);
+			else return fc.fileSize();
 		} finally {
 			fc.close();
 		}
 	}
 
-	public long lastModified(File file) throws IOException {
+	public long lastModified(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			return fc.lastModified();
 		} finally {
 			fc.close();
 		}
 	}
 
-	public String[] list(File file) throws IOException {
+	public String[] list(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			Enumeration e = fc.list("*", true);
 			Vector v = new Vector();
 			while (e.hasMoreElements()) v.addElement(e.nextElement());
@@ -239,36 +218,37 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public void setExec(File file, boolean on) throws IOException {
+	public void setExec(String file, boolean on) throws IOException {
 		return;
 	}
 
-	public void setRead(File file, boolean on) throws IOException {
+	public void setRead(String file, boolean on) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			fc.setReadable(on);
 		} finally {
 			fc.close();
 		}
 	}
 
-	public void setWrite(File file, boolean on) throws IOException {
+	public void setWrite(String file, boolean on) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
 		try {
-			if (!fc.exists()) throw new IOException("File not found: "+file);
 			fc.setWritable(on);
 		} finally {
 			fc.close();
 		}
 	}
 
-	public void move(File source, File dest) throws IOException {
+	public void move(String source, String dest) throws IOException {
+		if (source.length() == 0) throw new IOException("Cannot move mounted directory");
 		if (exists(dest)) throw new IOException("File already exists: "+dest);
-		if (source.parent().equals(dest.parent())) {
+		String sparent = source.substring(0, source.lastIndexOf('/'));
+		String dparent = dest.substring(0, dest.lastIndexOf('/'));
+		if (sparent.equals(dparent)) {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(source), Connector.READ_WRITE);
 			try {
-				fc.rename(dest.name());
+				fc.rename(dest.substring(dest.lastIndexOf('/'+1)));
 			} finally {
 				fc.close();
 			}
@@ -277,9 +257,9 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public long spaceFree() {
+	public long spaceFree(String rootdir) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root+'/', Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(pathFor(rootdir)+'/', Connector.READ);
 			try {
 				return fc.availableSize();
 			} finally {
@@ -290,9 +270,9 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public long spaceTotal() {
+	public long spaceTotal(String rootdir) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root+'/', Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(pathFor(rootdir)+'/', Connector.READ);
 			try {
 				return fc.totalSize();
 			} finally {
@@ -303,9 +283,9 @@ public class FS extends Filesystem implements Initable {
 		}
 	}
 
-	public long spaceUsed() {
+	public long spaceUsed(String rootdir) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(root+'/', Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(pathFor(rootdir)+'/', Connector.READ);
 			try {
 				return fc.usedSize();
 			} finally {
@@ -323,8 +303,8 @@ public class FS extends Filesystem implements Initable {
 		String[] roots = new String[rootv.size()];
 		for (int i=0; i<rootv.size(); i++) {
 			String str = String.valueOf(rootv.elementAt(i));
-			if (!str.endsWith("/")) str = str+"/";
-			roots[i] = str;
+			if (!str.endsWith("/")) roots[i] = str+'/';
+			else roots[i] = str;
 		}
 		return roots;
 	}

@@ -18,7 +18,6 @@
 
 package alchemy.midlet;
 
-import alchemy.fs.File;
 import alchemy.fs.Filesystem;
 import alchemy.fs.rms.FS;
 import alchemy.util.Closeable;
@@ -131,8 +130,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			FSNavigator nav = (FSNavigator)d;
 			String path = nav.getString(nav.getSelectedIndex());
 			if (path.endsWith("/")) try {
-				nav.setCurrentDir(new File(nav.getCurrentDir(), path));
-				if (nav.getCurrentDir().path().length() == 0) {
+				nav.setCurrentDir(nav.getCurrentDir()+'/'+path);
+				if (nav.getCurrentDir().length() == 0) {
 					nav.removeCommand(cmdChoose);
 				} else {
 					nav.addCommand(cmdChoose);
@@ -223,12 +222,12 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			navigator.setSelectCommand(cmdOpenDir);
 			navigator.addCommand(cmdChoose);
 			navigator.setCommandListener(this);
-			navigator.setCurrentDir(new File(""));
+			navigator.setCurrentDir("");
 			display.setCurrent(navigator);
 			synchronized (navigator) {
 				navigator.wait();
 			}
-			String path = navigator.getCurrentDir().path();
+			String path = navigator.getCurrentDir();
 			instCfg.put("fs.init", path);
 			messages.append("Selected path: "+path+'\n');
 		}
@@ -283,7 +282,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.append("Unpacking "+arh+'\n');
 			while (datastream.available() > 0) {
 				String fname = datastream.readUTF();
-				File f = new File('/'+fname);
+				String f = '/'+fname;
 				datastream.skip(8); //timestamp
 				int attrs = datastream.readUnsignedByte();
 				if ((attrs & 16) != 0) { //directory
@@ -302,7 +301,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 				fs.setExec(f, (attrs & 1) != 0);
 			}
 		}
-		fs.remove(new File("/PACKAGE"));
+		fs.remove("/PACKAGE");
 		if (fs instanceof Closeable) {
 			((Closeable)fs).close();
 		}
@@ -325,10 +324,10 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		newfs.init(newfsname);
 		// copying all files from the old FS to the new
 		messages.append("Copying data from the old file system...\n");
-		File root = new File("");
+		String root = "";
 		String[] list = oldfs.list(root);
 		for (int i=0; i<list.length; i++) {
-			copyTree(oldfs, newfs, new File(root, list[i]));
+			copyTree(oldfs, newfs, root+'/'+list[i]);
 		}
 		// writing configuration
 		oldfs.close();
@@ -342,7 +341,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.append("Rebuilding FS complete.\n");
 	}
 	
-	private void copyTree(Filesystem from, Filesystem to, File file) throws IOException {
+	private void copyTree(Filesystem from, Filesystem to, String file) throws IOException {
 		boolean fRead = from.canRead(file);
 		boolean fWrite = from.canWrite(file);
 		if (!fRead) from.setRead(file, true);
@@ -351,7 +350,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			to.mkdir(file);
 			String[] list = from.list(file);
 			for (int i=0; i<list.length; i++) {
-				File subfile = new File(file, list[i]);
+				String subfile = file+'/'+list[i];
 				copyTree(from, to, subfile);
 			}
 		} else {

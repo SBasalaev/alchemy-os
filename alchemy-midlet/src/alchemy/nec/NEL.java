@@ -22,7 +22,6 @@ import alchemy.core.Context;
 import alchemy.core.Int;
 import alchemy.evm.ELibBuilder;
 import alchemy.evm.Opcodes;
-import alchemy.fs.File;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import alchemy.util.Properties;
@@ -121,7 +120,7 @@ public class NEL extends NativeApp {
 			int count = 0, offset;
 			for (int fi=0; fi < infiles.size(); fi++) {
 				offset = count;
-				File infile = c.toFile(infiles.elementAt(fi).toString());
+				String infile = c.toFile(infiles.elementAt(fi).toString());
 				DataInputStream data = new DataInputStream(c.fs().read(infile));
 				if (data.readInt() != 0xC0DE0200)
 					throw new Exception("Unsupported object format in "+infile);
@@ -251,7 +250,7 @@ public class NEL extends NativeApp {
 				}
 			}
 			//writing output
-			File outfile = c.toFile(outname);
+			String outfile = c.toFile(outname);
 			DataOutputStream out = new DataOutputStream(c.fs().write(outfile));
 			out.writeInt(0xC0DE0200);
 			if (soname != null) {
@@ -327,7 +326,7 @@ public class NEL extends NativeApp {
 	}
 
 	private LibInfo loadLibInfo(Context c, String libname) throws Exception {
-		File libfile = c.resolveFile(libname, c.getEnv("LIBPATH"));
+		String libfile = c.resolveFile(libname, c.getEnv("LIBPATH"));
 		InputStream in = c.fs().read(libfile);
 		int magic = in.read() << 8 | in.read();
 		LibInfo info;

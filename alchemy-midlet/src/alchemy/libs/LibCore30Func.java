@@ -23,7 +23,8 @@ import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
-import alchemy.fs.File;
+import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeFunction;
 import alchemy.util.IO;
 import java.io.IOException;
@@ -54,11 +55,11 @@ class LibCore30Func extends NativeFunction {
 	protected Object execNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // pathfile(f: String): String
-				return c.toFile((String)args[0]).name();
+				return Filesystem.fname(c.toFile((String)args[0]));
 			case 1: // pathdir(f: String): String
-				return c.toFile((String)args[0]).parent().path();
+				return Filesystem.fparent(c.toFile((String)args[0]));
 			case 2: // abspath(f: String): String
-				return c.toFile((String)args[0]).path();
+				return c.toFile((String)args[0]);
 			case 3: // fcreate(f: String)
 				c.fs().create(c.toFile((String)args[0]));
 				return null;
@@ -112,8 +113,8 @@ class LibCore30Func extends NativeFunction {
 				return c.fs().list(c.toFile((String)args[0]));
 			case 20: // fmodified(f: String): Long
 				return Lval(c.fs().lastModified(c.toFile((String)args[0])));
-			case 21: // fsize(f: String): Int
-				return Ival(c.fs().size(c.toFile((String)args[0])));
+			case 21: // fsize(f: String): Long
+				return Lval(c.fs().size(c.toFile((String)args[0])));
 			case 22: // set_cwd(f: String)
 				c.setCurDir(c.toFile((String)args[0]));
 				return null;
@@ -209,13 +210,13 @@ class LibCore30Func extends NativeFunction {
 			case 56: // systime(): Long
 				return Lval(System.currentTimeMillis());
 			case 57: // get_cwd(): String
-				return c.getCurDir().path();
-			case 58: // space_total(): Long
-				return Lval(c.fs().spaceTotal());
-			case 59: // space_free(): Long
-				return Lval(c.fs().spaceFree());
-			case 60: // space_used(): Long
-				return Lval(c.fs().spaceUsed());
+				return c.getCurDir();
+			case 58: // space_total(root: String): Long
+				return Lval(c.fs().spaceTotal(c.toFile((String)args[0])));
+			case 59: // space_free(root: String): Long
+				return Lval(c.fs().spaceFree(c.toFile((String)args[0])));
+			case 60: // space_used(root: String): Long
+				return Lval(c.fs().spaceUsed(c.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
 				return String.valueOf(args[0]);
 			case 62: // new_strbuf(): StrBuf
@@ -350,7 +351,7 @@ class LibCore30Func extends NativeFunction {
 				String addr = url.substring(cl+1);
 				InputStream in;
 				if (protocol.equals("file")) {
-					in = c.fs().read(new File(addr));
+					in = c.fs().read(FSManager.normalize(addr));
 				} else if (protocol.equals("res")) {
 					in = this.getClass().getResourceAsStream(addr);
 					if (in == null) throw new IOException("Resource not found: "+addr);

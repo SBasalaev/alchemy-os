@@ -20,7 +20,7 @@ package alchemy.nec;
 
 import alchemy.core.Context;
 import alchemy.core.Int;
-import alchemy.fs.File;
+import alchemy.fs.Filesystem;
 import alchemy.nec.tree.*;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
@@ -55,7 +55,7 @@ public class Parser {
 		this.c = c;
 	}
 
-	public Unit parse(File source) {
+	public Unit parse(String source) {
 		unit = new Unit();
 		try {
 			// adding builtin types
@@ -73,7 +73,7 @@ public class Parser {
 			unit.putType(BuiltinType.STRUCTURE);
 			unit.putType(BuiltinType.ERROR);
 			// adding builtin functions
-			parseFile(new File("/res/nec/embed.eh"));
+			parseFile("/res/nec/embed.eh");
 			// parsing
 			parseFile(source);
 		} catch (ParseException pe) {
@@ -95,9 +95,9 @@ public class Parser {
 	 *   $INCPATH/name
 	 *   $INCPATH/name.eh
 	 */
-	private File resolveFile(String name) throws ParseException {
+	private String resolveFile(String name) throws ParseException {
 		if (name.length() == 0) throw new ParseException("Empty string in 'use'");
-		File f = c.toFile(name);
+		String f = c.toFile(name);
 		if (c.fs().exists(f)) return f;
 		f = c.toFile(name+".eh");
 		if (c.fs().exists(f)) return f;
@@ -113,7 +113,7 @@ public class Parser {
 		throw new ParseException("File not found: "+name);
 	}
 	
-	private void parseFile(File file) throws ParseException, IOException {
+	private void parseFile(String file) throws ParseException, IOException {
 		//do nothing if this file is already parsed
 		if (parsed.contains(file)) return;
 		//if file is in stack we have cyclic inclusion
@@ -126,9 +126,9 @@ public class Parser {
 		}
 		//push file in stack
 		Tokenizer oldt = t;
-		File olddir = c.getCurDir();
+		String olddir = c.getCurDir();
 		files.push(file);
-		c.setCurDir(file.parent());
+		c.setCurDir(Filesystem.fparent(file));
 		InputStream in = c.fs().read(file);
 		c.addStream(in);
 		UTFReader fred = new UTFReader(in);
@@ -142,7 +142,7 @@ public class Parser {
 			} else if (t.svalue.equals("use")) {
 				if (t.nextToken() != Tokenizer.TT_QUOTED)
 					throw new ParseException("String literal expected after 'use'");
-				File next = resolveFile(t.svalue);
+				String next = resolveFile(t.svalue);
 				parseFile(next);
 			} else if (t.svalue.equals("const")) {
 				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
@@ -309,7 +309,7 @@ public class Parser {
 	 * Parses definition of function (without the body).
 	 */
 	private Func parseFuncDef() throws ParseException, IOException {
-		Func func = new Func(unit, ((File)files.peek()).name());
+		Func func = new Func(unit, Filesystem.fname((String)files.peek()));
 		//parsing def
 		if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
 			throw new ParseException("Function name expected, got "+t);
@@ -863,7 +863,7 @@ public class Parser {
 		} else if (keyword.equals("def")) {
 			// anonymous function
 			// TODO: I probably need to use scope here instead
-			Func func = new Func(unit, ((File)files.peek()).name());
+			Func func = new Func(unit, Filesystem.fname((String)files.peek()));
 			// parsing args
 			expect('(');
 			Vector args = new Vector();

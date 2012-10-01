@@ -23,13 +23,29 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Filesystem abstraction.
- *
- * @see File
+ * Interface for file system drivers.
  *
  * @author Sergey Basalaev
  */
 public abstract class Filesystem {
+
+	/** Helper method for implementations that returns name part of the path. */
+	public static String fname(String path) {
+		if (path.length() == 0) {
+			return path;
+		} else {
+			return path.substring(path.lastIndexOf('/') + 1);
+		}
+	}
+
+	/** Helper method for implementations that returns dir part of the path. */
+	public static String fparent(String file) {
+		if (file.length() == 0) {
+			return null;
+		} else {
+			return file.substring(0, file.lastIndexOf('/'));
+		}
+	}
 
 	/** Constructor for subclasses. */
 	protected Filesystem() { }
@@ -45,8 +61,8 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 */
-	public abstract InputStream read(File file) throws IOException;
-
+	public abstract InputStream read(String file) throws IOException;
+	
 	/**
 	 * Returns a stream to write to the file.
 	 * Contents of the file becomes overwritten.
@@ -61,7 +77,7 @@ public abstract class Filesystem {
 	 *   if application is not granted access to the file
 	 * @see #append(File)
 	 */
-	public abstract OutputStream write(File file) throws IOException;
+	public abstract OutputStream write(String file) throws IOException;
 
 	/**
 	 * Returns a stream to write to the file.
@@ -77,7 +93,7 @@ public abstract class Filesystem {
 	 *   if application is not granted access to the file
 	 * @see #write(File)
 	 */
-	public abstract OutputStream append(File file) throws IOException;
+	public abstract OutputStream append(String file) throws IOException;
 
 	/**
 	 * Lists file names that the specified directory contains.
@@ -94,8 +110,8 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 */
-	public abstract String[] list(File file) throws IOException;
-
+	public abstract String[] list(String file) throws IOException;
+	
 	/**
 	 * Tests whether the specified file exists.
 	 * If an I/O error occurs then method
@@ -107,8 +123,8 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 */
-	public abstract boolean exists(File file);
-
+	public abstract boolean exists(String file);
+	
 	/**
 	 * Tests whether the specified file exists and a directory.
 	 *
@@ -119,7 +135,7 @@ public abstract class Filesystem {
 	 *   if application is not granted access to the file
 	 * @see #exists(File)
 	 */
-	public abstract boolean isDirectory(File file);
+	public abstract boolean isDirectory(String file);
 
 	/**
 	 * Creates new file in a filesystem.
@@ -130,7 +146,7 @@ public abstract class Filesystem {
 	 * @throws IOException
 	 *   if file exists, cannot be accessed or I/O error occurs
 	 */
-	public abstract void create(File file) throws IOException;
+	public abstract void create(String file) throws IOException;
 
 	/**
 	 * Creates new directory in a filesystem.
@@ -141,7 +157,7 @@ public abstract class Filesystem {
 	 * @throws IOException
 	 *   if file exists, cannot be accessed or I/O error occurs
 	 */
-	public abstract void mkdir(File file) throws IOException;
+	public abstract void mkdir(String file) throws IOException;
 
 	/**
 	 * Removes file from the system.
@@ -153,7 +169,7 @@ public abstract class Filesystem {
 	 *   if file cannot be accessed, is non-empty
 	 *   directory or I/O error occurs
 	 */
-	public abstract void remove(File file) throws IOException;
+	public abstract void remove(String file) throws IOException;
 
 	/**
 	 * Copies contents of one file to another.
@@ -172,7 +188,7 @@ public abstract class Filesystem {
 	 * @throws IOException
 	 *   if I/O error occurs during copying
 	 */
-	public void copy(File source, File dest) throws IOException {
+	public void copy(String source, String dest) throws IOException {
 		InputStream in = read(source);
 		OutputStream out = write(dest);
 		try {
@@ -214,12 +230,12 @@ public abstract class Filesystem {
 	 * @throws IOException
 	 *   if <code>dest</code> exists or if an I/O error occurs during moving
 	 */
-	public void move(File source, File dest) throws IOException {
+	public void move(String source, String dest) throws IOException {
 		if (exists(dest)) throw new IOException("Cannot move "+source+" to "+dest+", destination already exists");
 		copy(source, dest);
 		remove(source);
 	}
-
+	
 	/**
 	 * Returns the time of the last modification of the file.
 	 *
@@ -232,8 +248,8 @@ public abstract class Filesystem {
 	 *   or I/O error occurs
 	 * @see System#currentTimeMillis()
 	 */
-	public abstract long lastModified(File file) throws IOException;
-
+	public abstract long lastModified(String file) throws IOException;
+	
 	/**
 	 * Tests whether this file exists and can be read.
 	 * If an I/O error occurs this method returns <code>false</code>.
@@ -244,7 +260,7 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 */
-	public abstract boolean canRead(File file);
+	public abstract boolean canRead(String file);
 
 	/**
 	 * Tests whether this file can be written.
@@ -256,7 +272,7 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 */
-	public abstract boolean canWrite(File file);
+	public abstract boolean canWrite(String file);
 
 	/**
 	 * Tests whether this file can be executed.
@@ -268,7 +284,7 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 */
-	public abstract boolean canExec(File file);
+	public abstract boolean canExec(String file);
 
 	/**
 	 * Changes ability of file to be read.
@@ -282,7 +298,7 @@ public abstract class Filesystem {
 	 *   if file does not exist, cannot be accessed
 	 *   or I/O error occurs
 	 */
-	public abstract void setRead(File file, boolean on) throws IOException;
+	public abstract void setRead(String file, boolean on) throws IOException;
 
 	/**
 	 * Changes ability of file to be written.
@@ -296,7 +312,7 @@ public abstract class Filesystem {
 	 *   if file does not exist, cannot be accessed
 	 *   or I/O error occurs
 	 */
-	public abstract void setWrite(File file, boolean on) throws IOException;
+	public abstract void setWrite(String file, boolean on) throws IOException;
 
 	/**
 	 * Changes ability of file to be executed.
@@ -310,7 +326,7 @@ public abstract class Filesystem {
 	 *   if file does not exist, cannot be accessed
 	 *   or I/O error occurs
 	 */
-	public abstract void setExec(File file, boolean on) throws IOException;
+	public abstract void setExec(String file, boolean on) throws IOException;
 
 	/**
 	 * Returns the size of the file.
@@ -319,17 +335,17 @@ public abstract class Filesystem {
 	 * 
 	 * @param file the file
 	 * @return file size, in bytes
-
+	 * 
 	 * @throws SecurityException
 	 *   if application is not granted access to the file
 	 * @throws IOException
 	 *   if file does not exist, cannot be accessed
 	 *   or I/O error occurs
 	 */
-	public abstract int size(File file) throws IOException;
+	public abstract long size(String file) throws IOException;
 
 	/**
-	 * Determines the total size of this filesystem.
+	 * Determines the total size of the given filesystem.
 	 *
 	 * @return
 	 *   the total size of the file system in bytes, or
@@ -337,7 +353,7 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file system
 	 */
-	public abstract long spaceTotal();
+	public abstract long spaceTotal(String root);
 
 	/**
 	 * Determines the free memory that is available on the
@@ -349,7 +365,7 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file system
 	 */
-	public abstract long spaceFree();
+	public abstract long spaceFree(String root);
 
 	/**
 	 * Determines the used memory of the file system.
@@ -360,7 +376,7 @@ public abstract class Filesystem {
 	 * @throws SecurityException
 	 *   if application is not granted access to the file system
 	 */
-	public abstract long spaceUsed();
+	public abstract long spaceUsed(String root);
 	
 	/**
 	 * Service method for the installer.

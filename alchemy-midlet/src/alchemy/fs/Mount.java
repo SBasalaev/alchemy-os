@@ -16,39 +16,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.core;
-
-import alchemy.fs.Filesystem;
+package alchemy.fs;
 
 /**
- * Alchemy runtime.
+ * Represents mounted file system.
  * @author Sergey Basalaev
  */
-public final class Art {
+final class Mount {
+	public final String path;
+	public final Filesystem fs;
 
-	private Context root;
-	LibCache cache = new LibCache();
-	BuilderMap builders = new BuilderMap();
-
-	/**
-	 * Creates new Alchemy runtime.
-	 * @param fs  filesystem to use
-	 */
-	public Art() {
-		root = new Context(this);
-	}
-
-	/**
-	 * Returns root context for this runtime.
-	 */
-	public Context rootContext() {
-		return root;
-	}
-
-	/**
-	 * Associates given builder with given magic.
-	 */
-	public void setLibBuilder(short magic, LibBuilder builder) {
-		builders.put(magic, builder);
+	public Mount(String path, Filesystem fs) {
+		this.path = path;
+		this.fs = fs;
 	}
 }

@@ -55,7 +55,7 @@ def fopen_w(file: String): OStream;
 def fopen_a(file: String): OStream;
 def flist(file: String): [String];
 def fmodified(file: String): Long;
-def fsize(file: String): Int;
+def fsize(file: String): Long;
 
 def set_read(file: String, on: Bool);
 def set_write(file: String, on: Bool);
@@ -67,8 +67,8 @@ def can_exec(file: String): Bool;
 def get_cwd(): String;
 def set_cwd(dir: String);
 
-def space_total(): Long;
-def space_free(): Long;
-def space_used(): Long;
+def space_total(root: String): Long;
+def space_free(root: String): Long;
+def space_used(root: String): Long;
 
 def readurl(url: String): IStream;
