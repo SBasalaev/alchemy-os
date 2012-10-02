@@ -121,28 +121,4 @@ class InstallInfo {
 			throw new RuntimeException(e.toString());
 		}
 	}
-
-	/**
-	 * Returns filesystem set up by installation.
-	 * Returns null if Alchemy is not installed
-	 * @deprecated We should use FSManager instead
-	 */
-	public static Filesystem getFilesystem() throws IOException {
-		if (props == null && !exists()) return null;
-		if (props == null) read();
-		String fstype = props.get("fs.type");
-		String fsinit = props.get("fs.init");
-		try {
-			Class fsclass = Class.forName("alchemy.fs."+fstype+".FS");
-			Filesystem fs = (Filesystem)fsclass.newInstance();
-			if (fs instanceof Initable) {
-				((Initable)fs).init(fsinit);
-			}
-			return fs;
-		} catch (ClassNotFoundException cnfe) {
-			throw new RuntimeException("FS module not found for fs.type="+fstype);
-		} catch (Throwable t) {
-			throw new RuntimeException("Error while creating FS: "+t);
-		}
-	}
 }

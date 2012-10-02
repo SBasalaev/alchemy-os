@@ -72,8 +72,9 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			new Runnable() {
 				public void run() {
 					try {
-						Filesystem fs = InstallInfo.getFilesystem();
-						UTFReader r = new UTFReader(fs.read("/cfg/init"));
+						Properties props = InstallInfo.read();
+						FSManager.mount("", props.get("fs.type"), props.get("fs.init"));
+						UTFReader r = new UTFReader(FSManager.fs().read("/cfg/init"));
 						String[] cmd = IO.split(r.readLine(), ' ');
 						r.close();
 						String[] cmdargs = new String[cmd.length-1];
@@ -98,10 +99,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 
 	protected void destroyApp(boolean unconditional) {
 		try {
-			Filesystem fs = runtime.rootContext().fs();
-			if (fs instanceof Closeable) {
-				((Closeable)fs).close();
-			}
+			FSManager.umountAll();
 		} catch (Exception e) { }
 		notifyDestroyed();
 	}

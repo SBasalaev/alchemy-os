@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
+import alchemy.fs.FSManager;
 import alchemy.nec.tree.Unit;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -115,7 +116,7 @@ public class NEC extends NativeApp {
 		new VarIndexer().visitUnit(unit);
 		EAsmWriter wr = new EAsmWriter();
 		try {
-			OutputStream out = c.fs().write(c.toFile(outname));
+			OutputStream out = FSManager.fs().write(c.toFile(outname));
 			wr.writeTo(unit, out);
 			out.close();
 		} catch (Exception e) {

@@ -21,6 +21,7 @@ package alchemy.libs;
 import alchemy.libs.ui.UICanvas;
 import alchemy.core.Context;
 import alchemy.core.Int;
+import alchemy.fs.FSManager;
 import alchemy.midlet.UIServer;
 import alchemy.nlib.NativeFunction;
 import java.io.InputStream;
@@ -356,7 +357,7 @@ class LibUI1Func extends NativeFunction {
 			case 95: // Canvas.has_ptrdrag_event(): Bool
 				return Ival(((UICanvas)args[0]).hasPointerMotionEvents());
 			case 96: { // image_from_file(file: String): Image
-				InputStream in = c.fs().read(c.toFile((String)args[0]));
+				InputStream in = FSManager.fs().read(c.toFile((String)args[0]));
 				c.addStream(in);
 				Image img = Image.createImage(in);
 				in.close();

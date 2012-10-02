@@ -18,6 +18,7 @@
 
 package alchemy.midlet;
 
+import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.fs.rms.FS;
 import alchemy.util.Closeable;
@@ -98,6 +99,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	}
 
 	protected void destroyApp(boolean unconditional) {
+		FSManager.umountAll();
 		notifyDestroyed();
 	}
 
@@ -218,7 +220,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		instCfg.put("fs.type", selectedfs);
 		instCfg.put("fs.init", fsinit);
 		if ("true".equals(neednav)) {
-			final FSNavigator navigator = new FSNavigator(InstallInfo.getFilesystem());
+			FSManager.mount("", selectedfs, fsinit);
+			final FSNavigator navigator = new FSNavigator();
 			navigator.setSelectCommand(cmdOpenDir);
 			navigator.addCommand(cmdChoose);
 			navigator.setCommandListener(this);
@@ -230,6 +233,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			String path = navigator.getCurrentDir();
 			instCfg.put("fs.init", path);
 			messages.append("Selected path: "+path+'\n');
+			FSManager.umount("");
 		}
 		display.setCurrent(messages);
 		//installing core files
@@ -274,7 +278,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	}
 
 	private void installArchives(String property) throws Exception {
-		Filesystem fs = InstallInfo.getFilesystem();
+		Properties instCfg = InstallInfo.read();
+		FSManager.mount("", instCfg.get("fs.type"), instCfg.get("fs.init"));
+		Filesystem fs = FSManager.fs();
 		String[] archives = IO.split(setupCfg.get(property), ' ');
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
@@ -302,9 +308,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			}
 		}
 		fs.remove("/PACKAGE");
-		if (fs instanceof Closeable) {
-			((Closeable)fs).close();
-		}
+		FSManager.umount("");
 	}
 	
 	/** Should be only available when RMS file system is in use. */

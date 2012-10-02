@@ -18,7 +18,7 @@
 
 package alchemy.midlet;
 
-import alchemy.fs.Filesystem;
+import alchemy.fs.FSManager;
 import java.io.IOException;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Image;
@@ -26,6 +26,7 @@ import javax.microedition.lcdui.List;
 
 /**
  * File system navigator for the installer.
+ * Uses file system provided by FSManager.
  * @author Sergey Basalaev
  */
 class FSNavigator extends List {
@@ -47,24 +48,22 @@ class FSNavigator extends List {
 		iconFile = img;
 	}
 	
-	private final Filesystem fs;
 	private String currentDir;	
 	
-	FSNavigator(Filesystem fs) {
+	FSNavigator() {
 		super("Choose path", Choice.IMPLICIT);
-		this.fs = fs;
 	}
 	
 	public void setCurrentDir(String dir) throws IOException {
 		deleteAll();
 		if (dir.length() == 0) {
-			String[] roots = fs.listRoots();
+			String[] roots = FSManager.fs().listRoots();
 			for (int i=0; i<roots.length; i++) {
 				append(roots[i], iconDisk);
 			}
 		} else {
 			append("../", null);
-			String[] dirs = fs.list(dir);
+			String[] dirs = FSManager.fs().list(dir);
 			for (int i=0; i<dirs.length; i++) {
 				append(dirs[i], dirs[i].endsWith("/") ? iconDir : iconFile);
 			}

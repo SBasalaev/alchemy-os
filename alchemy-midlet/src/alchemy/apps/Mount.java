@@ -49,7 +49,7 @@ public class Mount extends NativeApp {
 		}
 		String dir = c.toFile(args[0]);
 		String options = (args.length < 3) ? "" : args[2];
-		if (!c.fs().isDirectory(dir)) {
+		if (!FSManager.fs().isDirectory(dir)) {
 			IO.println(c.stderr, "Directory does not exist: "+dir);
 			return 1;
 		}

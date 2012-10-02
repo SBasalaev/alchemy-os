@@ -18,6 +18,7 @@
 
 package alchemy.fs;
 
+import alchemy.util.Closeable;
 import alchemy.util.Initable;
 import java.io.IOException;
 import java.util.Vector;
@@ -109,6 +110,9 @@ public class FSManager {
 				Mount m = (Mount) mounts.elementAt(i);
 				if (m.path.equals(path)) {
 					mounts.removeElementAt(i);
+					if (m.fs instanceof Closeable) {
+						((Closeable) m.fs).close();
+					}
 					return true;
 				}
 			}
@@ -121,6 +125,18 @@ public class FSManager {
 	 */
 	public static Filesystem fs() {
 		return filesys;
+	}
+	
+	/** Closes all file systems. */
+	public static void umountAll() {
+		synchronized (mounts) {
+			for (int i=mounts.size()-1; i >= 0; i--) {
+				Mount mount = (Mount) mounts.elementAt(i);
+				Filesystem fs = mount.fs;
+				if (fs instanceof Closeable) ((Closeable)fs).close();
+			}
+			mounts.setSize(0);
+		}
 	}
 	
 	/**

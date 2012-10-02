@@ -32,7 +32,6 @@ public final class Art {
 
 	/**
 	 * Creates new Alchemy runtime.
-	 * @param fs  filesystem to use
 	 */
 	public Art() {
 		root = new Context(this);

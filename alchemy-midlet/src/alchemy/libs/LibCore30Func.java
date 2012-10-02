@@ -61,60 +61,60 @@ class LibCore30Func extends NativeFunction {
 			case 2: // abspath(f: String): String
 				return c.toFile((String)args[0]);
 			case 3: // fcreate(f: String)
-				c.fs().create(c.toFile((String)args[0]));
+				FSManager.fs().create(c.toFile((String)args[0]));
 				return null;
 			case 4: // fremove(f: String)
-				c.fs().remove(c.toFile((String)args[0]));
+				FSManager.fs().remove(c.toFile((String)args[0]));
 				return null;
 			case 5: // mkdir(f: String)
-				c.fs().mkdir(c.toFile((String)args[0]));
+				FSManager.fs().mkdir(c.toFile((String)args[0]));
 				return null;
 			case 6: // fcopy(src: String, dest: String)
-				c.fs().copy(c.toFile((String)args[0]), c.toFile((String)args[1]));
+				FSManager.fs().copy(c.toFile((String)args[0]), c.toFile((String)args[1]));
 				return null;
 			case 7: // fmove(src: String, dest: String)
-				c.fs().move(c.toFile((String)args[0]), c.toFile((String)args[1]));
+				FSManager.fs().move(c.toFile((String)args[0]), c.toFile((String)args[1]));
 				return null;
 			case 8: // set_read(f: String, on: Bool)
-				c.fs().setRead(c.toFile((String)args[0]), bval(args[1]));
+				FSManager.fs().setRead(c.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 9: // set_write(f: String, on: Bool)
-				c.fs().setWrite(c.toFile((String)args[0]), bval(args[1]));
+				FSManager.fs().setWrite(c.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 10: // set_exec(f: String, on: Bool)
-				c.fs().setExec(c.toFile((String)args[0]), bval(args[1]));
+				FSManager.fs().setExec(c.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 11: // can_read(f: String): Bool
-				return Ival(c.fs().canRead(c.toFile((String)args[0])));
+				return Ival(FSManager.fs().canRead(c.toFile((String)args[0])));
 			case 12: // can_write(f: String): Bool
-				return Ival(c.fs().canWrite(c.toFile((String)args[0])));
+				return Ival(FSManager.fs().canWrite(c.toFile((String)args[0])));
 			case 13: // can_exec(f: String): Bool
-				return Ival(c.fs().canExec(c.toFile((String)args[0])));
+				return Ival(FSManager.fs().canExec(c.toFile((String)args[0])));
 			case 14: // exists(f: String): Bool
-				return Ival(c.fs().exists(c.toFile((String)args[0])));
+				return Ival(FSManager.fs().exists(c.toFile((String)args[0])));
 			case 15: // is_dir(f: String): Bool
-				return Ival(c.fs().isDirectory(c.toFile((String)args[0])));
+				return Ival(FSManager.fs().isDirectory(c.toFile((String)args[0])));
 			case 16: { // fopen_r(f: String): IStream
-				InputStream stream = c.fs().read(c.toFile((String)args[0]));
+				InputStream stream = FSManager.fs().read(c.toFile((String)args[0]));
 				c.addStream(stream);
 				return stream;
 			}
 			case 17: { // fopen_w(f: String): OStream
-				OutputStream stream = c.fs().write(c.toFile((String)args[0]));
+				OutputStream stream = FSManager.fs().write(c.toFile((String)args[0]));
 				c.addStream(stream);
 				return stream;
 			}
 			case 18: { // fopen_a(f: String): OStream
-				OutputStream stream = c.fs().append(c.toFile((String)args[0]));
+				OutputStream stream = FSManager.fs().append(c.toFile((String)args[0]));
 				c.addStream(stream);
 				return stream;
 			}
 			case 19: // flist(f: String): Array
-				return c.fs().list(c.toFile((String)args[0]));
+				return FSManager.fs().list(c.toFile((String)args[0]));
 			case 20: // fmodified(f: String): Long
-				return Lval(c.fs().lastModified(c.toFile((String)args[0])));
+				return Lval(FSManager.fs().lastModified(c.toFile((String)args[0])));
 			case 21: // fsize(f: String): Long
-				return Lval(c.fs().size(c.toFile((String)args[0])));
+				return Lval(FSManager.fs().size(c.toFile((String)args[0])));
 			case 22: // set_cwd(f: String)
 				c.setCurDir(c.toFile((String)args[0]));
 				return null;
@@ -212,11 +212,11 @@ class LibCore30Func extends NativeFunction {
 			case 57: // get_cwd(): String
 				return c.getCurDir();
 			case 58: // space_total(root: String): Long
-				return Lval(c.fs().spaceTotal(c.toFile((String)args[0])));
+				return Lval(FSManager.fs().spaceTotal(c.toFile((String)args[0])));
 			case 59: // space_free(root: String): Long
-				return Lval(c.fs().spaceFree(c.toFile((String)args[0])));
+				return Lval(FSManager.fs().spaceFree(c.toFile((String)args[0])));
 			case 60: // space_used(root: String): Long
-				return Lval(c.fs().spaceUsed(c.toFile((String)args[0])));
+				return Lval(FSManager.fs().spaceUsed(c.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
 				return String.valueOf(args[0]);
 			case 62: // new_strbuf(): StrBuf
@@ -351,7 +351,7 @@ class LibCore30Func extends NativeFunction {
 				String addr = url.substring(cl+1);
 				InputStream in;
 				if (protocol.equals("file")) {
-					in = c.fs().read(FSManager.normalize(addr));
+					in = FSManager.fs().read(FSManager.normalize(addr));
 				} else if (protocol.equals("res")) {
 					in = this.getClass().getResourceAsStream(addr);
 					if (in == null) throw new IOException("Resource not found: "+addr);

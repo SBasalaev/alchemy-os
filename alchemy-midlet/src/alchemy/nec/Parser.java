@@ -20,6 +20,7 @@ package alchemy.nec;
 
 import alchemy.core.Context;
 import alchemy.core.Int;
+import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.nec.tree.*;
 import alchemy.util.IO;
@@ -98,16 +99,16 @@ public class Parser {
 	private String resolveFile(String name) throws ParseException {
 		if (name.length() == 0) throw new ParseException("Empty string in 'use'");
 		String f = c.toFile(name);
-		if (c.fs().exists(f)) return f;
+		if (FSManager.fs().exists(f)) return f;
 		f = c.toFile(name+".eh");
-		if (c.fs().exists(f)) return f;
+		if (FSManager.fs().exists(f)) return f;
 		if (name.charAt(0) != '/') {
 			String[] incpath = IO.split(c.getEnv("INCPATH"), ':');
 			for (int i=0; i<incpath.length; i++) {
 				f = c.toFile(incpath[i]+'/'+name);
-				if (c.fs().exists(f)) return f;
+				if (FSManager.fs().exists(f)) return f;
 				f = c.toFile(incpath[i]+'/'+name+".eh");
-				if (c.fs().exists(f)) return f;
+				if (FSManager.fs().exists(f)) return f;
 			}
 		}
 		throw new ParseException("File not found: "+name);
@@ -129,7 +130,7 @@ public class Parser {
 		String olddir = c.getCurDir();
 		files.push(file);
 		c.setCurDir(Filesystem.fparent(file));
-		InputStream in = c.fs().read(file);
+		InputStream in = FSManager.fs().read(file);
 		c.addStream(in);
 		UTFReader fred = new UTFReader(in);
 		t = new Tokenizer(fred);

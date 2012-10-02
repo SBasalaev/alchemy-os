@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Vector;
 import alchemy.apps.ConsoleForm.ConsoleInputStream;
+import alchemy.fs.FSManager;
 
 /**
  * Native shell.
@@ -54,7 +55,7 @@ public class Shell extends NativeApp {
 				scriptinput = new ByteArrayInputStream(IO.utfEncode(cmdline.toString()));
 				c.addStream(scriptinput);
 			} else {
-				scriptinput = c.fs().read(c.toFile(args[0]));
+				scriptinput = FSManager.fs().read(c.toFile(args[0]));
 				c.addStream(scriptinput);
 			}
 			if (c.stdin instanceof ConsoleInputStream) {
@@ -100,22 +101,22 @@ public class Shell extends NativeApp {
 				} else {
 					Context child = new Context(c);
 					if (cc.in != null) {
-						child.stdin = c.fs().read(c.toFile(cc.in));
+						child.stdin = FSManager.fs().read(c.toFile(cc.in));
 					}
 					if (cc.out != null) {
 						String outfile = c.toFile(cc.out);
 						if (cc.appendout) {
-							child.stdout = c.fs().append(outfile);
+							child.stdout = FSManager.fs().append(outfile);
 						} else {
-							child.stdout = c.fs().write(outfile);
+							child.stdout = FSManager.fs().write(outfile);
 						}
 					}
 					if (cc.err != null) {
 						String errfile = c.toFile(cc.err);
 						if (cc.appenderr) {
-							child.stderr = c.fs().append(errfile);
+							child.stderr = FSManager.fs().append(errfile);
 						} else {
-							child.stderr = c.fs().write(errfile);
+							child.stderr = FSManager.fs().write(errfile);
 						}
 					}
 					if (c.stdin instanceof ConsoleInputStream) {

@@ -368,14 +368,14 @@ public class Context {
 		//resolving file
 		String libfile = resolveFile(libname, pathlist);
 		//checking permissions
-		if (!fs().canExec(libfile))
+		if (!FSManager.fs().canExec(libfile))
 			throw new InstantiationException("Permission denied: "+libfile);
 		//searching in cache
-		long tstamp = fs().lastModified(libfile);
+		long tstamp = FSManager.fs().lastModified(libfile);
 		Library lib = art.cache.getLibrary(libfile, tstamp);
 		if (lib != null) return lib;
 		//reading magic number and building
-		InputStream in = fs().read(libfile);
+		InputStream in = FSManager.fs().read(libfile);
 		try {
 			int magic = (in.read() << 8) | in.read();
 			if (magic < 0)
@@ -428,25 +428,17 @@ public class Context {
 		String f;
 		if (name.indexOf('/') >= 0) {
 			f = toFile(name);
-			if (fs().exists(f)) return f;
+			if (FSManager.fs().exists(f)) return f;
 		} else {
 			String[] paths = IO.split(pathlist, ':');
 			for (int i=0; i<paths.length; i++) {
 				String path =paths[i];
 				if (path.length() == 0) continue;
 				f = toFile(path+'/'+name);
-				if (fs().exists(f)) return f;				
+				if (FSManager.fs().exists(f)) return f;				
 			}
 		}
 		throw new IOException("File not found: "+name);
-	}
-
-	/**
-	 * Convenience method to access runtime filesystem.
-	 * @deprecated FSManager.fs() should be used
-	 */
-	public Filesystem fs() {
-		return FSManager.fs();
 	}
 
 	/**
