@@ -177,21 +177,21 @@ public class Optimizer implements ExprVisitor {
 						c1 = c1.equals(c2) ? Boolean.FALSE : Boolean.TRUE;
 					}
 					break;
-				case Tokenizer.TT_LTLT:
+				case Token.LTLT:
 					if (c1 instanceof Int) {
 						c1 = new Int(((Int)c1).value << ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() << ((Int)c2).value);
 					}
 					break;
-				case Tokenizer.TT_GTGT:
+				case Token.GTGT:
 					if (c1 instanceof Int) {
 						c1 = new Int(((Int)c1).value >> ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() >> ((Int)c2).value);
 					}
 					break;
-				case Tokenizer.TT_GTGTGT:
+				case Token.GTGTGT:
 					if (c1 instanceof Int) {
 						c1 = new Int(((Int)c1).value >>> ((Int)c2).value);
 					} else if (c1 instanceof Long) {
@@ -302,14 +302,14 @@ public class Optimizer implements ExprVisitor {
 			Object c2 = ((ConstExpr)cmp.rvalue).value;
 			optimized = true;
 			switch (cmp.operator) {
-				case Tokenizer.TT_EQEQ:
+				case Token.EQEQ:
 					if (c1 == null) {
 						c1 = (c2 == null) ? Boolean.TRUE : Boolean.FALSE;
 					} else {
 						c1 = (c1.equals(c2)) ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
-				case Tokenizer.TT_NOTEQ:
+				case Token.NOTEQ:
 					if (c1 == null) {
 						c1 = (c2 == null) ? Boolean.FALSE : Boolean.TRUE;
 					} else {
@@ -338,7 +338,7 @@ public class Optimizer implements ExprVisitor {
 						c1 = ((Double)c1).doubleValue() > ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
-				case Tokenizer.TT_LTEQ:
+				case Token.LTEQ:
 					if (c1 instanceof Int) {
 						c1 = ((Int)c1).value <= ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Long) {
@@ -349,7 +349,7 @@ public class Optimizer implements ExprVisitor {
 						c1 = ((Double)c1).doubleValue() <= ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
-				case Tokenizer.TT_GTEQ:
+				case Token.GTEQ:
 					if (c1 instanceof Int) {
 						c1 = ((Int)c1).value >= ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					} else if (c1 instanceof Long) {
@@ -374,8 +374,8 @@ public class Optimizer implements ExprVisitor {
 				switch (cmp.operator) {
 					case '<': cmp.operator = '>'; break;
 					case '>': cmp.operator = '<'; break;
-					case Tokenizer.TT_LTEQ: cmp.operator = Tokenizer.TT_GTEQ; break;
-					case Tokenizer.TT_GTEQ: cmp.operator = Tokenizer.TT_LTEQ; break;
+					case Token.LTEQ: cmp.operator = Token.GTEQ; break;
+					case Token.GTEQ: cmp.operator = Token.LTEQ; break;
 				}
 				return cmp;
 			}

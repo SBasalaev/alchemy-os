@@ -160,15 +160,15 @@ public class EAsmWriter implements ExprVisitor {
 				if (type.isSubtypeOf(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IXOR);
 				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LXOR);
 				break;
-			case Tokenizer.TT_LTLT:
+			case Token.LTLT:
 				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.ISHL);
 				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSHL);
 				break;
-			case Tokenizer.TT_GTGT:
+			case Token.GTGT:
 				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.ISHR);
 				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSHR);
 				break;
-			case Tokenizer.TT_GTGTGT:
+			case Token.GTGTGT:
 				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IUSHR);
 				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LUSHR);
 				break;
@@ -218,7 +218,7 @@ public class EAsmWriter implements ExprVisitor {
 		if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value == null) {
 			// comparison with null
 			cmp.lvalue.accept(this, null);
-			if (cmp.operator == Tokenizer.TT_EQEQ) {
+			if (cmp.operator == Token.EQEQ) {
 				writer.visitJumpInsn(cond ? Opcodes.IFNULL : Opcodes.IFNNULL, jumpto);
 			} else {
 				writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
@@ -234,21 +234,21 @@ public class EAsmWriter implements ExprVisitor {
 				case '>':
 					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLE, jumpto);
 					break;
-				case Tokenizer.TT_LTEQ:
+				case Token.LTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
 					break;
-				case Tokenizer.TT_GTEQ:
+				case Token.GTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLT, jumpto);
 					break;
-				case Tokenizer.TT_EQEQ:
+				case Token.EQEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFEQ : Opcodes.IFNE, jumpto);
 					break;
-				case Tokenizer.TT_NOTEQ:
+				case Token.NOTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
 					break;
 			}
 		} else if ((cmp.lvalue.rettype().isSubtypeOf(BuiltinType.INT) || cmp.rvalue.rettype().isSubtypeOf(BuiltinType.INT))
-				&& cmp.operator != Tokenizer.TT_EQEQ && cmp.operator != Tokenizer.TT_NOTEQ) {
+				&& cmp.operator != Token.EQEQ && cmp.operator != Token.NOTEQ) {
 			// integer comparison
 			cmp.lvalue.accept(this, null);
 			cmp.rvalue.accept(this, null);
@@ -259,10 +259,10 @@ public class EAsmWriter implements ExprVisitor {
 				case '>':
 					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGT : Opcodes.IF_ICMPLE, jumpto);
 					break;
-				case Tokenizer.TT_LTEQ:
+				case Token.LTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPLE : Opcodes.IF_ICMPGT, jumpto);
 					break;
-				case Tokenizer.TT_GTEQ:
+				case Token.GTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGE : Opcodes.IF_ICMPLT, jumpto);
 					break;
 			}
@@ -289,16 +289,16 @@ public class EAsmWriter implements ExprVisitor {
 				case '>':
 					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLE, jumpto);
 					break;
-				case Tokenizer.TT_LTEQ:
+				case Token.LTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
 					break;
-				case Tokenizer.TT_GTEQ:
+				case Token.GTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLT, jumpto);
 					break;
-				case Tokenizer.TT_EQEQ:
+				case Token.EQEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFEQ : Opcodes.IFNE, jumpto);
 					break;
-				case Tokenizer.TT_NOTEQ:
+				case Token.NOTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
 					break;
 			}

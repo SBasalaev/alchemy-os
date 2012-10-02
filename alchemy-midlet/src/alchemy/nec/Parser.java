@@ -135,18 +135,18 @@ public class Parser {
 		UTFReader fred = new UTFReader(in);
 		t = new Tokenizer(fred);
 		//parse
-		while (t.nextToken() != Tokenizer.TT_EOF) {
+		while (t.nextToken() != Token.EOF) {
 			if (t.ttype == ';') {
 				// do nothing
-			} else if (t.ttype != Tokenizer.TT_KEYWORD) {
+			} else if (t.ttype != Token.KEYWORD) {
 				throw new ParseException(t+" unexpected here.");
 			} else if (t.svalue.equals("use")) {
-				if (t.nextToken() != Tokenizer.TT_QUOTED)
+				if (t.nextToken() != Token.QUOTED)
 					throw new ParseException("String literal expected after 'use'");
 				String next = resolveFile(t.svalue);
 				parseFile(next);
 			} else if (t.svalue.equals("const")) {
-				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+				if (t.nextToken() != Token.IDENTIFIER)
 					throw new ParseException("Constant name expected after 'const'");
 				String name = t.svalue;
 				expect('=');
@@ -158,7 +158,7 @@ public class Parser {
 				cnst.constValue = (ConstExpr)expr;
 				unit.addVar(cnst);
 			} else if (t.svalue.equals("type")) {
-				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+				if (t.nextToken() != Token.IDENTIFIER)
 					throw new ParseException("Type name expected after 'type'");
 				String typename = t.svalue;
 				if (typename.equals("Any"))
@@ -186,7 +186,7 @@ public class Parser {
 						while (t.nextToken() != '}') {
 							t.pushBack();
 							if (!fields.isEmpty()) expect(',');
-							if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+							if (t.nextToken() != Token.IDENTIFIER)
 								throw new ParseException("Field name expected, got "+t);
 							String fieldname = t.svalue;
 							expect(':');
@@ -206,7 +206,7 @@ public class Parser {
 						throw new ParseException(t.toString()+" unexpected here");
 				}
 			} else if (t.svalue.equals("var")) {
-				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+				if (t.nextToken() != Token.IDENTIFIER)
 					throw new ParseException("Variable name expected after 'var'");
 				String varname = t.svalue;
 				expect(':');
@@ -267,7 +267,7 @@ public class Parser {
 	 */
 	private Type parseType(Scope scope) throws ParseException, IOException {
 		switch (t.nextToken()) {
-			case Tokenizer.TT_IDENTIFIER: { //scalar type
+			case Token.IDENTIFIER: { //scalar type
 				Type type = scope.getType(t.svalue);
 				if (type == null) {
 					throw new ParseException("Undefined type "+t);
@@ -312,7 +312,7 @@ public class Parser {
 	private Func parseFuncDef() throws ParseException, IOException {
 		Func func = new Func(unit, Filesystem.fname((String)files.peek()));
 		//parsing def
-		if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+		if (t.nextToken() != Token.IDENTIFIER)
 			throw new ParseException("Function name expected, got "+t);
 		String str = t.svalue;
 		String fname;
@@ -321,7 +321,7 @@ public class Parser {
 			methodholder = unit.getType(str);
 			if (methodholder == null)
 				throw new ParseException("Type "+str+" is not defined");
-			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+			if (t.nextToken() != Token.IDENTIFIER)
 				throw new ParseException("Function name expected, got "+t);
 			fname = methodholder.toString()+'.'+t.svalue;
 		} else {
@@ -338,7 +338,7 @@ public class Parser {
 			t.pushBack();
 			if (first) first = false;
 			else expect(',');
-			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+			if (t.nextToken() != Token.IDENTIFIER)
 				throw new ParseException("Variable name expected, got "+t);
 			String varname = t.svalue;
 			expect(':');
@@ -388,13 +388,13 @@ public class Parser {
 	 */
 	private static int[] priorops = {
 			// if word operators are to appear they have the lowest priority
-			Tokenizer.TT_KEYWORD, Tokenizer.TT_IDENTIFIER, 0, 0,
+			Token.KEYWORD, Token.IDENTIFIER, 0, 0,
 			'^', 0, 0, 0,
-			Tokenizer.TT_BARBAR, '|', 0, 0,
-			Tokenizer.TT_AMPAMP, '&', 0, 0,
-			Tokenizer.TT_LTEQ, Tokenizer.TT_GTEQ, '<', '>',
-			Tokenizer.TT_EQEQ, Tokenizer.TT_NOTEQ, 0, 0,
-			Tokenizer.TT_LTLT, Tokenizer.TT_GTGT, Tokenizer.TT_GTGTGT, 0,
+			Token.BARBAR, '|', 0, 0,
+			Token.AMPAMP, '&', 0, 0,
+			Token.LTEQ, Token.GTEQ, '<', '>',
+			Token.EQEQ, Token.NOTEQ, 0, 0,
+			Token.LTLT, Token.GTGT, Token.GTGTGT, 0,
 			'+', '-', 0, 0,
 			'*', '/', '%', 0
 		};
@@ -440,24 +440,24 @@ public class Parser {
 			Expr right = (Expr)exprs.elementAt(index+1);
 			Type rtype = right.rettype();
 			Expr newexpr;
-			if (op == Tokenizer.TT_GTGT || op == Tokenizer.TT_LTLT || op == Tokenizer.TT_GTGTGT) {
+			if (op == Token.GTGT || op == Token.LTLT || op == Token.GTGTGT) {
 				if (!ltype.isSubtypeOf(BuiltinType.INT) && !ltype.isSubtypeOf(BuiltinType.LONG)
 				 || !rtype.isSubtypeOf(BuiltinType.INT))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new BinaryExpr(left, op, right);
-			} else if (op == '<' || op == '>' || op == Tokenizer.TT_LTEQ || op == Tokenizer.TT_GTEQ) {
+			} else if (op == '<' || op == '>' || op == Token.LTEQ || op == Token.GTEQ) {
 				if (!(ltype.isSubtypeOf(BuiltinType.NUMBER)) || !(rtype.isSubtypeOf(BuiltinType.NUMBER)))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				Type btype = binaryCastType(ltype, rtype);
 				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
-			} else if (op == Tokenizer.TT_EQEQ || op == Tokenizer.TT_NOTEQ) {
+			} else if (op == Token.EQEQ || op == Token.NOTEQ) {
 				Type btype = binaryCastType(ltype, rtype);
 				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
-			} else if (op == Tokenizer.TT_AMPAMP) {
+			} else if (op == Token.AMPAMP) {
 				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new IfExpr(left.line, left, right, new ConstExpr(right.line, Boolean.FALSE));
-			} else if (op == Tokenizer.TT_BARBAR) {
+			} else if (op == Token.BARBAR) {
 				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				newexpr = new IfExpr(left.line, left, new ConstExpr(right.line, Boolean.TRUE), right);
@@ -581,21 +581,21 @@ public class Parser {
 				}
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
-			case Tokenizer.TT_INT:
+			case Token.INT:
 				return new ConstExpr(lnum, new Int(t.ivalue));
-			case Tokenizer.TT_LONG:
+			case Token.LONG:
 				return new ConstExpr(lnum, new Long(t.lvalue));
-			case Tokenizer.TT_FLOAT:
+			case Token.FLOAT:
 				return new ConstExpr(lnum, new Float(t.fvalue));
-			case Tokenizer.TT_DOUBLE:
+			case Token.DOUBLE:
 				return new ConstExpr(lnum, new Double(t.dvalue));
-			case Tokenizer.TT_QUOTED:
+			case Token.QUOTED:
 				return new ConstExpr(lnum, t.svalue);
-			case Tokenizer.TT_BOOL:
+			case Token.BOOL:
 				return new ConstExpr(lnum, (t.svalue.equals("true") ? Boolean.TRUE : Boolean.FALSE));
-			case Tokenizer.TT_KEYWORD:
+			case Token.KEYWORD:
 				return parseKeyword(scope, t.svalue);
-			case Tokenizer.TT_IDENTIFIER:
+			case Token.IDENTIFIER:
 				String str = t.svalue;
 				Var var = scope.getVar(str);
 				if (var == null) throw new ParseException("Variable "+str+" is not defined");
@@ -660,7 +660,7 @@ public class Parser {
 			return new WhileExpr(lnum, cond, body);
 		} else if (keyword.equals("do")) {
 			Expr body = cast(parseExpr(scope), BuiltinType.NONE);
-			if (t.nextToken() != Tokenizer.TT_KEYWORD || !t.svalue.equals("while"))
+			if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("while"))
 				throw new ParseException("'while' expected after 'do <expr>'");
 			expect('(');
 			Expr cond = cast(parseExpr(scope), BuiltinType.BOOL);
@@ -688,7 +688,7 @@ public class Parser {
 			expect(')');
 			Expr ifexpr = parseExpr(scope);
 			Expr elseexpr;
-			if (t.nextToken() != Tokenizer.TT_KEYWORD || !t.svalue.equals("else")) {
+			if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("else")) {
 				t.pushBack();
 				elseexpr = new NoneExpr(t.lineNumber());
 			} else {
@@ -710,7 +710,7 @@ public class Parser {
 			Vector keysunique = new Vector(); // Int
 			Vector exprs = new Vector(); // Expr
 			while (t.nextToken() != '}') {
-				if (t.ttype == Tokenizer.TT_KEYWORD && t.svalue.equals("else")) {
+				if (t.ttype == Token.KEYWORD && t.svalue.equals("else")) {
 					if (elseexpr != null)
 						throw new ParseException("else branch is already defined in this switch");
 					expect(':');
@@ -766,7 +766,7 @@ public class Parser {
 			return swexpr;
 		} else if (keyword.equals("var") || keyword.equals("const")) {
 			boolean isConst = keyword.equals("const");
-			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+			if (t.nextToken() != Token.IDENTIFIER)
 				throw new ParseException("Identifier expected after 'var'");
 			String varname = t.svalue;
 			Type vartype = null;
@@ -820,7 +820,7 @@ public class Parser {
 					t.pushBack();
 					if (first) first = false;
 					else expect(',');
-					if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+					if (t.nextToken() != Token.IDENTIFIER)
 						throw new ParseException("Identifier expected in structure constructor");
 					int index = struct.fields.length-1;
 					while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
@@ -873,7 +873,7 @@ public class Parser {
 				t.pushBack();
 				if (first) first = false;
 				else expect(',');
-				if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+				if (t.nextToken() != Token.IDENTIFIER)
 					throw new ParseException("Variable name expected, got "+t);
 				String varname = t.svalue;
 				expect(':');
@@ -914,10 +914,10 @@ public class Parser {
 			return new ConstExpr(lnum, func);
 		} else if (keyword.equals("try")) {
 			Expr tryexpr = parseExpr(scope);
-			if (t.nextToken() != Tokenizer.TT_KEYWORD || !t.svalue.equals("catch"))
+			if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("catch"))
 				throw new ParseException("'catch' expected after 'try <expr>'");
 			expect('(');
-			if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+			if (t.nextToken() != Token.IDENTIFIER)
 				throw new ParseException("Identifier expected");
 			Var v = new Var(t.svalue, BuiltinType.ERROR);
 			expect(')');
@@ -1042,7 +1042,7 @@ public class Parser {
 	
 	private Expr parseDot(Scope scope, Expr expr) throws IOException, ParseException {
 		int lnum = t.lineNumber();
-		if (t.nextToken() != Tokenizer.TT_IDENTIFIER)
+		if (t.nextToken() != Token.IDENTIFIER)
 			throw new ParseException("Identifier expected after '.'");
 		String member = t.svalue;
 		Type type = expr.rettype();
@@ -1243,15 +1243,15 @@ public class Parser {
 	private String opstring(int ttype) {
 		if (ttype > 0) return String.valueOf((char)ttype);
 		switch (ttype) {
-			case Tokenizer.TT_EQEQ: return "==";
-			case Tokenizer.TT_GTEQ: return ">=";
-			case Tokenizer.TT_GTGT: return ">>";
-			case Tokenizer.TT_GTGTGT: return ">>>";
-			case Tokenizer.TT_LTEQ: return "<=";
-			case Tokenizer.TT_LTLT: return "<<";
-			case Tokenizer.TT_NOTEQ: return "!=";
-			case Tokenizer.TT_AMPAMP: return "&&";
-			case Tokenizer.TT_BARBAR: return "||";
+			case Token.EQEQ: return "==";
+			case Token.GTEQ: return ">=";
+			case Token.GTGT: return ">>";
+			case Token.GTGTGT: return ">>>";
+			case Token.LTEQ: return "<=";
+			case Token.LTLT: return "<<";
+			case Token.NOTEQ: return "!=";
+			case Token.AMPAMP: return "&&";
+			case Token.BARBAR: return "||";
 			default: return null;
 		}
 	}

@@ -29,44 +29,6 @@ class Tokenizer {
 	static private final int EOF_CHAR = -1;
 	static private final int NO_CHAR = -2;
 
-	/** Type of <i>end of stream</i> token. */
-	static public final int TT_EOF = -1;
-	/** Type of <i>integer literal</i> token. */
-	static public final int TT_INT = -2;
-	/** Type of <i>long literal</i> token. */
-	static public final int TT_LONG = -3;
-	/** Type of <i>float literal</i> token. */
-	static public final int TT_FLOAT = -4;
-	/** Type of <i>double literal</i> token. */
-	static public final int TT_DOUBLE = -5;
-	/** Type of <i>quoted string</i> token. */
-	static public final int TT_QUOTED = -6;
-	/** Type of <i>keyword</i> token. */
-	static public final int TT_KEYWORD = -7;
-	/** Type of <i>identifier</i> token. */
-	static public final int TT_IDENTIFIER = -8;
-	/** Type of <i>boolean</i> token. */
-	static public final int TT_BOOL = -9;
-
-	/** Type of <tt>'=='</tt> token. */
-	static public final int TT_EQEQ = -20;
-	/** Type of <tt>'&lt;='</tt> token. */
-	static public final int TT_LTEQ = -21;
-	/** Type of <tt>'&gt;='</tt> token. */
-	static public final int TT_GTEQ = -22;
-	/** Type of <tt>'!='</tt> token. */
-	static public final int TT_NOTEQ = -23;
-	/** Type of <tt>'&lt;&lt;'</tt> token. */
-	static public final int TT_LTLT = -24;
-	/** Type of <tt>'&gt;&gt;'</tt> token. */
-	static public final int TT_GTGT = -25;
-	/** Type of <tt>'&gt;&gt;&gt;'</tt> token. */
-	static public final int TT_GTGTGT = -26;
-	/** Type of <tt>'&amp;&amp;'</tt> token. */
-	static public final int TT_AMPAMP = -27;
-	/** Type of <tt>'||'</tt> token. */
-	static public final int TT_BARBAR = -28;
-
 	private UTFReader r;
 	private boolean pushedBack;
 	private int nextch = NO_CHAR;
@@ -129,7 +91,7 @@ class Tokenizer {
 
 		//EOF
 		if (ch == EOF_CHAR) {
-			return ttype = TT_EOF;
+			return ttype = Token.EOF;
 		}
 
 		//character literal
@@ -144,7 +106,7 @@ class Tokenizer {
 			if (ch != '\'') {
 				throw new ParseException("Unclosed character literal");
 			}
-			return ttype = TT_INT;
+			return ttype = Token.INT;
 		}
 
 		//string literal
@@ -160,7 +122,7 @@ class Tokenizer {
 				throw new ParseException("Unclosed string literal");
 			}
 			svalue = str.toString();
-			return ttype = TT_QUOTED;
+			return ttype = Token.QUOTED;
 		}
 		
 		// escaped identifier literal
@@ -175,7 +137,7 @@ class Tokenizer {
 				throw new ParseException("Unclosed identifier literal");
 			}
 			svalue = id.toString();
-			return ttype = TT_IDENTIFIER;
+			return ttype = Token.IDENTIFIER;
 		}
 
 		//dot and numbers
@@ -205,7 +167,7 @@ class Tokenizer {
 						} catch (Exception nfe) {
 							throw new ParseException("Integer number too large: "+number);
 						}
-						return ttype = TT_LONG;
+						return ttype = Token.LONG;
 					} else {
 						nextch = ch;
 						try {
@@ -213,7 +175,7 @@ class Tokenizer {
 						} catch (Exception nfe) {
 							throw new ParseException("Integer number too large: "+number);
 						}
-						return ttype = TT_INT;
+						return ttype = Token.INT;
 					}
 				} else {
 					nextch = ch;
@@ -262,7 +224,7 @@ class Tokenizer {
 				} catch (Exception nfe) {
 					throw new ParseException("Floating point number too large: "+number);
 				}
-				return ttype = TT_FLOAT;
+				return ttype = Token.FLOAT;
 			}
 			if (ch == 'd' || ch == 'D') {
 				try {
@@ -270,7 +232,7 @@ class Tokenizer {
 				} catch (Exception nfe) {
 					throw new ParseException("Floating point number too large: "+number);
 				}
-				return ttype = TT_DOUBLE;
+				return ttype = Token.DOUBLE;
 			}
 			if (dotseen) {
 				nextch = ch;
@@ -279,7 +241,7 @@ class Tokenizer {
 				} catch (Exception nfe) {
 					throw new ParseException("Floating point number too large: "+number);
 				}
-				return ttype = TT_DOUBLE;
+				return ttype = Token.DOUBLE;
 			}
 			if (ch == 'l' || ch == 'L') {
 				try {
@@ -287,7 +249,7 @@ class Tokenizer {
 				} catch (Exception nfe) {
 					throw new ParseException("Integer number too large: "+number);
 				}
-				return ttype = TT_LONG;
+				return ttype = Token.LONG;
 			} else {
 				nextch = ch;
 				try {
@@ -295,7 +257,7 @@ class Tokenizer {
 				} catch (Exception nfe) {
 					throw new ParseException("Integer number too large: "+number);
 				}
-				return ttype = TT_INT;
+				return ttype = Token.INT;
 			}
 		}
 
@@ -312,37 +274,60 @@ class Tokenizer {
 			String id = idbuf.toString();
 			svalue = id;
 			if (id.equals("true") || id.equals("false"))
-				return ttype = TT_BOOL;
+				return ttype = Token.BOOL;
 			if (id.equals("def") || id.equals("if") || id.equals("else") ||
 			    id.equals("use") || id.equals("do") || id.equals("while")||
 			    id.equals("cast")|| id.equals("var")|| id.equals("type") ||
 			    id.equals("null")|| id.equals("new")|| id.equals("for")  ||
 			    id.equals("try") || id.equals("catch") || id.equals("const")||
-			    id.equals("switch"))
-				return ttype = TT_KEYWORD;
-			return ttype = TT_IDENTIFIER;
+			    id.equals("switch") || id.equals("goto"))
+				return ttype = Token.KEYWORD;
+			return ttype = Token.IDENTIFIER;
 		}
 
 		//operators and comments
 		if (ch <= 127 && chtypes[ch] == OPCHAR) {
 			int ch2 = readChar();
 			if (ch2 <= 127 && chtypes[ch2] == OPCHAR) {
-				if (ch == '=' && ch2 == '=') return ttype = TT_EQEQ;
-				if (ch == '<' && ch2 == '=') return ttype = TT_LTEQ;
-				if (ch == '>' && ch2 == '=') return ttype = TT_GTEQ;
-				if (ch == '<' && ch2 == '<') return ttype = TT_LTLT;
+				if (ch == '=' && ch2 == '=') return ttype = Token.EQEQ;
+				if (ch == '<' && ch2 == '=') return ttype = Token.LTEQ;
+				if (ch == '>' && ch2 == '=') return ttype = Token.GTEQ;
+				if (ch == '<' && ch2 == '<') {
+					ch = readChar();
+					if (ch == '=') {
+						return ttype = Token.LTLTEQ;
+					} else {
+						nextch = ch;
+						return ttype = Token.LTLT;
+					}
+				}
 				if (ch == '>' && ch2 == '>') {
 					ch = readChar();
 					if (ch == '>') {
-						return ttype = TT_GTGTGT;
+						ch = readChar();
+						if (ch == '=') {
+							return ttype = Token.GTGTGTEQ;
+						} else {
+							nextch = ch;
+							return ttype = Token.GTGTGT;
+						}
+					} else if (ch == '=') {
+						return ttype = Token.GTGTEQ;
 					} else {
 						nextch = ch;
-						return ttype = TT_GTGT;
+						return ttype = Token.GTGT;
 					}
 				}
-				if (ch == '!' && ch2 == '=') return ttype = TT_NOTEQ;
-				if (ch == '&' && ch2 == '&') return ttype = TT_AMPAMP;
-				if (ch == '|' && ch2 == '|') return ttype = TT_BARBAR;
+				if (ch == '!' && ch2 == '=') return ttype = Token.NOTEQ;
+				if (ch == '+' && ch2 == '=') return ttype = Token.PLUSEQ;
+				if (ch == '-' && ch2 == '=') return ttype = Token.MINUSEQ;
+				if (ch == '*' && ch2 == '=') return ttype = Token.STAREQ;
+				if (ch == '/' && ch2 == '=') return ttype = Token.SLASHEQ;
+				if (ch == '%' && ch2 == '=') return ttype = Token.PERCENTEQ;
+				if (ch == '&' && ch2 == '=') return ttype = Token.AMPEQ;
+				if (ch == '|' && ch2 == '=') return ttype = Token.BAREQ;
+				if (ch == '&' && ch2 == '&') return ttype = Token.AMPAMP;
+				if (ch == '|' && ch2 == '|') return ttype = Token.BARBAR;
 				//line comment
 				if (ch == '/' && ch2 == '/') {
 					do ch = readChar();
@@ -474,38 +459,58 @@ class Tokenizer {
 	 */
 	public String toString() {
 		switch (ttype) {
-			case TT_EOF:
+			case Token.EOF:
 				return "<EOF>";
-			case TT_INT:
+			case Token.INT:
 				return String.valueOf(ivalue);
-			case TT_LONG:
+			case Token.LONG:
 				return String.valueOf(lvalue);
-			case TT_FLOAT:
+			case Token.FLOAT:
 				return String.valueOf(fvalue);
-			case TT_DOUBLE:
+			case Token.DOUBLE:
 				return String.valueOf(dvalue);
-			case TT_EQEQ:
+			case Token.EQEQ:
 				return "==";
-			case TT_GTEQ:
+			case Token.GTEQ:
 				return ">=";
-			case TT_GTGT:
+			case Token.GTGT:
 				return ">>";
-			case TT_GTGTGT:
+			case Token.GTGTGT:
 				return ">>>";
-			case TT_LTEQ:
+			case Token.LTEQ:
 				return "<=";
-			case TT_LTLT:
+			case Token.LTLT:
 				return "<<";
-			case TT_NOTEQ:
+			case Token.NOTEQ:
 				return "!=";
-			case TT_AMPAMP:
+			case Token.AMPAMP:
 				return "&&";
-			case TT_BARBAR:
+			case Token.BARBAR:
 				return "||";
-			case TT_KEYWORD:
-			case TT_IDENTIFIER:
-			case TT_QUOTED:
-			case TT_BOOL:
+			case Token.PLUSEQ:
+				return "+=";
+			case Token.MINUSEQ:
+				return "-=";
+			case Token.STAREQ:
+				return "*=";
+			case Token.SLASHEQ:
+				return "/=";
+			case Token.PERCENTEQ:
+				return "%=";
+			case Token.BAREQ:
+				return "|=";
+			case Token.AMPEQ:
+				return "&=";
+			case Token.LTLTEQ:
+				return "<<=";
+			case Token.GTGTEQ:
+				return ">>=";
+			case Token.GTGTGTEQ:
+				return ">>>=";
+			case Token.KEYWORD:
+			case Token.IDENTIFIER:
+			case Token.QUOTED:
+			case Token.BOOL:
 				return svalue;
 			default:
 				return String.valueOf((char)ttype);
