@@ -23,6 +23,8 @@ package alchemy.nec;
  * @author Sergey Basalaev
  */
 public interface Token {
+	/* CATEGORIES */
+	
 	/** End of stream. */
 	int EOF = -1;
 	/** Integer literal. */
@@ -42,6 +44,8 @@ public interface Token {
 	/** Boolean literal. */
 	int BOOL = -9;
 
+	/* OPERATORS */
+	
 	/** Token <code>'=='</code>. */
 	int EQEQ = -20;
 	/** Token <code>'&lt;='</code>. */
@@ -60,24 +64,29 @@ public interface Token {
 	int AMPAMP = -27;
 	/** Token <code>'||'</code>. */
 	int BARBAR = -28;
+	
+	/* ASSIGNMENTS */
+	
 	/** Token <code>'+='</code>. */
-	int PLUSEQ = -29;
+	int PLUSEQ = -31;
 	/** Token <code>'-='</code>. */
-	int MINUSEQ = -30;
+	int MINUSEQ = -32;
 	/** Token <code>'*='</code>. */
-	int STAREQ = -31;
+	int STAREQ = -33;
 	/** Token <code>'/='</code>. */
-	int SLASHEQ = -32;
+	int SLASHEQ = -34;
 	/** Token <code>'%='</code>. */
-	int PERCENTEQ = -33;
+	int PERCENTEQ = -35;
 	/** Token <code>'|='</code>. */
-	int BAREQ = -34;
+	int BAREQ = -36;
 	/** Token <code>'&='</code>. */
-	int AMPEQ = -35;
+	int AMPEQ = -37;
+	/** Token <code>'^='</code>. */
+	int HATEQ = -38;
 	/** Token <code>'&lt;&lt;='</code>. */
-	int LTLTEQ = -36;
+	int LTLTEQ = -39;
 	/** Token <code>'&gt;&gt;='</code>. */
-	int GTGTEQ = -37;
+	int GTGTEQ = -40;
 	/** Token <code>'&gt;&gt;&gt;='</code>. */
-	int GTGTGTEQ = -38;
+	int GTGTGTEQ = -41;
 }

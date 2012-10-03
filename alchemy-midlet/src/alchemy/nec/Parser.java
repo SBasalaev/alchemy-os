@@ -417,7 +417,7 @@ public class Parser {
 			exprs.addElement(parsePostfix(scope, parseExprNoop(scope)));
 			int opchar = t.nextToken();
 			if (opchar == ';') break;
-			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || opchar <= -20) {
+			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || (opchar <= -20 && opchar >= -30)) {
 				operators.addElement(new Int(opchar));
 			} else {
 				t.pushBack();
@@ -436,68 +436,15 @@ public class Parser {
 			}
 			int op = ((Int)operators.elementAt(index)).value;
 			Expr left = (Expr)exprs.elementAt(index);
-			Type ltype = left.rettype();
 			Expr right = (Expr)exprs.elementAt(index+1);
-			Type rtype = right.rettype();
-			Expr newexpr;
-			if (op == Token.GTGT || op == Token.LTLT || op == Token.GTGTGT) {
-				if (!ltype.isSubtypeOf(BuiltinType.INT) && !ltype.isSubtypeOf(BuiltinType.LONG)
-				 || !rtype.isSubtypeOf(BuiltinType.INT))
-					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				newexpr = new BinaryExpr(left, op, right);
-			} else if (op == '<' || op == '>' || op == Token.LTEQ || op == Token.GTEQ) {
-				if (!(ltype.isSubtypeOf(BuiltinType.NUMBER)) || !(rtype.isSubtypeOf(BuiltinType.NUMBER)))
-					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				Type btype = binaryCastType(ltype, rtype);
-				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
-			} else if (op == Token.EQEQ || op == Token.NOTEQ) {
-				Type btype = binaryCastType(ltype, rtype);
-				newexpr = new ComparisonExpr(cast(left,btype), op, cast(right,btype));
-			} else if (op == Token.AMPAMP) {
-				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
-					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				newexpr = new IfExpr(left.line, left, right, new ConstExpr(right.line, Boolean.FALSE));
-			} else if (op == Token.BARBAR) {
-				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
-					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				newexpr = new IfExpr(left.line, left, new ConstExpr(right.line, Boolean.TRUE), right);
-			} else if ("+-/*%".indexOf(op) >= 0) {
-				if (ltype.isSubtypeOf(BuiltinType.STRING)) {
-					// string concatenation
-					right = cast(right, BuiltinType.ANY);
-					if (left instanceof ConcatExpr) {
-						((ConcatExpr)left).exprs.addElement(right);
-						newexpr = left;
-					} else {
-						ConcatExpr cexpr = new ConcatExpr(left.line);
-						cexpr.exprs.addElement(left);
-						cexpr.exprs.addElement(right);
-						newexpr = cexpr;
-					}
-				} else {
-					Type btype = binaryCastType(ltype, rtype);
-					if (!(btype.isSubtypeOf(BuiltinType.NUMBER)))
-						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-					newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
-				}
-			} else if ("^&|".indexOf(op) >= 0) {
-				Type btype = binaryCastType(ltype, rtype);
-				if (!btype.isSubtypeOf(BuiltinType.BOOL) && !btype.isSubtypeOf(BuiltinType.INT) && !btype.isSubtypeOf(BuiltinType.LONG))
-					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				newexpr = new BinaryExpr(cast(left,btype), op, cast(right,btype));
-			} else {
-				//should not happen, but...
-				throw new ParseException("There is a bug in compiler."
-						+" Please report it with your source code and"
-						+"the following error message: unusual operator");
-			}
+			Expr newexpr = makeBinaryExpr(left, op, right);
 			exprs.setElementAt(newexpr, index);
 			exprs.removeElementAt(index+1);
 			operators.removeElementAt(index);
 		}
 		return (Expr)exprs.elementAt(0);
 	}
-	
+
 	private Expr parsePostfix(Scope scope, Expr expr) throws ParseException, IOException {
 		Expr rtexpr = expr;
 		while (true) {
@@ -599,33 +546,58 @@ public class Parser {
 				String str = t.svalue;
 				Var var = scope.getVar(str);
 				if (var == null) throw new ParseException("Variable "+str+" is not defined");
-				if (t.nextToken() == '=') { // setting variable value
-					if (var.isConst)
-						throw new ParseException("Cannot assign to constant "+str);
-					Expr value = cast(parseExpr(scope), var.type);
-					if (scope.isLocal(str)) {
-						return new AssignExpr(lnum, var, value);
-					} else {
-						// convert to  setstatic("var#hash", value)
-						Func setstatic = unit.getFunc("setstatic");
-						setstatic.hits++;
-						return new FCallExpr(lnum, new ConstExpr(lnum, setstatic), new Expr[] { new ConstExpr(lnum, str+'#'+var.hashCode()), value });
+				switch (t.nextToken()) {
+					case '=': { // setting variable value
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, value);
 					}
-				} else { // getting variable value
-					t.pushBack();
-					if (var.isConst && var.constValue != null) {
-						Object cnst = var.constValue.value;
-						if (cnst.getClass() == Func.class) {
-							((Func)cnst).hits++;
-						}
-						return var.constValue;
-					} else if (scope.isLocal(str)) {
-						return new VarExpr(lnum, var);
-					} else {
-						// convert to  cast(type)getstatic("var#hash")
-						Func getstatic = unit.getFunc("getstatic");
-						getstatic.hits++;
-						return new CastExpr(lnum, var.type, new FCallExpr(lnum, new ConstExpr(lnum, getstatic), new Expr[] { new ConstExpr(lnum, str+'#'+var.hashCode()) }));
+					case Token.PLUSEQ: { // var = var + expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '+', value));
+					}
+					case Token.MINUSEQ: { // var = var - expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '-', value));
+					}
+					case Token.STAREQ: { // var = var * expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '*', value));
+					}
+					case Token.SLASHEQ: { // var = var / expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '/', value));
+					}
+					case Token.PERCENTEQ: { // var = var % expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '%', value));
+					}
+					case Token.BAREQ: { // var = var | expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '|', value));
+					}
+					case Token.AMPEQ: { // var = var & expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '&', value));
+					}
+					case Token.HATEQ: { // var = var ^ expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '^', value));
+					}
+					case Token.LTLTEQ: { // var = var << expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.LTLT, value));
+					}
+					case Token.GTGTEQ: { // var = var >> expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.GTGT, value));
+					}
+					case Token.GTGTGTEQ: { // var = var >>> expr
+						Expr value = cast(parseExpr(scope), var.type);
+						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.GTGTGT, value));
+					}
+					default: { // getting variable value
+						t.pushBack();
+						return makeGetVar(lnum, scope, var);
 					}
 				}
 			default:
@@ -967,7 +939,7 @@ public class Parser {
 			args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
 		}
 		if (fload instanceof ConstExpr) {
-			return fcall(fload.line, (Func)((ConstExpr)fload).value, args);
+			return makeFCall(fload.line, (Func)((ConstExpr)fload).value, args);
 		} else {
 			return new FCallExpr(fload.line, fload, args);
 		}
@@ -1015,7 +987,7 @@ public class Parser {
 				indexexpr = cast(indexexpr, method.type.args[1]);
 				Expr assignexpr = cast(parseExpr(scope), method.type.args[2]);
 				method.hits++;
-				return fcall(lnum, method, new Expr[] {arexpr, indexexpr, assignexpr});
+				return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, assignexpr});
 			} else {
 				t.pushBack();
 				Func method = findMethod(artype, "get");
@@ -1025,7 +997,7 @@ public class Parser {
 					throw new ParseException("Method "+artype+".get must accept exactly one argument to use [] notation");
 				indexexpr = cast(indexexpr, method.type.args[1]);
 				method.hits++;
-				return fcall(lnum, method, new Expr[] {arexpr, indexexpr});
+				return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr});
 			}
 		}
 	}
@@ -1087,7 +1059,7 @@ public class Parser {
 				Expr[] args = new Expr[2];
 				args[0] = new ConstExpr(lnum, method);
 				args[1] = expr;
-				return fcall(lnum, curry, args);
+				return makeFCall(lnum, curry, args);
 			}
 		}
 		throw new ParseException("Type "+type+" has no member named "+member);
@@ -1113,13 +1085,130 @@ public class Parser {
 		}
 	}
 	
+	/** Checks if given operator can be applied to given expressions
+	 * and returns binary expression.
+	 */
+	private Expr makeBinaryExpr(Expr left, int op, Expr right) throws ParseException {
+		Type ltype = left.rettype();
+		Type rtype = right.rettype();
+		switch (op) {
+			case Token.GTGT:
+			case Token.LTLT:
+			case Token.GTGTGT: {
+				if (!ltype.isSubtypeOf(BuiltinType.INT) && !ltype.isSubtypeOf(BuiltinType.LONG)
+					|| !rtype.isSubtypeOf(BuiltinType.INT))
+						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
+				return new BinaryExpr(left, op, right);
+			}
+			case '<':
+			case '>':
+			case Token.LTEQ:
+			case Token.GTEQ: {
+				if (!(ltype.isSubtypeOf(BuiltinType.NUMBER)) || !(rtype.isSubtypeOf(BuiltinType.NUMBER)))
+					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
+				Type btype = binaryCastType(ltype, rtype);
+				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
+			}
+			case Token.EQEQ:
+			case Token.NOTEQ: {
+				Type btype = binaryCastType(ltype, rtype);
+				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
+			}
+			case Token.AMPAMP: {
+				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
+					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
+				return new IfExpr(left.line, left, right, new ConstExpr(right.line, Boolean.FALSE));
+			}
+			case Token.BARBAR: {
+				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
+					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
+				return new IfExpr(left.line, left, new ConstExpr(right.line, Boolean.TRUE), right);
+			}
+			case '+':
+			case '-':
+			case '*':
+			case '/':
+			case '%': {
+				if (ltype.isSubtypeOf(BuiltinType.STRING)) {
+					// string concatenation
+					right = cast(right, BuiltinType.ANY);
+					if (left instanceof ConcatExpr) {
+						((ConcatExpr)left).exprs.addElement(right);
+						return left;
+					} else {
+						ConcatExpr cexpr = new ConcatExpr(left.line);
+						cexpr.exprs.addElement(left);
+						cexpr.exprs.addElement(right);
+						return cexpr;
+					}
+				} else {
+					Type btype = binaryCastType(ltype, rtype);
+					if (!(btype.isSubtypeOf(BuiltinType.NUMBER)))
+						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
+					return new BinaryExpr(cast(left,btype), op, cast(right,btype));
+				}
+			}
+			case '^':
+			case '&':
+			case '|': {
+				Type btype = binaryCastType(ltype, rtype);
+				if (!btype.isSubtypeOf(BuiltinType.BOOL) && !btype.isSubtypeOf(BuiltinType.INT) && !btype.isSubtypeOf(BuiltinType.LONG))
+					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
+				return new BinaryExpr(cast(left,btype), op, cast(right,btype));
+			}
+			default: {
+				//should not happen, but...
+				throw new ParseException("There is a bug in compiler."
+					+" Please report it with your source code and"
+					+"the following error message: unusual operator "+opstring(op));
+			}
+		}
+	}
+	
+	/** Returns variable loading expression. */
+	private Expr makeGetVar(int lnum, Scope scope, Var var) {
+		if (var.isConst && var.constValue != null) {
+			Object cnst = var.constValue.value;
+			if (cnst.getClass() == Func.class) {
+				((Func)cnst).hits++;
+			}
+			return var.constValue;
+		} else if (scope.isLocal(var.name)) {
+			return new VarExpr(lnum, var);
+		} else {
+			// convert to  cast(type)getstatic("var#hash")
+			Func getstatic = unit.getFunc("getstatic");
+			getstatic.hits++;
+			return new CastExpr(lnum,
+					var.type,
+					new FCallExpr(lnum, new ConstExpr(lnum, getstatic),
+					new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())) }));
+		}
+	}
+	
+	/** Returns assignment expression. */
+	private Expr makeSetVar(int lnum, Scope scope, Var var, Expr value) throws ParseException {
+		if (var.isConst)
+			throw new ParseException("Cannot assign to constant "+var.name);
+		if (scope.isLocal(var.name)) {
+			return new AssignExpr(lnum, var, value);
+		} else {
+			// convert to  setstatic("var#hash", value)
+			Func setstatic = unit.getFunc("setstatic");
+			setstatic.hits++;
+			return new FCallExpr(lnum,
+					new ConstExpr(lnum, setstatic),
+					new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())), value });
+		}
+	}
+
 	/**
 	 * Does special type checkings and casts for the following functions:
 	 *   Function.curry   - checks if argument is acceptable, computes returned type
 	 *   Structure.clone  - the returned type is the same as of argument
 	 *   acopy            - checks types of arrays
 	 */
-	private Expr fcall(int lnum, Func f, Expr[] args) throws ParseException {
+	private Expr makeFCall(int lnum, Func f, Expr[] args) throws ParseException {
 		FCallExpr expr = new FCallExpr(lnum, new ConstExpr(lnum, f), args);
 		if (f.signature.equals("Function.curry") && args[0].rettype() instanceof FunctionType) {
 			// extra special for f.curry
@@ -1252,7 +1341,7 @@ public class Parser {
 			case Token.NOTEQ: return "!=";
 			case Token.AMPAMP: return "&&";
 			case Token.BARBAR: return "||";
-			default: return null;
+			default: return String.valueOf(ttype);
 		}
 	}
 

@@ -501,6 +501,8 @@ class Tokenizer {
 				return "|=";
 			case Token.AMPEQ:
 				return "&=";
+			case Token.HATEQ:
+				return "^=";
 			case Token.LTLTEQ:
 				return "<<=";
 			case Token.GTGTEQ:
