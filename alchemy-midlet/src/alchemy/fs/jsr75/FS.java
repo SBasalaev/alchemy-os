@@ -20,7 +20,6 @@ package alchemy.fs.jsr75;
 
 import alchemy.fs.File;
 import alchemy.fs.Filesystem;
-import alchemy.midlet.Logger;
 import alchemy.util.Initable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -167,6 +166,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public boolean exists(File file) {
+		if (file.path().length() == 0) return true;
 		try {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
@@ -180,6 +180,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public boolean isDirectory(File file) {
+		if (file.path().length() == 0) return true;
 		try {
 			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 			try {
@@ -218,9 +219,6 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public String[] list(File file) throws IOException {
-		//#ifdef DEBUGLOG
-		Logger.log("List: " + pathFor(file) + '/');
-		//#endif
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ);
 		try {
 			if (!fc.exists()) throw new IOException("File not found: "+file);
