@@ -61,9 +61,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private final Command cmdOpenDir = new Command("Open", Command.ITEM, 1);
 	
 	//#ifdef DEBUGLOG
-	/** Commands for debug log. */
-	private final Command cmdShowLog = new Command("Show log", Command.SCREEN, 7);
-	private final Command cmdClearLog = new Command("Clear log", Command.SCREEN, 8);
+//# 	/** Commands for debug log. */
+//# 	private final Command cmdShowLog = new Command("Show log", Command.SCREEN, 7);
+//# 	private final Command cmdClearLog = new Command("Clear log", Command.SCREEN, 8);
 	//#endif
 	
 	private Properties setupCfg;
@@ -87,7 +87,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 		new InstallerThread(0).start();
 		//#ifdef DEBUGLOG
-		Logger.log("Start: Installer");
+//# 		Logger.log("Start: Installer");
 		//#endif
 	}
 
@@ -110,11 +110,11 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.deleteAll();
 			messages.append(ABOUT_TEXT);
 		//#ifdef DEBUGLOG
-		} else if (c == cmdShowLog) {
-			messages.deleteAll();
-			messages.append(Logger.getLog());
-		} else if (c == cmdClearLog) {
-			Logger.clearLog();
+//# 		} else if (c == cmdShowLog) {
+//# 			messages.deleteAll();
+//# 			messages.append(Logger.getLog());
+//# 		} else if (c == cmdClearLog) {
+//# 			Logger.clearLog();
 		//#endif
 		} else if (c == cmdInstall) {
 			new InstallerThread(1).start();
@@ -393,8 +393,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.removeCommand(cmdUpdate);
 			messages.removeCommand(cmdRebuild);
 			//#ifdef DEBUGLOG
-			messages.removeCommand(cmdShowLog);
-			messages.removeCommand(cmdClearLog);
+//# 			messages.removeCommand(cmdShowLog);
+//# 			messages.removeCommand(cmdClearLog);
 			//#endif
 			try {
 				switch(action) {
@@ -411,8 +411,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.addCommand(cmdQuit);
 			messages.addCommand(cmdAbout);
 			//#ifdef DEBUGLOG
-			messages.addCommand(cmdShowLog);
-			messages.addCommand(cmdClearLog);
+//# 			messages.addCommand(cmdShowLog);
+//# 			messages.addCommand(cmdClearLog);
 			//#endif
 		}
 	}
