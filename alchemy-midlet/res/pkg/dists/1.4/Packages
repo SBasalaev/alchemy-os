@@ -6,12 +6,12 @@ Summary: application menu
 File: appmenu_0.3-1.pkg
 
 Package: coreutils
-Version: 0.4.1-1
+Version: 0.4.2-1
 Section: utils
 Homepage: http://code.google.com/p/alchemy-os/
-Summary: core Alchemy utilities
+Summary: core utilities for Alchemy OS
 Depends: libcore2
-File: coreutils_0.4.1-1.pkg
+File: coreutils_0.4.2-1.pkg
 
 Package: edit
 Version: 0.9-1
@@ -93,6 +93,13 @@ Section: admin
 Summary: Alchemy package manager
 Depends: libpkg0, libcore2
 File: pkg_0.1.1-1.pkg
+
+Package: pkg-arh
+Version: 0.1.1-1
+Section: admin
+Depends: libcore2, libpkg0
+Summary: utility to manipulate with package archives
+File: pkg-arh_0.1.1-1.pkg
 
 Package: sh
 Version: 1.0-1

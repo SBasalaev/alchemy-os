@@ -1,16 +1,16 @@
 #!/bin/sh
 
-echo 'Installing Alchemy OS 1.4.4'
+echo 'Installing Alchemy OS 1.4.5'
 
 echo 'Installing core components...'
 # in case this file does not exist
 echo >> /cfg/pkg/db/sources/installed
-echo 'res:/pkg  1.4' > /cfg/pkg/sources
+echo 'res:/pkg  1.4 ' > /cfg/pkg/sources
 pkg refresh
-pkg install alchemy-core alchemy-gui libcore-dev libui-dev nec ex
+pkg install alchemy-core alchemy-gui libcore-dev libui-dev nec ex pkg-arh
 
 echo 'Adding software sources...'
-echo 'http://alchemy-os.org/pkg  1.4' >> /cfg/pkg/sources
+echo 'http://alchemy-os.org/pkg  1.4 ' >> /cfg/pkg/sources
 echo 'http://alchemy-os.org/pkg  1.4-nonfree' >> /cfg/pkg/sources
 
 echo 'Installed successfully!'

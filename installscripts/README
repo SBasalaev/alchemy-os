@@ -1,3 +1,4 @@
 These directories are unpacked when Alchemy OS is installed or updated.
 They create essential directories and use pkg to install/update core
-packages. Thus, Alchemy OS can be updated without destroying pkg database.
+packages. Thus, Alchemy OS can be installed/updated to existing installation
+without destroying pkg database.
