@@ -111,7 +111,7 @@ public class FSManager {
 	public static boolean umount(String dir) {
 		String path = normalize(dir);
 		synchronized (mounts) {
-			for (int i=mounts.size(); i >= 0; i--) {
+			for (int i=mounts.size()-1; i >= 0; i--) {
 				Mount m = (Mount) mounts.elementAt(i);
 				if (m.path.equals(path)) {
 					mounts.removeElementAt(i);
