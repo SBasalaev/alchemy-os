@@ -21,7 +21,6 @@ package alchemy.midlet;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.fs.rms.FS;
-import alchemy.util.Closeable;
 import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
@@ -56,9 +55,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private final Command cmdUninstall = new Command("Uninstall", Command.SCREEN, 5);
 	private final Command cmdRebuild = new Command("Rebuild FS", Command.SCREEN, 3);
 	
-	/** Command for dialogs. */
-	private final Command cmdChoose = new Command("Choose", Command.OK, 2);
-	private final Command cmdOpenDir = new Command("Open", Command.ITEM, 1);
+	/** Dialog commands. */
+	private final Command cmdChoose = new Command("Choose", Command.OK, 1);
 
 //#if DEBUGLOG=="true"
 //# 	private final Command cmdShowLog = new Command("Show log", Command.SCREEN, 7);
@@ -125,23 +123,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		} else if (c == cmdRebuild) {
 			new InstallerThread(4).start();
 		} else if (c == cmdChoose) {
-			synchronized (d) {
-				d.notify();
-			}
-		} else if (c == cmdOpenDir) {
-			FSNavigator nav = (FSNavigator)d;
-			String path = nav.getString(nav.getSelectedIndex());
-			if (path.endsWith("/")) try {
-				nav.setCurrentDir(nav.getCurrentDir()+'/'+path);
-				if (nav.getCurrentDir().length() == 0) {
-					nav.removeCommand(cmdChoose);
-				} else {
-					nav.addCommand(cmdChoose);
-				}
-			} catch (IOException ioe) {
-				Alert alert = new Alert("I/O error", ioe.toString(), null, AlertType.ERROR);
-				display.setCurrent(alert, d);
-			}
+			synchronized (d) { d.notify(); }
 		}
 	}
 
@@ -220,20 +202,15 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		instCfg.put("fs.type", selectedfs);
 		instCfg.put("fs.init", fsinit);
 		if ("true".equals(neednav)) {
-			FSManager.mount("", selectedfs, fsinit);
-			final FSNavigator navigator = new FSNavigator();
-			navigator.setSelectCommand(cmdOpenDir);
-			navigator.addCommand(cmdChoose);
-			navigator.setCommandListener(this);
-			navigator.setCurrentDir("");
+			final FSNavigator navigator = new FSNavigator(display, selectedfs);
 			display.setCurrent(navigator);
 			synchronized (navigator) {
 				navigator.wait();
 			}
 			String path = navigator.getCurrentDir();
+			if (path == null) throw new Exception("Installation aborted");
 			instCfg.put("fs.init", path);
 			messages.append("Selected path: "+path+'\n');
-			FSManager.umount("");
 		}
 		display.setCurrent(messages);
 		//installing core files

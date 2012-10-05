@@ -123,10 +123,6 @@ class MountFilesystem extends Filesystem {
 		return mount.fs.list(npath(mount, nfile));
 	}
 
-	public String[] listRoots() {
-		return new String[] {"/"};
-	}
-
 	public long lastModified(String file) throws IOException {
 		String nfile = FSManager.normalize(file);
 		Mount mount = FSManager.findMount(nfile);

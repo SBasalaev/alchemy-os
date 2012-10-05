@@ -57,13 +57,18 @@ public class FSManager {
 				beg++;
 			} else {
 				int end = path.indexOf('/', beg);
-				if (end > 0) {
-					sb.append('/').append(path.substring(beg, end));
-					beg = end+1;
+				if (end < 0) end = path.length();
+				String name = path.substring(beg, end);
+				if (name.equals(".")) {
+					// skip this name
+				} else if (name.equals("..")) {
+					int len = sb.length()-1;
+					while (len > 0 && sb.charAt(len) != '/') len--;
+					sb.setLength(len);
 				} else {
-					sb.append('/').append(path.substring(beg));
-					beg = path.length();
+					sb.append('/').append(name);
 				}
+				beg = end+1;
 			}
 		}
 		return sb.toString();
