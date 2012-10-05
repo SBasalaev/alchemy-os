@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.fs.jsr75;
+package alchemy.fs.siemens;
 
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
@@ -27,10 +27,10 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
+import com.siemens.mp.io.file.FileConnection;
 
 /**
- * Driver for JSR 75 file system.
+ * FS driver for Siemens filesystem.
  *
  * @author Sergey Basalaev
  */
@@ -95,7 +95,7 @@ public class FS extends Filesystem implements Initable {
 	public InputStream read(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
-			return fc.openInputStream();
+			return new SiemensInputStream(fc.openInputStream());
 		} finally {
 			fc.close();
 		}

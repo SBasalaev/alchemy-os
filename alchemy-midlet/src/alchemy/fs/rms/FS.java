@@ -97,10 +97,6 @@ public final class FS extends Filesystem implements Initable, Closeable {
 		try { store.closeRecordStore(); }
 		catch (RecordStoreException rse) { }
 	}
-	
-	public String[] listRoots() {
-		return new String[] {"/"};
-	}
 
 	public synchronized void create(String file) throws IOException {
 		String parent = fparent(file);
