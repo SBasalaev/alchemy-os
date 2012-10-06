@@ -53,12 +53,12 @@ Depends: libcore3
 Summary: library to detect file type
 File: libfiletype1_1.0.1-1.pkg
 
-Package: libpkg0
+Package: libpkg1
 Version: 0.3.3-1
 Section: libs
 Summary: package management library
 Depends: libcore3
-File: libpkg0_0.3.3-1.pkg
+File: libpkg1_0.3.3-1.pkg
 
 Package: libui1
 Version: 0.90-1
@@ -87,11 +87,18 @@ Summary: builtin compiler and linker for Alchemy OS
 File: nec_1.90-1.pkg
 
 Package: pkg
-Version: 0.1.3-1
+Version: 0.1.3-2
 Section: admin
-Summary: Alchemy package manager
-Depends: libpkg0, libcore3
-File: pkg_0.1.3-1.pkg
+Summary: package manager
+Depends: libpkg1, libcore3
+File: pkg_0.1.3-2.pkg
+
+Package: pkg-arh
+Version: 0.1.2-2
+Section: admin
+Summary: utility to work with .pkg archives
+Depends: libpkg1, libcore3
+File: pkg-arh_0.1.2-2.pkg
 
 Package: sh
 Version: 1.0-1
