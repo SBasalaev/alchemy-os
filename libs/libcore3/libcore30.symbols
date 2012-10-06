@@ -114,10 +114,10 @@ loadlibrary
 Library.getfunc
 Structure.clone
 String.split
-parsei
-parsel
-parsef
-parsed
+String.toint
+String.tolong
+String.tofloat
+String.todouble
 getstatic
 setstatic
 String.format

@@ -1,19 +1,20 @@
 #!/bin/sh
 
-echo 'Updating Alchemy OS to 1.4.3'
+echo 'Updating Alchemy OS to 2.0 Alpha'
 
 echo 'Updating core components...'
 echo >> /cfg/pkg/db/sources/installed
-echo 'res:/pkg  1.4' > /cfg/pkg/sources
+echo 'res:/pkg 2.0' > /cfg/pkg/sources
 pkg refresh
-pkg install alchemy-core alchemy-gui libcore-dev libui-dev nec ex
+pkg install alchemy-core alchemy-gui libcore-dev libui-dev nec ex pkg-arh
 pkg update
 
-#echo Removing deprecated components...
+echo 'Removing deprecated components...'
+pkg remove libcore2 libui0.1
 
 echo 'Adding software sources...'
-echo 'http://pkg.alchemy-os.googlecode.com/git  1.4' >> /cfg/pkg/sources
-echo 'http://pkg.alchemy-os.googlecode.com/git  1.4-nonfree' >> /cfg/pkg/sources
+echo 'http://alchemy-os.org/pkg 2.0' >> /cfg/pkg/sources
+echo 'http://alchemy-os.org/pkg 2.0-nonfree' >> /cfg/pkg/sources
 
 echo 'appmenu' > /cfg/init
 
