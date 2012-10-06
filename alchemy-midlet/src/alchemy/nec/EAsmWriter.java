@@ -35,9 +35,10 @@ import java.util.Vector;
  */
 public class EAsmWriter implements ExprVisitor {
 	private FunctionWriter writer;
-	private final boolean debug = true;
+	private final boolean debug;
 	
-	public EAsmWriter() {
+	public EAsmWriter(boolean dbg) {
+		debug = dbg;
 	}
 	
 	public void writeTo(Unit unit, OutputStream out) throws IOException {

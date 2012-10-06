@@ -56,6 +56,7 @@ public class NEC extends NativeApp {
 		String fname = null;
 		boolean wait_outname = false;
 		boolean optimize = true;
+		boolean dbginfo = false;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
@@ -76,6 +77,8 @@ public class NEC extends NativeApp {
 				optimize = true;
 			} else if (arg.equals("-O0")) {
 				optimize = false;
+			} else if (arg.equals("-g")) {
+				dbginfo = true;
 			} else if (arg.startsWith("-I") && arg.length() > 2) {
 				c.setEnv("INCPATH", c.getEnv("INCPATH")+':'+arg.substring(2));
 			} else if (arg.charAt(0) == '-') {
@@ -114,7 +117,7 @@ public class NEC extends NativeApp {
 		if (optimize) new Optimizer().visitUnit(unit);
 		//writing object code
 		new VarIndexer().visitUnit(unit);
-		EAsmWriter wr = new EAsmWriter();
+		EAsmWriter wr = new EAsmWriter(dbginfo);
 		try {
 			OutputStream out = FSManager.fs().write(c.toFile(outname));
 			wr.writeTo(unit, out);
