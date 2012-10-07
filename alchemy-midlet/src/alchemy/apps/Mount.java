@@ -34,7 +34,7 @@ public class Mount extends NativeApp {
 	private static final String VERSION = "mount 1.0";
 	private static final String HELP = "Mounts file system to the given directory.\n\nUsage: mount dir type [options]";
 	
-	public int main(Context c, String[] args) {
+	public int main(Context c, String[] args) throws IOException {
 		if (args.length == 0 || args[0].equals("-h")) {
 			IO.println(c.stdout, HELP);
 			return 0;
@@ -47,18 +47,18 @@ public class Mount extends NativeApp {
 			IO.println(c.stderr, "mount: Insufficient arguments");
 			return 1;
 		}
+		String type = args[1];
 		String dir = c.toFile(args[0]);
 		String options = (args.length < 3) ? "" : args[2];
 		if (!FSManager.fs().isDirectory(dir)) {
 			IO.println(c.stderr, "Directory does not exist: "+dir);
 			return 1;
 		}
-		try {
-			FSManager.mount(dir, args[1], options);
-		} catch (IOException ioe) {
-			IO.println(c.stderr, "I/O error: "+ioe.getMessage());
-			return 1;
+		if (FSManager.fs().list(dir).length > 0) {
+			IO.println(c.stderr, "Warning: directory not empty");
 		}
+		if (type.equals("rms")) options = "rsfiles";
+		FSManager.mount(dir, type, options);
 		return 0;
 	}
 }
