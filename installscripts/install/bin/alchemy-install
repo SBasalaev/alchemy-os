@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo 'Installing Alchemy OS 2.0 Alpha'
+echo 'Installing Alchemy OS 2.0 Alpha 1'
 
 echo 'Installing core components...'
 # in case this file does not exist
@@ -12,8 +12,8 @@ pkg install alchemy-core alchemy-gui libcore-dev libui-dev nec ex pkg-arh
 echo 'Removing deprecated components'
 pkg remove libcore2 libui0.1
 
-echo 'Adding software sources...'
-echo 'http://alchemy-os.org/pkg 2.0' >> /cfg/pkg/sources
-echo 'http://alchemy-os.org/pkg  2.0-nonfree' >> /cfg/pkg/sources
+#echo 'Adding software sources...'
+#echo 'http://alchemy-os.org/pkg 2.0' >> /cfg/pkg/sources
+#echo 'http://alchemy-os.org/pkg  2.0-nonfree' >> /cfg/pkg/sources
 
 echo 'Installed successfully!'
