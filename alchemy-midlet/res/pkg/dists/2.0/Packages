@@ -127,11 +127,11 @@ Summary: this package depends on all packages that constitute Alchemy GUI, it is
 File: alchemy-gui_4.pkg
 
 Package: alpaca
-Version: 0.2.3-2
+Version: 0.2.3-3
 Section: admin
 Depends: libcore3, libui1, libpkg1, pkg, terminal
 Summary: GUI for Alchemy package manager
-File: alpaca_0.2.3-2.pkg
+File: alpaca_0.2.3-3.pkg
 
 Package: imgview
 Version: 0.1.1-1
