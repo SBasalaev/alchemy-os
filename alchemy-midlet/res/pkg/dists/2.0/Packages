@@ -113,11 +113,11 @@ Summary: Alchemy builtin terminal
 File: terminal_1.0-2.pkg
 
 Package: alchemy-core
-Version: 2
+Version: 3
 Section: admin
-Depends: libcore3, libui1, sh, terminal, edit, coreutils, pkg
+Depends: libcore3, libui1, sh, terminal, edit, coreutils, pkg, mount
 Summary: this package depends on all core components of Alchemy OS, it is recommended not to remove it to ensure safe upgrades
-File: alchemy-core_2.pkg
+File: alchemy-core_3.pkg
 
 Package: alchemy-gui
 Version: 4
