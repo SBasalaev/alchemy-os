@@ -24,8 +24,7 @@ import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 
 /**
- * Prints list of roots of JSR-75 file system.
- * (Fails with error if JSR-75 is not supported)
+ * Prints lists of roots in all supported file systems.
  * @author Sergey Basalaev
  */
 public class LsRoots extends NativeApp {
@@ -42,7 +41,7 @@ public class LsRoots extends NativeApp {
 				c.stdout.write(' ');
 				IO.println(c.stdout, roots[i]);
 			}
-		} catch (Exception e) {
+		} catch (Throwable t) {
 			IO.println(c.stdout, "* not supported");
 		}
 		IO.println(c.stdout, "siemens driver\n");
@@ -53,7 +52,7 @@ public class LsRoots extends NativeApp {
 				c.stdout.write(' ');
 				IO.println(c.stdout, roots[i]);
 			}
-		} catch (Exception e) {
+		} catch (Throwable t) {
 			IO.println(c.stdout, "* not supported");
 		}
 		return 0;
