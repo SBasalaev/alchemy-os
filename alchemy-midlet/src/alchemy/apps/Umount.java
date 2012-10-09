@@ -43,8 +43,8 @@ public class Umount extends NativeApp {
 			if (dir.length() == 0) {
 			IO.println(c.stderr, "umount: Cannot unmount root directory!");
 			return 1;
-			} else if (!FSManager.umount(args[0])) {
-				IO.println(c.stderr, "umount: "+args[0]+" is not mounted");
+			} else if (!FSManager.umount(dir)) {
+				IO.println(c.stderr, "umount: "+dir+" is not mounted");
 				return 1;
 			}
 		}
