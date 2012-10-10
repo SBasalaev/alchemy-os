@@ -13,11 +13,11 @@ Depends: libcore3
 File: coreutils_0.4.2-1.pkg
 
 Package: edit
-Version: 0.9.1-1
+Version: 0.9.1-2
 Section: gui
 Summary: simple text editor
 Depends: libcore3, libui1
-File: edit_0.9.1-1.pkg
+File: edit_0.9.1-2.pkg
 
 Package: ex
 Version: 1.0.1-1
