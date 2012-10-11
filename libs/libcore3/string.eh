@@ -30,6 +30,7 @@ def String.split(ch: Int): [String];
 def String.format(args: Array): String;
 def String.chars(): CArray;
 def String.utfbytes(): BArray;
+def String.hash(): Int;
 
 def ca2str(ca: CArray): String;
 def ba2utf(ba: BArray): String;

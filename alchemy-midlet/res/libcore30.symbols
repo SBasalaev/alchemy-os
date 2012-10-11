@@ -139,3 +139,4 @@ String.tolongbase
 Error.code
 Error.msg
 error
+String.hash

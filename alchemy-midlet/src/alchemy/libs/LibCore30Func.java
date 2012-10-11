@@ -475,6 +475,8 @@ class LibCore30Func extends NativeFunction {
 				return ((AlchemyException)args[0]).getMessage();
 			case 140: // error(code: Int, msg: String)
 				throw new AlchemyException(ival(args[0]), (String)args[1]);
+			case 141: // String.hash(): Int
+				return Ival(args[0].hashCode());
 			default:
 				return null;
 		}
