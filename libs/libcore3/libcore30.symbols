@@ -140,3 +140,4 @@ Error.code
 Error.msg
 error
 String.hash
+matches_glob

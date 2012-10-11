@@ -477,6 +477,8 @@ class LibCore30Func extends NativeFunction {
 				throw new AlchemyException(ival(args[0]), (String)args[1]);
 			case 141: // String.hash(): Int
 				return Ival(args[0].hashCode());
+			case 142: // matches_glob(path: String, glob: String): Bool
+				return Ival(IO.matchesPattern((String)args[0], (String)args[1]));
 			default:
 				return null;
 		}

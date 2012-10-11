@@ -228,4 +228,66 @@ public final class IO {
 			len = from.read(buf);
 		}
 	}
+	
+	/**
+	 * Checks if given filename matches glob pattern.
+	 * Supported wildcards are <code>*</code> and <code>?</code>.
+	 * These characters can be escaped using backslash.
+	 */
+    public static boolean matchesPattern(String name, String pattern) {
+        int nameofs = 0;
+        int pofs = 0;
+        int namelen = name.length();
+        int plen = pattern.length();
+        while (pofs < plen) {
+            char ch = pattern.charAt(pofs);
+            pofs++;
+            switch (ch) {
+                case '*': { // any sequence of characters
+                    /* skip subsequent stars */
+                    while (pofs < plen && pattern.charAt(pofs) == '*')
+                        pofs++;
+                    /* ending star matches everything */
+                    if (pofs == plen) return true;
+                    /* match tails */
+                    String tailpattern = pattern.substring(pofs, plen);
+                    ch = tailpattern.charAt(0);
+                    if (ch == '?') { //unoptimized cycle
+                        for (int i = nameofs; i < namelen; i++) {
+                            if (matchesPattern(name.substring(i,namelen), tailpattern))
+                                return true;
+                        }
+                    } else {
+                        if (ch == '\\' && tailpattern.length() > 1) ch = tailpattern.charAt(1);
+                        for (int i = name.indexOf(ch, nameofs); i >= 0; i = name.indexOf(ch, i+1)) {
+                            if (matchesPattern(name.substring(i,namelen), tailpattern))
+                                return true;
+                        }
+                    }
+                    return false;
+                }
+                case '\\': { // escaped character, exact match
+                    if (pofs < plen) ch = pattern.charAt(pofs);
+                    if (nameofs == namelen) return false;
+                    if (name.charAt(nameofs) != ch) return false;
+                    nameofs++;
+                    pofs++;
+                    break;
+                }
+                case '?': { // any character
+                    if (nameofs == namelen) return false;
+                    nameofs++;
+                    break;
+                }
+                default: { // exact character match
+                    if (nameofs == namelen) return false;
+                    if (name.charAt(nameofs) != ch) return false;
+                    nameofs++;
+                }
+            }
+        }
+        /* empty pattern matches empty string */
+        return nameofs == namelen;
+    }
+
 }

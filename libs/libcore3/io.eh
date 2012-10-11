@@ -43,26 +43,27 @@ def pathdir(path: String): String;
 def abspath(path: String): String;
 def relpath(path: String): String;
 
-def fcreate(file: String);
-def fremove(file: String);
-def mkdir(file: String);
+def fcreate(path: String);
+def fremove(path: String);
+def mkdir(path: String);
 def fcopy(source: String, dest: String);
 def fmove(source: String, dest: String);
-def exists(file: String): Bool;
-def is_dir(file: String): Bool;
-def fopen_r(file: String): IStream;
-def fopen_w(file: String): OStream;
-def fopen_a(file: String): OStream;
-def flist(file: String): [String];
-def fmodified(file: String): Long;
-def fsize(file: String): Long;
+def exists(path: String): Bool;
+def is_dir(path: String): Bool;
+def fopen_r(path: String): IStream;
+def fopen_w(path: String): OStream;
+def fopen_a(path: String): OStream;
+def flist(path: String): [String];
+def flistfilter(path: String, glob: String, show_hidden: Bool): [String];
+def fmodified(path: String): Long;
+def fsize(path: String): Long;
 
-def set_read(file: String, on: Bool);
-def set_write(file: String, on: Bool);
-def set_exec(file: String, on: Bool);
-def can_read(file: String): Bool;
-def can_write(file: String): Bool;
-def can_exec(file: String): Bool;
+def set_read(path: String, on: Bool);
+def set_write(path: String, on: Bool);
+def set_exec(path: String, on: Bool);
+def can_read(path: String): Bool;
+def can_write(path: String): Bool;
+def can_exec(path: String): Bool;
 
 def get_cwd(): String;
 def set_cwd(dir: String);
@@ -72,3 +73,5 @@ def space_free(root: String): Long;
 def space_used(root: String): Long;
 
 def readurl(url: String): IStream;
+
+def matches_glob(path: String, glob: String): Bool;
