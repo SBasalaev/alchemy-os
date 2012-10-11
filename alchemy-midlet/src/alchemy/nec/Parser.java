@@ -548,51 +548,51 @@ public class Parser {
 				if (var == null) throw new ParseException("Variable "+str+" is not defined");
 				switch (t.nextToken()) {
 					case '=': { // setting variable value
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, value);
 					}
 					case Token.PLUSEQ: { // var = var + expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '+', value));
 					}
 					case Token.MINUSEQ: { // var = var - expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '-', value));
 					}
 					case Token.STAREQ: { // var = var * expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '*', value));
 					}
 					case Token.SLASHEQ: { // var = var / expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '/', value));
 					}
 					case Token.PERCENTEQ: { // var = var % expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '%', value));
 					}
 					case Token.BAREQ: { // var = var | expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '|', value));
 					}
 					case Token.AMPEQ: { // var = var & expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '&', value));
 					}
 					case Token.HATEQ: { // var = var ^ expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '^', value));
 					}
 					case Token.LTLTEQ: { // var = var << expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.LTLT, value));
 					}
 					case Token.GTGTEQ: { // var = var >> expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.GTGT, value));
 					}
 					case Token.GTGTGTEQ: { // var = var >>> expr
-						Expr value = cast(parseExpr(scope), var.type);
+						Expr value = parseExpr(scope);
 						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.GTGTGT, value));
 					}
 					default: { // getting variable value
@@ -1035,12 +1035,60 @@ public class Parser {
 			}
 			if (index >= 0) {
 				ConstExpr indexexpr = new ConstExpr(lnum, new Int(index));
-				if (t.nextToken() == '=') {
-					Expr assignexpr = cast(parseExpr(scope), fields[index].type);
-					return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
-				} else {
-					t.pushBack();
-					return new ALoadExpr(lnum, expr, indexexpr, fields[index].type);
+				ALoadExpr ldexpr = new ALoadExpr(lnum, expr, indexexpr, fields[index].type);
+				switch (t.nextToken()) {
+					case '=': {
+						Expr assignexpr = cast(parseExpr(scope), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.PLUSEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '+', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.MINUSEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '-', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.STAREQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '*', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.SLASHEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '/', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.PERCENTEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '%', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.AMPEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '&', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.BAREQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '|', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.HATEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '^', parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.LTLTEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.LTLT, parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.GTGTEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.GTGT, parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					case Token.GTGTGTEQ: {
+						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.GTGTGT, parseExpr(scope)), fields[index].type);
+						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+					}
+					default: {
+						t.pushBack();
+						return ldexpr;
+					}
 				}
 			}
 		}
@@ -1188,6 +1236,7 @@ public class Parser {
 	
 	/** Returns assignment expression. */
 	private Expr makeSetVar(int lnum, Scope scope, Var var, Expr value) throws ParseException {
+		value = cast(value, var.type);
 		if (var.isConst)
 			throw new ParseException("Cannot assign to constant "+var.name);
 		if (scope.isLocal(var.name)) {

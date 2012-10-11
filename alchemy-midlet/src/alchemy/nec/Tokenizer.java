@@ -60,6 +60,7 @@ class Tokenizer {
 		chtypes['-'] = OPCHAR;
 		chtypes['*'] = OPCHAR;
 		chtypes['/'] = OPCHAR;
+		chtypes['%'] = OPCHAR;
 		chtypes['='] = OPCHAR;
 		chtypes['<'] = OPCHAR;
 		chtypes['>'] = OPCHAR;
