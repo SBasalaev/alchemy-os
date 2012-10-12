@@ -152,7 +152,7 @@ public class Parser {
 				expect('=');
 				Expr expr = (Expr)parseExpr(unit).accept(new Optimizer(), unit);
 				if (!(expr instanceof ConstExpr))
-					throw new ParseException("Could not evaluate value of global constant");
+					throw new ParseException("Constant expression expected");
 				Var cnst = new Var(name, expr.rettype());
 				cnst.isConst = true;
 				cnst.constValue = (ConstExpr)expr;

@@ -403,6 +403,7 @@ public class Optimizer implements ExprVisitor {
 				if (!(o1 instanceof Func) && !(o2 instanceof Func)) {
 					exprs.setElementAt(new ConstExpr(e1.line, String.valueOf(o1)+o2), i);
 					exprs.removeElementAt(i+1);
+					optimized = true;
 				} else {
 					i++;
 				}
@@ -410,7 +411,12 @@ public class Optimizer implements ExprVisitor {
 				i++;
 			}
 		}
-		return concat;
+		if (exprs.size() == 1) {
+			optimized = true;
+			return exprs.elementAt(0);
+		} else {
+			return concat;
+		}
 	}
 
 	public Object visitConst(ConstExpr cexpr, Object data) {
