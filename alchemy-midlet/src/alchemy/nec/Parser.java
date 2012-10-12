@@ -951,62 +951,124 @@ public class Parser {
 	private Expr parseBrackets(Scope scope, Expr arexpr) throws IOException, ParseException {
 		int lnum = t.lineNumber();
 		Type artype = arexpr.rettype();
-		Expr indexexpr = parseExpr(scope);
-		expect(']');
-		if (artype.isSubtypeOf(BuiltinType.ARRAY)
-		 || artype.equals(BuiltinType.BARRAY)
-		 || artype.equals(BuiltinType.CARRAY)) {
-			indexexpr = cast(indexexpr, BuiltinType.INT);
-			if (t.nextToken() == '=') {
-				Expr assignexpr = parseExpr(scope);
-				if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
-					assignexpr = cast(assignexpr, BuiltinType.INT);
-				} else if (artype instanceof ArrayType) {
-					assignexpr = cast(assignexpr, ((ArrayType)artype).elementType());
-				} else {
-					assignexpr = cast(assignexpr, BuiltinType.ANY);
-				}
-				return new AStoreExpr(lnum, arexpr, indexexpr, assignexpr);
+		if (t.nextToken() == ':') { // range with implicit start
+			if (t.nextToken() == ']') {
+				return arexpr;
 			} else {
 				t.pushBack();
-				if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
-					return new ALoadExpr(lnum, arexpr, indexexpr, BuiltinType.INT);
-				} else if (artype instanceof ArrayType) {
-					return new ALoadExpr(lnum, arexpr, indexexpr, ((ArrayType)artype).elementType());
-				} else {
-					return new ALoadExpr(lnum, arexpr, indexexpr, BuiltinType.ANY);
-				}
+				Expr endexpr = cast(parseExpr(scope), BuiltinType.INT);
+				expect(']');
+				Func method = findMethod(artype, "range");
+				if (method == null)
+					throw new ParseException("Method "+artype+".range not found");
+				if (method.type.args.length != 3 ||
+				   !method.type.args[1].equals(BuiltinType.INT) ||
+				   !method.type.args[2].equals(BuiltinType.INT))
+					throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
+				Expr startexpr = new ConstExpr(lnum, Int.ZERO);
+				method.hits++;
+				return makeFCall(lnum, method, new Expr[] {arexpr, startexpr, endexpr});
 			}
 		} else {
-			if (t.nextToken() == '=') {
-				Func method = findMethod(artype, "set");
-				if (method == null)
-					throw new ParseException("Method "+artype+".set not found");
-				if (method.type.args.length != 3)
-					throw new ParseException("Method "+artype+".set must accept exactly two arguments to use [] notation");
-				indexexpr = cast(indexexpr, method.type.args[1]);
-				Expr assignexpr = cast(parseExpr(scope), method.type.args[2]);
-				method.hits++;
-				return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, assignexpr});
+			t.pushBack();
+			Expr indexexpr = parseExpr(scope);
+			if (t.nextToken() == ':') {
+				if (t.nextToken() == ']') { // range with implicit end
+					Func method = findMethod(artype, "len");
+					if (method == null)
+						throw new ParseException("Method "+artype+".len not found");
+					if (method.type.args.length != 1 || !method.type.rettype.equals(BuiltinType.INT))
+						throw new ParseException("Method "+artype+".len must be ():Int to use [] notation");
+					method.hits++;
+					Expr endexpr = makeFCall(lnum, method, new Expr[] {arexpr});
+					method = findMethod(artype, "range");
+					if (method == null)
+						throw new ParseException("Method "+artype+".range not found");
+					if (method.type.args.length != 3 ||
+					   !method.type.args[1].equals(BuiltinType.INT) ||
+					   !method.type.args[2].equals(BuiltinType.INT))
+						throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
+					indexexpr = cast(indexexpr, BuiltinType.INT);
+					method.hits++;
+					return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, endexpr});
+				} else {
+					t.pushBack();
+					Expr endexpr = cast(parseExpr(scope), BuiltinType.INT);
+					expect(']');
+					Func method = findMethod(artype, "range");
+					if (method == null)
+						throw new ParseException("Method "+artype+".range not found");
+					if (method.type.args.length != 3 ||
+					   !method.type.args[1].equals(BuiltinType.INT) ||
+					   !method.type.args[2].equals(BuiltinType.INT))
+						throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
+					method.hits++;
+					return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, endexpr});
+				}
 			} else {
 				t.pushBack();
-				Func method = findMethod(artype, "get");
-				if (method == null)
-					throw new ParseException("Method "+artype+".get not found");
-				if (method.type.args.length != 2)
-					throw new ParseException("Method "+artype+".get must accept exactly one argument to use [] notation");
-				indexexpr = cast(indexexpr, method.type.args[1]);
-				method.hits++;
-				return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr});
+				expect(']');
+				if (artype.isSubtypeOf(BuiltinType.ARRAY)
+				 || artype.equals(BuiltinType.BARRAY)
+				 || artype.equals(BuiltinType.CARRAY)) {
+					indexexpr = cast(indexexpr, BuiltinType.INT);
+					if (t.nextToken() == '=') {
+						Expr assignexpr = parseExpr(scope);
+						if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
+							assignexpr = cast(assignexpr, BuiltinType.INT);
+						} else if (artype instanceof ArrayType) {
+							assignexpr = cast(assignexpr, ((ArrayType)artype).elementType());
+						} else {
+							assignexpr = cast(assignexpr, BuiltinType.ANY);
+						}
+						return new AStoreExpr(lnum, arexpr, indexexpr, assignexpr);
+					} else {
+						t.pushBack();
+						if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
+							return new ALoadExpr(lnum, arexpr, indexexpr, BuiltinType.INT);
+						} else if (artype instanceof ArrayType) {
+							return new ALoadExpr(lnum, arexpr, indexexpr, ((ArrayType)artype).elementType());
+						} else {
+							return new ALoadExpr(lnum, arexpr, indexexpr, BuiltinType.ANY);
+						}
+					}
+				} else {
+					if (t.nextToken() == '=') {
+						Func method = findMethod(artype, "set");
+						if (method == null)
+							throw new ParseException("Method "+artype+".set not found");
+						if (method.type.args.length != 3)
+							throw new ParseException("Method "+artype+".set must accept exactly two arguments to use [] notation");
+						indexexpr = cast(indexexpr, method.type.args[1]);
+						Expr assignexpr = cast(parseExpr(scope), method.type.args[2]);
+						method.hits++;
+						return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, assignexpr});
+					} else {
+						t.pushBack();
+						Func method = findMethod(artype, "get");
+						if (method == null)
+							throw new ParseException("Method "+artype+".get not found");
+						if (method.type.args.length != 2)
+							throw new ParseException("Method "+artype+".get must accept exactly one argument to use [] notation");
+						indexexpr = cast(indexexpr, method.type.args[1]);
+						method.hits++;
+						return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr});
+					}
+				}
 			}
 		}
 	}
 	
-	private Func findMethod(Type type, String name) {
+	private Func findMethod(Type type, String name) throws ParseException {
 		Type stype = type;
 		while (stype != null) {
-			Func method = unit.getFunc(stype.toString()+'.'+name);
-			if (method != null) return method;
+			Var mvar = unit.getVar(type.toString()+'.'+name);
+			if (mvar != null) {
+				if (mvar.isConst && mvar.constValue.value instanceof Func)
+					return (Func)mvar.constValue.value;
+				else
+					throw new ParseException("Cannot use variable as method");
+			}
 			stype = stype.superType();
 		}
 		return null;
