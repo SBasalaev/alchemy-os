@@ -20,7 +20,7 @@ def List.grow(newlen: Int) {
 
 def new_list(): List = new List(size=0, data=new [Any](10))
 
-def List.size(): Int = this.size
+def List.len(): Int = this.size
 
 def List.get(at: Int): Any {
   if (at >= 0 && at < this.size)
@@ -78,7 +78,7 @@ def List.clear() {
   this.size = 0
 }
 
-def List.sublist(from: Int, to: Int): List {
+def List.range(from: Int, to: Int): List {
   if (from >= 0 && to <= this.size && from <= to) {
     var data = new [Any] (to-from)
     acopy(this.data, from, data, 0, data.len)

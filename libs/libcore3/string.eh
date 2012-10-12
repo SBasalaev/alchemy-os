@@ -17,10 +17,12 @@ def String.todouble(): Double;
 
 def String.len(): Int;
 def String.ch(at: Int): Int;
+const `String.get` = `String.ch`
 def String.indexof(ch: Int): Int;
 def String.lindexof(ch: Int): Int;
 def String.find(sub: String): Int;
 def String.substr(from: Int, to: Int): String;
+const `String.range` = `String.substr`
 def String.ucase(): String;
 def String.lcase(): String;
 def String.concat(str: String): String;

@@ -5,6 +5,7 @@ type StrBuf < Any;
 def new_strbuf(): StrBuf;
 
 def StrBuf.ch(at: Int): Int;
+const `StrBuf.get` = `StrBuf.ch`
 def StrBuf.chars(from: Int, to: Int, buf: CArray, ofs: Int); 
 def StrBuf.append(a: Any): StrBuf;
 def StrBuf.addch(ch: Int): StrBuf;
