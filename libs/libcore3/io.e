@@ -27,7 +27,7 @@ def flistfilter(path: String, glob: String, show_hidden: Bool): [String] {
   for (var i=0, i < files.len, i += 1) {
     var file = files[i]
     if (matches_glob(file, glob))
-    if (show_hidden || file.ch(0) != '.')
+    if (show_hidden || file[0] != '.')
       list.add(file)
   }
   list.toarray()
