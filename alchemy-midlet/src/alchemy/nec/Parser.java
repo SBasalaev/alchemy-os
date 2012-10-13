@@ -1062,7 +1062,7 @@ public class Parser {
 	private Func findMethod(Type type, String name) throws ParseException {
 		Type stype = type;
 		while (stype != null) {
-			Var mvar = unit.getVar(type.toString()+'.'+name);
+			Var mvar = unit.getVar(stype.toString()+'.'+name);
 			if (mvar != null) {
 				if (mvar.isConst && mvar.constValue.value instanceof Func)
 					return (Func)mvar.constValue.value;
@@ -1387,6 +1387,10 @@ public class Parser {
 		}
 		if (toType.isSupertypeOf(fromType) || toType.equals(BuiltinType.ANY)) {
 			return expr;
+		}
+		if (toType.isSubtypeOf(fromType)) {
+			warn(W_TYPESAFE, "Unsafe type cast from "+fromType+" to "+toType);
+			return new CastExpr(expr.line, toType, expr);
 		}
 		if (toType instanceof FunctionType && fromType instanceof FunctionType) {
 			FunctionType fromF = (FunctionType)fromType;
