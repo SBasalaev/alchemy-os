@@ -239,20 +239,20 @@ class LibCore30Func extends NativeFunction {
 			case 69: // OStream.flush(out: OStream)
 				((OutputStream)args[0]).flush();
 				return null;
-			case 70: { // exec_wait(cmd: String, args: Array): Int
-				String prog = (String)args[0];
-				Object[] oargs = (Object[])args[1];
-				Context cc = new Context(c);
+			case 70: { // Process.start_wait(cmd: String, args: Array): Int
+				Context cc = (Context)args[0];
+				String prog = (String)args[1];
+				Object[] oargs = (Object[])args[2];
 				String[] sargs = new String[oargs.length];
 				for (int i=oargs.length-1; i>=0; i--) {
 					sargs[i] = String.valueOf(oargs[i]);
 				}
 				return Ival(cc.startAndWait(prog, sargs));
 			}
-			case 71: { // exec(cmd: String, args: Array)
-				String prog = (String)args[0];
-				Object[] oargs = (Object[])args[1];
-				Context cc = new Context(c);
+			case 71: { // Process.start(cmd: String, args: Array)
+				Context cc = (Context)args[0];
+				String prog = (String)args[1];
+				Object[] oargs = (Object[])args[2];
 				String[] sargs = new String[oargs.length];
 				for (int i=oargs.length-1; i>=0; i--) {
 					sargs[i] = String.valueOf(oargs[i]);
@@ -479,6 +479,47 @@ class LibCore30Func extends NativeFunction {
 				return Ival(args[0].hashCode());
 			case 142: // matches_glob(path: String, glob: String): Bool
 				return Ival(IO.matchesPattern((String)args[0], (String)args[1]));
+			case 143: // new_process(): Process
+				return new Context(c);
+			case 144: // Process.get_state(): Int
+				return Ival(((Context)args[0]).getState());
+			case 145: // Process.getenv(key: String): String
+				return ((Context)args[0]).getEnv((String)args[1]);
+			case 146: // Process.setenv(key: String, value: String)
+				((Context)args[0]).setEnv((String)args[1], (String)args[2]);
+				return null;
+			case 147: // Process.get_in(): IStream
+				return ((Context)args[0]).stdin;
+			case 148: // Process.get_out(): OStream
+				return ((Context)args[0]).stdout;
+			case 149: // Process.get_err(): OStream
+				return ((Context)args[0]).stderr;
+			case 150: // Process.set_in(in: IStream)
+				((Context)args[0]).stdin = (InputStream)args[1];
+				return null;
+			case 151: // Process.set_out(out: OStream)
+				((Context)args[0]).stdout = (OutputStream)args[1];
+				return null;
+			case 152: // Process.set_err(err: OStream)
+				((Context)args[0]).stderr = (OutputStream)args[1];
+				return null;
+			case 153: // Process.get_cwd(): String
+				return ((Context)args[0]).getCurDir();
+			case 154: // Process.set_cwd(dir: String)
+				((Context)args[0]).setCurDir((String)args[1]);
+				return null;
+			case 155: // Process.get_priority(): Int
+				return Ival(((Context)args[0]).getPriority());
+			case 156: // Process.set_priority(value: Int)
+				((Context)args[0]).setPriority(ival(args[1]));
+				return null;
+			case 157: // Process.get_name(): String
+				return ((Context)args[0]).getName();
+			case 158: // Process.interrupt()
+				((Context)args[0]).interrupt();
+				return null;
+			case 159: // Process.get_exitcode(): Int
+				return Ival(((Context)args[0]).getExitCode());
 			default:
 				return null;
 		}

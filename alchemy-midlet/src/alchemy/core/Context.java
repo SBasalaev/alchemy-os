@@ -151,13 +151,19 @@ public class Context {
 	/** State of the context. */
 	private int state = NEW;
 	/** Result returned by a program. */
-	private int exitcode = -1;
+	private int exitcode = 0;
 	/** Error thrown by a program. */
 	private Throwable error;
 	/** Streams opened by process. */
 	private Vector streams;
 	/** Listeners of this context. */
 	private Vector listeners;
+	/** Main function. */
+	private Function main;
+	/** Command-line arguments. */
+	private String[] cmdArgs;
+	/** Priority hint. */
+	private int priority = Thread.NORM_PRIORITY;
 
 	/* CONSTRUCTORS */
 
@@ -326,15 +332,14 @@ public class Context {
 	 *
 	 * @see <a href="#LibraryLoading">How programs are loaded</a>
 	 */
-	public void start(String progname, String[] cmdArgs)
+	public void start(String progname, String[] args)
 			throws IOException, InstantiationException, IllegalStateException {
 		if (state != NEW) throw new IllegalStateException();
-		if (cmdArgs == null) cmdArgs = new String[0];
 		Library prog = loadLibForPath(progname, getEnv("PATH"));
-		Function main = prog.getFunction("main");
+		this.main = prog.getFunction("main");
+		this.cmdArgs =  (args != null) ? args : new String[0];
 		if (main == null) throw new InstantiationException("No 'main' function");
-		thread = new ContextThread(progname, main, cmdArgs);
-		setState(RUNNING);
+		thread = new ContextThread(progname);
 		thread.start();
 	}
 
@@ -507,19 +512,32 @@ public class Context {
 	public void removeContextListener(ContextListener l) {
 		if (listeners != null) listeners.removeElement(l);
 	}
+	
+	public void interrupt() {
+		if (thread == null) throw new IllegalStateException("Process is not running");
+		thread.interrupt();
+	}
+	
+	public void setPriority(int pr) {
+		if (pr < Thread.MIN_PRIORITY || pr > Thread.MAX_PRIORITY)
+			throw new IllegalArgumentException("Process priority is out of range: "+pr);
+		if (thread == null) priority = pr;
+		else thread.setPriority(pr);
+	}
+	
+	public int getPriority() {
+		if (thread == null) return priority;
+		else return thread.getPriority();
+	}
 
 	private class ContextThread extends Thread {
 
-		private final Function main;
-		private final String[] cmdArgs;
-
-		public ContextThread(String progname, Function main, String[] cmdArgs) {
+		public ContextThread(String progname) {
 			super(progname);
-			this.main = main;
-			this.cmdArgs = cmdArgs;
 		}
 
 		public void run() {
+			setState(RUNNING);
 			try {
 				Int r = (Int)main.exec(Context.this, new Object[] {cmdArgs});
 				exitcode = r == null ? 0 : r.value;
