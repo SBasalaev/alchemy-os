@@ -1,5 +1,8 @@
 type Process < Any;
 
+type IStream;
+type OStream;
+
 const PS_NEW = 0
 const PS_RUNNING = 1
 const PS_ENDED = 5
