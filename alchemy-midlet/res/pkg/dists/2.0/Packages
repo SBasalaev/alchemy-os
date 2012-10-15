@@ -1,70 +1,105 @@
+Package: alchemy-core
+Version: 5
+Section: metapackages
+Depends: coreutils, edit, libcore3, libui1, mount, pkg, sh, terminal
+Summary: this package depends on all core components of Alchemy OS, it is recommended not to remove it to ensure safe upgrades
+File: alchemy-core_5.pkg
+Size: 349
+
+Package: alchemy-gui
+Version: 5
+Section: gui
+Depends: alpaca, appmenu, edit, imgview, navigator, terminal
+Summary: this metapackage depends on all packages that constitute default Alchemy GUI
+File: alchemy-gui_5.pkg
+Size: 290
+
+Package: alpaca
+Version: 0.2.4-2
+Section: admin
+Depends: libcore3, libpkg1, libui1, pkg, terminal
+Summary: GUI for package manager
+File: alpaca_0.2.4-2.pkg
+Size: 5965
+
 Package: appmenu
-Version: 0.3.1-1
+Version: 0.3.1-2
 Section: gui
 Depends: libcore3, libui1
 Summary: application menu
-File: appmenu_0.3.1-1.pkg
+File: appmenu_0.3.1-2.pkg
+Size: 1340
 
 Package: coreutils
-Version: 0.4.2-1
+Version: 0.5-1
 Section: utils
-Summary: essential utilities for Alchemy OS
 Depends: libcore3
-File: coreutils_0.4.2-1.pkg
+Summary: essential utilities for Alchemy OS
+File: coreutils_0.5-1.pkg
+Size: 8056
 
 Package: edit
-Version: 0.9.1-2
-Section: gui
-Summary: simple text editor
+Version: 0.9.1-3
+Section: text
 Depends: libcore3, libui1
-File: edit_0.9.1-2.pkg
+Summary: simple text editor
+File: edit_0.9.1-3.pkg
+Size: 1287
 
 Package: ex
-Version: 1.0.1-1
+Version: 1.1-1
 Section: devel
-Depends: nec, libcore3
-Summary: source building tool
-File: ex_1.0.1-1.pkg
+Depends: libcore3, nec
+Summary: build tool for Alchemy OS
+File: ex_1.1-1.pkg
+Size: 1274
 
 Package: fileinfo
-Version: 1.2.1-1
+Version: 1.3-1
 Section: gui
+Depends: libcore3, libfiletype1, libui1
 Summary: file properties viewer
-Depends: libcore3, libui1, libfiletype1
-File: fileinfo_1.2.1-1.pkg
+File: fileinfo_1.3-1.pkg
+Size: 1002
 
-Package: libcore3
-Version: 2.90-1
-Section: libs
-Summary: system library for Alchemy OS
-File: libcore3_2.90-1.pkg
+Package: imgview
+Version: 0.2-1
+Section: gui
+Depends: libcore3, libui1
+Summary: simple image viewer
+File: imgview_0.2-1.pkg
+Size: 760
 
 Package: libcore-dev
-Version: 2.90-1
+Version: 2.90.3-1
 Section: libdevel
 Depends: libcore3
-Summary: system development headers for Alchemy OS
-File: libcore-dev_2.90-1.pkg
+Summary: headers for standard library
+File: libcore-dev_2.90.3-1.pkg
+Size: 10549
+
+Package: libcore3
+Version: 2.90.3-1
+Section: libs
+Summary: standard library which is used by all programs
+File: libcore3_2.90.3-1.pkg
+Size: 5968
 
 Package: libfiletype1
-Version: 1.0.1-1
+Version: 1.0.2-1
 Section: libs
 Depends: libcore3
 Summary: library to detect file type
-File: libfiletype1_1.0.1-1.pkg
+File: libfiletype1_1.0.2-1.pkg
+Size: 2194
 
 Package: libpkg1
-Version: 0.3.3-1
+Version: 0.3.4-1
 Section: libs
-Summary: package management library
 Depends: libcore3
-File: libpkg1_0.3.3-1.pkg
-
-Package: libui1
-Version: 0.90-1
-Section: libs
-Summary: graphical interface library
-File: libui1_0.90-1.pkg
+Summary: package management library
+File: libpkg1_0.3.4-1.pkg
+Size: 6685
 
 Package: libui-dev
 Version: 0.90-1
@@ -72,76 +107,61 @@ Section: libdevel
 Depends: libui1
 Summary: headers for graphical interface library
 File: libui-dev_0.90-1.pkg
+Size: 6764
 
-Package: navigator
-Version: 0.3.2-1
-Section: gui
-Depends: libcore3, libui1, libfiletype1, edit, imgview, fileinfo, coreutils
-Summary: file manager
-File: navigator_0.3.2-1.pkg
-
-Package: nec
-Version: 1.90-1
-Section: devel
-Summary: builtin compiler and linker for Alchemy OS
-File: nec_1.90-1.pkg
-
-Package: pkg
-Version: 0.1.3-2
-Section: admin
-Summary: package manager
-Depends: libpkg1, libcore3
-File: pkg_0.1.3-2.pkg
-
-Package: pkg-arh
-Version: 0.1.2-2
-Section: admin
-Summary: utility to work with .pkg archives
-Depends: libpkg1, libcore3
-File: pkg-arh_0.1.2-2.pkg
-
-Package: sh
-Version: 1.0-1
-Section: admin
-Summary: Alchemy builtin shell
-File: sh_1.0-1.pkg
-
-Package: terminal
-Version: 1.0-2
-Section: gui
-Summary: Alchemy builtin terminal
-File: terminal_1.0-2.pkg
-
-Package: alchemy-core
-Version: 3
-Section: admin
-Depends: libcore3, libui1, sh, terminal, edit, coreutils, pkg, mount
-Summary: this package depends on all core components of Alchemy OS, it is recommended not to remove it to ensure safe upgrades
-File: alchemy-core_3.pkg
-
-Package: alchemy-gui
-Version: 4
-Section: gui
-Depends: appmenu, terminal, alpaca, navigator, imgview
-Summary: this package depends on all packages that constitute Alchemy GUI, it is recommended not to remove it to ensure safe upgrades
-File: alchemy-gui_4.pkg
-
-Package: alpaca
-Version: 0.2.3-3
-Section: admin
-Depends: libcore3, libui1, libpkg1, pkg, terminal
-Summary: GUI for Alchemy package manager
-File: alpaca_0.2.3-3.pkg
-
-Package: imgview
-Version: 0.1.1-1
-Section: gui
-Depends: libcore3, libui1
-Summary: simple image viewer
-File: imgview_0.1.1-1.pkg
+Package: libui1
+Version: 0.90-1
+Section: libs
+Summary: graphical interface library
+File: libui1_0.90-1.pkg
+Size: 338
 
 Package: mount
 Version: 1.0
 Section: admin
 Summary: utilities to work with different file systems
 File: mount_1.0.pkg
+Size: 327
+
+Package: navigator
+Version: 0.3.2-1
+Section: gui
+Depends: coreutils, edit, fileinfo, imgview, libcore3, libfiletype1, libui1
+Summary: file manager for Alchemy OS
+File: navigator_0.3.2-1.pkg
+Size: 9059
+
+Package: nec
+Version: 1.90-1
+Section: devel
+Depends: libcore-dev
+Summary: Alchemy builtin compiler and linker
+File: nec_1.90-1.pkg
+Size: 530
+
+Package: pkg
+Version: 0.1.4-1
+Section: admin
+Depends: libcore3, libpkg1
+Summary: package manager
+File: pkg_0.1.4-1.pkg
+Size: 1655
+
+Package: pkg-arh
+Version: 0.1.4-1
+Section: admin
+Depends: libcore3, libpkg1
+Summary: utility to view/install package files
+File: pkg-arh_0.1.4-1.pkg
+Size: 941
+
+Package: sh
+Version: 1.0-1
+Section: admin
+Summary: Alchemy builtin shell
+
+PACKAGE
+Package: terminal
+Version: 1.0-2
+Section: gui
+Summary: Alchemy builtin terminal
