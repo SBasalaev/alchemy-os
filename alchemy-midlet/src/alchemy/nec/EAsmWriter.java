@@ -233,7 +233,7 @@ public class EAsmWriter implements ExprVisitor {
 					writer.visitJumpInsn(cond ? Opcodes.IFLT : Opcodes.IFGE, jumpto);
 					break;
 				case '>':
-					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLE, jumpto);
+					writer.visitJumpInsn(cond ? Opcodes.IFGT : Opcodes.IFLE, jumpto);
 					break;
 				case Token.LTEQ:
 					writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
