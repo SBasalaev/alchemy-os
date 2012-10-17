@@ -21,14 +21,12 @@ def flush() = stdout().flush()
 def OStream.printf(fmt: String, args: Array) = this.print(fmt.format(args))
 def printf(fmt: String, args: Array) = stdout().printf(fmt, args)
 
-def flistfilter(path: String, glob: String, show_hidden: Bool): [String] {
+def flistfilter(path: String, glob: String): [String] {
   var files = flist(path)
   var list = new_list()
   for (var i=0, i < files.len, i += 1) {
     var file = files[i]
-    if (matches_glob(file, glob))
-    if (show_hidden || file[0] != '.')
-      list.add(file)
+    if (matches_glob(file, glob)) list.add(file)
   }
   list.toarray()
 }

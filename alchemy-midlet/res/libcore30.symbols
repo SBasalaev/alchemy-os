@@ -158,3 +158,9 @@ Process.set_priority
 Process.get_name
 Process.interrupt
 Process.get_exitcode
+istream_from_ba
+new_baostream
+BArrayOStream.len
+BArrayOStream.tobarray
+BArrayOStream.reset
+new_pipe

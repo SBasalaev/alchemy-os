@@ -1,5 +1,7 @@
 /* Input/Output */
 
+use "connection.eh"
+
 const EOF = -1
 
 type IStream < Any;
@@ -54,7 +56,7 @@ def fopen_r(path: String): IStream;
 def fopen_w(path: String): OStream;
 def fopen_a(path: String): OStream;
 def flist(path: String): [String];
-def flistfilter(path: String, glob: String, show_hidden: Bool): [String];
+def flistfilter(path: String, glob: String): [String];
 def fmodified(path: String): Long;
 def fsize(path: String): Long;
 
@@ -75,3 +77,14 @@ def space_used(root: String): Long;
 def readurl(url: String): IStream;
 
 def matches_glob(path: String, glob: String): Bool;
+
+def istream_from_ba(buf: BArray): IStream;
+
+type BArrayOstream < OStream;
+
+def new_baostream(): BArrayOStream;
+def BArrayOStream.len(): Int;
+def BArrayOStream.tobarray(): BArray;
+def BArrayOStream.reset();
+
+def new_pipe(): StreamConnection;
