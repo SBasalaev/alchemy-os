@@ -159,9 +159,11 @@ Package: sh
 Version: 1.0-1
 Section: admin
 Summary: Alchemy builtin shell
+File: sh_1.0-1.pkg
 
 PACKAGE
 Package: terminal
 Version: 1.0-2
 Section: gui
 Summary: Alchemy builtin terminal
+File: terminal_1.0-2.pkg

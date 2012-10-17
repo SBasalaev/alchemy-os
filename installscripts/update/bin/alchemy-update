@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo 'Updating Alchemy OS to 2.0 Alpha 1'
+echo 'Updating Alchemy OS to 2.0 Alpha 3'
 
 echo 'Updating core components...'
 echo >> /cfg/pkg/db/sources/installed
