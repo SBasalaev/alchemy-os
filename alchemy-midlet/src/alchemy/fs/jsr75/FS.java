@@ -209,9 +209,11 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public String[] list(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ);
+		String path = pathFor(file);
+		if (!path.endsWith("/")) path += "/";
+		FileConnection fc = (FileConnection)Connector.open(path, Connector.READ);
 		try {
-			Enumeration e = fc.list("*", true);
+			Enumeration e = fc.list("*", false);
 			Vector v = new Vector();
 			while (e.hasMoreElements()) v.addElement(e.nextElement());
 			int size = v.size();
