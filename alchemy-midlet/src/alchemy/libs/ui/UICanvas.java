@@ -30,11 +30,13 @@ import javax.microedition.lcdui.Image;
  */
 public class UICanvas extends Canvas {
 	
-	private final Image buffer;
+	private Image buffer;
 	
 	public UICanvas(boolean fullscreen) {
 		setFullScreenMode(fullscreen);
-		buffer = Image.createImage(getWidth(), getHeight());
+		if (buffer == null) {
+			buffer = Image.createImage(getWidth(), getHeight());
+		}
 	}
 	
 	protected void paint(Graphics g) {
@@ -68,5 +70,13 @@ public class UICanvas extends Canvas {
 	/** Generates pointer drag event. */
 	protected void pointerDragged(int x, int y) {
 		UIServer.pushEvent(this, UIServer.EVENT_PTR_DRAG, new Object[] {new Int(x), new Int(y)});
+	}
+
+	protected synchronized void sizeChanged(int w, int h) {
+		Image oldbuf = buffer;
+		buffer = Image.createImage(getWidth(), getHeight());
+		if (oldbuf != null) {
+			buffer.getGraphics().drawImage(oldbuf, 0, 0, Graphics.TOP | Graphics.LEFT);
+		}
 	}
 }

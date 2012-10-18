@@ -12,3 +12,4 @@ const SIZE_LARGE = 16;
 
 def str_width(font: Int, str: String): Int;
 def font_height(font: Int): Int;
+def font_baseline(font: Int): Int;

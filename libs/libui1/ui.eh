@@ -1,26 +1,34 @@
 use "ui_types.eh"
 
-def screen_height(scr: Screen): Int;
-def screen_width(scr: Screen): Int;
+def ui_set_app_title(title: String);
+def ui_set_app_icon(icon: Image);
 
-def screen_get_title(scr: Screen): String;
-def screen_set_title(scr: Screen, title: String);
+type Screen < Any;
 
-def screen_shown(scr: Screen): Bool;
+def Screen.get_height(): Int;
+def Screen.get_width(): Int;
+
+def Screen.get_title(): String;
+def Screen.set_title(title: String);
+
+def Screen.is_shown(): Bool;
 
 def ui_get_screen(): Screen;
 def ui_set_screen(scr: Screen);
 
-def new_menu(text: String, priority: Int): Menu;
-def menu_get_text(menu: Menu): String;
-def menu_get_priority(menu: Menu): Int;
+type Menu < Any;
 
-def screen_add_menu(scr: Screen, menu: Menu);
-def screen_remove_menu(scr: Screen, menu: Menu);
+def new_menu(text: String, priority: Int): Menu;
+def Menu.get_text(): String;
+def Menu.get_priority(): Int;
+
+def Screen.add_menu(menu: Menu);
+def Screen.remove_menu(menu: Menu);
 
 const EV_SHOW = -1;
 const EV_HIDE = -2;
 const EV_MENU = 1;
+const EV_ITEM = 2;
 const EV_KEY = 3;
 const EV_PTR_PRESS = 6;
 const EV_PTR_RELEASE = 7;

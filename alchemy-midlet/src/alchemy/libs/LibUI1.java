@@ -25,7 +25,7 @@ import java.io.IOException;
 /**
  * Native UI library for Alchemy.
  * @author Sergey Basalaev
- * @version 0.1.0
+ * @version 1.0
  */
 public class LibUI1 extends NativeLibrary {
 	

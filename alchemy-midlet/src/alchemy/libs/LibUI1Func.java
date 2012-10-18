@@ -137,8 +137,11 @@ class LibUI1Func extends NativeFunction {
 			case 23: // Graphics.copy_area(xsrc: Int, ysrc: Int, w: Int, h: Int, xdst: Int, ydst: Int)
 				((Graphics)args[0]).copyArea(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]), 0);
 				return null;
-			case 24: // new_canvas(full: Bool): Canvas
-				return new UICanvas(bval(args[0]));
+			case 24: { // new_canvas(full: Bool): Canvas
+				UICanvas canvas = new UICanvas(bval(args[0]));
+				canvas.setTitle(UIServer.getDefaultTitle(c));
+				return canvas;
+			}
 			case 25: { // Canvas.graphics(): Graphics
 				return ((UICanvas)args[0]).getGraphics();
 			}
@@ -195,7 +198,7 @@ class LibUI1Func extends NativeFunction {
 					images = new Image[img.length];
 					System.arraycopy(img, 0, images, 0, img.length);
 				}
-				List list = new List(null, Choice.IMPLICIT, strings, images);
+				List list = new List(UIServer.getDefaultTitle(c), Choice.IMPLICIT, strings, images);
 				list.setSelectCommand((Command)args[2]);
 				return list;
 			}
@@ -219,7 +222,7 @@ class LibUI1Func extends NativeFunction {
 				((Displayable)args[0]).removeCommand((Command)args[1]);
 				return null;
 			case 48: // new_form(): Form
-				return new Form(null);
+				return new Form(UIServer.getDefaultTitle(c));
 			case 49: // Form.add(item: Item)
 				((Form)args[0]).append((Item)args[1]);
 				return null;
@@ -312,8 +315,10 @@ class LibUI1Func extends NativeFunction {
 				return null;
 			case 82: { // new_radioitem(label: String, strings: [String]): RadioItem
 				Object[] array = (Object[])args[1];
-				String[] strings = new String[array.length];
-				System.arraycopy(array, 0, strings, 0, array.length);
+				String[] strings = new String[(array != null) ? array.length : 0];
+				if (array != null) {
+					System.arraycopy(array, 0, strings, 0, array.length);
+				}
 				return new ChoiceGroup((String)args[0], Choice.EXCLUSIVE, strings, null);
 			}
 			case 83: // RadioItem.get_index(): Int
@@ -322,7 +327,7 @@ class LibUI1Func extends NativeFunction {
 				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
 			case 85: { // new_textbox(text: String): TextBox
-				Form box = new Form(null);
+				Form box = new Form(UIServer.getDefaultTitle(c));
 				box.append(new StringItem(null, (String)args[0]));
 				return box;
 			}
@@ -364,6 +369,97 @@ class LibUI1Func extends NativeFunction {
 				c.removeStream(in);
 				return img;
 			}
+			case 97: // TextBox.get_font(): Int
+				return Ival(font2int(((StringItem)((Form)args[0]).get(0)).getFont()));
+			case 98: // TextBox.set_font(f: Int)
+				((StringItem)((Form)args[0]).get(0)).setFont(int2font(ival(args[1])));
+				return null;
+			case 99: // EditBox.get_maxsize(): Int
+				return Ival(((TextBox)args[0]).getMaxSize());
+			case 100: // EditBox.set_maxsize(size: Int)
+				((TextBox)args[0]).setMaxSize(ival(args[1]));
+				return null;
+			case 101: // EditBox.get_size(): Int
+				return Ival(((TextBox)args[0]).size());
+			case 102: // EditBox.get_caret(): Int
+				return Ival(((TextBox)args[0]).getCaretPosition());
+			case 103: // ListBox.add(str: String, img: Image)
+				((List)args[0]).append((String)args[1], (Image)args[2]);
+				return null;
+			case 104: // ListBox.insert(at: Int, str: String, img: Image)
+				((List)args[0]).insert(ival(args[1]), (String)args[2], (Image)args[3]);
+				return null;
+			case 105: // ListBox.set(at: Int, str: String, img: Image)
+				((List)args[0]).set(ival(args[1]), (String)args[2], (Image)args[3]);
+				return null;
+			case 106: // ListBox.delete(at: Int)
+				((List)args[0]).delete(ival(args[1]));
+				return null;
+			case 107: // ListBox.get_string(at: Int): String
+				return ((List)args[0]).getString(ival(args[1]));
+			case 108: // ListBox.get_image(at: Int): Image
+				return ((List)args[0]).getImage(ival(args[1]));
+			case 109: // ListBox.clear()
+				((List)args[0]).deleteAll();
+				return null;
+			case 110: // ListBox.len(): Int
+				return Ival(((List)args[0]).size());
+			case 111: { // new_hyperlinkitem(label: String, text: String, onclick: Menu)
+				StringItem item = new StringItem((String)args[0], (String)args[1], Item.HYPERLINK);
+				item.setDefaultCommand((Command)args[2]);
+				UIServer.receiveItemEvents(item);
+				return item;
+			}
+			case 112: // ImageItem.get_alttext(): String
+				return ((ImageItem)args[0]).getAltText();
+			case 113: // ImageItem.set_alttext(text: String)
+				((ImageItem)args[0]).setAltText((String)args[1]);
+				return null;
+			case 114: // EditItem.get_caret(): Int
+				return Ival(((TextField)args[0]).getCaretPosition());
+			case 115: // EditItem.get_maxsize(): Int
+				return Ival(((TextField)args[0]).getMaxSize());
+			case 116: // EditItem.set_maxsize(size: Int)
+				((TextField)args[0]).setMaxSize(ival(args[1]));
+				return null;
+			case 117: // EditItem.get_size(): Int
+				return Ival(((TextField)args[0]).size());
+			case 118: // RadioItem.add(str: String)
+				((ChoiceGroup)args[0]).append((String)args[1], null);
+				return null;
+			case 119: // RadioItem.insert(at: Int, str: String)
+				((ChoiceGroup)args[0]).insert(ival(args[1]), (String)args[2], null);
+				return null;
+			case 120: // RadioItem.set(at: Int, str: String)
+				((ChoiceGroup)args[0]).set(ival(args[1]), (String)args[2], null);
+				return null;
+			case 121: // RadioItem.delete(at: Int)
+				((ChoiceGroup)args[0]).delete(ival(args[1]));
+				return null;
+			case 122: // RadioItem.get(at: Int): String
+				return ((ChoiceGroup)args[0]).getString(ival(args[1]));
+			case 123: // RadioItem.clear()
+				((ChoiceGroup)args[0]).deleteAll();
+				return null;
+			case 124: // RadioItem.len(): Int
+				return Ival(((ChoiceGroup)args[0]).size());
+			case 125: { // new_popupitem(label: String, strings: [String]): PopupItem
+				Object[] array = (Object[])args[1];
+				String[] strings = new String[(array != null) ? array.length : 0];
+				if (array != null) {
+					System.arraycopy(array, 0, strings, 0, array.length);
+				}
+				return new ChoiceGroup((String)args[0], Choice.POPUP, strings, null);
+			}
+			case 126: // Canvas.set_fullscreen(full: Bool)
+				((UICanvas)args[0]).setFullScreenMode(bval(args[1]));
+				return null;
+			case 127: // ui_set_app_title(title: String)
+				UIServer.setDefaultTitle(c, (String)args[0]);
+				return null;
+			case 128: // ui_set_app_icon(icon: Image)
+				UIServer.setDefaultIcon(c, (Image)args[0]);
+				return null;
 			default:
 				return null;
 		}
@@ -375,11 +471,6 @@ class LibUI1Func extends NativeFunction {
 	
 	private static Font int2font(int mask) {
 		return Font.getFont(mask & 0x60, mask & 0x7, mask & 0x18);
-	}
-	
-	private static String titleFor(Context c) {
-		Object title = String.valueOf(c.get("ui.title"));
-		return (title != null) ? title.toString() : c.getName();
 	}
 
 	public String soname() {

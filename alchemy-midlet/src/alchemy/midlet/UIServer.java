@@ -29,6 +29,9 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.Item;
+import javax.microedition.lcdui.ItemCommandListener;
 import javax.microedition.lcdui.List;
 
 /**
@@ -51,8 +54,10 @@ public final class UIServer {
 	public static final Int EVENT_SHOW = Int.M_ONE;
 	/** Event type for losing focus. */
 	public static final Int EVENT_HIDE = Int.toInt(-2);
-	/** Event type for command activation. */
+	/** Event type for on-screen menu. */
 	public static final Int EVENT_MENU = Int.ONE;
+	/** Event type for on-item menu. */
+	public static final Int EVENT_ITEM_MENU = Int.toInt(2);
 	/** Event type for canvas key press. */
 	public static final Int EVENT_KEY_PRESS = Int.toInt(3);
 	/** Event type for canvas pointer press. */
@@ -70,6 +75,7 @@ public final class UIServer {
 	
 	private static final UIContextListener l = new UIContextListener();
 	private static final UICommandListener cl = new UICommandListener();
+	private static final UIItemCommandListener icl = new UIItemCommandListener();
 	
 	private static final List appList = new List("Applications", Choice.IMPLICIT);
 	private static final Command appCommand = new Command("Apps...", Command.SCREEN, 100);
@@ -198,6 +204,40 @@ public final class UIServer {
 		}
 	}
 	
+	/** Registers UI server as listener for item events. */
+	public static void receiveItemEvents(Item item) {
+		item.setItemCommandListener(icl);
+	}
+		
+	public static String getDefaultTitle(Context c) {
+		Object title = String.valueOf(c.get("ui.title"));
+		return (title != null) ? title.toString() : c.getName();
+	}
+	
+	public static void setDefaultTitle(Context c, String title) {
+		c.set("ui.title", title);
+		synchronized (UIServer.class) {
+			int index = frameIndex(c);
+			if (index >= 0) {
+				appList.set(index, title, appList.getImage(index));
+			}
+		}
+	}
+
+	public static Image getDefaultIcon(Context c) {
+		return (Image)c.get("ui.icon");
+	}
+	
+	public static void setDefaultIcon(Context c, Image img) {
+		c.set("ui.icon", img);
+		synchronized (UIServer.class) {
+			int index = frameIndex(c);
+			if (index >= 0) {
+				appList.set(index, appList.getString(index), img);
+			}
+		}
+	}
+	
 	/** Removes screen mapping when context ends. */
 	private static class UIContextListener implements ContextListener {
 		public void contextEnded(Context c) {
@@ -205,7 +245,7 @@ public final class UIServer {
 		}
 	}
 	
-	/** Generates command events. */
+	/** Generates screen menu events. */
 	private static class UICommandListener implements CommandListener {
 		public void commandAction(Command command, Displayable d) {
 			if (command == appCommand) { // show app selection screen
@@ -218,6 +258,13 @@ public final class UIServer {
 		}
 	}
 	
+	/** Generates item menu events. */
+	private static class UIItemCommandListener implements ItemCommandListener {
+		public void commandAction(Command command, Item item) {
+			pushEvent(null, EVENT_ITEM_MENU, item);
+		}
+	}
+	
 	private static class AppListCommandListener implements CommandListener {
 		public void commandAction(Command c, Displayable d) {
 			synchronized (UIServer.class) {
@@ -227,7 +274,7 @@ public final class UIServer {
 					frames.removeElementAt(index);
 					frames.addElement(frame);
 					appList.delete(index);
-					appList.append(frame.c.getName(), null);
+					appList.append(getDefaultTitle(frame.c), getDefaultIcon(frame.c));
 				}
 				displayCurrent();
 			}
