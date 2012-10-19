@@ -29,21 +29,20 @@ import javax.microedition.lcdui.Command;
  *
  * @author Sergey Basalaev
  */
-public class Console extends NativeApp {
+public class Terminal extends NativeApp {
 
 	private static final String HELP = "Usage: terminal [-k] <command> <args>...";
+	private static final String VERSION = "Native terminal v1.2";
 	private static final Command cmdClose = new Command("Close", Command.EXIT, 4);
 
-	public Console() { }
+	public Terminal() { }
 
 	public int main(Context c, String[] args) {
 		if (args.length == 0) {
-			IO.println(c.stderr, "terminal: no command given");
-			IO.println(c.stderr, HELP);
-			return 1;
+			args = new String[] {"sh"};
 		}
 		if (args[0].equals("-v")) {
-			IO.println(c.stdout, "Native terminal v1.1");
+			IO.println(c.stdout, VERSION);
 			return 0;
 		}
 		if (args[0].equals("-h")) {
@@ -61,7 +60,7 @@ public class Console extends NativeApp {
 			}
 		}
 		final Command cmdInput = new Command("Input", Command.OK, 1);
-		final ConsoleForm form = new ConsoleForm(cmdInput);
+		final TerminalForm form = new TerminalForm(cmdInput);
 		UIServer.setScreen(c, form);
 		Context child = new Context(c);
 		try {

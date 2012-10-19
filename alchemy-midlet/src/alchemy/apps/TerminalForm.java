@@ -35,17 +35,17 @@ import javax.microedition.lcdui.TextField;
  * A form for the native terminal.
  * @author Sergey Basalaev
  */
-class ConsoleForm extends Form {
+class TerminalForm extends Form {
 
-	final InputStream in = new ConsoleInputStream();
-	final PrintStream out = new PrintStream(new ConsoleOutputStream());
+	final InputStream in = new TerminalInputStream();
+	final PrintStream out = new PrintStream(new TerminalOutputStream());
 
 	private final TextField input = new TextField(">", null, 1024, TextField.ANY);
 	private final Command cmdInput;
 	private final Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
 	private boolean inputvisible = false;
 
-	public ConsoleForm(Command input) {
+	public TerminalForm(Command input) {
 		super("Terminal");
 		this.input.setInitialInputMode("MIDP_LOWERCASE_LATIN");
 		cmdInput = input;
@@ -79,11 +79,11 @@ class ConsoleForm extends Form {
 			return input.getString()+'\n';
 	}
 
-	private class ConsoleOutputStream extends OutputStream {
+	private class TerminalOutputStream extends OutputStream {
 
 		ByteArrayOutputStream buf;
 
-		public ConsoleOutputStream() {
+		public TerminalOutputStream() {
 			buf = new ByteArrayOutputStream();
 		}
 
@@ -114,11 +114,11 @@ class ConsoleForm extends Form {
 		}
 	}
 
-	public class ConsoleInputStream extends InputStream {
+	public class TerminalInputStream extends InputStream {
 
 		private ByteArrayInputStream buf = new ByteArrayInputStream(new byte[0]);
 
-		public ConsoleInputStream() { }
+		public TerminalInputStream() { }
 
 		public void setPrompt(String prompt) {
 			input.setLabel(prompt);

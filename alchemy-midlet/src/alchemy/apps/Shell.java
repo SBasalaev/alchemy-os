@@ -25,7 +25,7 @@ import alchemy.util.UTFReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Vector;
-import alchemy.apps.ConsoleForm.ConsoleInputStream;
+import alchemy.apps.TerminalForm.TerminalInputStream;
 import alchemy.fs.FSManager;
 
 /**
@@ -58,14 +58,14 @@ public class Shell extends NativeApp {
 				scriptinput = FSManager.fs().read(c.toFile(args[0]));
 				c.addStream(scriptinput);
 			}
-			if (c.stdin instanceof ConsoleInputStream) {
-				((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
+			if (c.stdin instanceof TerminalInputStream) {
+				((TerminalInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 			}
 			UTFReader r = new UTFReader(scriptinput);
 			while (true) try {
 				String line = r.readLine();
 				if (line == null) {
-					if (scriptinput instanceof ConsoleInputStream) continue;
+					if (scriptinput instanceof TerminalInputStream) continue;
 					else break;
 				}
 				line = line.trim();
@@ -75,7 +75,7 @@ public class Shell extends NativeApp {
 				try { cc = split(line); }
 				catch (IllegalArgumentException e) {
 					IO.println(c.stderr, r.lineNumber()+':'+e.getMessage());
-					if (scriptinput instanceof ConsoleInputStream) continue;
+					if (scriptinput instanceof TerminalInputStream) continue;
 					else return 1;
 				}
 				if (cc.cmd.equals("exit")) {
@@ -88,15 +88,15 @@ public class Shell extends NativeApp {
 					if (cc.args.length > 0) {
 						String newdir = c.toFile(cc.args[0]);
 						c.setCurDir(newdir);
-						if (c.stdin instanceof ConsoleInputStream) {
-							((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
+						if (c.stdin instanceof TerminalInputStream) {
+							((TerminalInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 						}
 					} else {
 						IO.println(c.stderr, "cd: no directory specified");
 					}
 				} else if (cc.cmd.equals("cls")) {
-					if (c.stdin instanceof ConsoleInputStream) {
-						((ConsoleInputStream)c.stdin).clearScreen();
+					if (c.stdin instanceof TerminalInputStream) {
+						((TerminalInputStream)c.stdin).clearScreen();
 					}
 				} else {
 					Context child = new Context(c);
@@ -119,15 +119,15 @@ public class Shell extends NativeApp {
 							child.stderr = FSManager.fs().write(errfile);
 						}
 					}
-					if (c.stdin instanceof ConsoleInputStream) {
-						((ConsoleInputStream)c.stdin).setPrompt("");
+					if (c.stdin instanceof TerminalInputStream) {
+						((TerminalInputStream)c.stdin).setPrompt("");
 					}
 					child.startAndWait(cc.cmd, cc.args);
 					if (cc.in != null) child.stdin.close();
 					if (cc.out != null) child.stdout.close();
 					if (cc.err != null) child.stderr.close();
-					if (c.stdin instanceof ConsoleInputStream) {
-						((ConsoleInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
+					if (c.stdin instanceof TerminalInputStream) {
+						((TerminalInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 					}
 				}
 			} catch (Throwable t) {
