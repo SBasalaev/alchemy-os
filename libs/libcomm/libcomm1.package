@@ -1,0 +1,8 @@
+Package: libcomm1
+Source: libcomm
+Version: 1.0-1
+Section: libs
+Summary: library to access COMM and IrDA ports
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: GPL-3+exception

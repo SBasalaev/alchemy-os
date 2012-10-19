@@ -1,0 +1,9 @@
+Package: libui-dev
+Source: libui
+Version: 1.0-1
+Section: libdevel
+Summary: graphical interface library - development headers
+Depends: libcore-dev, libui1
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: GPL-3+exception

@@ -1,0 +1,9 @@
+Package: libnet-dev
+Source: libnet
+Version: 1.0-1
+Section: libdevel
+Summary: network library - development headers
+Depends: libcore-dev, libnet1
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: GPL-3+exception
