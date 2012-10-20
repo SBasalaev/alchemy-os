@@ -7,7 +7,7 @@ cd -
 mv ../installscripts/install/install.arh res/
 
 echo 'Updating library symbols...'
-cp ../libs/libcore3/libcore30.symbols res/
-cp ../libs/libui1/libui1.symbols res/
-cp ../libs/libnet1/libnet1.symbols res/
-cp ../libs/libcomm1/libcomm1.symbols res/
+cp ../libs/libcore/libcore30.symbols res/
+cp ../libs/libui/libui1.symbols res/
+cp ../libs/libnet/libnet1.symbols res/
+cp ../libs/libcomm/libcomm1.symbols res/

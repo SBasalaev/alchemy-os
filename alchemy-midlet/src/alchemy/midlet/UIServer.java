@@ -238,6 +238,14 @@ public final class UIServer {
 		}
 	}
 	
+	public static boolean vibrate(int millis) {
+		return display.vibrate(millis);
+	}
+	
+	public static boolean flash(int millis) {
+		return display.flashBacklight(millis);
+	}
+	
 	/** Removes screen mapping when context ends. */
 	private static class UIContextListener implements ContextListener {
 		public void contextEnded(Context c) {

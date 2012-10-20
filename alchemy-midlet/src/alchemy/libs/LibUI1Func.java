@@ -460,6 +460,10 @@ class LibUI1Func extends NativeFunction {
 			case 128: // ui_set_app_icon(icon: Image)
 				UIServer.setDefaultIcon(c, (Image)args[0]);
 				return null;
+			case 129: // ui_vibrate(millis: Int): Bool
+				return Ival(UIServer.vibrate(ival(args[0])));
+			case 130: // ui_flash(millis: Int): Bool
+				return Ival(UIServer.flash(ival(args[0])));
 			default:
 				return null;
 		}

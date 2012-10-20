@@ -3,6 +3,9 @@ use "ui_types.eh"
 def ui_set_app_title(title: String);
 def ui_set_app_icon(icon: Image);
 
+def ui_vibrate(millis: Int): Bool;
+def ui_flash(millis: Int): Bool;
+
 type Screen < Any;
 
 def Screen.get_height(): Int;
