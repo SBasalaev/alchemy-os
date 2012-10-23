@@ -55,7 +55,12 @@ public class Shell extends NativeApp {
 				scriptinput = new ByteArrayInputStream(IO.utfEncode(cmdline.toString()));
 				c.addStream(scriptinput);
 			} else {
-				scriptinput = FSManager.fs().read(c.toFile(args[0]));
+				String file = c.toFile(args[0]);
+				byte[] buf = new byte[(int)FSManager.fs().size(file)];
+				InputStream in = FSManager.fs().read(c.toFile(args[0]));
+				in.read(buf);
+				in.close();
+				scriptinput = new ByteArrayInputStream(buf);
 				c.addStream(scriptinput);
 			}
 			if (c.stdin instanceof TerminalInputStream) {
