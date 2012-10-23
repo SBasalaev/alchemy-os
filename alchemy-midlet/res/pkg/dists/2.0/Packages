@@ -31,12 +31,12 @@ File: appmenu_0.3.1-2.pkg
 Size: 1340
 
 Package: coreutils
-Version: 0.5-1
+Version: 0.5.1-1
 Section: utils
 Depends: libcore3
 Summary: essential utilities for Alchemy OS
-File: coreutils_0.5-1.pkg
-Size: 8056
+File: coreutils_0.5.1-1.pkg
+Size: 8087
 
 Package: edit
 Version: 0.9.1-3
@@ -47,12 +47,12 @@ File: edit_0.9.1-3.pkg
 Size: 1287
 
 Package: ex
-Version: 1.1-1
+Version: 1.1.1-1
 Section: devel
 Depends: libcore3, nec
 Summary: build tool for Alchemy OS
-File: ex_1.1-1.pkg
-Size: 1274
+File: ex_1.1.1-1.pkg
+Size: 1330
 
 Package: fileinfo
 Version: 1.3-1
@@ -71,19 +71,19 @@ File: imgview_0.2-1.pkg
 Size: 760
 
 Package: libcore-dev
-Version: 2.90.3-1
+Version: 3.0-1
 Section: libdevel
 Depends: libcore3
 Summary: headers for standard library
-File: libcore-dev_2.90.3-1.pkg
-Size: 10549
+File: libcore-dev_3.0-1.pkg
+Size: 10938
 
 Package: libcore3
-Version: 2.90.3-1
+Version: 3.0-1
 Section: libs
 Summary: standard library which is used by all programs
-File: libcore3_2.90.3-1.pkg
-Size: 5968
+File: libcore3_3.0-1.pkg
+Size: 5923
 
 Package: libfiletype1
 Version: 1.0.2-1
@@ -102,19 +102,19 @@ File: libpkg1_0.3.5-1.pkg
 Size: 6696
 
 Package: libui-dev
-Version: 0.90-1
+Version: 1.0.1-1
 Section: libdevel
-Depends: libui1
-Summary: headers for graphical interface library
-File: libui-dev_0.90-1.pkg
-Size: 6764
+Depends: libcore-dev, libui1
+Summary: graphical interface library - development headers
+File: libui-dev_1.0.1-1.pkg
+Size: 8103
 
 Package: libui1
-Version: 0.90-1
+Version: 1.0.1-1
 Section: libs
 Summary: graphical interface library
-File: libui1_0.90-1.pkg
-Size: 338
+File: libui1_1.0.1-1.pkg
+Size: 308
 
 Package: mount
 Version: 1.0
@@ -132,12 +132,11 @@ File: navigator_0.3.2-1.pkg
 Size: 9059
 
 Package: nec
-Version: 1.90-1
+Version: 2.0-1
 Section: devel
-Depends: libcore-dev
-Summary: Alchemy builtin compiler and linker
-File: nec_1.90-1.pkg
-Size: 530
+Summary: Ether compiler and linker for Alchemy OS
+File: nec_2.0-1.pkg
+Size: 693
 
 Package: pkg
 Version: 0.1.4-1
@@ -156,14 +155,15 @@ File: pkg-arh_0.1.4-1.pkg
 Size: 941
 
 Package: sh
-Version: 1.0-1
-Section: admin
-Summary: Alchemy builtin shell
-File: sh_1.0-1.pkg
-
-PACKAGE
-Package: terminal
 Version: 1.0-2
+Section: admin
+Summary: shell for Alchemy OS
+File: sh_1.0-2.pkg
+Size: 232
+
+Package: terminal
+Version: 1.2-1
 Section: gui
-Summary: Alchemy builtin terminal
-File: terminal_1.0-2.pkg
+Summary: Built-in terminal for Alchemy OS
+File: terminal_1.2-1.pkg
+Size: 992
