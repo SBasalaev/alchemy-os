@@ -17,4 +17,6 @@ echo 'Adding software sources...'
 echo 'http://alchemy-os.org/pkg 2.0' >> /cfg/pkg/sources
 echo 'http://alchemy-os.org/pkg 2.0-nonfree' >> /cfg/pkg/sources
 
+echo 'appmenu' > /cfg/init
+
 echo 'Installed successfully!'

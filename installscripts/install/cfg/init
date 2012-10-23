@@ -1,1 +1,3 @@
-alchemy-first-launch
+terminal -k alchemy-install
+rm -f /bin/alchemy-install
+appmenu

@@ -1,9 +1,0 @@
-#!/bin/sh
-
-terminal -k alchemy-install
-
-echo 'appmenu' > /cfg/init
-rm /bin/alchemy-first-launch
-rm /bin/alchemy-install
-
-appmenu
