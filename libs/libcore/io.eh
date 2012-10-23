@@ -18,6 +18,7 @@ def seterr(err: OStream);
 def IStream.read(): Int;
 def IStream.readarray(buf: BArray, ofs: Int, len: Int): Int;
 def IStream.skip(num: Long): Long;
+def IStream.available(): Int;
 def IStream.close();
 
 def read(): Int;
@@ -80,7 +81,7 @@ def matches_glob(path: String, glob: String): Bool;
 
 def istream_from_ba(buf: BArray): IStream;
 
-type BArrayOstream < OStream;
+type BArrayOStream < OStream;
 
 def new_baostream(): BArrayOStream;
 def BArrayOStream.len(): Int;

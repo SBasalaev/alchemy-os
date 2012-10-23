@@ -534,8 +534,10 @@ class LibCore30Func extends NativeFunction {
 			case 164: // BArrayOStream.reset()
 				((ByteArrayOutputStream)args[0]).reset();
 				return null;
-			case 165: // new_pipe(): StreamConnection;
+			case 165: // new_pipe(): StreamConnection
 				return new Pipe();
+			case 166: // IStream.available(): Int
+				return Ival(((InputStream)args[0]).available());
 			default:
 				return null;
 		}

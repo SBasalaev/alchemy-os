@@ -164,3 +164,4 @@ BArrayOStream.len
 BArrayOStream.tobarray
 BArrayOStream.reset
 new_pipe
+IStream.available
