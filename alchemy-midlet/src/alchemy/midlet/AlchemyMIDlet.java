@@ -72,12 +72,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 					try {
 						Properties props = InstallInfo.read();
 						FSManager.mount("", props.get("fs.type"), props.get("fs.init"));
-						UTFReader r = new UTFReader(FSManager.fs().read("/cfg/init"));
-						String[] cmd = IO.split(r.readLine(), ' ');
-						r.close();
-						String[] cmdargs = new String[cmd.length-1];
-						System.arraycopy(cmd, 1, cmdargs, 0, cmdargs.length);
-						runtime.rootContext().start(cmd[0], cmdargs);
+						runtime.rootContext().start("sh", new String[] {"/cfg/init"});
 					} catch (Throwable t) {
 						kernelPanic(t.toString());
 					}
