@@ -244,7 +244,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private void update() throws Exception {
 		messages.deleteAll();
 		//installing new files
-		installArchives("update.archives");
+		installArchives("install.archives");
 		//writing configuration data
 		Properties instCfg = InstallInfo.read();
 		instCfg.put("alchemy.version", setupCfg.get("alchemy.version"));
