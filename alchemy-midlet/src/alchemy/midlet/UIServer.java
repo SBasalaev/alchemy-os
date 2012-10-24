@@ -77,10 +77,13 @@ public final class UIServer {
 	private static final UICommandListener cl = new UICommandListener();
 	private static final UIItemCommandListener icl = new UIItemCommandListener();
 	
-	private static final List appList = new List("Applications", Choice.IMPLICIT);
-	private static final Command appCommand = new Command("Apps...", Command.SCREEN, 100);
+	private static final List appList;
+	private static final Command appCommand = new Command("Switch to...", Command.SCREEN, 100);
+	private static final Command intCommand = new Command("Interrupt", Command.SCREEN, 2);
 	
 	static {
+		appList = new List("Switch to...", Choice.IMPLICIT);
+		appList.addCommand(intCommand);
 		appList.setCommandListener(new AppListCommandListener());
 	}
 	
@@ -106,10 +109,11 @@ public final class UIServer {
 		int i = frameIndex(c);
 		if (i >= 0) {
 			((UIFrame)frames.elementAt(i)).d = d;
+			appList.set(i, d.getTitle(), getDefaultIcon(c));
 		} else {
 			frames.addElement(new UIFrame(c, d));
 			c.addContextListener(l);
-			appList.append(c.getName(), null);
+			appList.append(d.getTitle(), getDefaultIcon(c));
 		}
 		d.addCommand(appCommand);
 		d.setCommandListener(cl);
@@ -185,8 +189,9 @@ public final class UIServer {
 	 * it returns <code>null</code> on empty queue.
 	 *
 	 * @throws IllegalStateException  if context is not mapped to a screen
+	 * @throws InterruptedException  if process was interrupted
 	 */
-	public static Object readEvent(Context c, boolean wait) throws IllegalStateException {
+	public static Object readEvent(Context c, boolean wait) throws IllegalStateException, InterruptedException {
 		UIFrame frame = null;
 		synchronized (UIServer.class) {
 			int i = frameIndex(c);
@@ -196,8 +201,7 @@ public final class UIServer {
 		synchronized (frame) {
 			Object e = frame.queue.pop();
 			if (e == null && wait) {
-				try { frame.wait(); }
-				catch (InterruptedException ie) { }
+				frame.wait();
 				e = frame.queue.pop();
 			}
 			return e;
@@ -216,12 +220,12 @@ public final class UIServer {
 	
 	public static void setDefaultTitle(Context c, String title) {
 		c.set("ui.title", title);
-		synchronized (UIServer.class) {
-			int index = frameIndex(c);
-			if (index >= 0) {
-				appList.set(index, title, appList.getImage(index));
-			}
-		}
+//		synchronized (UIServer.class) {
+//			int index = frameIndex(c);
+//			if (index >= 0) {
+//				appList.set(index, title, appList.getImage(index));
+//			}
+//		}
 	}
 
 	public static Image getDefaultIcon(Context c) {
@@ -275,17 +279,27 @@ public final class UIServer {
 	
 	private static class AppListCommandListener implements CommandListener {
 		public void commandAction(Command c, Displayable d) {
-			synchronized (UIServer.class) {
-				int index = appList.getSelectedIndex();
-				if (index != appList.size()-1) {
-					UIFrame frame = (UIFrame)frames.elementAt(index);
-					frames.removeElementAt(index);
-					frames.addElement(frame);
-					appList.delete(index);
-					appList.append(getDefaultTitle(frame.c), getDefaultIcon(frame.c));
+			if (c == List.SELECT_COMMAND) {
+				synchronized (UIServer.class) {
+					int index = appList.getSelectedIndex();
+					if (index != appList.size()-1) {
+						UIFrame frame = (UIFrame)frames.elementAt(index);
+						frames.removeElementAt(index);
+						frames.addElement(frame);
+						appList.delete(index);
+						appList.append(frame.d.getTitle(), getDefaultIcon(frame.c));
+					}
 				}
-				displayCurrent();
+			} else if (c == intCommand) {
+				synchronized (UIServer.class) {
+					int index = appList.getSelectedIndex();
+					if (index >= 0) {
+						UIFrame frame = (UIFrame)frames.elementAt(index);
+						frame.c.interrupt();
+					}
+				}
 			}
+			displayCurrent();
 		}
 	}
 	
