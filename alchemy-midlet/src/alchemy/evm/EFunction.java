@@ -671,7 +671,7 @@ class EFunction extends Function {
 					stack[++head] = Ival((code[ct++] << 8) | (code[ct++]& 0xff));
 					break;
 			} /* the big switch */
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			// the instruction on which error occured
 			ct--;
 			// filling exception with debug info
