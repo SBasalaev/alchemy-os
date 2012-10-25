@@ -784,22 +784,35 @@ public class Parser {
 		} else if (keyword.equals("new")) {
 			Type type = parseType(scope);
 			if (type instanceof StructureType) {
-				expect('(');
 				StructureType struct = (StructureType)type;
 				Expr[] init = new Expr[struct.fields.length];
 				boolean first = true;
-				while (t.nextToken() != ')') {
-					t.pushBack();
-					if (first) first = false;
-					else expect(',');
-					if (t.nextToken() != Token.IDENTIFIER)
-						throw new ParseException("Identifier expected in structure constructor");
-					int index = struct.fields.length-1;
-					while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
-					if (index < 0)
-						throw new ParseException("Type "+type+" has no member named "+t.svalue);
-					expect('=');
-					init[index] = cast(parseExpr(scope), struct.fields[index].type);
+				switch (t.nextToken()) {
+					case '{':
+						while (t.nextToken() != '}') {
+							t.pushBack();
+							if (first) first = false;
+							else expect(',');
+							if (t.nextToken() != Token.IDENTIFIER)
+								throw new ParseException("Identifier expected in structure constructor");
+							int index = struct.fields.length-1;
+							while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
+							if (index < 0)
+								throw new ParseException("Type "+type+" has no member named "+t.svalue);
+							expect('=');
+							init[index] = cast(parseExpr(scope), struct.fields[index].type);
+						}
+						break;
+					case '(':
+						for (int i=0; i < init.length; i++) {
+							if (first) first = false;
+							else expect(',');
+							init[i] = cast(parseExpr(scope), struct.fields[i].type);
+						}
+						expect(')');
+						break;
+					default:
+						throw new ParseException("'(' or '{' expected in structure constructor");
 				}
 				return new NewArrayByEnumExpr(lnum, type, init);
 			} else if (type.isSubtypeOf(BuiltinType.ARRAY)
