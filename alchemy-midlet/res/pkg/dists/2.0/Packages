@@ -116,10 +116,10 @@ Summary: file manager for Alchemy OS
 File: navigator_0.3.5-1.pkg
 
 Package: nec
-Version: 2.0-1
+Version: 2.0-2
 Section: devel
 Summary: Ether compiler and linker for Alchemy OS
-File: nec_2.0-1.pkg
+File: nec_2.0-2.pkg
 
 Package: pkg
 Version: 0.1.4-1
