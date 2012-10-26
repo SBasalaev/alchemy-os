@@ -30,8 +30,10 @@ public interface LibBuilder {
 
 	/**
 	 * Builds library from the given input stream.
-	 * Be aware that the first two bytes are already read
-	 * (FIXME see LibraryLoadingMechanism).
+	 * Particular library builder is determined from the magic number
+	 * read from the input stream, so first two bytes of the input
+	 * stream are already read. Builder should not close input stream
+	 * after reading library.
 	 *
 	 * @param c   context in which this library is loaded
 	 * @param in  input stream

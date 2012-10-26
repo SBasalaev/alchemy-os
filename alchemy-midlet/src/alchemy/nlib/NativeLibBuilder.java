@@ -47,6 +47,8 @@ public class NativeLibBuilder implements LibBuilder {
 			throw new InstantiationException("Class not accessible: "+classname);
 		} catch (ClassCastException cce) {
 			throw new InstantiationException("Not a library: "+classname);
+		} catch (NoClassDefFoundError ncdfe) {
+			throw new InstantiationException("Not supported by this device.");
 		}
 	}
 }
