@@ -18,7 +18,7 @@ def List.grow(newlen: Int) {
   this.data = newdata
 }
 
-def new_list(): List = new List(size=0, data=new [Any](10))
+def new_list(): List = new List(0, new [Any](10))
 
 def List.len(): Int = this.size
 
@@ -82,7 +82,7 @@ def List.range(from: Int, to: Int): List {
   if (from >= 0 && to <= this.size && from <= to) {
     var data = new [Any] (to-from)
     acopy(this.data, from, data, 0, data.len)
-    new List(size=data.len,data=data)
+    new List(data.len, data)
   } else {
     null
   }
@@ -135,7 +135,7 @@ def List.map(f: (Any):Any): List {
   for (var i=0, i<size, i=i+1) {
     newdata[i] = f(data[i])
   }
-  new List(size=size,data=newdata)
+  new List(size, newdata)
 }
 
 def List.mapself(f: (Any):Any) {
@@ -171,7 +171,7 @@ def List.sort(f: (Any,Any):Int): List {
   var newdata = new [Any](size)
   acopy(data, 0, newdata, 0, size)
   _quicksort(newdata, 0, size-1, f)
-  new List(data=newdata, size=size)
+  new List(size, newdata)
 }
 
 def List.sortself(f: (Any,Any):Int) {
@@ -199,7 +199,7 @@ def List.reverse(): List {
   for (var i=0, i<size, i=i+1) {
     newdata[size-i-1] = data[i]
   }
-  new List(size=size, data=newdata)
+  new List(size, newdata)
 }
 
 def List.toarray(): [Any] {

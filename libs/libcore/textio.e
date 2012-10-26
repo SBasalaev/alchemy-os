@@ -13,7 +13,7 @@ type Reader {
 }
 
 def new_reader(in: IStream, dec: (IStream):Int): Reader {
-  new Reader(in=in, dec=dec)
+  new Reader(in, dec)
 }
 
 def Reader.read(): Int {
@@ -89,7 +89,7 @@ type Writer {
 }
 
 def new_writer(out: OStream, enc: (OStream,Int)): Writer {
-  new Writer(out=out, enc=enc)
+  new Writer(out, enc)
 }
 
 def Writer.write(ch: Int) {
