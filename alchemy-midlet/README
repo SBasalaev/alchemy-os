@@ -2,3 +2,7 @@ Alchemy MIDlet suite.
 
 Icons (/res/*.png) are taken from Oxygen project
 and licensed under LGPLv3, see http://www.oxygen-icons.org/
+
+All packages (/res/pkg/*.pkg) are taken from the main repository
+meaning they have free (DFSG-compatible) license. Information
+about author and license is included in each package.
