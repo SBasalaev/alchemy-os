@@ -19,7 +19,6 @@
 package alchemy.libs.ui;
 
 import alchemy.core.Int;
-import alchemy.midlet.UIServer;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
@@ -54,22 +53,32 @@ public class UICanvas extends Canvas {
 
 	/** Generates key event. */
 	protected void keyPressed(int keyCode) {
-		UIServer.pushEvent(this, UIServer.EVENT_KEY_PRESS, new Int(keyCode));
+		UIServer.pushEvent(this, UIServer.EVENT_KEY_PRESS, Int.toInt(keyCode));
+	}
+
+	/** Generates key release event. */
+	protected void keyReleased(int keyCode) {
+		UIServer.pushEvent(this, UIServer.EVENT_KEY_RELEASE, Int.toInt(keyCode));
+	}
+
+	/** Generates key hold event. */
+	protected void keyRepeated(int keyCode) {
+		UIServer.pushEvent(this, UIServer.EVENT_KEY_HOLD, Int.toInt(keyCode));
 	}
 
 	/** Generates pointer press event. */
 	protected void pointerPressed(int x, int y) {
-		UIServer.pushEvent(this, UIServer.EVENT_PTR_PRESS, new Object[] {new Int(x), new Int(y)});
+		UIServer.pushEvent(this, UIServer.EVENT_PTR_PRESS, new Object[] {Int.toInt(x), Int.toInt(y)});
 	}
 	
 	/** Generates pointer release event. */
 	protected void pointerReleased(int x, int y) {
-		UIServer.pushEvent(this, UIServer.EVENT_PTR_RELEASE, new Object[] {new Int(x), new Int(y)});
+		UIServer.pushEvent(this, UIServer.EVENT_PTR_RELEASE, new Object[] {Int.toInt(x), Int.toInt(y)});
 	}
 
 	/** Generates pointer drag event. */
 	protected void pointerDragged(int x, int y) {
-		UIServer.pushEvent(this, UIServer.EVENT_PTR_DRAG, new Object[] {new Int(x), new Int(y)});
+		UIServer.pushEvent(this, UIServer.EVENT_PTR_DRAG, new Object[] {Int.toInt(x), Int.toInt(y)});
 	}
 
 	protected synchronized void sizeChanged(int w, int h) {

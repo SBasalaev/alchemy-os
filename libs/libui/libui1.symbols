@@ -112,6 +112,7 @@ ListBox.len
 new_hyperlinkitem
 ImageItem.get_alttext
 ImageItem.set_alttext
+EditItem.get_caret
 EditItem.get_maxsize
 EditItem.set_maxsize
 EditItem.get_size
@@ -128,3 +129,4 @@ ui_set_app_title
 ui_set_app_icon
 ui_vibrate
 ui_flash
+Canvas.has_hold_event

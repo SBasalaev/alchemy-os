@@ -22,7 +22,7 @@ import alchemy.libs.ui.UICanvas;
 import alchemy.core.Context;
 import alchemy.core.Int;
 import alchemy.fs.FSManager;
-import alchemy.midlet.UIServer;
+import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeFunction;
 import java.io.InputStream;
 import java.util.Date;
@@ -464,6 +464,8 @@ class LibUI1Func extends NativeFunction {
 				return Ival(UIServer.vibrate(ival(args[0])));
 			case 130: // ui_flash(millis: Int): Bool
 				return Ival(UIServer.flash(ival(args[0])));
+			case 131: // Canvas.has_hold_event(): Bool
+				return Ival(((UICanvas)args[0]).hasRepeatEvents());
 			default:
 				return null;
 		}

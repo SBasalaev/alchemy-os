@@ -23,10 +23,9 @@ import alchemy.core.Context;
 import alchemy.core.ContextListener;
 import alchemy.evm.ELibBuilder;
 import alchemy.fs.FSManager;
+import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeLibBuilder;
-import alchemy.util.IO;
 import alchemy.util.Properties;
-import alchemy.util.UTFReader;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -41,7 +40,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 	private Art runtime;
 
 	public AlchemyMIDlet() {
-		UIServer.display = Display.getDisplay(this);
+		UIServer.setDisplay(Display.getDisplay(this));
 		try {
 			if (!InstallInfo.exists()) {
 				kernelPanic("Alchemy is not installed.");

@@ -34,4 +34,5 @@ def Canvas.refresh();
 def Canvas.action_code(key: Int): Int;
 def Canvas.has_ptr_events(): Bool;
 def Canvas.has_ptrdrag_event(): Bool;
+def Canvas.has_hold_event(): Bool;
 def Canvas.set_fullscreen(full: Bool);

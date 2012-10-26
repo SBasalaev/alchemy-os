@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.midlet;
+package alchemy.libs.ui;
 
 import alchemy.core.Context;
 import alchemy.core.ContextListener;
@@ -60,6 +60,10 @@ public final class UIServer {
 	public static final Int EVENT_ITEM_MENU = Int.toInt(2);
 	/** Event type for canvas key press. */
 	public static final Int EVENT_KEY_PRESS = Int.toInt(3);
+	/** Event type for canvas key hold. */
+	public static final Int EVENT_KEY_HOLD = Int.toInt(4);
+	/** Event type for canvas key release. */
+	public static final Int EVENT_KEY_RELEASE = Int.toInt(5);
 	/** Event type for canvas pointer press. */
 	public static final Int EVENT_PTR_PRESS = Int.toInt(6);
 	/** Event type for canvas pointer release. */
@@ -68,7 +72,7 @@ public final class UIServer {
 	public static final Int EVENT_PTR_DRAG = Int.toInt(8);
 	
 	/** Display set by Alchemy MIDlet. */
-	static Display display;
+	private static Display display;
 
 	/** Holds all contexts which have associated screens. */
 	private static final Vector frames = new Vector();
@@ -88,6 +92,10 @@ public final class UIServer {
 	}
 	
 	private UIServer() { }
+	
+	public static void setDisplay(Display d) {
+		display = d;
+	}
 	
 	/** Finds frame in a vector by its Context or Displayable. */
 	private static int frameIndex(Object obj) {

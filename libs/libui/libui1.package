@@ -1,6 +1,6 @@
 Package: libui1
 Source: libui
-Version: 1.0.1-1
+Version: 1.0.2-1
 Section: libs
 Summary: graphical interface library
 Author: Sergey Basalaev

@@ -19,7 +19,7 @@
 package alchemy.apps;
 
 import alchemy.core.Context;
-import alchemy.midlet.UIServer;
+import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import javax.microedition.lcdui.Command;
