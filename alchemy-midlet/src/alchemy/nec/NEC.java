@@ -57,6 +57,7 @@ public class NEC extends NativeApp {
 		boolean wait_outname = false;
 		boolean optimize = true;
 		boolean dbginfo = false;
+		int warnmask = 0xfffffffe; // all except typesafe
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
@@ -79,6 +80,20 @@ public class NEC extends NativeApp {
 				optimize = false;
 			} else if (arg.equals("-g")) {
 				dbginfo = true;
+			} else if (arg.startsWith("-Wno-")) {
+				String nowarn = arg.substring(5);
+				if (nowarn.equals("all")) warnmask = 0;
+				else for (int j=0; j < Parser.WARN_STRINGS.length; j++) {
+					if (nowarn.equals(Parser.WARN_STRINGS[j]))
+						warnmask &= ~(1 << j);
+				}
+			} else if (arg.startsWith("-W")) {
+				String warn = arg.substring(2);
+				if (warn.equals("all")) warnmask = 0xffffffff;
+				else for (int j=0; j < Parser.WARN_STRINGS.length; j++) {
+					if (warn.equals(Parser.WARN_STRINGS[j]))
+						warnmask |= (1 << j);
+				}
 			} else if (arg.startsWith("-I") && arg.length() > 2) {
 				c.setEnv("INCPATH", c.getEnv("INCPATH")+':'+arg.substring(2));
 			} else if (arg.charAt(0) == '-') {
@@ -101,7 +116,7 @@ public class NEC extends NativeApp {
 			outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(c);
+		Parser parser = new Parser(c, warnmask);
 		Unit unit = null;
 		try {
 			unit = parser.parse(c.toFile(fname));

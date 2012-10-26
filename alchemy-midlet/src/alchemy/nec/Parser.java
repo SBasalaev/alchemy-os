@@ -37,23 +37,27 @@ import java.util.Vector;
 public class Parser {
 	
 	// Warning categories
-	private static final int W_ERROR = 1;
-	private static final int W_TYPESAFE = 2;
-	private static final int W_MAIN = 4;
-	private static final int W_CAST = 8;
-	private static final int W_VARS = 16;
+	private static final int W_ERROR = -1;
+	private static final int W_TYPESAFE = 0;
+	private static final int W_MAIN = 1;
+	private static final int W_CAST = 2;
+	private static final int W_VARS = 3;
+	
+	static final String[] WARN_STRINGS = {"typesafe", "main", "cast", "vars"};
 	
 	private final Context c;
 	private Tokenizer t;
 	private Unit unit;
+	private int warnmask;
 
 	/** Files in the process of parsing. */
 	private Stack files = new Stack();
 	/** Files that are already parsed. */
 	private Vector parsed = new Vector();
 	
-	public Parser(Context c) {
+	public Parser(Context c, int warnmask) {
 		this.c = c;
+		this.warnmask = warnmask;
 	}
 
 	public Unit parse(String source) {
@@ -1475,15 +1479,13 @@ public class Parser {
 
 	/** Prints warning on stderr. */
 	private void warn(int category, String msg) {
-		String wmsg = null;
-		switch (category) {
-			case W_ERROR: wmsg = "[Error]"; break;
-			case W_TYPESAFE: wmsg = "[Warning typesafe]"; break;
-			case W_CAST: wmsg = "[Warning cast]"; break;
-			case W_MAIN: wmsg = "[Warning main]"; break;
-			case W_VARS: wmsg = "[Warning vars]"; break;
+		if (category == W_ERROR || ((1 << category) & warnmask) != 0) {
+			StringBuffer output = new StringBuffer();
+			output.append(files.peek()).append(':').append(t.lineNumber());
+			if (category == W_ERROR) output.append(": [Error]");
+			else output.append(": [Warning ").append(WARN_STRINGS[category]).append(']');
+			output.append("\n ").append(msg);
+			IO.println(c.stderr, output);
 		}
-		IO.println(c.stderr, files.peek().toString() + ':' + t.lineNumber()
-				+ ": "+wmsg+"\n "+msg);
 	}
 }
