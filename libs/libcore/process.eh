@@ -11,6 +11,7 @@ const MIN_PRIORITY = 1
 const NORM_PRIORITY = 5
 const MAX_PRIORITY = 10
 
+def this_process(): Process;
 def new_process(): Process;
 
 def Process.get_state(): Int;

@@ -8,8 +8,8 @@ const ERR_NEG_ALEN = 104
 const ERR_ILL_ARG = 105
 const ERR_ILL_STATE = 106
 const ERR_SECURITY = 107
-const ERR_TYPE_MIS = 108
-const ERR_DIV_BY_0 = 109
+const ERR_TYPE_MISMATCH = 108
+const ERR_DIV_BY_ZERO = 109
 const ERR_INTERRUPT = 110
 
 def Error.code(): Int;

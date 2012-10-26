@@ -538,6 +538,8 @@ class LibCore30Func extends NativeFunction {
 				return new Pipe();
 			case 166: // IStream.available(): Int
 				return Ival(((InputStream)args[0]).available());
+			case 167: // this_process(): Process;
+				return c;
 			default:
 				return null;
 		}
