@@ -232,7 +232,7 @@ public class FunctionWriter implements Opcodes {
 				data.write(DCONST_1);
 				written = true;
 			}
-		} else {
+		} else if (cnst.getClass() == Object.class) {
 			data.write(ACONST_NULL);
 			written = true;
 		}

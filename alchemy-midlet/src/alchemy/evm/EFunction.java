@@ -679,7 +679,7 @@ class EFunction extends Function {
 			if (dbgtable != null) {
 				int srcline = 0;
 				for (int i=1; i<dbgtable.length; i += 2) {
-					if (dbgtable[i] <= ct) srcline = dbgtable[i+1];
+					if (dbgtable[i+1] <= ct) srcline = dbgtable[i];
 				}
 				ae.addTraceElement(this, cpool[dbgtable[0]]+":"+srcline);
 			} else {
