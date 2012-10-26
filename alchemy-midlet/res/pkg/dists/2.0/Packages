@@ -41,11 +41,11 @@ Summary: simple text editor
 File: edit_0.9.1-3.pkg
 
 Package: ex
-Version: 1.1.1-1
+Version: 1.2-1
 Section: devel
 Depends: libcore3, nec
 Summary: build tool for Alchemy OS
-File: ex_1.1.1-1.pkg
+File: ex_1.2-1.pkg
 
 Package: fileinfo
 Version: 1.3-1
