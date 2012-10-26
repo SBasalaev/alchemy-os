@@ -97,12 +97,8 @@ public class NEC extends NativeApp {
 				fname = arg;
 			}
 		}
-		//guessing outname
 		if (outname == null) {
-			if (fname.endsWith(".e") && fname.length() > 2)
-				outname = fname.substring(0, fname.length()-1)+'o';
-			else
-				outname = fname+".o";
+			outname = fname+".o";
 		}
 		//parsing source
 		Parser parser = new Parser(c);
