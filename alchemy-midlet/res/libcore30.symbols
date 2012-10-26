@@ -165,3 +165,4 @@ BArrayOStream.tobarray
 BArrayOStream.reset
 new_pipe
 IStream.available
+this_process
