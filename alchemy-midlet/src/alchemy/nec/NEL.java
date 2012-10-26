@@ -36,7 +36,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 /**
- * Native E linker.
+ * Native Ether linker.
+ * // TODO: move to alchemy.nes.asm
  * @author Sergey Basalaev
  */
 public class NEL extends NativeApp {

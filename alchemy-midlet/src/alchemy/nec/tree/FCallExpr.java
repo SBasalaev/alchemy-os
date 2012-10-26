@@ -31,8 +31,7 @@ public class FCallExpr extends Expr {
 	/** Argument expressions. */
 	public Expr[] args;
 
-	public FCallExpr(int lnum, Expr fload, Expr[] args) {
-		super(lnum);
+	public FCallExpr(Expr fload, Expr[] args) {
 		this.fload = fload;
 		this.args = args;
 	}

@@ -50,7 +50,10 @@ public class FunctionWriter implements Opcodes {
 	
 	/** Visit number of the line in the source file. */
 	public void visitLine(int num) {
-		if (dbgtable.length() == 0) throw new IllegalStateException("Source is not visited");
+		int len = dbgtable.length();
+		if (len == 0) {
+			throw new IllegalStateException("Source is not visited");
+		}
 		if (dbgtable.length() < 2 || dbgtable.charAt(dbgtable.length()-2) != num) {
 			dbgtable.append((char)num).append((char)data.size());
 		}
@@ -180,10 +183,7 @@ public class FunctionWriter implements Opcodes {
 	 */
 	public void visitLdcInsn(Object cnst) {
 		boolean written = false;
-		if (cnst == null) {
-			data.write(ACONST_NULL);
-			written = true;
-		} else if (cnst instanceof Boolean) {
+		if (cnst instanceof Boolean) {
 			if (cnst.equals(Boolean.TRUE)) data.write(ICONST_1);
 			else data.write(ICONST_0);
 			written = true;
@@ -232,6 +232,9 @@ public class FunctionWriter implements Opcodes {
 				data.write(DCONST_1);
 				written = true;
 			}
+		} else {
+			data.write(ACONST_NULL);
+			written = true;
 		}
 		if (!written) {
 			int index = objects.indexOf(cnst);

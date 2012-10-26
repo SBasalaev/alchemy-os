@@ -34,7 +34,6 @@ public class BinaryExpr extends Expr {
 	public Expr rvalue;
 
 	public BinaryExpr(Expr lvalue, int operator, Expr rvalue) {
-		super(lvalue.line);
 		this.lvalue = lvalue;
 		this.operator = operator;
 		this.rvalue = rvalue;

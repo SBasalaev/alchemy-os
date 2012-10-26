@@ -29,16 +29,15 @@ import alchemy.core.Int;
 public class ConstExpr extends Expr {
 
 	public final Object value;
+	public final int line;
 
 	public ConstExpr(int lnum, Object obj) {
-		super(lnum);
+		line = lnum;
 		value = obj;
 	}
 
 	public Type rettype() {
-		if (value == null) {
-			return BuiltinType.NULL;
-		} else if (value instanceof Int) {
+		if (value instanceof Int) {
 			return BuiltinType.INT;
 		} else if (value instanceof Long) {
 			return BuiltinType.LONG;
@@ -53,7 +52,7 @@ public class ConstExpr extends Expr {
 		} else if (value instanceof Func) {
 			return ((Func)value).type;
 		} else {
-			return null;
+			return BuiltinType.NULL;
 		}
 	}
 

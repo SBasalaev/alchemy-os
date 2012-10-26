@@ -29,8 +29,7 @@ public class WhileExpr extends Expr {
 	public Expr condition;
 	public Expr body;
 
-	public WhileExpr(int lnum, Expr condition, Expr body) {
-		super(lnum);
+	public WhileExpr(Expr condition, Expr body) {
 		this.condition = condition;
 		this.body = body;
 	}

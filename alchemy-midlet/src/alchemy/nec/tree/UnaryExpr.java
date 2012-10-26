@@ -28,8 +28,7 @@ public class UnaryExpr extends Expr {
 	public int operator;
 	public Expr expr;
 
-	public UnaryExpr(int lnum, int operator, Expr expr) {
-		super(lnum);
+	public UnaryExpr(int operator, Expr expr) {
 		this.operator = operator;
 		this.expr = expr;
 	}

@@ -32,8 +32,9 @@ public class Var {
 	/**
 	 * If not null, contains value of this constant.
 	 * If null then value is not known at the time of compilation.
+	 * <code>null</code> constant is represented by Object instance.
 	 */
-	public ConstExpr constValue = null;
+	public Object constValue = null;
 	/** Index assigned to local variable by compiler. */
 	public int index = -1;
 

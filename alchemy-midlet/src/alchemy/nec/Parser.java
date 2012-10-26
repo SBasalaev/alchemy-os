@@ -31,7 +31,7 @@ import java.util.Stack;
 import java.util.Vector;
 
 /**
- * Parses E language.
+ * Parses Ether language.
  * @author Sergey Basalaev
  */
 public class Parser {
@@ -159,7 +159,7 @@ public class Parser {
 					throw new ParseException("Constant expression expected");
 				Var cnst = new Var(name, expr.rettype());
 				cnst.isConst = true;
-				cnst.constValue = (ConstExpr)expr;
+				cnst.constValue = ((ConstExpr)expr).value;
 				unit.addVar(cnst);
 			} else if (t.svalue.equals("type")) {
 				if (t.nextToken() != Token.IDENTIFIER)
@@ -222,7 +222,7 @@ public class Parser {
 				if (fvar == null) {
 					fvar = new Var(fdef.signature, fdef.type);
 					fvar.isConst = true;
-					fvar.constValue = new ConstExpr(0, fdef);
+					fvar.constValue = fdef;
 					unit.addVar(fvar);
 				} else if (!fvar.type.equals(fdef.type)) {
 					if (fvar.type instanceof FunctionType)
@@ -477,28 +477,28 @@ public class Parser {
 		int lnum = t.lineNumber();
 		switch (ttype) {
 			case ';':
-				return new NoneExpr(lnum);
+				return new NoneExpr();
 			case '+':
 			case '-': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
 				if (!type.isSubtypeOf(BuiltinType.NUMBER))
 					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
-				return new UnaryExpr(lnum, ttype, sub);				
+				return new UnaryExpr(ttype, sub);				
 			}
 			case '~': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
 				if (!type.isSubtypeOf(BuiltinType.INT) && !type.isSubtypeOf(BuiltinType.LONG))
 					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
-				return new UnaryExpr(lnum, ttype, sub);				
+				return new UnaryExpr(ttype, sub);				
 			}
 			case '!': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
 				if (!type.isSubtypeOf(BuiltinType.BOOL))
 					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
-				return new UnaryExpr(lnum, ttype, sub);				
+				return new UnaryExpr(ttype, sub);				
 			}
 			case '{':
 				return parseBlock(scope);
@@ -623,17 +623,17 @@ public class Parser {
 			}
 			if (expr.rettype().isSupertypeOf(toType)) {
 				warn(W_TYPESAFE, "Unsafe type cast from "+expr.rettype()+" to "+toType);
-				return new CastExpr(lnum, toType, expr);
+				return new CastExpr(toType, expr);
 			}
 			return cast(expr, toType);		
 		} else if (keyword.equals("null")) {
-			return new ConstExpr(lnum, null);
+			return new ConstExpr(lnum, new Object());
 		} else if (keyword.equals("while")) {
 			expect('(');
 			Expr cond = cast(parseExpr(scope), BuiltinType.BOOL);
 			expect(')');
 			Expr body = cast(parseExpr(scope), BuiltinType.NONE);
-			return new WhileExpr(lnum, cond, body);
+			return new WhileExpr(cond, body);
 		} else if (keyword.equals("do")) {
 			Expr body = cast(parseExpr(scope), BuiltinType.NONE);
 			if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("while"))
@@ -641,11 +641,11 @@ public class Parser {
 			expect('(');
 			Expr cond = cast(parseExpr(scope), BuiltinType.BOOL);
 			expect(')');
-			return new DoWhileExpr(lnum, cond, body);
+			return new DoWhileExpr(cond, body);
 		} else if (keyword.equals("for")) {
 			expect('(');
-			BlockExpr forblock = new BlockExpr(lnum, scope);
-			BlockExpr forbody = new BlockExpr(lnum, forblock);
+			BlockExpr forblock = new BlockExpr(scope);
+			BlockExpr forbody = new BlockExpr(forblock);
 			Expr init = cast(parseExpr(forblock), BuiltinType.NONE);
 			expect(',');
 			Expr cond = cast(parseExpr(forblock), BuiltinType.BOOL);
@@ -656,7 +656,7 @@ public class Parser {
 			forbody.exprs.addElement(body);
 			forbody.exprs.addElement(incr);
 			forblock.exprs.addElement(init);
-			forblock.exprs.addElement(new WhileExpr(lnum, cond, forbody));
+			forblock.exprs.addElement(new WhileExpr(cond, forbody));
 			return forblock;
 		} else if (keyword.equals("if")) {
 			expect('(');
@@ -666,12 +666,12 @@ public class Parser {
 			Expr elseexpr;
 			if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("else")) {
 				t.pushBack();
-				elseexpr = new NoneExpr(t.lineNumber());
+				elseexpr = new NoneExpr();
 			} else {
 				elseexpr = parseExpr(scope);
 			}
 			Type btype = binaryCastType(ifexpr.rettype(), elseexpr.rettype());
-			return new IfExpr(lnum, cond, cast(ifexpr, btype), cast(elseexpr, btype));
+			return new IfExpr(cond, cast(ifexpr, btype), cast(elseexpr, btype));
 		} else if (keyword.equals("switch")) {
 			expect('(');
 			// do not cast, other numeric type may be put here by mistake
@@ -734,7 +734,7 @@ public class Parser {
 				Expr e = (Expr)exprs.elementAt(i);
 				exprs.setElementAt(cast(e, type), i);
 			}
-			SwitchExpr swexpr = new SwitchExpr(lnum);
+			SwitchExpr swexpr = new SwitchExpr();
 			swexpr.indexexpr = indexexpr;
 			swexpr.elseexpr = elseexpr;
 			swexpr.keys = keys;
@@ -781,9 +781,9 @@ public class Parser {
 				warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
 			}
 			if (varvalue != null) {
-				return new AssignExpr(lnum, v, varvalue);
+				return new AssignExpr(v, varvalue);
 			} else {
-				return new NoneExpr(lnum);
+				return new NoneExpr();
 			}
 		} else if (keyword.equals("new")) {
 			Type type = parseType(scope);
@@ -910,14 +910,14 @@ public class Parser {
 				throw new ParseException("Identifier expected");
 			Var v = new Var(t.svalue, BuiltinType.ERROR);
 			expect(')');
-			BlockExpr catchblock = new BlockExpr(t.lineNumber(), scope);
+			BlockExpr catchblock = new BlockExpr(scope);
 			if (catchblock.addVar(v)) {
 				warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
 			}
 			Expr catchexpr = parseExpr(catchblock);
 			Type commontype = binaryCastType(tryexpr.rettype(), catchexpr.rettype());
 			catchblock.exprs.addElement(cast(catchexpr, commontype));
-			TryCatchExpr trycatch = new TryCatchExpr(lnum);
+			TryCatchExpr trycatch = new TryCatchExpr();
 			trycatch.tryexpr = cast(tryexpr, commontype);
 			trycatch.catchexpr = catchblock;
 			trycatch.catchvar = v;
@@ -956,9 +956,9 @@ public class Parser {
 			args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
 		}
 		if (fload instanceof ConstExpr) {
-			return makeFCall(fload.line, (Func)((ConstExpr)fload).value, args);
+			return makeFCall(((ConstExpr)fload).line, (Func)((ConstExpr)fload).value, args);
 		} else {
-			return new FCallExpr(fload.line, fload, args);
+			return new FCallExpr(fload, args);
 		}
 	}
 	
@@ -1038,15 +1038,15 @@ public class Parser {
 						} else {
 							assignexpr = cast(assignexpr, BuiltinType.ANY);
 						}
-						return new AStoreExpr(lnum, arexpr, indexexpr, assignexpr);
+						return new AStoreExpr(arexpr, indexexpr, assignexpr);
 					} else {
 						t.pushBack();
 						if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
-							return new ALoadExpr(lnum, arexpr, indexexpr, BuiltinType.INT);
+							return new ALoadExpr(arexpr, indexexpr, BuiltinType.INT);
 						} else if (artype instanceof ArrayType) {
-							return new ALoadExpr(lnum, arexpr, indexexpr, ((ArrayType)artype).elementType());
+							return new ALoadExpr(arexpr, indexexpr, ((ArrayType)artype).elementType());
 						} else {
-							return new ALoadExpr(lnum, arexpr, indexexpr, BuiltinType.ANY);
+							return new ALoadExpr(arexpr, indexexpr, BuiltinType.ANY);
 						}
 					}
 				} else {
@@ -1081,8 +1081,8 @@ public class Parser {
 		while (stype != null) {
 			Var mvar = unit.getVar(stype.toString()+'.'+name);
 			if (mvar != null) {
-				if (mvar.isConst && mvar.constValue.value instanceof Func)
-					return (Func)mvar.constValue.value;
+				if (mvar.isConst && mvar.constValue instanceof Func)
+					return (Func)mvar.constValue;
 				else
 					throw new ParseException("Cannot use variable as method");
 			}
@@ -1101,7 +1101,7 @@ public class Parser {
 		 || type.isSubtypeOf(BuiltinType.BARRAY)
 		 || type.isSubtypeOf(BuiltinType.CARRAY)) {
 			if (member.equals("len")) {
-				return new ALenExpr(lnum, expr);
+				return new ALenExpr(expr);
 			}
 		} else if (type instanceof StructureType) {
 			Var[] fields = ((StructureType)type).fields;
@@ -1114,55 +1114,55 @@ public class Parser {
 			}
 			if (index >= 0) {
 				ConstExpr indexexpr = new ConstExpr(lnum, new Int(index));
-				ALoadExpr ldexpr = new ALoadExpr(lnum, expr, indexexpr, fields[index].type);
+				ALoadExpr ldexpr = new ALoadExpr(expr, indexexpr, fields[index].type);
 				switch (t.nextToken()) {
 					case '=': {
 						Expr assignexpr = cast(parseExpr(scope), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.PLUSEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '+', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.MINUSEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '-', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.STAREQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '*', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.SLASHEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '/', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.PERCENTEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '%', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.AMPEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '&', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.BAREQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '|', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.HATEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '^', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.LTLTEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.LTLT, parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.GTGTEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.GTGT, parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					case Token.GTGTGTEQ: {
 						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.GTGTGT, parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(lnum, expr, indexexpr, assignexpr);
+						return new AStoreExpr(expr, indexexpr, assignexpr);
 					}
 					default: {
 						t.pushBack();
@@ -1193,7 +1193,7 @@ public class Parser {
 	}
 
 	private Expr parseBlock(Scope scope) throws ParseException, IOException {
-		BlockExpr block = new BlockExpr(t.lineNumber(), scope);
+		BlockExpr block = new BlockExpr(scope);
 		Expr lastexpr = null;
 		while (t.nextToken() != '}') {
 			t.pushBack();
@@ -1204,7 +1204,7 @@ public class Parser {
 				block.exprs.addElement(new DiscardExpr(lastexpr));
 		}
 		if (block.exprs.isEmpty()) {
-			return new NoneExpr(block.line);
+			return new NoneExpr();
 		} else {
 			//not to discard value of last expression
 			block.exprs.setElementAt(lastexpr, block.exprs.size()-1);
@@ -1244,12 +1244,12 @@ public class Parser {
 			case Token.AMPAMP: {
 				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				return new IfExpr(left.line, left, right, new ConstExpr(right.line, Boolean.FALSE));
+				return new IfExpr(left, right, new ConstExpr(-1, Boolean.FALSE));
 			}
 			case Token.BARBAR: {
 				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				return new IfExpr(left.line, left, new ConstExpr(right.line, Boolean.TRUE), right);
+				return new IfExpr(left, new ConstExpr(-1, Boolean.TRUE), right);
 			}
 			case '+':
 			case '-':
@@ -1263,7 +1263,7 @@ public class Parser {
 						((ConcatExpr)left).exprs.addElement(right);
 						return left;
 					} else {
-						ConcatExpr cexpr = new ConcatExpr(left.line);
+						ConcatExpr cexpr = new ConcatExpr();
 						cexpr.exprs.addElement(left);
 						cexpr.exprs.addElement(right);
 						return cexpr;
@@ -1295,20 +1295,20 @@ public class Parser {
 	/** Returns variable loading expression. */
 	private Expr makeGetVar(int lnum, Scope scope, Var var) {
 		if (var.isConst && var.constValue != null) {
-			Object cnst = var.constValue.value;
+			Object cnst = var.constValue;
 			if (cnst.getClass() == Func.class) {
 				((Func)cnst).hits++;
 			}
-			return var.constValue;
+			return new ConstExpr(lnum, var.constValue);
 		} else if (scope.isLocal(var.name)) {
 			return new VarExpr(lnum, var);
 		} else {
 			// convert to  cast(type)getstatic("var#hash")
 			Func getstatic = unit.getFunc("getstatic");
 			getstatic.hits++;
-			return new CastExpr(lnum,
+			return new CastExpr(
 					var.type,
-					new FCallExpr(lnum, new ConstExpr(lnum, getstatic),
+					new FCallExpr(new ConstExpr(lnum, getstatic),
 					new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())) }));
 		}
 	}
@@ -1319,12 +1319,12 @@ public class Parser {
 		if (var.isConst)
 			throw new ParseException("Cannot assign to constant "+var.name);
 		if (scope.isLocal(var.name)) {
-			return new AssignExpr(lnum, var, value);
+			return new AssignExpr(var, value);
 		} else {
 			// convert to  setstatic("var#hash", value)
 			Func setstatic = unit.getFunc("setstatic");
 			setstatic.hits++;
-			return new FCallExpr(lnum,
+			return new FCallExpr(
 					new ConstExpr(lnum, setstatic),
 					new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())), value });
 		}
@@ -1337,7 +1337,7 @@ public class Parser {
 	 *   acopy            - checks types of arrays
 	 */
 	private Expr makeFCall(int lnum, Func f, Expr[] args) throws ParseException {
-		FCallExpr expr = new FCallExpr(lnum, new ConstExpr(lnum, f), args);
+		FCallExpr expr = new FCallExpr(new ConstExpr(lnum, f), args);
 		if (f.signature.equals("Function.curry") && args[0].rettype() instanceof FunctionType) {
 			// extra special for f.curry
 			if (args[0] instanceof ConstExpr
@@ -1354,7 +1354,7 @@ public class Parser {
 				newftype.rettype = redftype;
 				newftype.args = new Type[1];
 				newftype.args[0] = ftype.args[0];
-				return new CastExpr(lnum, newftype, expr);
+				return new CastExpr(newftype, expr);
 			}
 			FunctionType oldftype = (FunctionType)args[0].rettype();
 			if (oldftype.args.length == 0)
@@ -1370,9 +1370,9 @@ public class Parser {
 			newftype.rettype = oldftype.rettype;
 			newftype.args = new Type[oldftype.args.length-1];
 			System.arraycopy(oldftype.args, 1, newftype.args, 0, newftype.args.length);
-			return new CastExpr(lnum, newftype, expr);
+			return new CastExpr(newftype, expr);
 		} else if (f.signature.equals("Structure.clone") && args[0].rettype() instanceof StructureType) {
-			return new CastExpr(lnum, args[0].rettype(), expr);
+			return new CastExpr(args[0].rettype(), expr);
 		} else if (f.signature.equals("acopy") && args[2].rettype() instanceof ArrayType) {
 			ArrayType toarray = (ArrayType)args[2].rettype();
 			if (args[0].rettype() instanceof ArrayType) {
@@ -1407,7 +1407,7 @@ public class Parser {
 		}
 		if (toType.isSubtypeOf(fromType)) {
 			warn(W_TYPESAFE, "Unsafe type cast from "+fromType+" to "+toType);
-			return new CastExpr(expr.line, toType, expr);
+			return new CastExpr(toType, expr);
 		}
 		if (toType instanceof FunctionType && fromType instanceof FunctionType) {
 			FunctionType fromF = (FunctionType)fromType;
@@ -1420,7 +1420,7 @@ public class Parser {
 			if (cancast) return expr;
 		}
 		if (fromType.isSubtypeOf(BuiltinType.NUMBER) && toType.isSubtypeOf(BuiltinType.NUMBER)) {
-			return new CastExpr(expr.line, toType, expr);
+			return new CastExpr(toType, expr);
 		}
 		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
 	}

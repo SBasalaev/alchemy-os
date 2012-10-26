@@ -35,9 +35,7 @@ public class TryCatchExpr extends Expr {
 	public Expr catchexpr;
 	public Var catchvar;
 
-	public TryCatchExpr(int lnum) {
-		super(lnum);
-	}
+	public TryCatchExpr() { }
 
 	public Type rettype() {
 		return tryexpr.rettype();

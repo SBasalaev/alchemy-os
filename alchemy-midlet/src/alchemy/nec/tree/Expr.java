@@ -23,12 +23,8 @@ package alchemy.nec.tree;
  * @author Sergey Basalaev
  */
 public abstract class Expr {
-
-	public final int line;
 	
-	public Expr(int lnum) {
-		this.line = lnum;
-	}
+	public Expr() { }
 	
 	/** Type that this expression returns. */
 	public abstract Type rettype();

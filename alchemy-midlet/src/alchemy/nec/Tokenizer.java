@@ -22,7 +22,7 @@ import alchemy.util.UTFReader;
 import java.io.IOException;
 
 /**
- * Parses E source into sequence of tokens.
+ * Splits Ether source into sequence of tokens.
  * @author Sergey Basalaev
  */
 class Tokenizer {

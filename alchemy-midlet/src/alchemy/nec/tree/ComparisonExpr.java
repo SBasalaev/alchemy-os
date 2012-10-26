@@ -30,7 +30,6 @@ public class ComparisonExpr extends Expr {
 	public Expr rvalue;
 
 	public ComparisonExpr(Expr lvalue, int operator, Expr rvalue) {
-		super(lvalue.line);
 		this.lvalue = lvalue;
 		this.operator = operator;
 		this.rvalue = rvalue;

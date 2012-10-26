@@ -26,21 +26,23 @@ import alchemy.util.IO;
 import java.io.OutputStream;
 
 /**
- * Native E compiler.
+ * Native Ether compiler.
  * @author Sergey Basalaev
  */
 public class NEC extends NativeApp {
 	
 	static private final String VERSION =
-			"Native E Compiler version 1.4";
+			"Native Ether Compiler version 2.0";
 
 	static private final String HELP =
 			"Usage: ec [options] <input> \n" +
 			"Options:\n" +
 			"-o <output>\n write to this file\n" +
-			"-t<target>\n compile for given target\n" +
+			//"-t<target>\n compile for given target\n" +
 			"-O<level>\n choose optimization level\n" +
 			"-I<path>\n add path to includes\n" +
+			"-W<cat> -Wno-<cat>\n Switches category of warnings\n" +
+			"-g\n turns on debugging info\n" +
 			"-h\n print this help and exit\n" +
 			"-v\n print version and exit";
 

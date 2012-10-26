@@ -19,7 +19,7 @@
 package alchemy.nec;
 
 /**
- * Thrown when E source being parsed is invalid.
+ * Thrown when Ether source being parsed is invalid.
  * @author Sergey Basalaev
  */
 public class ParseException extends Exception {

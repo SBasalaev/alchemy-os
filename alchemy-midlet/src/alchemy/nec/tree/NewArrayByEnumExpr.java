@@ -26,9 +26,10 @@ public class NewArrayByEnumExpr extends Expr {
 
 	private final Type type;
 	public final Expr[] initializers;
+	public final int line;
 
 	public NewArrayByEnumExpr(int lnum, Type type, Expr[] initializers) {
-		super(lnum);
+		this.line = lnum;
 		this.type = type;
 		this.initializers = initializers;
 	}

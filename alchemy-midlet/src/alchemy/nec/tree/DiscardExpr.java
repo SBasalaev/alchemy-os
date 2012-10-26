@@ -26,7 +26,6 @@ public class DiscardExpr extends Expr {
 	public Expr expr;
 
 	public DiscardExpr(Expr expr) {
-		super(expr.line);
 		this.expr = expr;
 	}
 

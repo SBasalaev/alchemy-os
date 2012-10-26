@@ -28,8 +28,7 @@ public class ALenExpr extends Expr {
 
 	public Expr arrayexpr;
 
-	public ALenExpr(int lnum, Expr arrayexpr) {
-		super(lnum);
+	public ALenExpr(Expr arrayexpr) {
 		this.arrayexpr = arrayexpr;
 	}
 

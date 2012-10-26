@@ -64,11 +64,10 @@ public class EAsmWriter implements ExprVisitor {
 	
 	public Object visitALen(ALenExpr alen, Object unused) {
 		alen.arrayexpr.accept(this, unused);
-		if (debug) writer.visitLine(alen.line);
 		Type artype = alen.arrayexpr.rettype();
-		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
+		if (artype.equals(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.BALEN);
-		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
+		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CALEN);
 		} else {
 			writer.visitInsn(Opcodes.ALEN);
@@ -79,11 +78,10 @@ public class EAsmWriter implements ExprVisitor {
 	public Object visitALoad(ALoadExpr aload, Object unused) {
 		aload.arrayexpr.accept(this, unused);
 		aload.indexexpr.accept(this, unused);
-		if (debug) writer.visitLine(aload.line);
 		Type artype = aload.arrayexpr.rettype();
-		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
+		if (artype.equals(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.BALOAD);
-		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
+		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CALOAD);
 		} else {
 			writer.visitInsn(Opcodes.ALOAD);
@@ -95,11 +93,10 @@ public class EAsmWriter implements ExprVisitor {
 		astore.arrayexpr.accept(this, unused);
 		astore.indexexpr.accept(this, unused);
 		astore.assignexpr.accept(this, unused);
-		if (debug) writer.visitLine(astore.line);
 		Type artype = astore.arrayexpr.rettype();
-		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
+		if (artype.equals(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.BASTORE);
-		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
+		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CASTORE);
 		} else {
 			writer.visitInsn(Opcodes.ASTORE);
@@ -109,7 +106,6 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitAssign(AssignExpr assign, Object unused) {
 		assign.expr.accept(this, unused);
-		if (debug) writer.visitLine(assign.line);
 		writer.visitVarInsn(Opcodes.STORE, assign.var.index);
 		return null;
 	}
@@ -120,58 +116,58 @@ public class EAsmWriter implements ExprVisitor {
 		Type type = binary.rettype();
 		switch (binary.operator) {
 			case '+':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IADD);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LADD);
-				else if (type.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FADD);
-				else if (type.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DADD);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.IADD);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LADD);
+				else if (type.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FADD);
+				else if (type.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DADD);
 				break;
 			case '-':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.ISUB);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSUB);
-				else if (type.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FSUB);
-				else if (type.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DSUB);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.ISUB);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSUB);
+				else if (type.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FSUB);
+				else if (type.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DSUB);
 				break;
 			case '*':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IMUL);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LMUL);
-				else if (type.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FMUL);
-				else if (type.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DMUL);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.IMUL);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LMUL);
+				else if (type.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FMUL);
+				else if (type.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DMUL);
 				break;
 			case '/':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IDIV);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LDIV);
-				else if (type.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FDIV);
-				else if (type.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DDIV);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.IDIV);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LDIV);
+				else if (type.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FDIV);
+				else if (type.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DDIV);
 				break;
 			case '%':
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IMOD);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LMOD);
-				else if (type.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FMOD);
-				else if (type.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DMOD);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.IMOD);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LMOD);
+				else if (type.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FMOD);
+				else if (type.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DMOD);
 				break;
 			case '&':
-				if (type.isSubtypeOf(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IAND);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LAND);
+				if (type.equals(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IAND);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LAND);
 				break;
 			case '|':
-				if (type.isSubtypeOf(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IOR);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LOR);
+				if (type.equals(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IOR);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LOR);
 				break;
 			case '^':
-				if (type.isSubtypeOf(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IXOR);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LXOR);
+				if (type.equals(BuiltinType.INT) || type.equals(BuiltinType.BOOL)) writer.visitInsn(Opcodes.IXOR);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LXOR);
 				break;
 			case Token.LTLT:
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.ISHL);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSHL);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.ISHL);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSHL);
 				break;
 			case Token.GTGT:
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.ISHR);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSHR);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.ISHR);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LSHR);
 				break;
 			case Token.GTGTGT:
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.IUSHR);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LUSHR);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.IUSHR);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LUSHR);
 				break;
 		}
 		return null;
@@ -187,25 +183,24 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitCast(CastExpr cast, Object unused) {
 		cast.expr.accept(this, unused);
-		if (debug) writer.visitLine(cast.line);
 		Type from = cast.expr.rettype();
 		Type to = cast.rettype();
-		if (from.isSubtypeOf(BuiltinType.INT)) {
-			if (to.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.I2L);
-			else if (to.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.I2F);
-			else if (to.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.I2D);
-		} else if (from.isSubtypeOf(BuiltinType.LONG)) {
-			if (to.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.L2I);
-			else if (to.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.L2F);
-			else if (to.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.L2D);
-		} else if (from.isSubtypeOf(BuiltinType.FLOAT)) {
-			if (to.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.F2L);
-			else if (to.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.F2I);
-			else if (to.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.F2D);
-		} else if (from.isSubtypeOf(BuiltinType.DOUBLE)) {
-			if (to.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.D2L);
-			else if (to.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.D2F);
-			else if (to.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.D2I);
+		if (from.equals(BuiltinType.INT)) {
+			if (to.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.I2L);
+			else if (to.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.I2F);
+			else if (to.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.I2D);
+		} else if (from.equals(BuiltinType.LONG)) {
+			if (to.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.L2I);
+			else if (to.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.L2F);
+			else if (to.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.L2D);
+		} else if (from.equals(BuiltinType.FLOAT)) {
+			if (to.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.F2L);
+			else if (to.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.F2I);
+			else if (to.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.F2D);
+		} else if (from.equals(BuiltinType.DOUBLE)) {
+			if (to.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.D2L);
+			else if (to.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.D2F);
+			else if (to.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.D2I);
 		}
 		return null;
 	}
@@ -248,7 +243,7 @@ public class EAsmWriter implements ExprVisitor {
 					writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
 					break;
 			}
-		} else if ((cmp.lvalue.rettype().isSubtypeOf(BuiltinType.INT) || cmp.rvalue.rettype().isSubtypeOf(BuiltinType.INT))
+		} else if ((cmp.lvalue.rettype().equals(BuiltinType.INT) || cmp.rvalue.rettype().equals(BuiltinType.INT))
 				&& cmp.operator != Token.EQEQ && cmp.operator != Token.NOTEQ) {
 			// integer comparison
 			cmp.lvalue.accept(this, null);
@@ -272,13 +267,13 @@ public class EAsmWriter implements ExprVisitor {
 			cmp.lvalue.accept(this, null);
 			cmp.rvalue.accept(this, null);
 			Type type = Type.commonSupertype(cmp.lvalue.rettype(), cmp.rvalue.rettype());
-			if (type.isSubtypeOf(BuiltinType.INT)) {
+			if (type.equals(BuiltinType.INT)) {
 				writer.visitInsn(Opcodes.ICMP);
-			} else if (type.isSubtypeOf(BuiltinType.LONG)) {
+			} else if (type.equals(BuiltinType.LONG)) {
 				writer.visitInsn(Opcodes.LCMP);
-			} else if (type.isSubtypeOf(BuiltinType.FLOAT)) {
+			} else if (type.equals(BuiltinType.FLOAT)) {
 				writer.visitInsn(Opcodes.FCMP);
-			} else if (type.isSubtypeOf(BuiltinType.DOUBLE)) {
+			} else if (type.equals(BuiltinType.DOUBLE)) {
 				writer.visitInsn(Opcodes.DCMP);
 			} else {
 				writer.visitInsn(Opcodes.ACMP);
@@ -359,7 +354,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitConst(ConstExpr cexpr, Object unused) {
-		if (debug) writer.visitLine(cexpr.line);
+		if (debug && cexpr.line >= 0) writer.visitLine(cexpr.line);
 		Object obj = cexpr.value;
 		if (obj instanceof Func) {
 			obj = new FuncObject(((Func)obj).signature);
@@ -431,6 +426,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitNewArray(NewArrayExpr newarray, Object unused) {
+		if (debug) writer.visitLine(newarray.line);
 		newarray.lengthexpr.accept(this, unused);
 		Type artype = newarray.rettype();
 		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
@@ -444,6 +440,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object unused) {
+		if (debug) writer.visitLine(newarray.line);
 		writer.visitLdcInsn(new Int(newarray.initializers.length));
 		Type artype = newarray.rettype();
 		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {

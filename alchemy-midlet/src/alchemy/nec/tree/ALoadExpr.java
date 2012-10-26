@@ -29,8 +29,7 @@ public class ALoadExpr extends Expr {
 	public Expr arrayexpr;
 	public Expr indexexpr;
 
-	public ALoadExpr(int lnum, Expr arrayexpr, Expr indexexpr, Type type) {
-		super(lnum);
+	public ALoadExpr(Expr arrayexpr, Expr indexexpr, Type type) {
 		this.arrayexpr = arrayexpr;
 		this.indexexpr = indexexpr;
 		this.returnType = type;

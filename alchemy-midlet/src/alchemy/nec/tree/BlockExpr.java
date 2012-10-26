@@ -41,8 +41,7 @@ public class BlockExpr extends Expr implements Scope {
 
 	private final Scope parent;
 
-	public BlockExpr(int lnum, Scope parent) {
-		super(lnum);
+	public BlockExpr(Scope parent) {
 		this.parent = parent;
 	}
 

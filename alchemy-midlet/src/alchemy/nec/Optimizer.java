@@ -199,7 +199,7 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 			}
-			return new ConstExpr(binary.lvalue.line, c1);
+			return new ConstExpr(((ConstExpr)binary.lvalue).line, c1);
 		}
 		return binary;
 	}
@@ -225,7 +225,7 @@ public class Optimizer implements ExprVisitor {
 		switch (block.exprs.size()) {
 			case 0:
 				optimized = true;
-				return new NoneExpr(block.line);
+				return new NoneExpr();
 			case 1:
 				Expr e = (Expr)block.exprs.elementAt(0);
 				if (block.locals.isEmpty()) {
@@ -285,7 +285,7 @@ public class Optimizer implements ExprVisitor {
 					cnst = new Int((int)d);
 				}
 			}
-			return new ConstExpr(cast.line, cnst);
+			return new ConstExpr(((ConstExpr)cast.expr).line, cnst);
 		}
 		return cast;
 	}
@@ -361,7 +361,7 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 			}
-			return new ConstExpr(cmp.lvalue.line, c1);
+			return new ConstExpr(((ConstExpr)cmp.lvalue).line, c1);
 		} else if (cmp.lvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)cmp.lvalue).value;
 			if (cnst == null || cnst.equals(Int.ZERO)) {
@@ -401,7 +401,7 @@ public class Optimizer implements ExprVisitor {
 				Object o1 = ((ConstExpr)e1).value;
 				Object o2 = ((ConstExpr)e2).value;
 				if (!(o1 instanceof Func) && !(o2 instanceof Func)) {
-					exprs.setElementAt(new ConstExpr(e1.line, String.valueOf(o1)+o2), i);
+					exprs.setElementAt(new ConstExpr(((ConstExpr)e1).line, String.valueOf(o1)+o2), i);
 					exprs.removeElementAt(i+1);
 					optimized = true;
 				} else {
@@ -438,7 +438,7 @@ public class Optimizer implements ExprVisitor {
 		disc.expr = (Expr)disc.expr.accept(this, scope);
 		if (disc.expr instanceof ConstExpr || disc.expr instanceof VarExpr) {
 			optimized = true;
-			return new NoneExpr(disc.line);
+			return new NoneExpr();
 		} else if (disc.expr instanceof UnaryExpr) {
 			optimized = true;
 			disc.expr = ((UnaryExpr)disc.expr).expr;
@@ -446,14 +446,14 @@ public class Optimizer implements ExprVisitor {
 		} else if (disc.expr instanceof BinaryExpr) {
 			optimized = true;
 			BinaryExpr binary = (BinaryExpr)disc.expr;
-			BlockExpr block = new BlockExpr(binary.line, (Scope)scope);
+			BlockExpr block = new BlockExpr((Scope)scope);
 			block.exprs.addElement(new DiscardExpr(binary.lvalue));
 			block.exprs.addElement(new DiscardExpr(binary.rvalue));
 			return block;
 		} else if (disc.expr instanceof ComparisonExpr) {
 			optimized = true;
 			ComparisonExpr cmp = (ComparisonExpr)disc.expr;
-			BlockExpr block = new BlockExpr(cmp.line, (Scope)scope);
+			BlockExpr block = new BlockExpr((Scope)scope);
 			block.exprs.addElement(new DiscardExpr(cmp.lvalue));
 			block.exprs.addElement(new DiscardExpr(cmp.rvalue));
 			return block;
@@ -470,7 +470,7 @@ public class Optimizer implements ExprVisitor {
 		} else if (disc.expr instanceof ALoadExpr) {
 			optimized = true;
 			ALoadExpr aload = (ALoadExpr)disc.expr;
-			BlockExpr block = new BlockExpr(aload.line, (Scope)scope);
+			BlockExpr block = new BlockExpr((Scope)scope);
 			block.exprs.addElement(new DiscardExpr(aload.arrayexpr));
 			block.exprs.addElement(new DiscardExpr(aload.indexexpr));
 			return block;
@@ -481,7 +481,7 @@ public class Optimizer implements ExprVisitor {
 		} else if (disc.expr instanceof ConcatExpr) {
 			optimized = true;
 			Vector exprs = ((ConcatExpr)disc.expr).exprs;
-			BlockExpr block = new BlockExpr(disc.line, (Scope)scope);
+			BlockExpr block = new BlockExpr((Scope)scope);
 			for (int i=0; i<exprs.size(); i++) {
 				block.exprs.addElement(new DiscardExpr((Expr)exprs.elementAt(i)));
 			}
@@ -493,7 +493,7 @@ public class Optimizer implements ExprVisitor {
 		} else if (disc.expr instanceof NewArrayByEnumExpr) {
 			optimized = true;
 			Expr[] exprs = ((NewArrayByEnumExpr)disc.expr).initializers;
-			BlockExpr block = new BlockExpr(disc.line, (Scope)scope);
+			BlockExpr block = new BlockExpr((Scope)scope);
 			for (int i=0; i<exprs.length; i++) {
 				if (exprs[i] != null) block.exprs.addElement(new DiscardExpr(exprs[i]));
 			}
@@ -536,14 +536,14 @@ public class Optimizer implements ExprVisitor {
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
 				if (!(cnst instanceof Func)) {
 					optimized = true;
-					return new ConstExpr(fcall.args[0].line, String.valueOf(cnst));
+					return new ConstExpr(((ConstExpr)fcall.args[0]).line, String.valueOf(cnst));
 				}
 			}
 			if (f.body != null && (f.body instanceof ConstExpr || f.body instanceof NoneExpr)) {
 				// we don't need to call function but we still
 				// need to calculate its arguments
 				f.hits--;
-				BlockExpr block = new BlockExpr(fcall.line, (Scope)scope);
+				BlockExpr block = new BlockExpr((Scope)scope);
 				for (int i=0; i<fcall.args.length; i++) {
 					block.exprs.addElement(new DiscardExpr(fcall.args[i]));
 				}
@@ -664,7 +664,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 			}
 			optimized = true;
-			return new ConstExpr(unary.expr.line, cnst);
+			return new ConstExpr(((ConstExpr)unary.expr).line, cnst);
 		}
 		return unary;
 	}
@@ -684,10 +684,10 @@ public class Optimizer implements ExprVisitor {
 			Object cnst = ((ConstExpr)wexpr.condition).value;
 			optimized = true;
 			if (cnst.equals(Boolean.FALSE)) {
-				return new NoneExpr(wexpr.line);
+				return new NoneExpr();
 			} else if (cnst.equals(Boolean.TRUE)) {
 				// do-while is shorter when writing native code
-				return new DoWhileExpr(wexpr.line, wexpr.condition, wexpr.body);
+				return new DoWhileExpr(wexpr.condition, wexpr.body);
 			}
 		}
 		return wexpr;
