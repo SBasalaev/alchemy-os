@@ -47,7 +47,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 				return;
 			}
 			Properties prop = InstallInfo.read();
-			FSManager.mount("", prop.get("fs.type"), prop.get("fs.init"));
+			FSManager.mount("", prop.get(InstallInfo.FS_TYPE), prop.get(InstallInfo.FS_INIT));
 			//setting up environment
 			runtime = new Art();
 			runtime.setLibBuilder((short)0xC0DE, new ELibBuilder());
@@ -61,6 +61,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			runApp();
 		} catch (Throwable t) {
 			kernelPanic(t.toString());
+			t.printStackTrace();
 		}
 	}
 
@@ -69,11 +70,10 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			new Runnable() {
 				public void run() {
 					try {
-						Properties props = InstallInfo.read();
-						FSManager.mount("", props.get("fs.type"), props.get("fs.init"));
 						runtime.rootContext().start("sh", new String[] {"/cfg/init"});
 					} catch (Throwable t) {
 						kernelPanic(t.toString());
+						t.printStackTrace();
 					}
 				}
 			}

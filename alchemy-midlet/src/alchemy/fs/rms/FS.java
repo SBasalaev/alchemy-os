@@ -19,6 +19,7 @@
 package alchemy.fs.rms;
 
 import alchemy.fs.Filesystem;
+import alchemy.midlet.InstallInfo;
 import alchemy.util.Closeable;
 import alchemy.util.Initable;
 import java.io.DataInputStream;
@@ -38,7 +39,7 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  * rather slow.
  * @author Sergey Basalaev
  */
-public final class FS extends Filesystem implements Initable, Closeable {
+public final class FS extends Filesystem implements Closeable {
 	
 	// file attributes
 	static private int A_DIR = 16;
@@ -64,21 +65,14 @@ public final class FS extends Filesystem implements Initable, Closeable {
 	 * filesystem can be used.
 	 */
 	public FS() {
+		// initializing root file descriptor
 		FD fd = new FD();
 		fd.name = "/";
 		fd.record = 1;
 		fd.attrs = A_READ | A_WRITE | A_DIR;
 		rootFD = fd;
-	}
-
-	/**
-	 * Creates new <code>RSFilesystem</code> that uses
-	 * record store with given name.
-	 * @param name    name of the record store to use
-	 * @throws RuntimeException
-	 *   if an error occurs within record storage system
-	 */
-	public void init(String name) {
+		// initializing record store
+		String name = InstallInfo.read().get(InstallInfo.RMS_NAME);
 		RecordStore rs = null;
 		try {
 			try {

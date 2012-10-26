@@ -18,13 +18,10 @@
 
 package alchemy.midlet;
 
-import alchemy.fs.Filesystem;
-import alchemy.util.Initable;
 import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreNotFoundException;
 
@@ -46,7 +43,7 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  * </dl>
  * @author Sergey Basalaev
  */
-class InstallInfo {
+public class InstallInfo {
 
 	private static final String INSTALLINFO = "installinfo";
 
@@ -54,6 +51,15 @@ class InstallInfo {
 
 	private InstallInfo() { }
 
+	/** Key for the installed version number. */
+	public static final String SYS_VERSION = "alchemy.version";
+	/** Key for the type of the root file system. */
+	public static final String FS_INIT = "fs.init";
+	/** Key for the string used to initialize root file system. */
+	public static final String FS_TYPE = "fs.type";
+	/** Key for the current name of the record store used as emulated FS. */
+	public static final String RMS_NAME = "rms.name";
+	
 	/**
 	 * Tests whether installation info exists within MIDlet.
 	 */

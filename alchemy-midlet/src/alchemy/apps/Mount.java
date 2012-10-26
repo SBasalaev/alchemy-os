@@ -57,7 +57,6 @@ public class Mount extends NativeApp {
 		if (FSManager.fs().list(dir).length > 0) {
 			IO.println(c.stderr, "Warning: directory not empty");
 		}
-		if (type.equals("rms")) options = "rsfiles";
 		FSManager.mount(dir, type, options);
 		return 0;
 	}
