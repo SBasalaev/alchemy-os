@@ -1,0 +1,3 @@
+#@alchemy.libs.LibMedia1
+soname=libmedia.1.so
+symbols=/res/libmedia1.symbols

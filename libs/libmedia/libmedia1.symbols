@@ -1,0 +1,10 @@
+play_tone
+new_player
+Player.get_ctype
+Player.set_loops
+Player.get_duration
+Player.get_time
+Player.set_time
+Player.start
+Player.stop
+Player.close

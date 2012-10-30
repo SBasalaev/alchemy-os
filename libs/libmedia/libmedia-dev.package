@@ -1,0 +1,8 @@
+Package: libmedia-dev
+Source: libmedia
+Version: 1.0-1
+Section: libdevel
+Summary: media library - development headers
+Author: Sergey Basalaev
+Maintainer: sbasalaev@gmail.com
+License: GPL-3+exception

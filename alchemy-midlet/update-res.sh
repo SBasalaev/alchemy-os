@@ -11,3 +11,4 @@ cp ../libs/libcore/libcore30.symbols res/
 cp ../libs/libui/libui1.symbols res/
 cp ../libs/libnet/libnet1.symbols res/
 cp ../libs/libcomm/libcomm1.symbols res/
+cp ../libs/libmedia/libmedia1.symbols res/
