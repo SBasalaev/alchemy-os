@@ -124,7 +124,6 @@ RadioItem.get
 RadioItem.clear
 RadioItem.len
 new_popupitem
-Canvas.set_fullscreen
 ui_set_app_title
 ui_set_app_icon
 ui_vibrate

@@ -451,20 +451,17 @@ class LibUI1Func extends NativeFunction {
 				}
 				return new ChoiceGroup((String)args[0], Choice.POPUP, strings, null);
 			}
-			case 126: // Canvas.set_fullscreen(full: Bool)
-				((UICanvas)args[0]).setFullScreenMode(bval(args[1]));
-				return null;
-			case 127: // ui_set_app_title(title: String)
+			case 126: // ui_set_app_title(title: String)
 				UIServer.setDefaultTitle(c, (String)args[0]);
 				return null;
-			case 128: // ui_set_app_icon(icon: Image)
+			case 127: // ui_set_app_icon(icon: Image)
 				UIServer.setDefaultIcon(c, (Image)args[0]);
 				return null;
-			case 129: // ui_vibrate(millis: Int): Bool
+			case 128: // ui_vibrate(millis: Int): Bool
 				return Ival(UIServer.vibrate(ival(args[0])));
-			case 130: // ui_flash(millis: Int): Bool
+			case 129: // ui_flash(millis: Int): Bool
 				return Ival(UIServer.flash(ival(args[0])));
-			case 131: // Canvas.has_hold_event(): Bool
+			case 130: // Canvas.has_hold_event(): Bool
 				return Ival(((UICanvas)args[0]).hasRepeatEvents());
 			default:
 				return null;
