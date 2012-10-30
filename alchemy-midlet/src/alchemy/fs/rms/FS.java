@@ -21,7 +21,6 @@ package alchemy.fs.rms;
 import alchemy.fs.Filesystem;
 import alchemy.midlet.InstallInfo;
 import alchemy.util.Closeable;
-import alchemy.util.Initable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -465,7 +464,6 @@ public final class FS extends Filesystem implements Closeable {
 
 	private class FileInputStream extends InputStream {
 
-		private FD fd;
 		private byte[] buf;
 		private int mark = 8;
 		private int pos = 8;
