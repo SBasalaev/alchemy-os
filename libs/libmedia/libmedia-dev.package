@@ -6,3 +6,4 @@ Summary: media library - development headers
 Author: Sergey Basalaev
 Maintainer: sbasalaev@gmail.com
 License: GPL-3+exception
+Depends: libmedia1
