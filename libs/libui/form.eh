@@ -29,7 +29,7 @@ def TextItem.set_font(font: Int);
 
 type HyperlinkItem < TextItem;
 
-def new_hyperlinkitem(label: String, text: String, onclick: Menu);
+def new_hyperlinkitem(label: String, text: String);
 
 type ImageItem < Item;
 

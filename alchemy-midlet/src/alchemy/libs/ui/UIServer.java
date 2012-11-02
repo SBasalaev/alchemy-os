@@ -82,8 +82,9 @@ public final class UIServer {
 	private static final UIItemCommandListener icl = new UIItemCommandListener();
 	
 	private static final List appList;
-	private static final Command appCommand = new Command("Switch to...", Command.SCREEN, 100);
-	private static final Command intCommand = new Command("Interrupt", Command.SCREEN, 2);
+	private static final Command appCommand = new Command("Switch to...", Command.BACK, 100);
+	private static final Command intCommand = new Command("Interrupt", Command.STOP, 2);
+	private static final Command itemCommand = new Command("Select", Command.ITEM, 1);
 	
 	static {
 		appList = new List("Switch to...", Choice.IMPLICIT);
@@ -217,10 +218,11 @@ public final class UIServer {
 	}
 	
 	/** Registers UI server as listener for item events. */
-	public static void receiveItemEvents(Item item) {
+	public static void registerItem(Item item) {
+		item.setDefaultCommand(itemCommand);
 		item.setItemCommandListener(icl);
 	}
-		
+
 	public static String getDefaultTitle(Context c) {
 		Object title = String.valueOf(c.get("ui.title"));
 		return (title != null) ? title.toString() : c.getName();
@@ -228,12 +230,6 @@ public final class UIServer {
 	
 	public static void setDefaultTitle(Context c, String title) {
 		c.set("ui.title", title);
-//		synchronized (UIServer.class) {
-//			int index = frameIndex(c);
-//			if (index >= 0) {
-//				appList.set(index, title, appList.getImage(index));
-//			}
-//		}
 	}
 
 	public static Image getDefaultIcon(Context c) {

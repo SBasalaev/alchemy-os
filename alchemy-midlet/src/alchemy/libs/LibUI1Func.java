@@ -404,10 +404,9 @@ class LibUI1Func extends NativeFunction {
 				return null;
 			case 110: // ListBox.len(): Int
 				return Ival(((List)args[0]).size());
-			case 111: { // new_hyperlinkitem(label: String, text: String, onclick: Menu)
+			case 111: { // new_hyperlinkitem(label: String, text: String)
 				StringItem item = new StringItem((String)args[0], (String)args[1], Item.HYPERLINK);
-				item.setDefaultCommand((Command)args[2]);
-				UIServer.receiveItemEvents(item);
+				UIServer.registerItem(item);
 				return item;
 			}
 			case 112: // ImageItem.get_alttext(): String
