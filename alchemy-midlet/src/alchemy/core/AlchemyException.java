@@ -20,6 +20,7 @@ package alchemy.core;
 
 import java.io.IOException;
 import java.util.Vector;
+import javax.microedition.media.MediaException;
 
 /**
  * Exception thrown by function instances.
@@ -46,6 +47,7 @@ public class AlchemyException extends Exception {
 	public static final int ERR_CLASSCAST = 108;
 	public static final int ERR_DIVBYZERO = 109;
 	public static final int ERR_INTERRUPT = 110;
+	public static final int ERR_MEDIA = 111;
 	
 	public AlchemyException(Throwable cause) {
 		super(cause.getMessage());
@@ -59,6 +61,7 @@ public class AlchemyException extends Exception {
 				: (cause instanceof ClassCastException) ? ERR_CLASSCAST
 				: (cause instanceof ArithmeticException) ? ERR_DIVBYZERO
 				: (cause instanceof InterruptedException) ? ERR_INTERRUPT
+				: (cause instanceof MediaException) ? ERR_MEDIA
 				: FAIL;
 	}
 	

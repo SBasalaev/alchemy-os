@@ -11,6 +11,7 @@ const ERR_SECURITY = 107
 const ERR_TYPE_MISMATCH = 108
 const ERR_DIV_BY_ZERO = 109
 const ERR_INTERRUPT = 110
+const ERR_MEDIA = 111
 
 def Error.code(): Int;
 def Error.msg(): String;
