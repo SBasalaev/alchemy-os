@@ -1,6 +1,6 @@
 Package: libnet-dev
 Source: libnet
-Version: 1.0-1
+Version: 1.0.1-1
 Section: libdevel
 Summary: network library - development headers
 Depends: libcore-dev, libnet1
