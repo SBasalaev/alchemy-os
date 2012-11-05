@@ -546,64 +546,49 @@ public class Parser {
 				return new ConstExpr(lnum, (t.svalue.equals("true") ? Boolean.TRUE : Boolean.FALSE));
 			case Token.KEYWORD:
 				return parseKeyword(scope, t.svalue);
-			case Token.IDENTIFIER:
+			case Token.IDENTIFIER: {
 				String str = t.svalue;
 				Var var = scope.getVar(str);
 				if (var == null) throw new ParseException("Variable "+str+" is not defined");
-				switch (t.nextToken()) {
-					case '=': { // setting variable value
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, value);
+				// making get expression
+				Expr vexpr;
+				if (var.isConst && var.constValue != null) {
+					Object cnst = var.constValue;
+					if (cnst instanceof Func) {
+						((Func)cnst).hits++;
 					}
-					case Token.PLUSEQ: { // var = var + expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '+', value));
-					}
-					case Token.MINUSEQ: { // var = var - expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '-', value));
-					}
-					case Token.STAREQ: { // var = var * expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '*', value));
-					}
-					case Token.SLASHEQ: { // var = var / expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '/', value));
-					}
-					case Token.PERCENTEQ: { // var = var % expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '%', value));
-					}
-					case Token.BAREQ: { // var = var | expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '|', value));
-					}
-					case Token.AMPEQ: { // var = var & expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '&', value));
-					}
-					case Token.HATEQ: { // var = var ^ expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), '^', value));
-					}
-					case Token.LTLTEQ: { // var = var << expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.LTLT, value));
-					}
-					case Token.GTGTEQ: { // var = var >> expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.GTGT, value));
-					}
-					case Token.GTGTGTEQ: { // var = var >>> expr
-						Expr value = parseExpr(scope);
-						return makeSetVar(lnum, scope, var, makeBinaryExpr(makeGetVar(lnum, scope, var), Token.GTGTGT, value));
-					}
-					default: { // getting variable value
-						t.pushBack();
-						return makeGetVar(lnum, scope, var);
-					}
+					vexpr = new ConstExpr(lnum, var.constValue);
+				} else if (scope.isLocal(var.name)) {
+					vexpr = new VarExpr(lnum, var);
+				} else {
+					// convert to  cast(type)getstatic("var#hash")
+					Func getstatic = unit.getFunc("getstatic");
+					getstatic.hits++;
+					vexpr = new CastExpr(
+							var.type,
+							new FCallExpr(new ConstExpr(lnum, getstatic),
+							new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())) }));
 				}
+				if (Token.isAssignment(t.nextToken())) {
+					if (var.isConst)
+						throw new ParseException("Cannot assign to constant "+var.name);
+					int operator = t.ttype;
+					Expr value = cast(makeAssignRval(vexpr, operator, parseExpr(scope)), var.type);
+					if (scope.isLocal(var.name)) {
+						return new AssignExpr(var, value);
+					} else {
+						// convert to  setstatic("var#hash", value)
+						Func setstatic = unit.getFunc("setstatic");
+						setstatic.hits++;
+						return new FCallExpr(
+							new ConstExpr(lnum, setstatic),
+							new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())), value });
+					}
+				} else {
+					t.pushBack();
+					return vexpr;
+				}
+			}
 			default:
 				throw new ParseException(t.toString()+" unexpected here");
 		}
@@ -1022,54 +1007,64 @@ public class Parser {
 					method.hits++;
 					return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, endexpr});
 				}
-			} else {
+			} else { // not a range
 				t.pushBack();
 				expect(']');
 				if (artype.isSubtypeOf(BuiltinType.ARRAY)
 				 || artype.equals(BuiltinType.BARRAY)
 				 || artype.equals(BuiltinType.CARRAY)) {
+					// array getter or setter
 					indexexpr = cast(indexexpr, BuiltinType.INT);
-					if (t.nextToken() == '=') {
-						Expr assignexpr = parseExpr(scope);
+					Expr getexpr;
+					if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
+						getexpr = new ALoadExpr(arexpr, indexexpr, BuiltinType.INT);
+					} else if (artype instanceof ArrayType) {
+						getexpr = new ALoadExpr(arexpr, indexexpr, ((ArrayType)artype).elementType());
+					} else {
+						getexpr = new ALoadExpr(arexpr, indexexpr, BuiltinType.ANY);
+					}
+					if (Token.isAssignment(t.nextToken())) {
+						Expr rexpr = makeAssignRval(getexpr, t.ttype, parseExpr(scope));
 						if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
-							assignexpr = cast(assignexpr, BuiltinType.INT);
+							rexpr = cast(rexpr, BuiltinType.INT);
 						} else if (artype instanceof ArrayType) {
-							assignexpr = cast(assignexpr, ((ArrayType)artype).elementType());
+							rexpr = cast(rexpr, ((ArrayType)artype).elementType());
 						} else {
-							assignexpr = cast(assignexpr, BuiltinType.ANY);
+							rexpr = cast(rexpr, BuiltinType.ANY);
 						}
-						return new AStoreExpr(arexpr, indexexpr, assignexpr);
+						return new AStoreExpr(arexpr, indexexpr, rexpr);
 					} else {
 						t.pushBack();
-						if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
-							return new ALoadExpr(arexpr, indexexpr, BuiltinType.INT);
-						} else if (artype instanceof ArrayType) {
-							return new ALoadExpr(arexpr, indexexpr, ((ArrayType)artype).elementType());
-						} else {
-							return new ALoadExpr(arexpr, indexexpr, BuiltinType.ANY);
-						}
+						return getexpr;
 					}
 				} else {
-					if (t.nextToken() == '=') {
-						Func method = findMethod(artype, "set");
-						if (method == null)
+					// get() or set() function
+					int operator = t.nextToken();
+					Func getmethod;
+					Expr getexpr = null;
+					if (operator != '=') {
+						getmethod = findMethod(artype, "get");
+						if (getmethod == null)
+							throw new ParseException("Method "+artype+".get not found");
+						if (getmethod.type.args.length != 2)
+							throw new ParseException("Method "+artype+".get must accept exactly one argument to use [] notation");
+						indexexpr = cast(indexexpr, getmethod.type.args[1]);
+						getmethod.hits++;
+						getexpr = makeFCall(lnum, getmethod, new Expr[] {arexpr, indexexpr});
+					}
+					if (Token.isAssignment(operator)) {
+						Func setmethod = findMethod(artype, "set");
+						if (setmethod == null)
 							throw new ParseException("Method "+artype+".set not found");
-						if (method.type.args.length != 3)
+						if (setmethod.type.args.length != 3)
 							throw new ParseException("Method "+artype+".set must accept exactly two arguments to use [] notation");
-						indexexpr = cast(indexexpr, method.type.args[1]);
-						Expr assignexpr = cast(parseExpr(scope), method.type.args[2]);
-						method.hits++;
-						return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, assignexpr});
+						indexexpr = cast(indexexpr, setmethod.type.args[1]);
+						Expr rexpr = cast(makeAssignRval(getexpr, operator, parseExpr(scope)), setmethod.type.args[2]);
+						setmethod.hits++;
+						return makeFCall(lnum, setmethod, new Expr[] {arexpr, indexexpr, rexpr});
 					} else {
 						t.pushBack();
-						Func method = findMethod(artype, "get");
-						if (method == null)
-							throw new ParseException("Method "+artype+".get not found");
-						if (method.type.args.length != 2)
-							throw new ParseException("Method "+artype+".get must accept exactly one argument to use [] notation");
-						indexexpr = cast(indexexpr, method.type.args[1]);
-						method.hits++;
-						return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr});
+						return getexpr;
 					}
 				}
 			}
@@ -1291,44 +1286,6 @@ public class Parser {
 			}
 		}
 	}
-	
-	/** Returns variable loading expression. */
-	private Expr makeGetVar(int lnum, Scope scope, Var var) {
-		if (var.isConst && var.constValue != null) {
-			Object cnst = var.constValue;
-			if (cnst.getClass() == Func.class) {
-				((Func)cnst).hits++;
-			}
-			return new ConstExpr(lnum, var.constValue);
-		} else if (scope.isLocal(var.name)) {
-			return new VarExpr(lnum, var);
-		} else {
-			// convert to  cast(type)getstatic("var#hash")
-			Func getstatic = unit.getFunc("getstatic");
-			getstatic.hits++;
-			return new CastExpr(
-					var.type,
-					new FCallExpr(new ConstExpr(lnum, getstatic),
-					new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())) }));
-		}
-	}
-	
-	/** Returns assignment expression. */
-	private Expr makeSetVar(int lnum, Scope scope, Var var, Expr value) throws ParseException {
-		value = cast(value, var.type);
-		if (var.isConst)
-			throw new ParseException("Cannot assign to constant "+var.name);
-		if (scope.isLocal(var.name)) {
-			return new AssignExpr(var, value);
-		} else {
-			// convert to  setstatic("var#hash", value)
-			Func setstatic = unit.getFunc("setstatic");
-			setstatic.hits++;
-			return new FCallExpr(
-					new ConstExpr(lnum, setstatic),
-					new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())), value });
-		}
-	}
 
 	/**
 	 * Does special type checkings and casts for the following functions:
@@ -1388,6 +1345,37 @@ public class Parser {
 			}
 		}
 		return expr;
+	}
+	
+	private Expr makeAssignRval(Expr get, int operator, Expr right) throws ParseException {
+		switch (operator) {
+			case '=':
+				return right;
+			case Token.PLUSEQ:
+				return makeBinaryExpr(get, '+', right);
+			case Token.MINUSEQ:
+				return makeBinaryExpr(get, '-', right);
+			case Token.STAREQ:
+				return makeBinaryExpr(get, '*', right);
+			case Token.SLASHEQ:
+				return makeBinaryExpr(get, '/', right);
+			case Token.PERCENTEQ:
+				return makeBinaryExpr(get, '%', right);
+			case Token.BAREQ:
+				return makeBinaryExpr(get, '|', right);
+			case Token.AMPEQ:
+				return makeBinaryExpr(get, '&', right);
+			case Token.HATEQ:
+				return makeBinaryExpr(get, '^', right);
+			case Token.LTLTEQ:
+				return makeBinaryExpr(get, Token.LTLT, right);
+			case Token.GTGTEQ:
+				return makeBinaryExpr(get, Token.GTGT, right);
+			case Token.GTGTGTEQ:
+				return makeBinaryExpr(get, Token.GTGTGT, right);
+			default:
+				throw new ParseException("Unexpected operator type "+operator);
+		}
 	}
 
 	/**
