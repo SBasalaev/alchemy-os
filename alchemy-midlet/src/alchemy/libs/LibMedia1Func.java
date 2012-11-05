@@ -62,6 +62,8 @@ class LibMedia1Func extends NativeFunction {
 			case 9: // Player.close()
 				((Player)args[0]).close();
 				return null;
+			case 10: // get_supported_ctypes(): [String]
+				return Manager.getSupportedContentTypes(null);
 			default:
 				return null;
 		}

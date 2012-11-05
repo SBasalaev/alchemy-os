@@ -1,6 +1,8 @@
 
 def play_tone(note: Int, duration: Int, volume: Int);
 
+def get_supported_ctypes(): [String];
+
 type Player < Any;
 
 type IStream;
