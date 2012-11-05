@@ -1110,59 +1110,12 @@ public class Parser {
 			if (index >= 0) {
 				ConstExpr indexexpr = new ConstExpr(lnum, new Int(index));
 				ALoadExpr ldexpr = new ALoadExpr(expr, indexexpr, fields[index].type);
-				switch (t.nextToken()) {
-					case '=': {
-						Expr assignexpr = cast(parseExpr(scope), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.PLUSEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '+', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.MINUSEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '-', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.STAREQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '*', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.SLASHEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '/', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.PERCENTEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '%', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.AMPEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '&', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.BAREQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '|', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.HATEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, '^', parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.LTLTEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.LTLT, parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.GTGTEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.GTGT, parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					case Token.GTGTGTEQ: {
-						Expr assignexpr = cast(makeBinaryExpr(ldexpr, Token.GTGTGT, parseExpr(scope)), fields[index].type);
-						return new AStoreExpr(expr, indexexpr, assignexpr);
-					}
-					default: {
-						t.pushBack();
-						return ldexpr;
-					}
+				if (Token.isAssignment(t.nextToken())) {
+					Expr rexpr = cast(makeAssignRval(ldexpr, t.ttype, parseExpr(scope)), fields[index].type);
+					return new AStoreExpr(expr, indexexpr, rexpr);
+				} else {
+					t.pushBack();
+					return ldexpr;
 				}
 			}
 		}
