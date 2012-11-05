@@ -1047,7 +1047,7 @@ public class Parser {
 						if (getmethod == null)
 							throw new ParseException("Method "+artype+".get not found");
 						if (getmethod.type.args.length != 2)
-							throw new ParseException("Method "+artype+".get must accept exactly one argument to use [] notation");
+							throw new ParseException("Method "+artype+".get must accept one argument to use [] notation");
 						indexexpr = cast(indexexpr, getmethod.type.args[1]);
 						getmethod.hits++;
 						getexpr = makeFCall(lnum, getmethod, new Expr[] {arexpr, indexexpr});
@@ -1057,7 +1057,7 @@ public class Parser {
 						if (setmethod == null)
 							throw new ParseException("Method "+artype+".set not found");
 						if (setmethod.type.args.length != 3)
-							throw new ParseException("Method "+artype+".set must accept exactly two arguments to use [] notation");
+							throw new ParseException("Method "+artype+".set must accept two arguments to use [] notation");
 						indexexpr = cast(indexexpr, setmethod.type.args[1]);
 						Expr rexpr = cast(makeAssignRval(getexpr, operator, parseExpr(scope)), setmethod.type.args[2]);
 						setmethod.hits++;
@@ -1137,7 +1137,31 @@ public class Parser {
 				return makeFCall(lnum, curry, args);
 			}
 		}
-		throw new ParseException("Type "+type+" has no member named "+member);
+		// no such method, trying getter and setter
+		Func setter = findMethod(type, "set_" + member);
+		Func getter = findMethod(type, "get_" + member);
+		Expr getexpr = null;
+		int operator = t.nextToken();
+		if (operator != '=') {
+			if (getter == null)
+				throw new ParseException("Getter for " + type + "." + member + " not found.");
+			if (getter.type.args.length != 1)
+				throw new ParseException("Getter for " + type + "." + member + " must accept no arguments");
+			getter.hits++;
+			getexpr = makeFCall(lnum, getter, new Expr[] { expr });
+		}
+		if (Token.isAssignment(operator)) {
+			if (setter == null)
+				throw new ParseException("Setter for " + type + "." + member + " not found.");
+			if (setter.type.args.length != 2)
+				throw new ParseException("Setter for " + type + "." + member + " must accept one argument");
+			setter.hits++;
+			Expr setexpr = cast(makeAssignRval(getexpr, operator, parseExpr(scope)), setter.type.args[1]);
+			return makeFCall(lnum, setter, new Expr[] { expr, setexpr });
+		} else {
+			t.pushBack();
+			return getexpr;
+		}
 	}
 
 	private Expr parseBlock(Scope scope) throws ParseException, IOException {
