@@ -1092,9 +1092,11 @@ public class Parser {
 			throw new ParseException("Identifier expected after '.'");
 		String member = t.svalue;
 		Type type = expr.rettype();
+		if (type instanceof NamedType && type.superType() == null)
+			type = unit.getType(type.toString());
 		if (type.isSubtypeOf(BuiltinType.ARRAY)
-		 || type.isSubtypeOf(BuiltinType.BARRAY)
-		 || type.isSubtypeOf(BuiltinType.CARRAY)) {
+		 || type.equals(BuiltinType.BARRAY)
+		 || type.equals(BuiltinType.CARRAY)) {
 			if (member.equals("len")) {
 				return new ALenExpr(expr);
 			}
