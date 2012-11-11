@@ -8,3 +8,4 @@ Player.set_time
 Player.start
 Player.stop
 Player.close
+get_supported_ctypes

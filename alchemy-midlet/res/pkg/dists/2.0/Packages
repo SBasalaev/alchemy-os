@@ -62,11 +62,11 @@ Summary: simple image viewer
 File: imgview_0.2-1.pkg
 
 Package: libcore-dev
-Version: 3.0.1-1
+Version: 3.0.2-1
 Section: libdevel
 Depends: libcore3
 Summary: headers for standard library
-File: libcore-dev_3.0.1-1.pkg
+File: libcore-dev_3.0.2-1.pkg
 
 Package: libcore3
 Version: 3.0.1-1
@@ -89,11 +89,11 @@ Summary: package management library
 File: libpkg1_0.3.5-1.pkg
 
 Package: libui-dev
-Version: 1.0.3-1
+Version: 1.0.5-1
 Section: libdevel
 Depends: libcore-dev, libui1
 Summary: graphical interface library - development headers
-File: libui-dev_1.0.3-1.pkg
+File: libui-dev_1.0.5-1.pkg
 
 Package: libui1
 Version: 1.0.3-1
