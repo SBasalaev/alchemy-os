@@ -83,9 +83,9 @@ CheckItem.set_text
 new_radioitem
 RadioItem.get_index
 RadioItem.set_index
-new_textbox
-TextBox.get_text
-TextBox.set_text
+new_msgbox
+MsgBox.get_text
+MsgBox.set_text
 font_baseline
 Graphics.get_stroke
 Graphics.set_stroke
@@ -95,8 +95,8 @@ Canvas.action_code
 Canvas.has_ptr_events
 Canvas.has_ptrdrag_event
 image_from_file
-TextBox.get_font
-TextBox.set_font
+MsgBox.get_image
+MsgBox.set_image
 EditBox.get_maxsize
 EditBox.set_maxsize
 EditBox.get_size

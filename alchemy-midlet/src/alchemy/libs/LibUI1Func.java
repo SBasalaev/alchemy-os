@@ -26,6 +26,8 @@ import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeFunction;
 import java.io.InputStream;
 import java.util.Date;
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
@@ -326,15 +328,15 @@ class LibUI1Func extends NativeFunction {
 			case 84: // RadioItem.set_index(index: String)
 				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
-			case 85: { // new_textbox(text: String): TextBox
-				Form box = new Form(UIServer.getDefaultTitle(c));
-				box.append(new StringItem(null, (String)args[0]));
+			case 85: { // new_msgbox(text: String, img: Image): MsgBox
+				Alert box = new Alert(UIServer.getDefaultTitle(c), (String)args[0], (Image)args[1], null);
+				box.setTimeout(Alert.FOREVER);
 				return box;
 			}
-			case 86: // TextBox.get_text(): String
-				return ((StringItem)((Form)args[0]).get(0)).getText();
-			case 87: // TextBox.set_text(text: String)
-				((StringItem)((Form)args[0]).get(0)).setText((String)args[1]);
+			case 86: // MsgBox.get_text(): String
+				return ((Alert)args[0]).getString();
+			case 87: // MsgBox.set_text(text: String)
+				((Alert)args[0]).setString((String)args[1]);
 				return null;
 			case 88: // font_baseline(font: Int): Int
 				return Ival(int2font(ival(args[0])).getBaselinePosition());
@@ -369,10 +371,10 @@ class LibUI1Func extends NativeFunction {
 				c.removeStream(in);
 				return img;
 			}
-			case 97: // TextBox.get_font(): Int
-				return Ival(font2int(((StringItem)((Form)args[0]).get(0)).getFont()));
-			case 98: // TextBox.set_font(f: Int)
-				((StringItem)((Form)args[0]).get(0)).setFont(int2font(ival(args[1])));
+			case 97: // MsgBox.get_image(): Image
+				return ((Alert)args[0]).getImage();
+			case 98: // MsgBox.set_image(img: Image)
+				((Alert)args[0]).setImage((Image)args[1]);
 				return null;
 			case 99: // EditBox.get_maxsize(): Int
 				return Ival(((TextBox)args[0]).getMaxSize());

@@ -1,13 +1,13 @@
 use "ui_types.eh"
 use "ui_edit.eh"
 
-type TextBox < Screen;
+type MsgBox < Screen;
 
-def new_textbox(text: String): TextBox;
-def TextBox.get_text(): String;
-def TextBox.set_text(text: String);
-def TextBox.get_font(): Int;
-def TextBox.set_font(f: Int);
+def new_msgbox(text: String, image: Image): MsgBox;
+def MsgBox.get_text(): String;
+def MsgBox.set_text(text: String);
+def MsgBox.get_image(): Image;
+def MsgBox.set_image(img: Image);
 
 type EditBox < Screen;
 
