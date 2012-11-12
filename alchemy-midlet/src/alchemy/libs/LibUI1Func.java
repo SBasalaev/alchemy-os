@@ -22,12 +22,11 @@ import alchemy.libs.ui.UICanvas;
 import alchemy.core.Context;
 import alchemy.core.Int;
 import alchemy.fs.FSManager;
+import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeFunction;
 import java.io.InputStream;
 import java.util.Date;
-import javax.microedition.lcdui.Alert;
-import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
@@ -328,15 +327,12 @@ class LibUI1Func extends NativeFunction {
 			case 84: // RadioItem.set_index(index: String)
 				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
-			case 85: { // new_msgbox(text: String, img: Image): MsgBox
-				Alert box = new Alert(UIServer.getDefaultTitle(c), (String)args[0], (Image)args[1], null);
-				box.setTimeout(Alert.FOREVER);
-				return box;
-			}
+			case 85: // new_msgbox(text: String, img: Image): MsgBox
+				return new MsgBox(UIServer.getDefaultTitle(c), (String)args[0], (Image)args[1]);
 			case 86: // MsgBox.get_text(): String
-				return ((Alert)args[0]).getString();
+				return ((MsgBox)args[0]).getString();
 			case 87: // MsgBox.set_text(text: String)
-				((Alert)args[0]).setString((String)args[1]);
+				((MsgBox)args[0]).setString((String)args[1]);
 				return null;
 			case 88: // font_baseline(font: Int): Int
 				return Ival(int2font(ival(args[0])).getBaselinePosition());
@@ -372,9 +368,9 @@ class LibUI1Func extends NativeFunction {
 				return img;
 			}
 			case 97: // MsgBox.get_image(): Image
-				return ((Alert)args[0]).getImage();
+				return ((MsgBox)args[0]).getImage();
 			case 98: // MsgBox.set_image(img: Image)
-				((Alert)args[0]).setImage((Image)args[1]);
+				((MsgBox)args[0]).setImage((Image)args[1]);
 				return null;
 			case 99: // EditBox.get_maxsize(): Int
 				return Ival(((TextBox)args[0]).getMaxSize());
