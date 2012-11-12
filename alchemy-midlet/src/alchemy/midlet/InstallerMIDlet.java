@@ -85,7 +85,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			"This MIDlet is free software and is licensed under GNU GPL version 3\n" +
 			"A copy of the GNU GPL may be found at http://www.gnu.org/licenses/\n";
 
-		new InstallerThread(0).start();
+		display.callSerially(new InstallerThread(0));
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
@@ -301,6 +301,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		Properties cfg = InstallInfo.read();
 		String oldname = cfg.get(InstallInfo.RMS_NAME);
 		alchemy.fs.rms.FS oldfs = new FS();
+		long oldlen = oldfs.spaceUsed(null);
 		// creating new FS
 		String newname = (oldname.equals("rsfiles")) ? "rsfiles2" : "rsfiles";
 		cfg.put(InstallInfo.RMS_NAME, newname);
@@ -313,15 +314,20 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		for (int i=0; i<list.length; i++) {
 			copyTree(oldfs, newfs, "/"+list[i]);
 		}
-		// writing configuration
 		oldfs.close();
+		// computing new len
 		newfs.close();
+		newfs = new FS();
+		long newlen = newfs.spaceUsed(null);
+		newfs.close();
+		// writing configuration
 		messages.append("Saving configuration...\n");
 		cfg.put(InstallInfo.RMS_NAME, newname);
 		InstallInfo.save();
 		// removing old FS
 		RecordStore.deleteRecordStore(oldname);
 		messages.append("Optimization complete.\n");
+		messages.append("" + (oldlen - newlen) + " bytes saved.\n");
 	}
 	
 	private void copyTree(Filesystem from, Filesystem to, String file) throws IOException {
@@ -387,7 +393,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 					case 4: rebuildFileSystem();
 				}
 			} catch (Throwable e) {
-				e.printStackTrace();
+				// e.printStackTrace();
 				messages.append("Fatal error: "+e.toString()+'\n');
 			}
 			messages.addCommand(cmdQuit);
