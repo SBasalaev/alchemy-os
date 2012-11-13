@@ -221,7 +221,7 @@ class LibCore30Func extends NativeFunction {
 			case 60: // space_used(root: String): Long
 				return Lval(FSManager.fs().spaceUsed(c.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
-				return String.valueOf(args[0]);
+				return LibCore30.stringValue(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
 			case 63: // IStream.close()
@@ -540,6 +540,8 @@ class LibCore30Func extends NativeFunction {
 				return Ival(((InputStream)args[0]).available());
 			case 167: // this_process(): Process;
 				return c;
+			case 168: // chstr(ch: Int): String
+				return String.valueOf((char)ival(args[0]));
 			default:
 				return null;
 		}

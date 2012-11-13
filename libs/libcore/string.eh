@@ -36,3 +36,4 @@ def String.hash(): Int;
 
 def ca2str(ca: CArray): String;
 def ba2utf(ba: BArray): String;
+def chstr(ch: Int): String;

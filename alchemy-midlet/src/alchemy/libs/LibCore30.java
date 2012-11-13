@@ -19,6 +19,7 @@
 package alchemy.libs;
 
 import alchemy.core.Context;
+import alchemy.core.Int;
 import alchemy.nlib.NativeFunction;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
@@ -267,5 +268,34 @@ public class LibCore30 extends NativeLibrary {
 		result += Math.PI/6 * offsteps;
 		if (big) result = Math.PI/2.0d - result;
 		return neg ? -result : result;
+	}
+	
+	public static String stringValue(Object a) {
+		if (a instanceof Object[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final Object[] ar = (Object[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(stringValue(ar[i]));
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof char[]) {
+			StringBuffer sb = new StringBuffer().append('\'');
+			final char[] ar = (char[]) a;
+			for (int i=0; i < ar.length; i++) {
+				sb.append(ar[i]);
+			}
+			return sb.append('\'').toString();
+		} else if (a instanceof byte[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final byte[] ar = (byte[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i]);
+			}
+			return sb.append(']').toString();			
+		} else {
+			return String.valueOf(a);
+		}
 	}
 }
