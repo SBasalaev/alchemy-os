@@ -19,10 +19,11 @@
 package alchemy.libs;
 
 import alchemy.core.Context;
-import alchemy.core.Int;
 import alchemy.nlib.NativeFunction;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Alchemy core runtime library.
@@ -293,7 +294,18 @@ public class LibCore30 extends NativeLibrary {
 				if (i != 0) sb.append(", ");
 				sb.append(ar[i]);
 			}
-			return sb.append(']').toString();			
+			return sb.append(']').toString();
+		} else if (a instanceof Hashtable) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final Hashtable h = (Hashtable)a;
+			boolean first = true;
+			for (Enumeration e = h.keys(); e.hasMoreElements(); ) {
+				Object key = e.nextElement();
+				if (first) first = false;
+				else sb.append(", ");
+				sb.append(stringValue(key)).append('=').append(stringValue(h.get(key)));
+			}
+			return sb.append(']').toString();
 		} else {
 			return String.valueOf(a);
 		}
