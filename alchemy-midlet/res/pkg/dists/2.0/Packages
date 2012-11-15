@@ -27,11 +27,11 @@ Summary: application menu
 File: appmenu_0.3.1-2.pkg
 
 Package: coreutils
-Version: 0.5.1-1
+Version: 0.5.2-1
 Section: utils
 Depends: libcore3
 Summary: essential utilities for Alchemy OS
-File: coreutils_0.5.1-1.pkg
+File: coreutils_0.5.2-1.pkg
 
 Package: edit
 Version: 0.9.2-1
