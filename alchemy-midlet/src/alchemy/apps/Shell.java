@@ -40,6 +40,7 @@ public class Shell extends NativeApp {
 
 	public int main(Context c, String[] args) {
 		try {
+			int exitcode = 0;
 			InputStream scriptinput;
 			if (args.length == 0) {
 				scriptinput = c.stdin;
@@ -69,10 +70,7 @@ public class Shell extends NativeApp {
 			UTFReader r = new UTFReader(scriptinput);
 			while (true) try {
 				String line = r.readLine();
-				if (line == null) {
-					if (scriptinput instanceof TerminalInputStream) continue;
-					else break;
-				}
+				if (line == null) break;
 				line = line.trim();
 				if (line.length() == 0) continue;
 				if (line.charAt(0) == '#') continue;
@@ -84,11 +82,13 @@ public class Shell extends NativeApp {
 					else return 1;
 				}
 				if (cc.cmd.equals("exit")) {
-					int ret = 0;
 					if (cc.args.length > 0) try {
-						ret = Integer.parseInt(cc.args[0]);
-					} catch (NumberFormatException e) { ret = 1; }
-					return ret;
+						exitcode = Integer.parseInt(cc.args[0]);
+					} catch (NumberFormatException e) {
+						IO.println(c.stderr, "exit: Not a number: "+cc.args[0]);
+						exitcode = 1;
+					}
+					return exitcode;
 				} else if (cc.cmd.equals("cd")) {
 					if (cc.args.length > 0) {
 						String newdir = c.toFile(cc.args[0]);
@@ -96,13 +96,16 @@ public class Shell extends NativeApp {
 						if (c.stdin instanceof TerminalInputStream) {
 							((TerminalInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
 						}
+						exitcode = 0;
 					} else {
 						IO.println(c.stderr, "cd: no directory specified");
+						exitcode = 1;
 					}
 				} else if (cc.cmd.equals("cls")) {
 					if (c.stdin instanceof TerminalInputStream) {
 						((TerminalInputStream)c.stdin).clearScreen();
 					}
+					exitcode = 0;
 				} else {
 					Context child = new Context(c);
 					if (cc.in != null) {
@@ -127,7 +130,7 @@ public class Shell extends NativeApp {
 					if (c.stdin instanceof TerminalInputStream) {
 						((TerminalInputStream)c.stdin).setPrompt("");
 					}
-					child.startAndWait(cc.cmd, cc.args);
+					exitcode = child.startAndWait(cc.cmd, cc.args);
 					if (cc.in != null) child.stdin.close();
 					if (cc.out != null) child.stdout.close();
 					if (cc.err != null) child.stderr.close();
@@ -138,7 +141,7 @@ public class Shell extends NativeApp {
 			} catch (Throwable t) {
 				IO.println(c.stderr, t);
 			}
-			return 0;
+			return exitcode;
 		} catch (Exception e) {
 			//e.printStackTrace();
 			IO.println(c.stderr, e);
