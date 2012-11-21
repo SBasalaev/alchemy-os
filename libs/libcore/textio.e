@@ -98,7 +98,7 @@ def Writer.write(ch: Int) {
 
 def Writer.writearray(buf: CArray, ofs: Int, len: Int) {
   for (var i=0, i<len, i=i+1) {
-    this.write(buf[ofs+len])
+    this.write(buf[ofs+i])
   }
 }
 
@@ -134,18 +134,18 @@ def readch_utf8(in: IStream): Int {
   else if ((b1 & 0xe0) == 0xc0) {
     var b2 = in.read()
     if (b2 < 0 || (b2 & 0xc0) != 0x80)
-      '?'
+      '\uFFFD'
     else
       ((b1 & 0x1f) << 6) | (b2 & 0x3f)
   } else if ((b1 & 0xf0) == 0xe0) {
     var b2 = in.read()
     var b3 = in.read()
     if (b3 < 0 || (b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80)
-      '?'
+      '\uFFFD'
     else
       ((b1 & 0xf) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f)
   } else {
-    '?'
+    '\uFFFD'
   }
 }
 
@@ -182,7 +182,7 @@ def readch_utf16(in: IStream): Int {
     EOF
   } else {
     var b2 = in.read()
-    if (b2 < 0) '?'
+    if (b2 < 0) '\uFFFD'
     else (b1 << 8) | b2
   }
 }
