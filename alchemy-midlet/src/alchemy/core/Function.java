@@ -74,7 +74,7 @@ public abstract class Function {
 	}
 
 	/** Boxing method for integer values. */
-	protected static final Int Ival(int value) {
+	protected static Int Ival(int value) {
 		return Int.toInt(value);
 	}
 
@@ -82,28 +82,27 @@ public abstract class Function {
 	 * Method converts <code>true</code> to <code>Int(1)</code>
 	 * and <code>false</code> to <code>Int(0)</code>.
 	 */
-	protected static final Int Ival(boolean value) {
+	protected static Int Ival(boolean value) {
 		return value ? Int.ONE : Int.ZERO;
 	}
 
 	/** Boxing method for long values. */
-	protected static final Long Lval(long value) {
+	protected static Long Lval(long value) {
 		return new Long(value);
 	}
 
 	/** Boxing method for float values. */
-	protected static final Float Fval(float value) {
+	protected static Float Fval(float value) {
 		return new Float(value);
 	}
 
 	/** Boxing method for double values. */
-	protected static final Double Dval(double value) {
+	protected static Double Dval(double value) {
 		return new Double(value);
 	}
 
 	/** Unboxing method for Int values. */
-	protected static final int ival(Object obj) {
-		if (obj == null) return 0;
+	protected static int ival(Object obj) {
 		return ((Int)obj).value;
 	}
 
@@ -111,26 +110,22 @@ public abstract class Function {
 	 * Method returns <code>false</code> iff <code>obj</code>
 	 * is <code>Int(0)</code>.
 	 */
-	protected static final boolean bval(Object obj) {
-		if (obj == null) return false;
+	protected static boolean bval(Object obj) {
 		return ((Int)obj).value != 0;
 	}
 
 	/** Unboxing method for Long values. */
-	protected static final long lval(Object obj) {
-		if (obj == null) return 0l;
+	protected static long lval(Object obj) {
 		return ((Long)obj).longValue();
 	}
 
 	/** Unboxing method for Float values. */
-	protected static final float fval(Object obj) {
-		if (obj == null) return 0f;
+	protected static float fval(Object obj) {
 		return ((Float)obj).floatValue();
 	}
 
 	/** Unboxing method for Double values. */
-	protected static final double dval(Object obj) {
-		if (obj == null) return 0d;
+	protected static double dval(Object obj) {
 		return ((Double)obj).doubleValue();
 	}
 }

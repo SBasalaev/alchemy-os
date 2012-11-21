@@ -63,67 +63,83 @@ class EFunction extends Function {
 		int ct = 0;
 		while (true) {
 		try {
-			int instr = code[ct++];
+			int instr = code[ct];
+			ct++;
 			switch (instr) {
 			// CONSTANTS
 				case Opcodes.ACONST_NULL: {
-					stack[++head] = null;
+					head++;
+					stack[head] = null;
 					break;
 				}
 				case Opcodes.ICONST_M1: {
-					stack[++head] = Int.M_ONE;
+					head++;
+					stack[head] = Int.M_ONE;
 					break;
 				}
 				case Opcodes.ICONST_0: {
-					stack[++head] = Int.ZERO;
+					head++;
+					stack[head] = Int.ZERO;
 					break;
 				}
 				case Opcodes.ICONST_1: {
-					stack[++head] = Int.ONE;
+					head++;
+					stack[head] = Int.ONE;
 					break;
 				}
 				case Opcodes.ICONST_2: {
-					stack[++head] = Int.toInt(2);
+					head++;
+					stack[head] = Int.toInt(2);
 					break;
 				}
 				case Opcodes.ICONST_3: {
-					stack[++head] = Int.toInt(3);
+					head++;
+					stack[head] = Int.toInt(3);
 					break;
 				}
 				case Opcodes.ICONST_4: {
-					stack[++head] = Int.toInt(4);
+					head++;
+					stack[head] = Int.toInt(4);
 					break;
 				}
 				case Opcodes.ICONST_5: {
-					stack[++head] = Int.toInt(5);
+					head++;
+					stack[head] = Int.toInt(5);
 					break;
 				}
 				case Opcodes.LCONST_0: {
-					stack[++head] = Lval(0l);
+					head++;
+					stack[head] = Lval(0l);
 					break;
 				}
 				case Opcodes.LCONST_1: {
-					stack[++head] = Lval(1l);
+					head++;
+					stack[head] = Lval(1l);
 					break;
 				}
 				case Opcodes.FCONST_0: {
-					stack[++head] = Fval(0f);
+					head++;
+					stack[head] = Fval(0f);
 					break;
 				}
 				case Opcodes.FCONST_1: {
-					stack[++head] = Fval(1f);
+					head++;
+					stack[head] = Fval(1f);
 					break;
 				}
 				case Opcodes.FCONST_2: {
-					stack[++head] = Fval(2f);
+					head++;
+					stack[head] = Fval(2f);
 					break;
 				}
 				case Opcodes.DCONST_0: {
-					stack[++head] = Dval(0d);
+					head++;
+					stack[head] = Dval(0d);
 					break;
 				}
 				case Opcodes.DCONST_1: {
-					stack[++head] = Dval(1d);
+					head++;
+					stack[head] = Dval(1d);
 					break;
 				}
 				
@@ -179,28 +195,28 @@ class EFunction extends Function {
 
 			//INTEGER ARITHMETICS
 				case Opcodes.IADD: {
-					Object atmp = Ival(ival(stack[--head]) + ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) + ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.ISUB: {
-					Object atmp = Ival(ival(stack[--head]) - ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) - ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.IMUL: {
-					Object atmp = Ival(ival(stack[--head]) * ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) * ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.IDIV: {
-					Object atmp = Ival(ival(stack[--head]) / ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) / ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.IMOD: {
-					Object atmp = Ival(ival(stack[--head]) % ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) % ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.INEG: {
@@ -208,65 +224,66 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.ICMP: {
-					int itmp = ival(stack[--head]) - ival(stack[++head]);
-					stack[--head] = (itmp > 0) ? Int.ONE : (itmp == 0 ? Int.ZERO : Int.M_ONE);
+					head--;
+					int itmp = ival(stack[head]) - ival(stack[head+1]);
+					stack[head] = (itmp > 0) ? Int.ONE : (itmp == 0 ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 				case Opcodes.ISHL: {
-					Object atmp = Ival(ival(stack[--head]) << ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) << ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.ISHR: {
-					Object atmp = Ival(ival(stack[--head]) >> ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) >> ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.IUSHR: {
-					Object atmp = Ival(ival(stack[--head]) >>> ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) >>> ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.IAND: {
-					Object atmp = Ival(ival(stack[--head]) & ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) & ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.IOR: {
-					Object atmp = Ival(ival(stack[--head]) | ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) | ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.IXOR: {
-					Object atmp = Ival(ival(stack[--head]) ^ ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Ival(ival(stack[head]) ^ ival(stack[head+1]));
 					break;
 				}
 
 			//LONG ARITHMETICS
 				case Opcodes.LADD: {
-					Object atmp = Lval(lval(stack[--head]) + lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) + lval(stack[head+1]));
 					break;
 				}
 				case Opcodes.LSUB: {
-					Object atmp = Lval(lval(stack[--head]) - lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) - lval(stack[head+1]));
 					break;
 				}
 				case Opcodes.LMUL: {
-					Object atmp = Lval(lval(stack[--head]) * lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) * lval(stack[head+1]));
 					break;
 				}
 				case Opcodes.LDIV: {
-					Object atmp = Lval(lval(stack[--head]) / lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) / lval(stack[head+1]));
 					break;
 				}
 				case Opcodes.LMOD:  {
-					Object atmp = Lval(lval(stack[--head]) % lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) % lval(stack[head+1]));
 					break;
 				}
 				case Opcodes.LNEG: {
@@ -274,65 +291,66 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.LCMP: {
-					long ltmp = lval(stack[--head]) - lval(stack[++head]);
-					stack[--head] = (ltmp > 0) ? Int.ONE : (ltmp == 0 ? Int.ZERO : Int.M_ONE);
+					head--;
+					long ltmp = lval(stack[head]) - lval(stack[head+1]);
+					stack[head] = (ltmp > 0L) ? Int.ONE : (ltmp == 0L ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 				case Opcodes.LSHL: {
-					Object atmp = Lval(lval(stack[--head]) << ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) << ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.LSHR: {
-					Object atmp = Lval(lval(stack[--head]) >> ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) >> ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.LUSHR: {
-					Object atmp = Lval(lval(stack[--head]) >>> ival(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) >>> ival(stack[head+1]));
 					break;
 				}
 				case Opcodes.LAND: {
-					Object atmp = Lval(lval(stack[--head]) & lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) & lval(stack[head+1]));
 					break;
 				}
 				case Opcodes.LOR: {
-					Object atmp = Lval(lval(stack[--head]) | lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) | lval(stack[head+1]));
 					break;
 				}
 				case Opcodes.LXOR: {
-					Object atmp = Lval(lval(stack[--head]) ^ lval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Lval(lval(stack[head]) ^ lval(stack[head+1]));
 					break;
 				}
 
 			//FLOAT ARITHMETICS
 				case Opcodes.FADD: {
-					Object atmp = Fval(fval(stack[--head]) + fval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Fval(fval(stack[head]) + fval(stack[head+1]));
 					break;
 				}
 				case Opcodes.FSUB: {
-					Object atmp = Fval(fval(stack[--head]) - fval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Fval(fval(stack[head]) - fval(stack[head+1]));
 					break;
 				}
 				case Opcodes.FMUL: {
-					Object atmp = Fval(fval(stack[--head]) * fval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Fval(fval(stack[head]) * fval(stack[head+1]));
 					break;
 				}
 				case Opcodes.FDIV: {
-					Object atmp = Fval(fval(stack[--head]) / fval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Fval(fval(stack[head]) / fval(stack[head+1]));
 					break;
 				}
 				case Opcodes.FMOD: {
-					Object atmp = Fval(fval(stack[--head]) % fval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Fval(fval(stack[head]) % fval(stack[head+1]));
 					break;
 				}
 				case Opcodes.FNEG: {
@@ -340,35 +358,36 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.FCMP: {
-					float ftmp = fval(stack[--head]) - fval(stack[++head]);
-					stack[--head] = (ftmp > 0) ? Int.ONE : (ftmp == 0 ? Int.ZERO : Int.M_ONE);
+					head--;
+					float ftmp = fval(stack[head]) - fval(stack[head+1]);
+					stack[head] = (ftmp > 0) ? Int.ONE : (ftmp == 0 ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 
 			//DOUBLE ARITHMETICS
 				case Opcodes.DADD: {
-					Object atmp = Dval(dval(stack[--head]) + dval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Dval(dval(stack[head]) + dval(stack[head+1]));
 					break;
 				}
 				case Opcodes.DSUB: {
-					Object atmp = Dval(dval(stack[--head]) - dval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Dval(dval(stack[head]) - dval(stack[head+1]));
 					break;
 				}
 				case Opcodes.DMUL: {
-					Object atmp = Dval(dval(stack[--head]) * dval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Dval(dval(stack[head]) * dval(stack[head+1]));
 					break;
 				}
 				case Opcodes.DDIV: {
-					Object atmp = Dval(dval(stack[--head]) / dval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Dval(dval(stack[head]) / dval(stack[head+1]));
 					break;
 				}
 				case Opcodes.DMOD: {
-					Object atmp = Dval(dval(stack[--head]) % dval(stack[++head]));
-					stack[--head] = atmp;
+					head--;
+					stack[head] = Dval(dval(stack[head]) % dval(stack[head+1]));
 					break;
 				}
 				case Opcodes.DNEG: {
@@ -376,8 +395,9 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.DCMP: {
-					double dtmp = dval(stack[--head]) - dval(stack[++head]);
-					stack[--head] = (dtmp > 0) ? Int.ONE : (dtmp == 0 ? Int.ZERO : Int.M_ONE);
+					head--;
+					double dtmp = dval(stack[head]) - dval(stack[head+1]);
+					stack[head] = (dtmp > 0) ? Int.ONE : (dtmp == 0 ? Int.ZERO : Int.M_ONE);
 					break;
 				}
 
@@ -389,10 +409,15 @@ class EFunction extends Function {
 				case Opcodes.LOAD_4:
 				case Opcodes.LOAD_5:
 				case Opcodes.LOAD_6:
-				case Opcodes.LOAD_7:
-					stack[++head] = locals[instr & 7]; break;
+				case Opcodes.LOAD_7: {
+					head++;
+					stack[head] = locals[instr & 7];
+					break;
+				}
 				case Opcodes.LOAD: { //load <ubyte>
-					stack[++head] = locals[code[ct++] & 0xff];
+					head++;
+					stack[head] = locals[code[ct] & 0xff];
+					ct++;
 					break;
 				}
 				//variable savers
@@ -403,81 +428,105 @@ class EFunction extends Function {
 				case Opcodes.STORE_4:
 				case Opcodes.STORE_5:
 				case Opcodes.STORE_6:
-				case Opcodes.STORE_7:{
+				case Opcodes.STORE_7: {
 					locals[instr & 7] = stack[head];
 					head--;
 					break;
 				}
 				case Opcodes.STORE: { //store <ubyte>
-					locals[code[ct++] & 0xff] = stack[head];
+					locals[code[ct] & 0xff] = stack[head];
+					ct++;
 					head--;
 					break;
 				}
 
 			//BRANCHING
 				case Opcodes.IFEQ: { //ifeq <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) == 0) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head]) == 0) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.IFNE: { //ifne <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) != 0) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head]) != 0) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.IFLT: { //iflt <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) < 0) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head]) < 0) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.IFGE: { //ifge <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) >= 0) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head]) >= 0) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.IFGT: { //ifgt <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) > 0) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head]) > 0) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.IFLE: { //ifle <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) <= 0) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head]) <= 0) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.GOTO: { //goto <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					ct = itmp;
+					ct = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					break;
 				}
 				case Opcodes.IFNULL: { //ifnull <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (stack[head--] == null) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (stack[head] == null) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.IFNNULL: { //ifnnull <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (stack[head--] != null) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (stack[head] != null) ct = itmp;
+					head--;
 					break;
 				}
 				case Opcodes.IF_ICMPLT: { //if_icmplt <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) > ival(stack[head--])) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head-1]) < ival(stack[head])) ct = itmp;
+					head -= 2;
 					break;
 				}
 				case Opcodes.IF_ICMPGE: { //if_icmpge <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) <= ival(stack[head--])) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head-1]) >= ival(stack[head])) ct = itmp;
+					head -= 2;
 					break;
 				}
 				case Opcodes.IF_ICMPGT: { //if_icmpgt <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) < ival(stack[head--])) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head-1]) > ival(stack[head])) ct = itmp;
+					head -= 2;
 					break;
 				}
 				case Opcodes.IF_ICMPLE: { //if_icmple <ushort>
-					int itmp = (code[ct++] & 0xff) << 8 | (code[ct++] & 0xff);
-					if (ival(stack[head--]) >= ival(stack[head--])) ct = itmp;
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (ival(stack[head-1]) >= ival(stack[head])) ct = itmp;
+					head -= 2;
 					break;
 				}
 			//FUNCTION CALLS
@@ -506,7 +555,8 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.CALL: {//call <ubyte>
-					int paramlen = code[ct++] & 0xff;
+					int paramlen = code[ct] & 0xff;
+					ct++;
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
@@ -514,7 +564,8 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.CALV: {//calv <ubyte>
-					int paramlen = code[ct++] & 0xff;
+					int paramlen = code[ct] & 0xff;
+					ct++;
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
@@ -593,36 +644,44 @@ class EFunction extends Function {
 
 			//SWITCH BRANCHING
 				case Opcodes.TABLESWITCH: {
-					int dflt = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
-					int min = ((code[ct++] & 0xff) << 24)
-					        | ((code[ct++] & 0xff) << 16)
-					        | ((code[ct++] & 0xff) << 8)
-					        | (code[ct++] & 0xff);
-					int max = ((code[ct++] & 0xff) << 24)
-					        | ((code[ct++] & 0xff) << 16)
-					        | ((code[ct++] & 0xff) << 8)
-					        | (code[ct++] & 0xff);
-					int val = ival(stack[head--]);
+					int dflt = ((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff);
+					ct += 2;
+					int min = (code[ct] << 24)
+					        | ((code[ct+1] & 0xff) << 16)
+					        | ((code[ct+2] & 0xff) << 8)
+					        | (code[ct+3] & 0xff);
+					ct += 4;
+					int max = (code[ct] << 24)
+					        | ((code[ct+1] & 0xff) << 16)
+					        | ((code[ct+2] & 0xff) << 8)
+					        | (code[ct+3] & 0xff);
+					ct += 4;
+					int val = ival(stack[head]);
+					head--;
 					if (val >= min && val <= max) {
 						ct += (val-min)*2;
-						ct = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
+						ct = ((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff);
 					} else {
 						ct = dflt;
 					}
 					break;
 				}
 				case Opcodes.LOOKUPSWITCH: {
-					int dflt = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
-					int count = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
-					int val = ival(stack[head--]);
+					int dflt = ((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff);
+					ct += 2;
+					int count = ((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff);
+					ct += 2;
+					int val = ival(stack[head]);
+					head--;
 					boolean matched = false;
 					for (int i=0; i<count && !matched; i++) {
-						int cand = ((code[ct++] & 0xff) << 24)
-					             | ((code[ct++] & 0xff) << 16)
-					             | ((code[ct++] & 0xff) << 8)
-					             | (code[ct++] & 0xff);
+						int cand = (code[ct] << 24)
+					             | ((code[ct+1] & 0xff) << 16)
+					             | ((code[ct+2] & 0xff) << 8)
+					             | (code[ct+3] & 0xff);
+						ct += 4;
 						if (val == cand) {
-							ct = ((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff);
+							ct = ((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff);
 							matched = true;
 						} else {
 							ct += 2;
@@ -633,8 +692,9 @@ class EFunction extends Function {
 				}
 			//OTHERS
 				case Opcodes.ACMP: {
-					boolean btmp = stack[head] == null ? stack[head-1] == null : stack[head].equals(stack[head-1]);
-					stack[--head] = Ival(!btmp);
+					head--;
+					boolean eq = (stack[head] == null) ? stack[head+1] == null : stack[head].equals(stack[head+1]);
+					stack[head] = Ival(!eq);
 					break;
 				}
 				case Opcodes.RET_NULL:
@@ -658,17 +718,23 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.LDC: { //ldc <ushort>
-					stack[++head] = cpool[((code[ct++] & 0xff) << 8) | (code[ct++] & 0xff)];
+					head++;
+					stack[head] = cpool[((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff)];
+					ct += 2;
 					break;
 				}
 				case Opcodes.POP:
 					head--;
 					break;
 				case Opcodes.BIPUSH: //bipush <byte>
-					stack[++head] = Ival(code[ct++]);
+					head++;
+					stack[head] = Ival(code[ct]);
+					ct++;
 					break;
 				case Opcodes.SIPUSH: //sipush <short>
-					stack[++head] = Ival((code[ct++] << 8) | (code[ct++]& 0xff));
+					head++;
+					stack[head] = Ival((code[ct] << 8) | (code[ct+1]& 0xff));
+					ct += 2;
 					break;
 			} /* the big switch */
 		} catch (Throwable e) {
@@ -693,7 +759,8 @@ class EFunction extends Function {
 				}
 			}
 			if (jumpto >= 0) {
-				stack[++head] = ae;
+				head++;
+				stack[head] = ae;
 				ct = jumpto;
 			} else {
 				throw ae;
