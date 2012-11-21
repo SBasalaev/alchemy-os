@@ -250,8 +250,8 @@ public class Parser {
 							body = parseExpr(fdef);
 						}
 						fdef.body = cast(body, fdef.type.rettype);
-						// global functions should not be removed
 						fdef.hits++;
+						fdef.source = Filesystem.fname((String)files.peek());
 						break;
 					default:
 						throw new ParseException(t.toString()+" unexpected here");
@@ -314,7 +314,7 @@ public class Parser {
 	 * Parses definition of function (without the body).
 	 */
 	private Func parseFuncDef() throws ParseException, IOException {
-		Func func = new Func(unit, Filesystem.fname((String)files.peek()));
+		Func func = new Func(unit);
 		//parsing def
 		if (t.nextToken() != Token.IDENTIFIER)
 			throw new ParseException("Function name expected, got "+t);
@@ -612,7 +612,7 @@ public class Parser {
 			}
 			return cast(expr, toType);		
 		} else if (keyword.equals("null")) {
-			return new ConstExpr(lnum, new Object());
+			return new ConstExpr(lnum, Null.NULL);
 		} else if (keyword.equals("while")) {
 			expect('(');
 			Expr cond = cast(parseExpr(scope), BuiltinType.BOOL);
@@ -838,7 +838,8 @@ public class Parser {
 		} else if (keyword.equals("def")) {
 			// anonymous function
 			// TODO: I probably need to use scope here instead
-			Func func = new Func(unit, Filesystem.fname((String)files.peek()));
+			Func func = new Func(unit);
+			func.source = Filesystem.fname((String)files.peek());
 			// parsing args
 			expect('(');
 			Vector args = new Vector();

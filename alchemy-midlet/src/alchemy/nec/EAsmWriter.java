@@ -211,7 +211,7 @@ public class EAsmWriter implements ExprVisitor {
 	 * is fulfilled, otherwise jump is performed when condition fails.
 	 */
 	private void visitCmpInIf(ComparisonExpr cmp, Label jumpto, boolean cond) {
-		if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value == null) {
+		if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value == Null.NULL) {
 			// comparison with null
 			cmp.lvalue.accept(this, null);
 			if (cmp.operator == Token.EQEQ) {

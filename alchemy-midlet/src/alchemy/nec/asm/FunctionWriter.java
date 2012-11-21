@@ -2,6 +2,7 @@ package alchemy.nec.asm;
 
 import alchemy.core.Int;
 import alchemy.evm.Opcodes;
+import alchemy.nec.tree.Null;
 import java.io.ByteArrayOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -232,7 +233,7 @@ public class FunctionWriter implements Opcodes {
 				data.write(DCONST_1);
 				written = true;
 			}
-		} else if (cnst.getClass() == Object.class) {
+		} else if (cnst == Null.NULL) {
 			data.write(ACONST_NULL);
 			written = true;
 		}
