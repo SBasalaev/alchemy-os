@@ -44,20 +44,27 @@ public class Parser {
 	private static final int W_VARS = 3;
 	
 	static final String[] WARN_STRINGS = {"typesafe", "main", "cast", "vars"};
+
+	// eXperimental feature categories
+	private static final int X_TRY = 1;
+	
+	static final String[] X_STRINGS = {"try"};
 	
 	private final Context c;
 	private Tokenizer t;
 	private Unit unit;
-	private int warnmask;
+	private int Wmask; /* Enabled warnings. */
+	private int Xmask; /* Enabled experimental features. */
 
 	/** Files in the process of parsing. */
 	private Stack files = new Stack();
 	/** Files that are already parsed. */
 	private Vector parsed = new Vector();
 	
-	public Parser(Context c, int warnmask) {
+	public Parser(Context c, int Wmask, int Xmask) {
 		this.c = c;
-		this.warnmask = warnmask;
+		this.Wmask = Wmask;
+		this.Xmask = Xmask;
 	}
 
 	public Unit parse(String source) {
@@ -888,17 +895,25 @@ public class Parser {
 			unit.funcs.addElement(func);
 			return new ConstExpr(lnum, func);
 		} else if (keyword.equals("try")) {
+			if ((Xmask & X_TRY) == 0)
+				throw new ParseException("Experimental try/catch support is disabled. Use -Xtry to enable it.");
 			Expr tryexpr = parseExpr(scope);
 			if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("catch"))
 				throw new ParseException("'catch' expected after 'try <expr>'");
-			expect('(');
-			if (t.nextToken() != Token.IDENTIFIER)
-				throw new ParseException("Identifier expected");
-			Var v = new Var(t.svalue, BuiltinType.ERROR);
-			expect(')');
+			Var v = null;
 			BlockExpr catchblock = new BlockExpr(scope);
-			if (catchblock.addVar(v)) {
-				warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
+			if (t.nextToken() == '(') {
+				if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("var"))
+					throw new ParseException("'var' expected");
+				if (t.nextToken() != Token.IDENTIFIER)
+					throw new ParseException("Identifier expected");
+				v = new Var(t.svalue, BuiltinType.ERROR);
+				if (catchblock.addVar(v)) {
+					warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
+				}
+				expect(')');
+			} else {
+				t.pushBack();
 			}
 			Expr catchexpr = parseExpr(catchblock);
 			Type commontype = binaryCastType(tryexpr.rettype(), catchexpr.rettype());
@@ -1447,7 +1462,7 @@ public class Parser {
 
 	/** Prints warning on stderr. */
 	private void warn(int category, String msg) {
-		if (category == W_ERROR || ((1 << category) & warnmask) != 0) {
+		if (category == W_ERROR || ((1 << category) & Wmask) != 0) {
 			StringBuffer output = new StringBuffer();
 			output.append(files.peek()).append(':').append(t.lineNumber());
 			if (category == W_ERROR) output.append(": [Error]");

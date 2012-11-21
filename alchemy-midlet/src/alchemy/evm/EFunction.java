@@ -754,12 +754,13 @@ class EFunction extends Function {
 			// catching or rethrowing
 			int jumpto = -1;
 			if (errtable != null) {
-				for (int i=0; i<errtable.length && jumpto < 0; i += 3) {
-					if (ct >= errtable[i] && ct <= errtable[i+1]) jumpto = errtable[i+2];
+				for (int i=0; i < errtable.length && jumpto < 0; i += 4)
+				if (ct >= errtable[i] && ct <= errtable[i+1]) {
+					jumpto = errtable[i+2];
+					head = errtable[i+3];
 				}
 			}
 			if (jumpto >= 0) {
-				head++;
 				stack[head] = ae;
 				ct = jumpto;
 			} else {

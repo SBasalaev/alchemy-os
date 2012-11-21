@@ -345,8 +345,10 @@ public class FunctionWriter implements Opcodes {
 	}
 	
 	public void visitTryCatchHandler(Label from, Label to) {
-		visitStack(1);
+		if (from.stackpos < 0)
+			throw new IllegalStateException("Try/Catch handler must be visited after corresponding block");
 		Label handler = new Label();
+		handler.stackpos = from.stackpos + 1;
 		visitLabel(handler);
 		errdata.addElement(from);
 		errdata.addElement(to);
@@ -375,12 +377,18 @@ public class FunctionWriter implements Opcodes {
 			dbgtable.getChars(0, dbgtable.length(), func.dbgtable, 0);
 		}
 		if (errdata.size() > 0) {
-			func.errtable = new char[errdata.size()];
-			for (int i=0; i<errdata.size(); i++) {
-				Label label = (Label)errdata.elementAt(i);
-				if (label.addr < 0) throw new IllegalStateException("Label not visited");
-				func.errtable[i] = (char)label.addr;
+			StringBuffer sb = new StringBuffer();
+			for (int i=0; i<errdata.size(); i += 3) {
+				Label from = (Label)errdata.elementAt(i);
+				if (from.addr < 0) throw new IllegalStateException("Label not visited");
+				Label to = (Label)errdata.elementAt(i+1);
+				if (to.addr < 0) throw new IllegalStateException("Label not visited");
+				Label handle = (Label)errdata.elementAt(i+2);
+				if (handle.addr < 0) throw new IllegalStateException("Label not visited");
+				sb.append((char)from.addr).append((char)to.addr).append((char)handle.addr).append((char)from.stackpos);
 			}
+			func.errtable = new char[errdata.size() / 3 * 4];
+			sb.getChars(0, sb.length(), func.errtable, 0);
 		}
 	}
 }

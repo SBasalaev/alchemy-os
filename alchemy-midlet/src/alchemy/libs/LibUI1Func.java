@@ -76,7 +76,7 @@ class LibUI1Func extends NativeFunction {
 			}
 			case 5: // image_from_image(im: Image, x: Int, y: Int, w: Int, h: Int): Image
 				return Image.createImage((Image)args[0], ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), 0);
-			case 6: { // Image.get_argb(argb: Array, ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int)
+			case 6: { // Image.get_argb(argb: [Int], ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int)
 				Object[] data = (Object[])args[1];
 				int ofs = ival(args[2]);
 				int scanlen = ival(args[3]);

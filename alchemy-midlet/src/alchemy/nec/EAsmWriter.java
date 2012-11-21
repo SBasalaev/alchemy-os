@@ -567,12 +567,12 @@ public class EAsmWriter implements ExprVisitor {
 		writer.visitJumpInsn(Opcodes.GOTO, aftertry);
 		writer.visitLabel(tryend);
 		writer.visitTryCatchHandler(trystart, tryend);
-		if (trycatch.catchexpr instanceof NoneExpr) {
+		if (trycatch.catchvar == null) {
 			writer.visitInsn(Opcodes.POP);
 		} else {
 			writer.visitVarInsn(Opcodes.STORE, trycatch.catchvar.index);
-			trycatch.catchexpr.accept(this, unused);
 		}
+		trycatch.catchexpr.accept(this, unused);
 		writer.visitLabel(aftertry);
 		return null;
 	}

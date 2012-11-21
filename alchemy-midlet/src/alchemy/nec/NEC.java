@@ -42,7 +42,8 @@ public class NEC extends NativeApp {
 			"-O<level>\n choose optimization level\n" +
 			"-I<path>\n add path to includes\n" +
 			"-W<cat> -Wno-<cat>\n Switches category of warnings\n" +
-			"-g\n turns on debugging info\n" +
+			"-g\n turn on debugging info\n" +
+			"-Xcommand\n use experimental feature\n" +
 			"-h\n print this help and exit\n" +
 			"-v\n print version and exit";
 
@@ -59,7 +60,8 @@ public class NEC extends NativeApp {
 		boolean wait_outname = false;
 		boolean optimize = true;
 		boolean dbginfo = false;
-		int warnmask = 0xfffffffe; // all except typesafe
+		int Wmask = 0xfffffffe; // all except typesafe
+		int Xmask = 0;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
@@ -76,25 +78,31 @@ public class NEC extends NativeApp {
 			//		IO.println(c.stderr, "Unsupported target: "+arg.substring(2));
 			//		return 1;
 			//	}
-			} else if (arg.equals("-O1") || arg.equals("-O")) {
-				optimize = true;
 			} else if (arg.equals("-O0")) {
 				optimize = false;
+			} else if (arg.startsWith("-O")) {
+				optimize = true;
+			} else if (arg.startsWith("-X")) {
+				String Xfeature = arg.substring(2);
+				for (int j=0; j < Parser.X_STRINGS.length; j++) {
+					if (Xfeature.equals(Parser.X_STRINGS[j]))
+						Xmask |= (1 << j);
+				}
 			} else if (arg.equals("-g")) {
 				dbginfo = true;
 			} else if (arg.startsWith("-Wno-")) {
 				String nowarn = arg.substring(5);
-				if (nowarn.equals("all")) warnmask = 0;
+				if (nowarn.equals("all")) Wmask = 0;
 				else for (int j=0; j < Parser.WARN_STRINGS.length; j++) {
 					if (nowarn.equals(Parser.WARN_STRINGS[j]))
-						warnmask &= ~(1 << j);
+						Wmask &= ~(1 << j);
 				}
 			} else if (arg.startsWith("-W")) {
 				String warn = arg.substring(2);
-				if (warn.equals("all")) warnmask = 0xffffffff;
+				if (warn.equals("all")) Wmask = 0xffffffff;
 				else for (int j=0; j < Parser.WARN_STRINGS.length; j++) {
 					if (warn.equals(Parser.WARN_STRINGS[j]))
-						warnmask |= (1 << j);
+						Wmask |= (1 << j);
 				}
 			} else if (arg.startsWith("-I") && arg.length() > 2) {
 				c.setEnv("INCPATH", c.getEnv("INCPATH")+':'+arg.substring(2));
@@ -118,7 +126,7 @@ public class NEC extends NativeApp {
 			outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(c, warnmask);
+		Parser parser = new Parser(c, Wmask, Xmask);
 		Unit unit = null;
 		try {
 			unit = parser.parse(c.toFile(fname));
