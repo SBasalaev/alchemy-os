@@ -525,7 +525,7 @@ class EFunction extends Function {
 				case Opcodes.IF_ICMPLE: { //if_icmple <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head-1]) >= ival(stack[head])) ct = itmp;
+					if (ival(stack[head-1]) <= ival(stack[head])) ct = itmp;
 					head -= 2;
 					break;
 				}
