@@ -214,8 +214,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			messages.append("Selected path: "+path+'\n');
 		}
 		display.setCurrent(messages);
-		//installing core files
-		installArchives("install.archives");
+		//installing base files
+		installFiles();
 		//writing configuration data
 		instCfg.put(InstallInfo.SYS_VERSION, setupCfg.get("alchemy.version"));
 		//writing install config
@@ -249,7 +249,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		if ("rms".equals(cfg.get(InstallInfo.FS_TYPE)) && null == cfg.get(InstallInfo.RMS_NAME))
 			cfg.put(InstallInfo.RMS_NAME, cfg.get(InstallInfo.FS_INIT));
 		//installing new files
-		installArchives("install.archives");
+		installFiles();
 		//writing configuration data
 		Properties instCfg = InstallInfo.read();
 		instCfg.put(InstallInfo.SYS_VERSION, setupCfg.get("alchemy.version"));
@@ -259,11 +259,16 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.addCommand(cmdUninstall);
 	}
 
-	private void installArchives(String property) throws Exception {
+	/**
+	 * Installs base system files and configuration in prepared file system.
+	 */
+	private void installFiles() throws Exception {
+		// open file system
 		Properties instCfg = InstallInfo.read();
 		FSManager.mount("", instCfg.get(InstallInfo.FS_TYPE), instCfg.get(InstallInfo.FS_INIT));
 		Filesystem fs = FSManager.fs();
-		String[] archives = IO.split(setupCfg.get(property), ' ');
+		// unpack base file archives
+		String[] archives = IO.split(setupCfg.get("install.archives"), ' ');
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
@@ -288,8 +293,22 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 				fs.setWrite(f, (attrs & 2) != 0);
 				fs.setExec(f, (attrs & 1) != 0);
 			}
+			datastream.close();
 		}
 		fs.remove("/PACKAGE");
+		// install /cfg/locale
+		if (!fs.exists("/cfg/locale")) {
+			String property = System.getProperty("microedition.locale");
+			if (property == null) property = "en_US";
+			property = property.replace('-', '_');
+			OutputStream out = fs.write("/cfg/locale");
+			out.write(IO.utfEncode(property));
+		}
+		// install /cfg/platform
+		OutputStream out = fs.write("/cfg/platform");
+		out.write(IO.utfEncode("Profiles: " + System.getProperty("microedition.profiles") + '\n'));
+		out.write(IO.utfEncode("Configuration: " + System.getProperty("microedition.configuration") + '\n'));
+		// close file system
 		FSManager.umount("");
 	}
 	
