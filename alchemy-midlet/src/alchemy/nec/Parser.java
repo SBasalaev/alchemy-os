@@ -250,8 +250,8 @@ public class Parser {
 							body = parseExpr(fdef);
 						}
 						fdef.body = cast(body, fdef.type.rettype);
-						// if function is public then increase hits
-						if (fdef.signature.charAt(0) != '_') fdef.hits++;
+						// global functions should not be removed
+						fdef.hits++;
 						break;
 					default:
 						throw new ParseException(t.toString()+" unexpected here");
