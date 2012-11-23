@@ -188,29 +188,18 @@ public class Parser {
 						Type superType = parseType(unit);
 						if (superType instanceof BuiltinType && !superType.equals(BuiltinType.ANY))
 							throw new ParseException("Cannot make a subtype of builtin type.");
-						unit.putType(new NamedType(typename, superType));
+						Type type;
+						if (t.nextToken() == '{') {
+							type = parseStruct(typename, superType);
+						} else {
+							t.pushBack();
+							type = new NamedType(typename, superType);
+						}
+						unit.putType(type);
 						break;
 					}
 					case '{': { // structure type
-						StructureType struct = new StructureType(typename);
-						Vector fields = new Vector();
-						while (t.nextToken() != '}') {
-							t.pushBack();
-							if (!fields.isEmpty()) expect(',');
-							if (t.nextToken() != Token.IDENTIFIER)
-								throw new ParseException("Field name expected, got "+t);
-							String fieldname = t.svalue;
-							expect(':');
-							Type vartype = parseType(unit);
-							Var var = new Var(fieldname, vartype);
-							var.index = fields.size();
-							fields.addElement(var);
-						}
-						struct.fields = new Var[fields.size()];
-						for (int i=fields.size()-1; i>=0; i--) {
-							struct.fields[i] = ((Var)fields.elementAt(i));
-						}
-						unit.putType(struct);
+						unit.putType(parseStruct(typename, BuiltinType.STRUCTURE));
 						break;
 					}
 					default:
@@ -271,6 +260,40 @@ public class Parser {
 		t = oldt;
 		c.setCurDir(olddir);
 		parsed.addElement(files.pop());
+	}
+	
+	private StructureType parseStruct(String name, Type parent) throws ParseException, IOException {
+		if (parent instanceof NamedType && parent.superType() == null)
+			parent = unit.getType(parent.toString());
+		StructureType struct = new StructureType(name, parent);
+		Vector fields = new Vector();
+		if (parent instanceof StructureType) {
+			final Var[] pfields = ((StructureType)parent).fields;
+			for (int i=0; i < pfields.length; i++) {
+				fields.addElement(pfields[i]);
+			}
+		} else if (!parent.equals(BuiltinType.STRUCTURE)) {
+			throw new ParseException("Type " + name + " is not a structure");
+		}
+		boolean first = true;
+		while (t.nextToken() != '}') {
+			t.pushBack();
+			if (first) first = false;
+			else expect(',');
+			if (t.nextToken() != Token.IDENTIFIER)
+				throw new ParseException("Field name expected, got "+t);
+			String fieldname = t.svalue;
+			expect(':');
+			Type vartype = parseType(unit);
+			Var var = new Var(fieldname, vartype);
+			var.index = fields.size();
+			fields.addElement(var);
+		}
+		struct.fields = new Var[fields.size()];
+		for (int i=fields.size()-1; i>=0; i--) {
+			struct.fields[i] = ((Var)fields.elementAt(i));
+		}
+		return struct;
 	}
 	
 	/**

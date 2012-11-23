@@ -34,7 +34,7 @@ public class StructureType extends NamedType {
 
 	public Var[] fields;
 
-	public StructureType(String name) {
-		super(name, BuiltinType.STRUCTURE);
+	public StructureType(String name, Type parent) {
+		super(name, parent);
 	}
 }
