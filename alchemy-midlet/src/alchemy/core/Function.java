@@ -18,6 +18,8 @@
 
 package alchemy.core;
 
+import alchemy.core.types.Int;
+
 /**
  * Function is an atomic piece of program execution.
  * Subclasses should provide implementation of

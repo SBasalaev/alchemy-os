@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.core;
+package alchemy.core.types;
 
 /**
  * Boxed integer.

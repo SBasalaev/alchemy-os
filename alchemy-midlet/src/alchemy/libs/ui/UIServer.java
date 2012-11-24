@@ -20,7 +20,7 @@ package alchemy.libs.ui;
 
 import alchemy.core.Context;
 import alchemy.core.ContextListener;
-import alchemy.core.Int;
+import alchemy.core.types.Int;
 import java.util.Vector;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;

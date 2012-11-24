@@ -18,7 +18,7 @@
 
 package alchemy.nec;
 
-import alchemy.core.Int;
+import alchemy.core.types.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.asm.FuncObject;
 import alchemy.nec.asm.FunctionWriter;

@@ -21,7 +21,7 @@ package alchemy.evm;
 import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
-import alchemy.core.Int;
+import alchemy.core.types.Int;
 
 /**
  * Embedded Virtual Machine.

@@ -1,6 +1,6 @@
 package alchemy.nec.asm;
 
-import alchemy.core.Int;
+import alchemy.core.types.Int;
 import alchemy.evm.Opcodes;
 import java.io.DataOutputStream;
 import java.io.IOException;

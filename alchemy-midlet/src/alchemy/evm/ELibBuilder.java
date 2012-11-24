@@ -21,7 +21,7 @@ package alchemy.evm;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.HashLibrary;
-import alchemy.core.Int;
+import alchemy.core.types.Int;
 import alchemy.core.LibBuilder;
 import alchemy.core.Library;
 import java.io.DataInputStream;

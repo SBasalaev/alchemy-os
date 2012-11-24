@@ -18,7 +18,7 @@
 
 package alchemy.nec;
 
-import alchemy.core.Int;
+import alchemy.core.types.Int;
 import alchemy.nec.tree.*;
 import java.util.Vector;
 

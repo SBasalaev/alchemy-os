@@ -20,7 +20,7 @@ package alchemy.libs;
 
 import alchemy.libs.ui.UICanvas;
 import alchemy.core.Context;
-import alchemy.core.Int;
+import alchemy.core.types.Int;
 import alchemy.fs.FSManager;
 import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UIServer;
