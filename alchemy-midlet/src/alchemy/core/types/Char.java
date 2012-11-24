@@ -19,45 +19,29 @@
 package alchemy.core.types;
 
 /**
- * Boxed integer.
- * Works faster then java.lang.Integer due to caching.
- * Provides convenient constants for -1, 0, 1.
- *
+ * Boxed character.
+ * 
  * @author Sergey Basalaev
  */
-public class Int {
-	private static final Int[] cache;
+public class Char extends Int {
 	
-	public static final Int ONE;
-	public static final Int ZERO;
-	public static final Int M_ONE;
+	private static final Char[] cache;
 	
 	static {
-		cache = new Int[256+128];
-		for (int i=0; i<cache.length; i++) cache[i] = new Int(i-128);
-		M_ONE = cache[127];
-		ZERO = cache[128];
-		ONE = cache[129];
+		cache = new Char[256];
+		for (char i=0; i < 256; i++) cache[i] = new Char(i);
 	}
 	
-	public final int value;
-	
-	public Int(int val) { this.value = val; }
-
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (!(obj instanceof Int)) return false;
-		return this.value == ((Int)obj).value;
+	public Char(char ch) {
+		super(ch);
 	}
 
-	public int hashCode() { return value; }
-	
-	public static Int toInt(int i) {
-		if (i >= -128 && i < 256) return cache[i+128];
-		else return new Int(i);
-	}
-	
 	public String toString() {
-		return Integer.toString(value);
+		return String.valueOf((char)value);
+	}
+	
+	public static Char toChar(char ch) {
+		if (ch < 256) return cache[ch];
+		else return new Char(ch);
 	}
 }
