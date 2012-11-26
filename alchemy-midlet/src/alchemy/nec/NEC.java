@@ -38,7 +38,7 @@ public class NEC extends NativeApp {
 			"Usage: ec [options] <input> \n" +
 			"Options:\n" +
 			"-o <output>\n write to this file\n" +
-			//"-t<target>\n compile for given target\n" +
+			"-t<target>\n compile for given target\n" +
 			"-O<level>\n choose optimization level\n" +
 			"-I<path>\n add path to includes\n" +
 			"-W<cat> -Wno-<cat>\n Switches category of warnings\n" +
@@ -60,8 +60,9 @@ public class NEC extends NativeApp {
 		boolean wait_outname = false;
 		boolean optimize = true;
 		boolean dbginfo = false;
-		int Wmask = 0xfffffffe; // all except typesafe
+		int Wmask = -1; // all warnings
 		int Xmask = 0;
+		int target = 0x0200;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
@@ -72,12 +73,15 @@ public class NEC extends NativeApp {
 				return 0;
 			} else if (arg.equals("-o")) {
 				wait_outname = true;
-			//} else if (arg.startsWith("-t")) {
-			//	if (arg.equals("-t2.0"));
-			//	else {
-			//		IO.println(c.stderr, "Unsupported target: "+arg.substring(2));
-			//		return 1;
-			//	}
+			} else if (arg.startsWith("-t")) {
+				if (arg.equals("-t2.0")) {
+					target = 0x0200;
+				} else if (arg.equals("-t2.1")) {
+					target = 0x0201;
+				} else {
+					IO.println(c.stderr, "Unsupported target: "+arg.substring(2));
+					return 1;
+				}
 			} else if (arg.equals("-O0")) {
 				optimize = false;
 			} else if (arg.startsWith("-O")) {
@@ -126,7 +130,7 @@ public class NEC extends NativeApp {
 			outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(c, Wmask, Xmask);
+		Parser parser = new Parser(c, target, Wmask, Xmask);
 		Unit unit = null;
 		try {
 			unit = parser.parse(c.toFile(fname));

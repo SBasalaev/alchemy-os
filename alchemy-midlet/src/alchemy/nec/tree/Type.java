@@ -35,7 +35,19 @@ public abstract class Type {
 	public abstract Type superType();
 	
 	public final boolean isSupertypeOf(Type type) {
-		if (type.equals(BuiltinType.NULL)) return true;
+		if (type.equals(BuiltinType.NULL)) {
+			return true;
+		}
+		if (this instanceof FunctionType && type instanceof FunctionType) {
+			final FunctionType fthis = (FunctionType)this;
+			final FunctionType fsub = (FunctionType)type;
+			if (fthis.args.length != fsub.args.length) return false;
+			boolean ok = fthis.rettype.isSupertypeOf(fsub.rettype);
+			for (int i=0; ok && i < fthis.args.length; i++) {
+				ok = fthis.args[i].isSubtypeOf(fsub.args[i]);
+			}
+			return ok;
+		}
 		while (type != null) {
 			if (this.equals(type)) return true;
 			type = type.superType();

@@ -51,6 +51,7 @@ public class Parser {
 	static final String[] X_STRINGS = {"try"};
 	
 	private final Context c;
+	private final int target;
 	private Tokenizer t;
 	private Unit unit;
 	private int Wmask; /* Enabled warnings. */
@@ -61,8 +62,9 @@ public class Parser {
 	/** Files that are already parsed. */
 	private Vector parsed = new Vector();
 	
-	public Parser(Context c, int Wmask, int Xmask) {
+	public Parser(Context c, int target, int Wmask, int Xmask) {
 		this.c = c;
+		this.target = target;
 		this.Wmask = Wmask;
 		this.Xmask = Xmask;
 	}
@@ -637,10 +639,10 @@ public class Parser {
 				warn(W_CAST, "Unnecessary cast to the supertype");
 			}
 			if (expr.rettype().isSupertypeOf(toType)) {
-				warn(W_TYPESAFE, "Unsafe type cast from "+expr.rettype()+" to "+toType);
+				//warn(W_TYPESAFE, "Unsafe type cast from "+expr.rettype()+" to "+toType);
 				return new CastExpr(toType, expr);
 			}
-			return cast(expr, toType);		
+			return cast(expr, toType);
 		} else if (keyword.equals("null")) {
 			return new ConstExpr(lnum, Null.NULL);
 		} else if (keyword.equals("while")) {
@@ -1414,16 +1416,6 @@ public class Parser {
 		if (toType.isSubtypeOf(fromType)) {
 			warn(W_TYPESAFE, "Unsafe type cast from "+fromType+" to "+toType);
 			return new CastExpr(toType, expr);
-		}
-		if (toType instanceof FunctionType && fromType instanceof FunctionType) {
-			FunctionType fromF = (FunctionType)fromType;
-			FunctionType toF = (FunctionType)toType;
-			boolean cancast = fromF.args.length == toF.args.length;
-			for (int i=0; i<toF.args.length && cancast; i++) {
-				cancast = toF.args[i].isSubtypeOf(fromF.args[i]);
-			}
-			if (cancast) cancast = toF.rettype.isSupertypeOf(fromF.rettype);
-			if (cancast) return expr;
 		}
 		if (fromType.isSubtypeOf(BuiltinType.NUMBER) && toType.isSubtypeOf(BuiltinType.NUMBER)) {
 			return new CastExpr(toType, expr);
