@@ -16,10 +16,10 @@ def String.tofloat(): Float;
 def String.todouble(): Double;
 
 def String.len(): Int;
-def String.ch(at: Int): Int;
+def String.ch(at: Int): Char;
 const `String.get` = `String.ch`
-def String.indexof(ch: Int): Int;
-def String.lindexof(ch: Int): Int;
+def String.indexof(ch: Char): Int;
+def String.lindexof(ch: Char): Int;
 def String.find(sub: String): Int;
 def String.substr(from: Int, to: Int): String;
 const `String.range` = `String.substr`
@@ -28,7 +28,7 @@ def String.lcase(): String;
 def String.concat(str: String): String;
 def String.cmp(str: String): Int;
 def String.trim(): String;
-def String.split(ch: Int): [String];
+def String.split(ch: Char): [String];
 def String.format(args: Array): String;
 def String.chars(): CArray;
 def String.utfbytes(): BArray;
@@ -36,4 +36,4 @@ def String.hash(): Int;
 
 def ca2str(ca: CArray): String;
 def ba2utf(ba: BArray): String;
-def chstr(ch: Int): String;
+def chstr(ch: Char): String;

@@ -21,7 +21,6 @@ package alchemy.evm;
 import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
-import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 
 /**
@@ -631,7 +630,7 @@ class EFunction extends Function {
 				case Opcodes.CALOAD: {
 					int at = ival(stack[head]);
 					head--;
-					stack[head] = Ival( ((char[])stack[head])[at] );
+					stack[head] = Cval( ((char[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.CASTORE: {

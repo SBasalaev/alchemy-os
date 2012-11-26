@@ -143,6 +143,10 @@ public abstract class Function {
 	protected static int ival(Object obj) {
 		return ((Int)obj).value;
 	}
+	
+	protected static char cval(Object obj) {
+		return (char)((Int)obj).value;
+	}
 
 	/** Unboxing method for Int values.
 	 * Method returns <code>false</code> iff <code>obj</code>

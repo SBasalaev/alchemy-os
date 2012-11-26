@@ -112,7 +112,7 @@ class LibCore30Func extends NativeFunction {
 				c.addStream(stream);
 				return stream;
 			}
-			case 19: // flist(f: String): Array
+			case 19: // flist(f: String): [String]
 				return FSManager.fs().list(c.toFile((String)args[0]));
 			case 20: // fmodified(f: String): Long
 				return Lval(FSManager.fs().lastModified(c.toFile((String)args[0])));
@@ -125,11 +125,11 @@ class LibCore30Func extends NativeFunction {
 				return LibCore30.relPath(c, c.toFile((String)args[0]));
 			case 24: // String.len(): Int
 				return Ival(((String)args[0]).length());
-			case 25: // String.ch(at: Int): Int
-				return Ival(((String)args[0]).charAt(ival(args[1])));
-			case 26: // String.indexof(ch: Int): Int
+			case 25: // String.ch(at: Int): Char
+				return Cval(((String)args[0]).charAt(ival(args[1])));
+			case 26: // String.indexof(ch: Char): Int
 				return Ival(((String)args[0]).indexOf(ival(args[1])));
-			case 27: // String.lindexof(ch: Int): Int
+			case 27: // String.lindexof(ch: Char): Int
 				return Ival(((String)args[0]).lastIndexOf(ival(args[1])));
 			case 28: // String.find(sub: String): Int
 				return Ival(((String)args[0]).indexOf((String)args[1]));
@@ -194,17 +194,19 @@ class LibCore30Func extends NativeFunction {
 			case 47: // StrBuf.append(a: Any): StrBuf
 				return ((StringBuffer)args[0]).append(args[1]);
 			case 48: // StrBuf.addch(ch: Int): StrBuf
-				return ((StringBuffer)args[0]).append((char)ival(args[1]));
+				     // DEPRECATED: Use StrBuf.append(cast (Char) ch)
+				return ((StringBuffer)args[0]).append(cval(args[1]));
 			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
 				return ((StringBuffer)args[0]).delete(ival(args[1]), ival(args[2]));
 			case 50: // StrBuf.delch(at: Int): StrBuf
 				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
 			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), args[2]);
-			case 52: // StrBuf.insch(at: Int, ch: Int): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), (char)ival(args[2]));
-			case 53: // StrBuf.setch(at: Int, ch: Int): StrBuf
-				((StringBuffer)args[0]).setCharAt(ival(args[1]), (char)ival(args[2]));
+			case 52: // StrBuf.insch(at: Int, ch: Char): StrBuf
+				     // DEPRECATED: Use StrBuf.insert(at: Int, cast (Char) ch): StrBuf
+				return ((StringBuffer)args[0]).insert(ival(args[1]), cval(args[2]));
+			case 53: // StrBuf.setch(at: Int, ch: Char): StrBuf
+				((StringBuffer)args[0]).setCharAt(ival(args[1]), cval(args[2]));
 				return args[0];
 			case 54: // StrBuf.len(): Int
 				return Ival(((StringBuffer)args[0]).length());
@@ -382,8 +384,8 @@ class LibCore30Func extends NativeFunction {
 				System.arraycopy(struct, 0, clone, 0, struct.length);
 				return clone;
 			}
-			case 115: // String.split(ch: Int): [String]
-				return IO.split((String)args[0], (char)ival(args[1]));
+			case 115: // String.split(ch: Char): [String]
+				return IO.split((String)args[0], cval(args[1]));
 			case 116: // String.toint(): Int
 				try {
 					return Ival(Integer.parseInt((String)args[0]));
@@ -408,9 +410,9 @@ class LibCore30Func extends NativeFunction {
 				} catch (NumberFormatException nfe) {
 					return null;
 				}
-			case 120: // !getstatic(key: Any): Any
+			case 120: // getstatic(key: Any): Any
 				return c.get(args[0]);
-			case 121: // !setstatic(key: Any, val: Any)
+			case 121: // setstatic(key: Any, val: Any)
 				c.set(args[0], args[1]);
 				return null;
 			case 122: // String.format(args: Array): String
@@ -448,8 +450,8 @@ class LibCore30Func extends NativeFunction {
 			case 129: // Dict.clear()
 				((Hashtable)args[0]).clear();
 				return null;
-			case 130: // StrBuf.ch(at: Int): Int
-				return Ival(((StringBuffer)args[0]).charAt(ival(args[1])));
+			case 130: // StrBuf.ch(at: Int): Char
+				return Cval(((StringBuffer)args[0]).charAt(ival(args[1])));
 			case 131: // Int.tobase(base: Int): String
 				return Integer.toString(ival(args[0]), ival(args[1]));
 			case 132: // Long.tobase(base: Int): String
@@ -540,7 +542,8 @@ class LibCore30Func extends NativeFunction {
 				return Ival(((InputStream)args[0]).available());
 			case 167: // this_process(): Process;
 				return c;
-			case 168: // chstr(ch: Int): String
+			case 168: // chstr(ch: Char): String
+				      // DEPRECATED: use ch.tostr()
 				return String.valueOf((char)ival(args[0]));
 			default:
 				return null;
