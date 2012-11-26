@@ -1,6 +1,6 @@
 /*
  * Archiver for Alchemy.
- *  Copyright (C) 2011  Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2012  Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.arh;
+package org.alchemy.arh;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -35,7 +35,7 @@ public class Main {
 
 	private Main() { }
 
-	static private final String VERSION = "arh 1.0";
+	static private final String VERSION = "arh 1.1";
 	static private final String HELP =
 			"Usage:\n" +
 			"arh c archive files...    create archive\n" +
@@ -53,6 +53,12 @@ public class Main {
 	/** Exec flag. */
 	static private final int A_EXEC = 1;
 
+	/* Due to file system differences, attribute flags are hardcoded now.
+	 * DIRECTORY  drwx
+	 * PROGRAM    -rwx
+	 * FILE       -rw-
+	 */
+	
 	static private File archiveFile;
 
 	/**
@@ -113,10 +119,7 @@ public class Main {
 		if (f.equals(archiveFile)) return;
 		out.writeUTF(arhpath(fname));
 		out.writeLong(f.lastModified());
-		int attrs = 0;
-		if (f.canRead()) attrs |= A_READ;
-		if (f.canWrite()) attrs |= A_WRITE;
-		if (f.canExecute()) attrs |= A_EXEC;
+		int attrs = A_READ | A_WRITE;
 		if (f.isDirectory()) {
 			out.writeByte(attrs | A_DIR);
 			String[] subs = f.list();
@@ -124,12 +127,19 @@ public class Main {
 				arhFile(out, fname+'/'+sub);
 			}
 		} else {
+			InputStream fstream = new FileInputStream(f);
+			int magic = (fstream.read() << 8) | fstream.read();
+			fstream.close();
+			if ((magic == 0xC0DE) || (magic == (('#' << 8) | '!'))
+			 || (magic == (('#' << 8) | '@')) || (magic == (('#' << 8) | '='))) {
+				attrs |= A_EXEC;
+			}
 			out.writeByte(attrs);
 			long len = f.length();
 			if (len > Integer.MAX_VALUE) throw new IOException("File is too long: "+fname);
 			out.writeInt((int)len);
 			if (len > 0) {
-				InputStream fstream = new FileInputStream(f);
+				fstream = new FileInputStream(f);
 				byte[] buf = new byte[4096];
 				int l = fstream.read(buf);
 				do {
