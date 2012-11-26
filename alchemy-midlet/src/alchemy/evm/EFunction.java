@@ -21,6 +21,7 @@ package alchemy.evm;
 import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
+import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 
 /**
@@ -190,6 +191,10 @@ class EFunction extends Function {
 				}
 				case Opcodes.D2F: {
 					stack[head] = Fval((float)dval(stack[head]));
+					break;
+				}
+				case Opcodes.I2C: {
+					stack[head] = ((Int)stack[head]).toChar();
 					break;
 				}
 
@@ -575,17 +580,17 @@ class EFunction extends Function {
 				}
 
 			//ARRAY INSTRUCTIONS
-				case Opcodes.NEWARRAY: {
+				case Opcodes.NEWAA: {
 					stack[head] = new Object[ival(stack[head])];
 					break;
 				}
-				case Opcodes.ALOAD: {
+				case Opcodes.AALOAD: {
 					int at = ival(stack[head]);
 					head--;
 					stack[head] = ((Object[])stack[head])[at];
 					break;
 				}
-				case Opcodes.ASTORE: {
+				case Opcodes.AASTORE: {
 					Object val = stack[head];
 					int at = ival(stack[head-1]);
 					Object[] array = (Object[])stack[head-2];
@@ -593,7 +598,7 @@ class EFunction extends Function {
 					head -= 3;
 					break;
 				}
-				case Opcodes.ALEN: {
+				case Opcodes.AALEN: {
 					stack[head] = Ival(((Object[])stack[head]).length);
 					break;
 				}

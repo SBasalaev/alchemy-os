@@ -60,4 +60,8 @@ public class Int {
 	public String toString() {
 		return Integer.toString(value);
 	}
+	
+	public Char toChar() {
+		return Char.toChar((char)value);
+	}
 }

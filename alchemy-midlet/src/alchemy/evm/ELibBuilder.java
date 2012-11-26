@@ -54,10 +54,16 @@ public class ELibBuilder implements LibBuilder {
 	 * New in format 1.1
 	 *  Instructions: call calv newarray aload astore alen newba
 	 *                baload bastore balen newca caload castore calen
+	 * 
 	 * New in format 2.0
 	 *  Simplify format to be loaded and processed faster
+	 *  Add line number table to functions
+	 *  Add error table to functions
 	 *  Instructions: if_icmpge if_icmpgt if_icmple if_icmplt
 	 *                tableswitch lookupswitch
+	 * 
+	 * New in format 2.1
+	 *  Char instructions: i2c
 	 */
 	
 	public Library build(Context c, InputStream in) throws IOException, InstantiationException {

@@ -44,4 +44,8 @@ public class Char extends Int {
 		if (ch < 256) return cache[ch];
 		else return new Char(ch);
 	}
+	
+	public Char toChar() {
+		return this;
+	}
 }

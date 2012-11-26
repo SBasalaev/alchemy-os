@@ -42,7 +42,7 @@ public interface Opcodes {
 	byte IAND        = (byte)0x1A;
 	byte IOR         = (byte)0x1B;
 	byte IXOR        = (byte)0x1C;
-	// 0x1D
+	byte I2C         = (byte)0x1D;
 	byte RET_NULL    = (byte)0x1E;
 	byte RETURN      = (byte)0x1F;
 	byte LADD        = (byte)0x20;
@@ -141,10 +141,11 @@ public interface Opcodes {
 	byte CALV_5      = (byte)0x7D;
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
-	byte NEWARRAY    = (byte)0xF0;
-	byte ALOAD       = (byte)0xF1;
-	byte ASTORE      = (byte)0xF2;
-	byte ALEN        = (byte)0xF3;
+	
+	byte NEWAA       = (byte)0xF0;
+	byte AALOAD      = (byte)0xF1;
+	byte AASTORE     = (byte)0xF2;
+	byte AALEN       = (byte)0xF3;
 	byte NEWBA       = (byte)0xF4;
 	byte BALOAD      = (byte)0xF5;
 	byte BASTORE     = (byte)0xF6;

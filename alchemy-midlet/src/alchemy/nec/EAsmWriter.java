@@ -70,7 +70,7 @@ public class EAsmWriter implements ExprVisitor {
 		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CALEN);
 		} else {
-			writer.visitInsn(Opcodes.ALEN);
+			writer.visitInsn(Opcodes.AALEN);
 		}
 		return null;
 	}
@@ -84,7 +84,7 @@ public class EAsmWriter implements ExprVisitor {
 		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CALOAD);
 		} else {
-			writer.visitInsn(Opcodes.ALOAD);
+			writer.visitInsn(Opcodes.AALOAD);
 		}
 		return null;
 	}
@@ -99,7 +99,7 @@ public class EAsmWriter implements ExprVisitor {
 		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.CASTORE);
 		} else {
-			writer.visitInsn(Opcodes.ASTORE);
+			writer.visitInsn(Opcodes.AASTORE);
 		}
 		return null;
 	}
@@ -434,7 +434,7 @@ public class EAsmWriter implements ExprVisitor {
 		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.NEWCA);
 		} else {
-			writer.visitInsn(Opcodes.NEWARRAY);
+			writer.visitInsn(Opcodes.NEWAA);
 		}
 		return null;
 	}
@@ -448,7 +448,7 @@ public class EAsmWriter implements ExprVisitor {
 		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.NEWCA);
 		} else {
-			writer.visitInsn(Opcodes.NEWARRAY);
+			writer.visitInsn(Opcodes.NEWAA);
 		}
 		for (int i=0; i<newarray.initializers.length; i++) {
 			Expr e = newarray.initializers[i];
@@ -461,7 +461,7 @@ public class EAsmWriter implements ExprVisitor {
 				} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
 					writer.visitInsn(Opcodes.CASTORE);
 				} else {
-					writer.visitInsn(Opcodes.ASTORE);
+					writer.visitInsn(Opcodes.AASTORE);
 				}
 			}
 		}

@@ -64,13 +64,13 @@ public class FunctionWriter implements Opcodes {
 	public void visitInsn(int opcode) {
 		data.write(opcode);
 		switch (opcode) {
-			case ASTORE:
+			case AASTORE:
 			case BASTORE:
 			case CASTORE:
 				visitStack(-3);
 				break;
 			case ACMP:
-			case ALOAD:
+			case AALOAD:
 			case BALOAD:
 			case CALOAD:
 			case DADD:
@@ -113,7 +113,7 @@ public class FunctionWriter implements Opcodes {
 			case RETURN:
 				visitStack(-1);
 				break;
-			case ALEN:
+			case AALEN:
 			case BALEN:
 			case CALEN:
 			case D2F:
@@ -132,7 +132,7 @@ public class FunctionWriter implements Opcodes {
 			case L2F:
 			case L2I:
 			case LNEG:
-			case NEWARRAY:
+			case NEWAA:
 			case NEWBA:
 			case NEWCA:
 			case NOP:
