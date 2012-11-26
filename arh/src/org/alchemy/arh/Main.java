@@ -121,7 +121,7 @@ public class Main {
 		out.writeLong(f.lastModified());
 		int attrs = A_READ | A_WRITE;
 		if (f.isDirectory()) {
-			out.writeByte(attrs | A_DIR);
+			out.writeByte(attrs | A_DIR | A_EXEC);
 			String[] subs = f.list();
 			for (String sub : subs) {
 				arhFile(out, fname+'/'+sub);
