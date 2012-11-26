@@ -583,10 +583,90 @@ class EFunction extends Function {
 					stack[head] = new Object[ival(stack[head])];
 					break;
 				}
+				case Opcodes.NEWBA: {
+					stack[head] = new byte[ival(stack[head])];
+					break;
+				}
+				case Opcodes.NEWCA: {
+					stack[head] = new char[ival(stack[head])];
+					break;
+				}
+				case Opcodes.NEWZA: {
+					stack[head] = new boolean[ival(stack[head])];
+					break;
+				}
+				case Opcodes.NEWSA: {
+					stack[head] = new short[ival(stack[head])];
+					break;
+				}
+				case Opcodes.NEWIA: {
+					stack[head] = new int[ival(stack[head])];
+					break;
+				}
+				case Opcodes.NEWLA: {
+					stack[head] = new long[ival(stack[head])];
+					break;
+				}
+				case Opcodes.NEWFA: {
+					stack[head] = new float[ival(stack[head])];
+					break;
+				}
+				case Opcodes.NEWDA: {
+					stack[head] = new double[ival(stack[head])];
+					break;
+				}
 				case Opcodes.AALOAD: {
 					int at = ival(stack[head]);
 					head--;
 					stack[head] = ((Object[])stack[head])[at];
+					break;
+				}
+				case Opcodes.BALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Ival( ((byte[])stack[head])[at] );
+					break;
+				}
+				case Opcodes.CALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Cval( ((char[])stack[head])[at] );
+					break;
+				}
+				case Opcodes.ZALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Ival( ((boolean[])stack[head])[at] );
+					break;
+				}
+				case Opcodes.SALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Ival( ((short[])stack[head])[at] );
+					break;
+				}
+				case Opcodes.IALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Ival( ((int[])stack[head])[at] );
+					break;
+				}
+				case Opcodes.LALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Lval( ((long[])stack[head])[at] );
+					break;
+				}
+				case Opcodes.FALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Fval( ((float[])stack[head])[at] );
+					break;
+				}
+				case Opcodes.DALOAD: {
+					int at = ival(stack[head]);
+					head--;
+					stack[head] = Dval( ((double[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.AASTORE: {
@@ -597,20 +677,6 @@ class EFunction extends Function {
 					head -= 3;
 					break;
 				}
-				case Opcodes.AALEN: {
-					stack[head] = Ival(((Object[])stack[head]).length);
-					break;
-				}
-				case Opcodes.NEWBA: {
-					stack[head] = new byte[ival(stack[head])];
-					break;
-				}
-				case Opcodes.BALOAD: {
-					int at = ival(stack[head]);
-					head--;
-					stack[head] = Ival( ((byte[])stack[head])[at] );
-					break;
-				}
 				case Opcodes.BASTORE: {
 					int val = ival(stack[head]);
 					int at = ival(stack[head-1]);
@@ -619,30 +685,88 @@ class EFunction extends Function {
 					head -= 3;
 					break;
 				}
+				case Opcodes.CASTORE: {
+					char val = cval(stack[head]);
+					int at = ival(stack[head-1]);
+					char[] array = (char[])stack[head-2];
+					array[at] = val;
+					head -= 3;
+					break;
+				}
+				case Opcodes.ZASTORE: {
+					boolean val = bval(stack[head]);
+					int at = ival(stack[head-1]);
+					boolean[] array = (boolean[])stack[head-2];
+					array[at] = val;
+					head -= 3;
+					break;
+				}
+				case Opcodes.SASTORE: {
+					short val = (short)ival(stack[head]);
+					int at = ival(stack[head-1]);
+					short[] array = (short[])stack[head-2];
+					array[at] = val;
+					head -= 3;
+					break;
+				}
+				case Opcodes.IASTORE: {
+					int val = ival(stack[head]);
+					int at = ival(stack[head-1]);
+					int[] array = (int[])stack[head-2];
+					array[at] = val;
+					head -= 3;
+					break;
+				}
+				case Opcodes.FASTORE: {
+					float val = fval(stack[head]);
+					int at = ival(stack[head-1]);
+					float[] array = (float[])stack[head-2];
+					array[at] = val;
+					head -= 3;
+					break;
+				}
+				case Opcodes.DASTORE: {
+					double val = dval(stack[head]);
+					int at = ival(stack[head-1]);
+					double[] array = (double[])stack[head-2];
+					array[at] = val;
+					head -= 3;
+					break;
+				}
+				case Opcodes.AALEN: {
+					stack[head] = Ival(((Object[])stack[head]).length);
+					break;
+				}
 				case Opcodes.BALEN: {
 					stack[head] = Ival(((byte[])stack[head]).length);
 					break;
 				}
-				case Opcodes.NEWCA: {
-					stack[head] = new char[ival(stack[head])];
-					break;
-				}
-				case Opcodes.CALOAD: {
-					int at = ival(stack[head]);
-					head--;
-					stack[head] = Cval( ((char[])stack[head])[at] );
-					break;
-				}
-				case Opcodes.CASTORE: {
-					int val = ival(stack[head]);
-					int at = ival(stack[head-1]);
-					char[] array = (char[])stack[head-2];
-					array[at] = (char)val;
-					head -= 3;
-					break;
-				}
 				case Opcodes.CALEN: {
 					stack[head] = Ival(((char[])stack[head]).length);
+					break;
+				}
+				case Opcodes.ZALEN: {
+					stack[head] = Ival(((boolean[])stack[head]).length);
+					break;
+				}
+				case Opcodes.SALEN: {
+					stack[head] = Ival(((short[])stack[head]).length);
+					break;
+				}
+				case Opcodes.IALEN: {
+					stack[head] = Ival(((int[])stack[head]).length);
+					break;
+				}
+				case Opcodes.LALEN: {
+					stack[head] = Ival(((long[])stack[head]).length);
+					break;
+				}
+				case Opcodes.FALEN: {
+					stack[head] = Ival(((float[])stack[head]).length);
+					break;
+				}
+				case Opcodes.DALEN: {
+					stack[head] = Ival(((double[])stack[head]).length);
 					break;
 				}
 

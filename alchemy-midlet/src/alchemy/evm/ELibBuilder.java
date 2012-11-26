@@ -48,7 +48,7 @@ public class ELibBuilder implements LibBuilder {
 	 * version must be equal to or less than this value.
 	 * </ul>
 	 */
-	static public final int VERSION = 0x0200;
+	static public final int VERSION = 0x0201;
 
 	/*
 	 * New in format 1.1
@@ -64,6 +64,10 @@ public class ELibBuilder implements LibBuilder {
 	 * 
 	 * New in format 2.1
 	 *  Char instructions: i2c
+	 *  Array instructions: newza zaload zastore zalen newsa saload
+	 *    sastore salen newia iaload iastore ialen newla laload lastore
+	 *    lalen newfa faload fastore falen newda daload dastore dalen
+	 *    
 	 */
 	
 	public Library build(Context c, InputStream in) throws IOException, InstantiationException {
