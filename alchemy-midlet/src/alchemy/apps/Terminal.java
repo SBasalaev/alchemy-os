@@ -33,7 +33,7 @@ public class Terminal extends NativeApp {
 
 	private static final String HELP = "Usage: terminal [-k] <command> <args>...";
 	private static final String VERSION = "Native terminal v1.2";
-	private static final Command cmdClose = new Command("Close", Command.EXIT, 4);
+	private static final Command cmdClose = new Command("Close", Command.OK, 4);
 
 	public Terminal() { }
 
