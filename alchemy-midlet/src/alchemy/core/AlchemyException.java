@@ -68,6 +68,7 @@ public class AlchemyException extends Exception {
 	public AlchemyException(int errcode, String msg) {
 		super(msg);
 		this.errcode = errcode;
+		if (errcode == 0) throw new IllegalArgumentException();
 	}
 	
 	public void addTraceElement(Function f, String dbg) {
