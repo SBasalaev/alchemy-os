@@ -152,7 +152,7 @@ public class Context {
 	/** State of the context. */
 	private int state = NEW;
 	/** Result returned by a program. */
-	private int exitcode = 0;
+	private int exitcode = AlchemyException.SUCCESS;
 	/** Error thrown by a program. */
 	private Throwable error;
 	/** Streams opened by process. */
@@ -540,11 +540,18 @@ public class Context {
 		public void run() {
 			setState(RUNNING);
 			try {
-				Int r = (Int)main.exec(Context.this, new Object[] {cmdArgs});
-				exitcode = r == null ? 0 : r.value;
+				Object r = main.exec(Context.this, new Object[] {cmdArgs});
+				if (r instanceof Int) {
+					exitcode = ((Int)r).value;
+				}
 			} catch (Throwable t) {
 				error = t;
 				IO.println(stderr, t);
+				if (t instanceof AlchemyException) {
+					exitcode = ((AlchemyException)t).errcode;
+				} else {
+					exitcode = AlchemyException.FAIL;
+				}
 				//t.printStackTrace();
 			}
 			try { stdout.flush(); } catch (IOException e) { }
