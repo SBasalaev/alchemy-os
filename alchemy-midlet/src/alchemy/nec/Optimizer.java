@@ -97,7 +97,7 @@ public class Optimizer implements ExprVisitor {
 			switch (binary.operator) {
 				case '+':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value + ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value + ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() + ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -108,7 +108,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case '-':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value - ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value - ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() - ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -119,7 +119,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case '*':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value * ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value * ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() * ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -130,7 +130,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case '/':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value / ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value / ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() / ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -141,7 +141,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case '%':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value % ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value % ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() % ((Long)c2).longValue());
 					} else if (c1 instanceof Float) {
@@ -152,7 +152,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case '&':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value & ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value & ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() & ((Long)c2).longValue());
 					} else if (c1 instanceof Boolean) {
@@ -161,7 +161,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case '|':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value | ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value | ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() | ((Long)c2).longValue());
 					} else if (c1 instanceof Boolean) {
@@ -170,7 +170,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case '^':
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value ^ ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value ^ ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() ^ ((Long)c2).longValue());
 					} else if (c1 instanceof Boolean) {
@@ -179,21 +179,21 @@ public class Optimizer implements ExprVisitor {
 					break;
 				case Token.LTLT:
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value << ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value << ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() << ((Int)c2).value);
 					}
 					break;
 				case Token.GTGT:
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value >> ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value >> ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() >> ((Int)c2).value);
 					}
 					break;
 				case Token.GTGTGT:
 					if (c1 instanceof Int) {
-						c1 = new Int(((Int)c1).value >>> ((Int)c2).value);
+						c1 = Int.toInt(((Int)c1).value >>> ((Int)c2).value);
 					} else if (c1 instanceof Long) {
 						c1 = new Long(((Long)c1).longValue() >>> ((Int)c2).value);
 					}
@@ -264,7 +264,7 @@ public class Optimizer implements ExprVisitor {
 				} else if (toType.equals(BuiltinType.FLOAT)) {
 					cnst = new Float(l);
 				} else if (toType.equals(BuiltinType.INT)) {
-					cnst = new Int((int)l);
+					cnst = Int.toInt((int)l);
 				}
 			} else if (cnst instanceof Float) {
 				float f = ((Float)cnst).floatValue();
@@ -273,7 +273,7 @@ public class Optimizer implements ExprVisitor {
 				} else if (toType.equals(BuiltinType.LONG)) {
 					cnst = new Long((long)f);
 				} else if (toType.equals(BuiltinType.INT)) {
-					cnst = new Int((int)f);
+					cnst = Int.toInt((int)f);
 				}
 			} else if (cnst instanceof Double) {
 				double d = ((Double)cnst).doubleValue();
@@ -282,7 +282,7 @@ public class Optimizer implements ExprVisitor {
 				} else if (toType.equals(BuiltinType.LONG)) {
 					cnst = new Long((long)d);
 				} else if (toType.equals(BuiltinType.INT)) {
-					cnst = new Int((int)d);
+					cnst = Int.toInt((int)d);
 				}
 			}
 			return new ConstExpr(((ConstExpr)cast.expr).line, cnst);
@@ -641,7 +641,7 @@ public class Optimizer implements ExprVisitor {
 				case '-':
 					if (cnst instanceof Int) {
 						int i = ((Int)cnst).value;
-						cnst = new Int(-i);
+						cnst = Int.toInt(-i);
 					} else if (cnst instanceof Long) {
 						long l = ((Long)cnst).longValue();
 						cnst = new Long(-l);
@@ -656,7 +656,7 @@ public class Optimizer implements ExprVisitor {
 				case '~':
 					if (cnst instanceof Int) {
 						int i = ((Int)cnst).value;
-						cnst = new Int(~i);
+						cnst = Int.toInt(~i);
 					} else if (cnst instanceof Long) {
 						long l = ((Long)cnst).longValue();
 						cnst = new Long(~l);

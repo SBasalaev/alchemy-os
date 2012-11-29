@@ -138,7 +138,7 @@ public class NEL extends NativeApp {
 							obj = null;
 							break;
 						case 'i':
-							obj = new Int(data.readInt());
+							obj = Int.toInt(data.readInt());
 							break;
 						case 'l':
 							obj = new Long(data.readLong());

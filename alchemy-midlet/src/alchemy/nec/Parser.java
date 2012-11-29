@@ -454,7 +454,7 @@ public class Parser {
 			int opchar = t.nextToken();
 			if (opchar == ';') break;
 			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || (opchar <= -20 && opchar >= -30)) {
-				operators.addElement(new Int(opchar));
+				operators.addElement(Int.toInt(opchar));
 			} else {
 				t.pushBack();
 				break;
@@ -565,7 +565,7 @@ public class Parser {
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
 			case Token.INT:
-				return new ConstExpr(lnum, new Int(t.ivalue));
+				return new ConstExpr(lnum, Int.toInt(t.ivalue));
 			case Token.LONG:
 				return new ConstExpr(lnum, new Long(t.lvalue));
 			case Token.FLOAT:
@@ -1151,7 +1151,7 @@ public class Parser {
 				}
 			}
 			if (index >= 0) {
-				ConstExpr indexexpr = new ConstExpr(lnum, new Int(index));
+				ConstExpr indexexpr = new ConstExpr(lnum, Int.toInt(index));
 				ALoadExpr ldexpr = new ALoadExpr(expr, indexexpr, fields[index].type);
 				if (Token.isAssignment(t.nextToken())) {
 					Expr rexpr = cast(makeAssignRval(ldexpr, t.ttype, parseExpr(scope)), fields[index].type);

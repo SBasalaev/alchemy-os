@@ -441,7 +441,7 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object unused) {
 		if (debug) writer.visitLine(newarray.line);
-		writer.visitLdcInsn(new Int(newarray.initializers.length));
+		writer.visitLdcInsn(Int.toInt(newarray.initializers.length));
 		Type artype = newarray.rettype();
 		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.NEWBA);
@@ -454,7 +454,7 @@ public class EAsmWriter implements ExprVisitor {
 			Expr e = newarray.initializers[i];
 			if (e != null) {
 				writer.visitInsn(Opcodes.DUP);
-				writer.visitLdcInsn(new Int(i));
+				writer.visitLdcInsn(Int.toInt(i));
 				e.accept(this, unused);
 				if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
 					writer.visitInsn(Opcodes.BASTORE);
@@ -593,7 +593,7 @@ public class EAsmWriter implements ExprVisitor {
 			case '~':
 				unary.expr.accept(this, unused);
 				if (type.isSubtypeOf(BuiltinType.INT)) {
-					writer.visitLdcInsn(new Int(-1));
+					writer.visitLdcInsn(Int.M_ONE);
 					writer.visitInsn(Opcodes.IXOR);
 				} else if (type.isSubtypeOf(BuiltinType.LONG)) {
 					writer.visitLdcInsn(new Long(-1));
@@ -601,7 +601,7 @@ public class EAsmWriter implements ExprVisitor {
 				}
 				break;
 			case '!':
-				writer.visitLdcInsn(new Int(1));
+				writer.visitLdcInsn(Int.ONE);
 				unary.expr.accept(this, unused);
 				writer.visitInsn(Opcodes.ISUB);
 				break;

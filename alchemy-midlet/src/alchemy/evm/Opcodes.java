@@ -42,7 +42,7 @@ public interface Opcodes {
 	byte IAND        = (byte)0x1A;
 	byte IOR         = (byte)0x1B;
 	byte IXOR        = (byte)0x1C;
-	byte I2C         = (byte)0x1D;
+	// 0x1D;
 	byte RET_NULL    = (byte)0x1E;
 	byte RETURN      = (byte)0x1F;
 	byte LADD        = (byte)0x20;
@@ -180,6 +180,6 @@ public interface Opcodes {
 	byte CALEN       = (byte)0xFB;
 	byte TABLESWITCH = (byte)0xFC;
 	byte LOOKUPSWITCH= (byte)0xFD;
-	// 0xFE
-	// 0xFF
+	byte I2C         = (byte)0xFE;
+	byte C2I         = (byte)0xFF;
 }

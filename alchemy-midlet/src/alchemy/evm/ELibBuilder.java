@@ -102,7 +102,7 @@ public class ELibBuilder implements LibBuilder {
 				case '0': //null, aligning object
 					break;
 				case 'i': //integer
-					cpool[cindex] = new Int(data.readInt());
+					cpool[cindex] = Int.toInt(data.readInt());
 					break;
 				case 'l': //long
 					cpool[cindex] = new Long(data.readLong());

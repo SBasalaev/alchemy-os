@@ -32,7 +32,7 @@ public class Char extends Int {
 		for (char i=0; i < 256; i++) cache[i] = new Char(i);
 	}
 	
-	public Char(char ch) {
+	protected Char(char ch) {
 		super(ch);
 	}
 

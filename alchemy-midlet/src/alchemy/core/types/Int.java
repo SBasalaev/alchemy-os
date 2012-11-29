@@ -42,7 +42,7 @@ public class Int {
 	
 	public final int value;
 	
-	public Int(int val) { this.value = val; }
+	protected Int(int val) { this.value = val; }
 
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
@@ -52,9 +52,20 @@ public class Int {
 
 	public int hashCode() { return value; }
 	
+	/**
+	 * Converts integer number into Int instance.
+	 */
 	public static Int toInt(int i) {
 		if (i >= -128 && i < 256) return cache[i+128];
 		else return new Int(i);
+	}
+	
+	public static Int toInt(Int i) {
+		if (i instanceof Char) {
+			return Int.toInt(i.value);
+		} else {
+			return i;
+		}
 	}
 	
 	public String toString() {

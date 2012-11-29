@@ -41,7 +41,7 @@ public class VarIndexer implements ExprVisitor {
 					Var v = (Var)f.locals.elementAt(vi);
 					v.index = vi;
 				}
-				f.body.accept(this, new Int(f.locals.size()));
+				f.body.accept(this, Int.toInt(f.locals.size()));
 			}
 		}
 	}
@@ -83,7 +83,7 @@ public class VarIndexer implements ExprVisitor {
 			v.index = start+vi;
 		}
 		for (int ei=0; ei<block.exprs.size(); ei++) {
-			((Expr)block.exprs.elementAt(ei)).accept(this, new Int(start+size));
+			((Expr)block.exprs.elementAt(ei)).accept(this, Int.toInt(start+size));
 		}
 		return null;
 	}
