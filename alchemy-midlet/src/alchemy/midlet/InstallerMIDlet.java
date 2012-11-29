@@ -297,17 +297,19 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		}
 		fs.remove("/PACKAGE");
 		// install /cfg/locale
-		if (!fs.exists("/cfg/locale")) {
+		if (!fs.exists("/cfg/locale") || fs.size("/cfg/locale") < 2) {
 			String property = System.getProperty("microedition.locale");
 			if (property == null) property = "en_US";
 			property = property.replace('-', '_');
 			OutputStream out = fs.write("/cfg/locale");
 			out.write(IO.utfEncode(property));
+			out.close();
 		}
 		// install /cfg/platform
 		OutputStream out = fs.write("/cfg/platform");
 		out.write(IO.utfEncode("Profiles: " + System.getProperty("microedition.profiles") + '\n'));
 		out.write(IO.utfEncode("Configuration: " + System.getProperty("microedition.configuration") + '\n'));
+		out.close();
 		// close file system
 		FSManager.umount("");
 	}
