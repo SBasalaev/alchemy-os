@@ -109,11 +109,11 @@ File: mount_1.0.pkg
 Size: 327
 
 Package: navigator
-Version: 0.3.6-1
+Version: 0.3.7-1
 Section: gui
 Depends: coreutils, edit, fileinfo, imgview, libcore3, libfiletype1, libui1
 Summary: file manager for Alchemy OS
-File: navigator_0.3.6-1.pkg
+File: navigator_0.3.7-1.pkg
 
 Package: nec
 Version: 2.0-2
