@@ -220,7 +220,7 @@ public class EAsmWriter implements ExprVisitor {
 				writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
 			}
 		} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Int.ZERO)
-		        && cmp.lvalue.rettype().isSubtypeOf(BuiltinType.INT)) {
+		        && cmp.lvalue.rettype().equals(BuiltinType.INT)) {
 			// integer comparison with zero
 			cmp.lvalue.accept(this, null);
 			switch (cmp.operator) {
@@ -380,6 +380,9 @@ public class EAsmWriter implements ExprVisitor {
 			writer.visitJumpInsn(Opcodes.GOTO, lstart);
 		} else if (wexpr.condition instanceof ComparisonExpr) {
 			visitCmpInIf((ComparisonExpr)wexpr.condition, lstart, true);
+		} else if (wexpr.condition instanceof UnaryExpr) {
+			((UnaryExpr)wexpr.condition).expr.accept(this, unused);
+			writer.visitJumpInsn(Opcodes.IFEQ, lstart);
 		} else {
 			wexpr.condition.accept(this, unused);
 			writer.visitJumpInsn(Opcodes.IFNE, lstart);
@@ -407,6 +410,9 @@ public class EAsmWriter implements ExprVisitor {
 		// writing if condition
 		if (ifexpr.condition instanceof ComparisonExpr) {
 			visitCmpInIf((ComparisonExpr)ifexpr.condition, lelse, false);
+		} else if (ifexpr.condition instanceof UnaryExpr) {
+			((UnaryExpr)ifexpr.condition).expr.accept(this, unused);
+			writer.visitJumpInsn(Opcodes.IFNE, lelse);
 		} else {
 			ifexpr.condition.accept(this, unused);
 			writer.visitJumpInsn(Opcodes.IFEQ, lelse);
@@ -429,9 +435,9 @@ public class EAsmWriter implements ExprVisitor {
 		if (debug) writer.visitLine(newarray.line);
 		newarray.lengthexpr.accept(this, unused);
 		Type artype = newarray.rettype();
-		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
+		if (artype.equals(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.NEWBA);
-		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
+		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.NEWCA);
 		} else {
 			writer.visitInsn(Opcodes.NEWAA);
@@ -443,9 +449,9 @@ public class EAsmWriter implements ExprVisitor {
 		if (debug) writer.visitLine(newarray.line);
 		writer.visitLdcInsn(Int.toInt(newarray.initializers.length));
 		Type artype = newarray.rettype();
-		if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
+		if (artype.equals(BuiltinType.BARRAY)) {
 			writer.visitInsn(Opcodes.NEWBA);
-		} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
+		} else if (artype.equals(BuiltinType.CARRAY)) {
 			writer.visitInsn(Opcodes.NEWCA);
 		} else {
 			writer.visitInsn(Opcodes.NEWAA);
@@ -456,9 +462,9 @@ public class EAsmWriter implements ExprVisitor {
 				writer.visitInsn(Opcodes.DUP);
 				writer.visitLdcInsn(Int.toInt(i));
 				e.accept(this, unused);
-				if (artype.isSubtypeOf(BuiltinType.BARRAY)) {
+				if (artype.equals(BuiltinType.BARRAY)) {
 					writer.visitInsn(Opcodes.BASTORE);
-				} else if (artype.isSubtypeOf(BuiltinType.CARRAY)) {
+				} else if (artype.equals(BuiltinType.CARRAY)) {
 					writer.visitInsn(Opcodes.CASTORE);
 				} else {
 					writer.visitInsn(Opcodes.AASTORE);
@@ -585,17 +591,17 @@ public class EAsmWriter implements ExprVisitor {
 				break;
 			case '-':
 				unary.expr.accept(this, unused);
-				if (type.isSubtypeOf(BuiltinType.INT)) writer.visitInsn(Opcodes.INEG);
-				else if (type.isSubtypeOf(BuiltinType.LONG)) writer.visitInsn(Opcodes.LNEG);
-				else if (type.isSubtypeOf(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FNEG);
-				else if (type.isSubtypeOf(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DNEG);
+				if (type.equals(BuiltinType.INT)) writer.visitInsn(Opcodes.INEG);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LNEG);
+				else if (type.equals(BuiltinType.FLOAT)) writer.visitInsn(Opcodes.FNEG);
+				else if (type.equals(BuiltinType.DOUBLE)) writer.visitInsn(Opcodes.DNEG);
 				break;
 			case '~':
 				unary.expr.accept(this, unused);
-				if (type.isSubtypeOf(BuiltinType.INT)) {
+				if (type.equals(BuiltinType.INT)) {
 					writer.visitLdcInsn(Int.M_ONE);
 					writer.visitInsn(Opcodes.IXOR);
-				} else if (type.isSubtypeOf(BuiltinType.LONG)) {
+				} else if (type.equals(BuiltinType.LONG)) {
 					writer.visitLdcInsn(new Long(-1));
 					writer.visitInsn(Opcodes.LXOR);
 				}
@@ -616,22 +622,25 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitWhile(WhileExpr wexpr, Object unused) {
-		Label lcond = new Label();
 		Label lstart = new Label();
-		// writing body
-		writer.visitJumpInsn(Opcodes.GOTO, lcond);
-		writer.visitLabel(lstart);
-		wexpr.body.accept(this, unused);
+		Label lafter = new Label();
 		// writing condition
-		writer.visitLabel(lcond);
+		writer.visitLabel(lstart);
 		if (wexpr.condition instanceof ConstExpr && ((ConstExpr)wexpr.condition).value.equals(Boolean.TRUE)) {
-			writer.visitJumpInsn(Opcodes.GOTO, lstart);
+			// nothing to check
 		} else if (wexpr.condition instanceof ComparisonExpr) {
-			visitCmpInIf((ComparisonExpr)wexpr.condition, lstart, true);
+			visitCmpInIf((ComparisonExpr)wexpr.condition, lafter, false);
+		} else if (wexpr.condition instanceof UnaryExpr) {
+			((UnaryExpr)wexpr.condition).expr.accept(this, unused);
+			writer.visitJumpInsn(Opcodes.IFNE, lafter);
 		} else {
 			wexpr.condition.accept(this, unused);
-			writer.visitJumpInsn(Opcodes.IFNE, lstart);
+			writer.visitJumpInsn(Opcodes.IFEQ, lafter);
 		}
+		// writing body
+		wexpr.body.accept(this, unused);
+		writer.visitJumpInsn(Opcodes.GOTO, lstart);
+		writer.visitLabel(lafter);
 		return null;
 	}
 }

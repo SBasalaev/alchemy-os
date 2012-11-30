@@ -25,17 +25,20 @@ package alchemy.nec.tree;
 public class Var {
 	/** Name of the variable. */
 	public String name;
+
 	/** Type of the variable. */
 	public Type type;
+	
 	/** Indicates whether this variable is a constant. */
 	public boolean isConst = false;
+	
 	/**
 	 * If not null, contains value of this constant.
 	 * If null then value is not known at the time of compilation.
-	 * <code>null</code> constant is represented by Object instance.
 	 */
 	public Object constValue = null;
-	/** Index assigned to local variable by compiler. */
+	
+	/** Index assigned to a variable by compiler. */
 	public int index = -1;
 
 	public Var(String name, Type type) {

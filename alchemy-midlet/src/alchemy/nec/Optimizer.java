@@ -23,10 +23,14 @@ import alchemy.nec.tree.*;
 import java.util.Vector;
 
 /**
- * Simple optimizer.
- * Folds constants and eliminates dead code.
+ * Simple optimizer used with {@code -O1}.
+ * Performs the following optimizations:
+ * <ul>
+ * <li>Constant folding (CF)</li>
+ * <li>Dead code elimination (DCE)</li>
+ * </ul>
  * <p>
- * Visiting methods accept Scope as argument and
+ * Visit* methods accept Scope as argument and
  * return optimized tree.
  * </p>
  * 
@@ -60,8 +64,30 @@ public class Optimizer implements ExprVisitor {
 		}
 	}
 
+	/**
+	 * <pre>
+	 * CF:
+	 *   new Array(expr).len         -&gt;  expr
+	 *   new Array{e1, ..., eN}.len  -&gt;  {discard(e1), ..., discard(eN), N}
+	 * </pre>
+	 */
 	public Object visitALen(ALenExpr alen, Object scope) {
 		alen.arrayexpr = (Expr)alen.arrayexpr.accept(this, scope);
+		if (alen.arrayexpr instanceof NewArrayExpr) {
+			optimized = true;
+			return ((NewArrayExpr)alen.arrayexpr).lengthexpr;
+		}
+		if (alen.arrayexpr instanceof NewArrayByEnumExpr) {
+			optimized = true;
+			final NewArrayByEnumExpr newarray = (NewArrayByEnumExpr) alen.arrayexpr;
+			final BlockExpr block = new BlockExpr((Scope)scope);
+			for (int i=0; i < newarray.initializers.length; i++) {
+				Expr e = newarray.initializers[i];
+				if (e != null) block.exprs.addElement(new DiscardExpr(e));
+			}
+			block.exprs.addElement(new ConstExpr(newarray.line, Int.toInt(newarray.initializers.length)));
+			return block;
+		}
 		return alen;
 	}
 
@@ -84,12 +110,176 @@ public class Optimizer implements ExprVisitor {
 	}
 
 	/**
+	 * <pre>
 	 * CF:
-	 *   const op const  =>  const
+	 *   expr + 0        =&gt;  expr
+	 *   expr - 0        =&gt;  expr
+	 *   expr | 0        =&gt;  expr
+	 *   expr ^ 0        =&gt;  expr
+	 *   expr &lt;&lt; 0       =&gt; expr
+	 *   expr &gt;&gt; 0       =&gt; expr
+	 *   expr &gt;&gt;&gt; 0      =&gt; expr
+	 * 
+	 *   expr * 0        =&gt;  { discard(expr), 0 }
+	 *   expr & 0        =&gt;  { discard(expr), 0 }
+	 * 
+	 *   expr * 1        =&gt;  expr
+	 *   expr / 1        =&gt;  expr
+	 *   expr % 1        =&gt;  expr
+	 * 
+	 *   expr & -1       =&gt;  expr
+	 *   expr ^ -1       =&gt;  ~expr
+	 * 
+	 *   expr + 0L       =&gt;  expr
+	 *   expr - 0L       =&gt;  expr
+	 *   expr | 0L       =&gt;  expr
+	 *   expr ^ 0L       =&gt;  expr
+	 * 
+	 *   expr * 0L       =&gt;  { discard(expr), 0L }
+	 *   expr & 0L       =&gt;  { discard(expr), 0L }
+	 * 
+	 *   expr * 1L       =&gt;  expr
+	 *   expr / 1L       =&gt;  expr
+	 *   expr % 1L       =&gt;  expr
+	 * 
+	 *   expr & -1L      =&gt;  expr
+	 *   expr ^ -1L      =&gt;  ~expr
+	 * 
+	 *   expr & true     =&gt;  expr
+	 *   expr & false    =&gt;  { discard(expr), false }
+	 * 
+	 *   expr | true     =&gt;  { discard(expr), true }
+	 *   expr | false    =&gt;  expr
+	 * 
+	 *   expr ^ true     =&gt;  !expr
+	 *   expr ^ false    =&gt;  expr
+	 * 
+	 *   const op const  =&gt;  const
+	 * </pre>
 	 */
 	public Object visitBinary(BinaryExpr binary, Object scope) {
 		binary.lvalue = (Expr)binary.lvalue.accept(this, scope);
 		binary.rvalue = (Expr)binary.rvalue.accept(this, scope);
+		// optimizing  expr op const
+		if (binary.rvalue instanceof ConstExpr) {
+			Object cnst = ((ConstExpr)binary.rvalue).value;
+			if (cnst instanceof Int) {
+				if (cnst.equals(Int.ZERO)) {
+					switch (binary.operator) {
+						case '+':
+						case '-':
+						case '|':
+						case '^':
+						case Token.LTLT:
+						case Token.GTGT:
+						case Token.GTGTGT: {
+							optimized = true;
+							return binary.lvalue;
+						}
+						case '/':
+						case '%': // refuse to optimize integer division by zero
+							return binary;
+						case '*':
+						case '&': {
+							optimized = true;
+							BlockExpr block = new BlockExpr((Scope)scope);
+							block.exprs.addElement(new DiscardExpr(binary.lvalue));
+							block.exprs.addElement(binary.rvalue);
+							return block;
+						}
+					}
+				} else if (cnst.equals(Int.ONE)) {
+					switch (binary.operator) {
+						case '*':
+						case '/':
+						case '%': {
+							optimized = true;
+							return binary.lvalue;
+						}
+					}
+				} else if (cnst.equals(Int.M_ONE)) {
+					switch (binary.operator) {
+						case '&': {
+							optimized = true;
+							return binary.lvalue;
+						}
+						case '^': {
+							optimized = true;
+							return new UnaryExpr('~', binary.lvalue);
+						}
+					}
+				}
+			} else if (cnst instanceof Long) {
+				long l = ((Long)cnst).longValue();
+				if (l == 0L) {
+					switch (binary.operator) {
+						case '+':
+						case '-':
+						case '|':
+						case '^': {
+							optimized = true;
+							return binary.lvalue;
+						}
+						case '/':
+						case '%': // refuse to optimize integer division by zero
+							return binary;
+						case '*':
+						case '&': {
+							optimized = true;
+							BlockExpr block = new BlockExpr((Scope)scope);
+							block.exprs.addElement(new DiscardExpr(binary.lvalue));
+							block.exprs.addElement(binary.rvalue);
+							return block;
+						}
+					}
+				} else if (l == 1L) {
+					switch (binary.operator) {
+						case '*':
+						case '/':
+						case '%': {
+							optimized = true;
+							return binary.lvalue;
+						}
+					}
+				} else if (l == -1L) {
+					switch (binary.operator) {
+						case '&': {
+							optimized = true;
+							return binary.lvalue;
+						}
+						case '^': {
+							optimized = true;
+							return new UnaryExpr('~', binary.lvalue);
+						}
+					}
+				}
+			} else if (cnst instanceof Boolean) {
+				switch (binary.operator) {
+					case '&': {
+						optimized = true;
+						if (cnst.equals(Boolean.TRUE)) return binary.lvalue;
+						BlockExpr block = new BlockExpr((Scope)scope);
+						block.exprs.addElement(new DiscardExpr(binary.lvalue));
+						block.exprs.addElement(binary.rvalue);
+						return block;
+					}
+					case '|': {
+						optimized = true;
+						if (cnst.equals(Boolean.FALSE)) return binary.lvalue;
+						BlockExpr block = new BlockExpr((Scope)scope);
+						block.exprs.addElement(new DiscardExpr(binary.lvalue));
+						block.exprs.addElement(binary.rvalue);
+						return block;
+					}
+					case '^': {
+						optimized = true;
+						if (cnst.equals(Boolean.FALSE)) return binary.lvalue;
+						else return new UnaryExpr('!', binary.lvalue);
+					}
+				}
+			}
+		}
+		// optimizing  const op const
 		if (binary.lvalue instanceof ConstExpr && binary.rvalue instanceof ConstExpr) {
 			Object c1 = ((ConstExpr)binary.lvalue).value;
 			Object c2 = ((ConstExpr)binary.rvalue).value;
@@ -205,10 +395,12 @@ public class Optimizer implements ExprVisitor {
 	}
 
 	/**
+	 * <pre>
 	 * CF:
-	 *   { ... exprN-1; none; exprN+1; ... }   =>   { ... exprN-1; exprN+1; ... }
-	 *   { expr }   =>   expr
-	 *   {}   =>   none
+	 *   { ... exprN-1; none; exprN+1; ... }   =&gt;   { ... exprN-1; exprN+1; ... }
+	 *   { expr }   =&gt;   expr
+	 *   {}   =&gt;   none
+	 * </pre>
 	 */
 	public Object visitBlock(BlockExpr block, Object scope) {
 		int i=0;
@@ -239,8 +431,10 @@ public class Optimizer implements ExprVisitor {
 	}
 	
 	/**
+	 * <pre>
 	 * CF:
-	 *   cast (Number) const  =>  const
+	 *   cast (Number) const  =&gt;  const
+	 * </pre>
 	 */
 	public Object visitCast(CastExpr cast, Object scope) {
 		cast.expr = (Expr)cast.expr.accept(this, scope);
@@ -291,8 +485,16 @@ public class Optimizer implements ExprVisitor {
 	}
 
 	/**
+	 * <pre>
 	 * CF:
-	 *  const op const  =>  const
+	 *   const op const  =&gt;  const
+	 * 
+	 * HELP COMPILER:
+	 *   0 &lt; expr   =&gt;  expr &gt; 0
+	 *   0 &gt; expr   =&gt;  expr &lt; 0
+	 *   0 &lt;= expr  =&gt;  expr &gt;= 0
+	 *   0 &gt;= expr  =&gt;  expr &lt;= 0
+	 * </pre>
 	 */
 	public Object visitComparison(ComparisonExpr cmp, Object scope) {
 		cmp.lvalue = (Expr)cmp.lvalue.accept(this, scope);
@@ -303,18 +505,10 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			switch (cmp.operator) {
 				case Token.EQEQ:
-					if (c1 == null) {
-						c1 = (c2 == null) ? Boolean.TRUE : Boolean.FALSE;
-					} else {
-						c1 = (c1.equals(c2)) ? Boolean.TRUE : Boolean.FALSE;
-					}
+					c1 = (c1.equals(c2)) ? Boolean.TRUE : Boolean.FALSE;
 					break;
 				case Token.NOTEQ:
-					if (c1 == null) {
-						c1 = (c2 == null) ? Boolean.FALSE : Boolean.TRUE;
-					} else {
-						c1 = (c1.equals(c2)) ? Boolean.FALSE : Boolean.TRUE;
-					}
+					c1 = (c1.equals(c2)) ? Boolean.FALSE : Boolean.TRUE;
 					break;
 				case '<':
 					if (c1 instanceof Int) {
@@ -364,7 +558,7 @@ public class Optimizer implements ExprVisitor {
 			return new ConstExpr(((ConstExpr)cmp.lvalue).line, c1);
 		} else if (cmp.lvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)cmp.lvalue).value;
-			if (cnst == null || cnst.equals(Int.ZERO)) {
+			if (cnst.equals(Int.ZERO)) {
 				// to not duplicate code in EAsmWriter and
 				// allow it to make assumptions only on rvalue
 				optimized = true;
@@ -384,8 +578,10 @@ public class Optimizer implements ExprVisitor {
 	}
 
 	/**
+	 * <pre>
 	 * CF:
-	 *   "str"+const  =>  "strconst"
+	 *   "str"+const  =&gt;  "strconst"
+	 * </pre>
 	 */
 	public Object visitConcat(ConcatExpr concat, Object scope) {
 		Vector exprs = concat.exprs;
@@ -419,20 +615,25 @@ public class Optimizer implements ExprVisitor {
 		}
 	}
 
-	public Object visitConst(ConstExpr cexpr, Object data) {
+	public Object visitConst(ConstExpr cexpr, Object scope) {
 		return cexpr;
 	}
 
 	/**
-	 * DCE: (unused operations)
-	 *   const;       =>  none
-	 *   var;         =>  none
-	 *   ex1 op ex1;  =>  {ex1; ex2;}
-	 *   op ex;       =>  ex;
-	 *   array.len;   =>  array;
-	 *   array[i];    =>  {array; i;}
+	 * <pre>
+	 * DCE:
+	 *   pop(const)            =&gt;  none
+	 *   pop(var)              =&gt;  none
+	 *   pop(ex1 op ex1)       =&gt;  {pop(ex1); pop(ex2)}
+	 *   pop(op ex)            =&gt;  pop(ex)
+	 *   pop(new [](i))        =&gt;  pop(i)
+	 *   pop(new []{e1,...,eN} =&gt;  {pop(e1), ..., pop(eN)}
+	 *   pop(array.len)        =&gt;  pop(array)
+	 *   pop(array[i])         =&gt;  {pop(array); pop(i)}
+	 * 
 	 * CF: (to ease further DCE)
-	 *   {...; eN};   =>  {...; eN; }
+	 *   pop( {...; eN} )      =&gt;  {...; pop(eN)}
+	 * </pre>
 	 */
 	public Object visitDiscard(DiscardExpr disc, Object scope) {
 		disc.expr = (Expr)disc.expr.accept(this, scope);
@@ -503,8 +704,10 @@ public class Optimizer implements ExprVisitor {
 	}
 
 	/**
+	 * <pre>
 	 * CF:
-	 *  do expr; while (false)  =>  expr;
+	 *   do expr; while (false)  =&gt;  expr;
+	 * </pre>
 	 */
 	public Object visitDoWhile(DoWhileExpr wexpr, Object scope) {
 		wexpr.condition = (Expr)wexpr.condition.accept(this, scope);
@@ -520,9 +723,10 @@ public class Optimizer implements ExprVisitor {
 	}
 
 	/**
+	 * <pre>
 	 * CF:
 	 *   const.tostr()  =>  "const"
-	 *   remove calls to empty and constant functions
+	 * </pre>
 	 */
 	public Object visitFCall(FCallExpr fcall, Object scope) {
 		fcall.fload = (Expr)fcall.fload.accept(this, scope);
@@ -539,6 +743,7 @@ public class Optimizer implements ExprVisitor {
 					return new ConstExpr(((ConstExpr)fcall.args[0]).line, String.valueOf(cnst));
 				}
 			}
+/* Inlining functions will be a part of -O2
 			if (f.body != null && (f.body instanceof ConstExpr || f.body instanceof NoneExpr)) {
 				// we don't need to call function but we still
 				// need to calculate its arguments
@@ -551,16 +756,17 @@ public class Optimizer implements ExprVisitor {
 				optimized = true;
 				return block.accept(this, scope);
 			}
+*/
 		}
 		return fcall;
 	}
 
 	/**
+	 * <pre>
 	 * DCE:
-	 *  if (true) e1 else e2   =>  e1
-	 *  if (false) e1 else e2  =>  e2
-	 * CF:
-	 *  if (!expr) e1 else e2  =>  if (expr) e2 else e1
+	 *   if (true) e1 else e2   =&gt;  e1
+	 *   if (false) e1 else e2  =&gt;  e2
+	 * </pre>
 	 */
 	public Object visitIf(IfExpr ifexpr, Object scope) {
 		ifexpr.condition = (Expr)ifexpr.condition.accept(this, scope);
@@ -574,6 +780,7 @@ public class Optimizer implements ExprVisitor {
 				return ifexpr.elseexpr;
 			}
 		}
+/* Makes line numbers inconsistent, it is better to handle "if (!expr)" by EAsmWriter
 		if (ifexpr.condition instanceof UnaryExpr) {
 			optimized = true;
 			ifexpr.condition = ((UnaryExpr)ifexpr.condition).expr;
@@ -582,6 +789,7 @@ public class Optimizer implements ExprVisitor {
 			ifexpr.elseexpr = tmp;
 			return ifexpr;
 		}
+*/
 		return ifexpr;
 	}
 
@@ -602,35 +810,76 @@ public class Optimizer implements ExprVisitor {
 		return none;
 	}
 
+	/**
+	 * <pre>
+	 * DCE:
+	 *   switch (const) { ... }  =&gt;  branch
+	 * </pre>
+	 */
 	public Object visitSwitch(SwitchExpr swexpr, Object scope) {
+		// optimize subtrees
 		swexpr.indexexpr = (Expr)swexpr.indexexpr.accept(this, scope);
 		for (int i=0; i<swexpr.exprs.size(); i++) {
 			Expr e = (Expr)swexpr.exprs.elementAt(i);
 			swexpr.exprs.setElementAt(e.accept(this, scope), i);
 		}
 		if (swexpr.elseexpr != null) swexpr.elseexpr = (Expr)swexpr.elseexpr.accept(this, scope);
+		// optimize switch (const)
+		if (swexpr.indexexpr instanceof ConstExpr) {
+			int choice = ((Int)((ConstExpr)swexpr.indexexpr).value).value;
+			optimized = true;
+			for (int br=0; br < swexpr.keys.size(); br++) {
+				final int[] indices = (int[])swexpr.keys.elementAt(br);
+				for (int i=0; i < indices.length; i++) {
+					if (indices[i] == choice) return swexpr.exprs.elementAt(br);
+				}
+			}
+			if (swexpr.elseexpr != null) return swexpr.elseexpr;
+			else return new NoneExpr();
+		}
 		return swexpr;
 	}
 
+	/**
+	 * <pre>
+	 * DCE:
+	 *   try { } catch { ... }  =&gt;  none
+	 * </pre>
+	 */
 	public Object visitTryCatch(TryCatchExpr trycatch, Object scope) {
 		trycatch.tryexpr = (Expr)trycatch.tryexpr.accept(this, scope);
 		trycatch.catchexpr = (Expr)trycatch.catchexpr.accept(this, scope);
+		if (trycatch.tryexpr instanceof NoneExpr) {
+			optimized = true;
+			return trycatch.tryexpr;
+		}
 		return trycatch;
 	}
 
 	/**
+	 * <pre>
 	 * CF:
-	 *  +expr   =>  expr
-	 *  -const  =>  const
-	 *  ~const  =>  const
-	 *  !const  =>  const
+	 *  +expr   =&gt;  expr
+	 *  -const  =&gt;  const
+	 *  ~const  =&gt;  const
+	 *  !const  =&gt;  const
+	 * 
+	 *  !(a == b)  =&gt;  a != b
+	 *  !(a != b)  =&gt;  a == b
+	 *  !(a &lt; b)   =&gt;  a &gt;= b
+	 *  !(a &gt; b)   =&gt;  a &lt;= b
+	 *  !(a &lt;= b)  =&gt;  a &gt; b
+	 *  !(a &gt;= b)  =&gt;  a &lt; b
+	 * </pre>
 	 */
 	public Object visitUnary(UnaryExpr unary, Object scope) {
+		// optimize subexpression
 		unary.expr = (Expr)unary.expr.accept(this, scope);
 		if (unary.operator == '+') {
 			optimized = true;
 			return unary.expr;
 		}
+		// optimize "op const"
 		if (unary.expr instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)unary.expr).value;
 			switch (unary.operator) {
@@ -666,6 +915,20 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			return new ConstExpr(((ConstExpr)unary.expr).line, cnst);
 		}
+		// optimize !(expr cmp expr)
+		if (unary.expr instanceof ComparisonExpr) {
+			optimized = true;
+			final ComparisonExpr cmp = (ComparisonExpr) unary.expr;
+			switch (cmp.operator) {
+				case '<': cmp.operator = Token.GTEQ; break;
+				case '>': cmp.operator = Token.LTEQ; break;
+				case Token.LTEQ: cmp.operator = '>'; break;
+				case Token.GTEQ: cmp.operator = '<'; break;
+				case Token.EQEQ: cmp.operator = Token.NOTEQ; break;
+				case Token.NOTEQ: cmp.operator = Token.EQEQ; break;
+			}
+			return cmp;
+		}
 		return unary;
 	}
 	
@@ -674,8 +937,10 @@ public class Optimizer implements ExprVisitor {
 	}
 	
 	/**
+	 * <pre>
 	 * DCE:
-	 *  while (false) expr;   =>   none
+	 *   while (false) expr;   =&gt;   none
+	 * </pre>
 	 */
 	public Object visitWhile(WhileExpr wexpr, Object scope) {
 		wexpr.condition = (Expr)wexpr.condition.accept(this, scope);
@@ -685,9 +950,6 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			if (cnst.equals(Boolean.FALSE)) {
 				return new NoneExpr();
-			} else if (cnst.equals(Boolean.TRUE)) {
-				// do-while is shorter when writing native code
-				return new DoWhileExpr(wexpr.condition, wexpr.body);
 			}
 		}
 		return wexpr;
