@@ -693,7 +693,7 @@ public class Parser {
 			expect('(');
 			// do not cast, other numeric type may be put here by mistake
 			Expr indexexpr = parseExpr(scope);
-			if (!indexexpr.rettype().isSubtypeOf(BuiltinType.INT))
+			if (!indexexpr.rettype().equals(BuiltinType.INT))
 				throw new ParseException("Index of switch must be Int");
 			expect(')');
 			expect('{');
@@ -716,12 +716,13 @@ public class Parser {
 						Expr branchindex = (Expr)parseExpr(scope).accept(new Optimizer(), scope);
 						if (!(branchindex instanceof ConstExpr))
 							throw new ParseException("Constant expression expected in switch key");
-						if (!branchindex.rettype().isSubtypeOf(BuiltinType.INT))
+						if (!branchindex.rettype().equals(BuiltinType.INT))
 							throw new ParseException("switch key is required to be integer");
 						Int idx = (Int)((ConstExpr)branchindex).value;
 						if (keysunique.contains(idx))
 							throw new ParseException("branch for "+idx+" is already defined in this switch");
 						branchkeyv.addElement(idx);
+						keysunique.addElement(idx);
 					} while (t.nextToken() != ':');
 					int[] branchkeys = new int[branchkeyv.size()];
 					for (int i=0; i<branchkeys.length; i++) {
