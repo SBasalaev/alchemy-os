@@ -36,9 +36,11 @@ public class Char extends Int {
 		super(ch);
 	}
 
+/* Disabled for 2.0 to not break compatibility.
 	public String toString() {
 		return String.valueOf((char)value);
 	}
+*/
 	
 	public static Char toChar(char ch) {
 		if (ch < 256) return cache[ch];
