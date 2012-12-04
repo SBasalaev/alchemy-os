@@ -75,11 +75,11 @@ Summary: standard library which is used by all programs
 File: libcore3_3.0.4-1.pkg
 
 Package: libfiletype1
-Version: 1.1.1-1
+Version: 1.1.2-1
 Section: libs
 Depends: libcore3
 Summary: library to detect file type
-File: libfiletype1_1.1.1-1.pkg
+File: libfiletype1_1.1.2-1.pkg
 
 Package: libpkg1
 Version: 0.3.5-1
