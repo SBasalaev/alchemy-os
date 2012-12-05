@@ -216,9 +216,9 @@ public class Main {
 				out.flush();
 				out.close();
 			}
-			f.setReadable((attrs & A_READ) != 0, false);
-			f.setWritable((attrs & A_WRITE) != 0, false);
-			f.setExecutable((attrs & A_EXEC) != 0, false);
+			f.setReadable((attrs & A_READ) != 0);
+			f.setWritable((attrs & A_WRITE) != 0);
+			f.setExecutable((attrs & A_EXEC) != 0);
 		}
 	}
 
