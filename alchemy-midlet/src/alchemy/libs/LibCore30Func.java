@@ -268,7 +268,7 @@ class LibCore30Func extends NativeFunction {
 			case 72: // bacopy(src: BArray, sofs: Int, dest: BArray, dofs: Int, len: Int)
 			case 73: // cacopy(src: CArray, sofs: Int, dest: CArray, dofs: Int, len: Int)
 			case 74: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
-				System.arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
+				arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
 			case 75: // fprint(out: OStream, a: Any): OStream
 				IO.print((OutputStream)args[0], args[1]);
@@ -552,5 +552,85 @@ class LibCore30Func extends NativeFunction {
 
 	protected String soname() {
 		return "libcore.3.so";
+	}
+	
+	public static void arraycopy(Object src, int sofs, Object dest, int dofs, int len) {
+		if (dest.getClass().isInstance(src)) {
+			System.arraycopy(src, sofs, dest, dofs, len);
+			return;
+		}
+		if (src instanceof Object[]) {
+			final Object[] from = (Object[])src;
+			if (dest instanceof byte[]) {
+				final byte[] to = (byte[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = (byte)ival(from[sofs+i]);
+				return;
+			} else if (dest instanceof short[]) {
+				final short[] to = (short[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = (short)ival(from[sofs+i]);
+				return;
+			} else if (dest instanceof char[]) {
+				final char[] to = (char[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = cval(from[sofs+i]);
+				return;
+			} else if (dest instanceof boolean[]) {
+				final boolean[] to = (boolean[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = bval(from[sofs+i]);
+				return;
+			} else if (dest instanceof int[]) {
+				final int[] to = (int[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = ival(from[sofs+i]);
+				return;
+			} else if (dest instanceof long[]) {
+				final long[] to = (long[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = lval(from[sofs+i]);
+				return;
+			} else if (dest instanceof float[]) {
+				final float[] to = (float[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = fval(from[sofs+i]);
+				return;
+			} else if (dest instanceof double[]) {
+				final double[] to = (double[])dest;
+				for (int i=0; i<len; i++) to[dofs+i] = dval(from[sofs+i]);
+				return;
+			}
+		}
+		if (dest instanceof Object[]) {
+			final Object[] to = (Object[])dest;
+			if (src instanceof byte[]) {
+				final byte[] from = (byte[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
+				return;
+			} else if (src instanceof short[]) {
+				final short[] from = (short[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
+				return;
+			} else if (src instanceof char[]) {
+				final char[] from = (char[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Cval(from[sofs+i]);
+				return;
+			} else if (src instanceof boolean[]) {
+				final boolean[] from = (boolean[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
+				return;
+			} else if (src instanceof int[]) {
+				final int[] from = (int[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
+				return;
+			} else if (src instanceof long[]) {
+				final long[] from = (long[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Lval(from[sofs+i]);
+				return;
+			} else if (src instanceof float[]) {
+				final float[] from = (float[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Fval(from[sofs+i]);
+				return;
+			} else if (src instanceof double[]) {
+				final double[] from = (double[])src;
+				for (int i=0; i<len; i++) to[dofs+i] = Dval(from[sofs+i]);
+				return;
+			}
+		}
+		throw new ClassCastException();
 	}
 }
