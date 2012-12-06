@@ -63,11 +63,10 @@ public class ELibBuilder implements LibBuilder {
 	 *                tableswitch lookupswitch
 	 * 
 	 * New in format 2.1
-	 *  Char instructions: i2c
+	 *  Char instructions: i2c c2i
 	 *  Array instructions: newza zaload zastore zalen newsa saload
 	 *    sastore salen newia iaload iastore ialen newla laload lastore
 	 *    lalen newfa faload fastore falen newda daload dastore dalen
-	 *    
 	 */
 	
 	public Library build(Context c, InputStream in) throws IOException, InstantiationException {

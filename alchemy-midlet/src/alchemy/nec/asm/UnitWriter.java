@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.util.Vector;
 
 /**
- * Code writer for version 2.0
+ * Code writer for version 2.1
  * @author Sergey Basalaev
  */
 public class UnitWriter {

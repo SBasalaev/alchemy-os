@@ -81,8 +81,6 @@ public class Parser {
 			unit.putType(BuiltinType.BOOL);
 			unit.putType(BuiltinType.STRING);
 			unit.putType(BuiltinType.ARRAY);
-			unit.putType(BuiltinType.BARRAY);
-			unit.putType(BuiltinType.CARRAY);
 			unit.putType(BuiltinType.FUNCTION);
 			unit.putType(BuiltinType.STRUCTURE);
 			unit.putType(BuiltinType.ERROR);
@@ -837,26 +835,18 @@ public class Parser {
 						throw new ParseException("'(' or '{' expected in structure constructor");
 				}
 				return new NewArrayByEnumExpr(lnum, type, init);
-			} else if (type.isSubtypeOf(BuiltinType.ARRAY)
-			        || type == BuiltinType.BARRAY
-			        || type == BuiltinType.CARRAY) {
+			} else if (type instanceof ArrayType) {
 				if (t.nextToken() == '(') {
 					Expr lenexpr = cast(parseExpr(scope), BuiltinType.INT);
 					expect(')');
 					return new NewArrayExpr(lnum, type, lenexpr);
 				} else if (t.ttype == '{') {
 					Vector vinit = new Vector();
+					Type eltype = ((ArrayType)type).elementType();
 					while (t.nextToken() != '}') {
 						t.pushBack();
 						if (!vinit.isEmpty()) expect(',');
-						Expr e = parseExpr(scope);
-						if (type.equals(BuiltinType.ARRAY)) {
-							e = cast(e, BuiltinType.ANY);
-						} else if (type instanceof ArrayType) {
-							e = cast(e, ((ArrayType)type).elementType());
-						} else {
-							e = cast(e, BuiltinType.INT);
-						}
+						Expr e = cast(parseExpr(scope), eltype);
 						vinit.addElement(e);
 					}
 					Expr[] init = new Expr[vinit.size()];
@@ -1052,29 +1042,14 @@ public class Parser {
 			} else { // not a range
 				t.pushBack();
 				expect(']');
-				if (artype.isSubtypeOf(BuiltinType.ARRAY)
-				 || artype == BuiltinType.BARRAY
-				 || artype == BuiltinType.CARRAY) {
+				if (artype instanceof ArrayType) {
 					// array getter or setter
 					indexexpr = cast(indexexpr, BuiltinType.INT);
-					Expr getexpr;
-					if (artype == BuiltinType.BARRAY || artype == BuiltinType.CARRAY) {
-						getexpr = new ALoadExpr(arexpr, indexexpr, BuiltinType.INT);
-					} else if (artype instanceof ArrayType) {
-						getexpr = new ALoadExpr(arexpr, indexexpr, ((ArrayType)artype).elementType());
-					} else {
-						getexpr = new ALoadExpr(arexpr, indexexpr, BuiltinType.ANY);
-					}
+					Type eltype = ((ArrayType)artype).elementType();
+					Expr getexpr = new ALoadExpr(arexpr, indexexpr, eltype);
 					if (Token.isAssignment(t.nextToken())) {
 						Expr rexpr = makeAssignRval(getexpr, t.ttype, parseExpr(scope));
-						if (artype == BuiltinType.BARRAY || artype == BuiltinType.CARRAY) {
-							rexpr = cast(rexpr, BuiltinType.INT);
-						} else if (artype instanceof ArrayType) {
-							rexpr = cast(rexpr, ((ArrayType)artype).elementType());
-						} else {
-							rexpr = cast(rexpr, BuiltinType.ANY);
-						}
-						return new AStoreExpr(arexpr, indexexpr, rexpr);
+						return new AStoreExpr(arexpr, indexexpr, cast(rexpr, eltype));
 					} else {
 						t.pushBack();
 						return getexpr;
@@ -1136,9 +1111,7 @@ public class Parser {
 		Type type = expr.rettype();
 		if (type instanceof NamedType && type.superType() == null)
 			type = unit.getType(type.toString());
-		if (type.isSubtypeOf(BuiltinType.ARRAY)
-		 || type == BuiltinType.BARRAY
-		 || type == BuiltinType.CARRAY) {
+		if (type instanceof ArrayType) {
 			if (member.equals("len")) {
 				return new ALenExpr(expr);
 			}

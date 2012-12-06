@@ -45,7 +45,7 @@ public class NEL extends NativeApp {
 	/** Highest supported library file format version.
 	 * @see ELibBuilder#VERSION
 	 */
-	static private final int SUPPORTED = 0x0200;
+	static private final int SUPPORTED = 0x0201;
 
 	static private final String VERSION =
 			"Native E linker version 1.3";

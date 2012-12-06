@@ -62,7 +62,7 @@ public class NEC extends NativeApp {
 		boolean dbginfo = false;
 		int Wmask = -1; // all warnings
 		int Xmask = 0;
-		int target = 0x0200;
+		int target = 0x0201;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
@@ -74,9 +74,8 @@ public class NEC extends NativeApp {
 			} else if (arg.equals("-o")) {
 				wait_outname = true;
 			} else if (arg.startsWith("-t")) {
-				if (arg.equals("-t2.0")) {
-					target = 0x0200;
-				} else if (arg.equals("-t2.1")) {
+				// does anyone really need cross-compilation?
+				if (arg.equals("-t2.1")) {
 					target = 0x0201;
 				} else {
 					IO.println(c.stderr, "Unsupported target: "+arg.substring(2));

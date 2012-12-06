@@ -39,24 +39,16 @@ public class BuiltinType extends NamedType {
 	static public final BuiltinType LONG = new BuiltinType("Long", NUMBER);
 	static public final BuiltinType FLOAT = new BuiltinType("Float", NUMBER);
 	static public final BuiltinType DOUBLE = new BuiltinType("Double", NUMBER);
-	/* Array types. */
+	/* Super types. */
 	static public final BuiltinType ARRAY = new BuiltinType("Array", ANY);
-	static public final BuiltinType BARRAY = new BuiltinType("[Byte]", ARRAY);
-	static public final BuiltinType CARRAY = new BuiltinType("[Char]", ARRAY);
-	static public final BuiltinType SARRAY = new BuiltinType("[Short]", ARRAY);
-	static public final BuiltinType ZARRAY = new BuiltinType("[Bool]", ARRAY);
-	static public final BuiltinType IARRAY = new BuiltinType("[Int]", ARRAY);
-	static public final BuiltinType LARRAY = new BuiltinType("[Long]", ARRAY);
-	static public final BuiltinType FARRAY = new BuiltinType("[Float]", ARRAY);
-	static public final BuiltinType DARRAY = new BuiltinType("[Double]", ARRAY);
-	/* Others. */
-	static public final BuiltinType STRING = new BuiltinType("String", ANY);
-	static public final BuiltinType BOOL = new BuiltinType("Bool", ANY);
 	static public final BuiltinType FUNCTION = new BuiltinType("Function", ANY);
 	static public final BuiltinType STRUCTURE = new BuiltinType("Structure", ANY);
-	static public final BuiltinType ERROR = new BuiltinType("Error", ANY);
 	/* A special type which is subtype of all types. */
 	static public final BuiltinType NULL = new BuiltinType("<null>", ANY);
 	/* A special type which is used when expression does not return a value. */
 	static public final BuiltinType NONE = new BuiltinType("<none>", null);
+	/* Others. */
+	static public final BuiltinType STRING = new BuiltinType("String", ANY);
+	static public final BuiltinType BOOL = new BuiltinType("Bool", ANY);
+	static public final BuiltinType ERROR = new BuiltinType("Error", ANY);
 }

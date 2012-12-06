@@ -143,7 +143,7 @@ class LibCore30Func extends NativeFunction {
 				return ((String)args[0]).concat((String)args[1]);
 			case 33: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
-			case 34: // String.chars(): CArray
+			case 34: // String.chars(): [Char]
 				return ((String)args[0]).toCharArray();
 			case 35: // String.trim(): String
 				return ((String)args[0]).trim();
@@ -231,20 +231,20 @@ class LibCore30Func extends NativeFunction {
 				return null;
 			case 64: // IStream.read(): Int
 				return Ival(((InputStream)args[0]).read());
-			case 65: // IStream.readarray(buf: BArray, ofs: Int, len: Int): Int
+			case 65: // IStream.readarray(buf: [Byte], ofs: Int, len: Int): Int
 				return Ival(((InputStream)args[0]).read((byte[])args[1], ival(args[2]), ival(args[3])));
 			case 66: // IStream.skip(n: Long): Long
 				return Lval(((InputStream)args[0]).skip(lval(args[1])));
 			case 67: // OStream.write(b: Int)
 				((OutputStream)args[0]).write(ival(args[1]));
 				return null;
-			case 68: // OStream.writearray(buf: BArray, ofs: Int, len: Int)
+			case 68: // OStream.writearray(buf: [Byte], ofs: Int, len: Int)
 				((OutputStream)args[0]).write((byte[])args[1], ival(args[2]), ival(args[3]));
 				return null;
 			case 69: // OStream.flush(out: OStream)
 				((OutputStream)args[0]).flush();
 				return null;
-			case 70: { // Process.start_wait(cmd: String, args: Array): Int
+			case 70: { // Process.start_wait(cmd: String, args: [String]): Int
 				Context cc = (Context)args[0];
 				String prog = (String)args[1];
 				Object[] oargs = (Object[])args[2];
@@ -254,7 +254,7 @@ class LibCore30Func extends NativeFunction {
 				}
 				return Ival(cc.startAndWait(prog, sargs));
 			}
-			case 71: { // Process.start(cmd: String, args: Array)
+			case 71: { // Process.start(cmd: String, args: [String])
 				Context cc = (Context)args[0];
 				String prog = (String)args[1];
 				Object[] oargs = (Object[])args[2];
@@ -265,8 +265,10 @@ class LibCore30Func extends NativeFunction {
 				cc.start(prog, sargs);
 				return null;
 			}
-			case 72: // bacopy(src: BArray, sofs: Int, dest: BArray, dofs: Int, len: Int)
-			case 73: // cacopy(src: CArray, sofs: Int, dest: CArray, dofs: Int, len: Int)
+			case 72: // bacopy(src: [Byte], sofs: Int, dest: [Byte], dofs: Int, len: Int)
+				// DEPRECATED
+			case 73: // cacopy(src: [Char], sofs: Int, dest: [Char], dofs: Int, len: Int)
+				// DEPRECATED
 			case 74: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
 				arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
@@ -313,9 +315,9 @@ class LibCore30Func extends NativeFunction {
 				return Dval(LibCore30.acos(dval(args[0])));
 			case 93: // atan(a: Double): Double
 				return Dval(LibCore30.atan(dval(args[0])));
-			case 94: // ca2str(chars: CArray): String
+			case 94: // ca2str(chars: [Char]): String
 				return new String((char[])args[0]);
-			case 95: // ba2utf(bytes: BArray): String
+			case 95: // ba2utf(bytes: [Byte]): String
 				return IO.utfDecode((byte[])args[0]);
 			case 96: // ibits2f(bits: Int): Float
 				return Fval(Float.intBitsToFloat(ival(args[0])));
@@ -335,7 +337,7 @@ class LibCore30Func extends NativeFunction {
 			case 103: // Dict.remove(key: Any)
 				((Hashtable)args[0]).remove(args[1]);
 				return null;
-			case 104: // OStream.close
+			case 104: // OStream.close()
 				((OutputStream)args[0]).close();
 				return null;
 			case 105: // rnd(n: Int): Int
@@ -415,7 +417,7 @@ class LibCore30Func extends NativeFunction {
 			case 121: // setstatic(key: Any, val: Any)
 				c.set(args[0], args[1]);
 				return null;
-			case 122: // String.format(args: Array): String
+			case 122: // String.format(args: [Any]): String
 				return IO.printf((String)args[0], (Object[])args[1]);
 			case 123: { // Dict.keys(): [Any]
 				Vector keyv = new Vector();
@@ -531,7 +533,7 @@ class LibCore30Func extends NativeFunction {
 				return new ByteArrayOutputStream();
 			case 162: // BArrayOStream.len(): Int
 				return Ival(((ByteArrayOutputStream)args[0]).size());
-			case 163: // BArrayOStream.tobarray(): BArray
+			case 163: // BArrayOStream.tobarray(): [Byte]
 				return ((ByteArrayOutputStream)args[0]).toByteArray();
 			case 164: // BArrayOStream.reset()
 				((ByteArrayOutputStream)args[0]).reset();
