@@ -188,7 +188,7 @@ public class Parser {
 						break;
 					case '<': { // defining subtype
 						Type superType = parseType(unit);
-						if (superType instanceof BuiltinType && !superType.equals(BuiltinType.ANY))
+						if (superType instanceof BuiltinType && superType != BuiltinType.ANY)
 							throw new ParseException("Cannot make a subtype of builtin type.");
 						Type type;
 						if (t.nextToken() == '{') {
@@ -274,7 +274,7 @@ public class Parser {
 			for (int i=0; i < pfields.length; i++) {
 				fields.addElement(pfields[i]);
 			}
-		} else if (!parent.equals(BuiltinType.STRUCTURE)) {
+		} else if (parent != BuiltinType.STRUCTURE) {
 			throw new ParseException("Type " + name + " is not a structure");
 		}
 		boolean first = true;
@@ -412,7 +412,7 @@ public class Parser {
 					warn(W_MAIN, "argument of main() should be of type [String]");
 				}
 			}
-			if (!rettype.equals(BuiltinType.INT) && !rettype.equals(BuiltinType.NONE)) {
+			if (rettype != BuiltinType.INT && rettype != BuiltinType.NONE) {
 				warn(W_MAIN, "Incompatible return type in main(), should be Int or <none>.");
 			}
 		}
@@ -521,14 +521,14 @@ public class Parser {
 			case '~': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
-				if (!type.isSubtypeOf(BuiltinType.INT) && !type.isSubtypeOf(BuiltinType.LONG))
+				if (type != BuiltinType.INT && type != BuiltinType.LONG)
 					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
 				return new UnaryExpr(ttype, sub);				
 			}
 			case '!': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
-				if (!type.isSubtypeOf(BuiltinType.BOOL))
+				if (type != BuiltinType.BOOL)
 					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
 				return new UnaryExpr(ttype, sub);				
 			}
@@ -553,9 +553,9 @@ public class Parser {
 					Expr e = (Expr)exprs.elementAt(i);
 					eltype = binaryCastType(eltype, e.rettype());
 				}
-				if (eltype.equals(BuiltinType.NULL))
+				if (eltype == BuiltinType.NULL)
 					eltype = BuiltinType.ANY;
-				else if (eltype.equals(BuiltinType.NONE))
+				else if (eltype == BuiltinType.NONE)
 					throw new ParseException("Cannot create array of <none>.");
 				// building expression
 				Expr[] init = new Expr[exprs.size()];
@@ -693,7 +693,7 @@ public class Parser {
 			expect('(');
 			// do not cast, other numeric type may be put here by mistake
 			Expr indexexpr = parseExpr(scope);
-			if (!indexexpr.rettype().equals(BuiltinType.INT))
+			if (indexexpr.rettype() != BuiltinType.INT)
 				throw new ParseException("Index of switch must be Int");
 			expect(')');
 			expect('{');
@@ -716,7 +716,7 @@ public class Parser {
 						Expr branchindex = (Expr)parseExpr(scope).accept(new Optimizer(), scope);
 						if (!(branchindex instanceof ConstExpr))
 							throw new ParseException("Constant expression expected in switch key");
-						if (!branchindex.rettype().equals(BuiltinType.INT))
+						if (branchindex.rettype() != BuiltinType.INT)
 							throw new ParseException("switch key is required to be integer");
 						Int idx = (Int)((ConstExpr)branchindex).value;
 						if (keysunique.contains(idx))
@@ -776,7 +776,7 @@ public class Parser {
 				varvalue = parseExpr(scope);
 				if (vartype == null) {
 					vartype = varvalue.rettype();
-					if (vartype.equals(BuiltinType.NONE))
+					if (vartype == BuiltinType.NONE)
 						throw new ParseException("Cannot convert from <none> to Any");
 				} else {
 					varvalue = cast(varvalue, vartype);
@@ -838,8 +838,8 @@ public class Parser {
 				}
 				return new NewArrayByEnumExpr(lnum, type, init);
 			} else if (type.isSubtypeOf(BuiltinType.ARRAY)
-			        || type.isSubtypeOf(BuiltinType.BARRAY)
-			        || type.isSubtypeOf(BuiltinType.CARRAY)) {
+			        || type == BuiltinType.BARRAY
+			        || type == BuiltinType.CARRAY) {
 				if (t.nextToken() == '(') {
 					Expr lenexpr = cast(parseExpr(scope), BuiltinType.INT);
 					expect(')');
@@ -1006,8 +1006,8 @@ public class Parser {
 				if (method == null)
 					throw new ParseException("Method "+artype+".range not found");
 				if (method.type.args.length != 3 ||
-				   !method.type.args[1].equals(BuiltinType.INT) ||
-				   !method.type.args[2].equals(BuiltinType.INT))
+				   method.type.args[1] != BuiltinType.INT ||
+				   method.type.args[2] != BuiltinType.INT)
 					throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
 				Expr startexpr = new ConstExpr(lnum, Int.ZERO);
 				method.hits++;
@@ -1021,7 +1021,7 @@ public class Parser {
 					Func method = findMethod(artype, "len");
 					if (method == null)
 						throw new ParseException("Method "+artype+".len not found");
-					if (method.type.args.length != 1 || !method.type.rettype.equals(BuiltinType.INT))
+					if (method.type.args.length != 1 || method.type.rettype != BuiltinType.INT)
 						throw new ParseException("Method "+artype+".len must be ():Int to use [] notation");
 					method.hits++;
 					Expr endexpr = makeFCall(lnum, method, new Expr[] {arexpr});
@@ -1029,8 +1029,8 @@ public class Parser {
 					if (method == null)
 						throw new ParseException("Method "+artype+".range not found");
 					if (method.type.args.length != 3 ||
-					   !method.type.args[1].equals(BuiltinType.INT) ||
-					   !method.type.args[2].equals(BuiltinType.INT))
+					   method.type.args[1] != BuiltinType.INT ||
+					   method.type.args[2] != BuiltinType.INT)
 						throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
 					indexexpr = cast(indexexpr, BuiltinType.INT);
 					method.hits++;
@@ -1043,8 +1043,8 @@ public class Parser {
 					if (method == null)
 						throw new ParseException("Method "+artype+".range not found");
 					if (method.type.args.length != 3 ||
-					   !method.type.args[1].equals(BuiltinType.INT) ||
-					   !method.type.args[2].equals(BuiltinType.INT))
+					   method.type.args[1] != BuiltinType.INT ||
+					   method.type.args[2] != BuiltinType.INT)
 						throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
 					method.hits++;
 					return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, endexpr});
@@ -1053,12 +1053,12 @@ public class Parser {
 				t.pushBack();
 				expect(']');
 				if (artype.isSubtypeOf(BuiltinType.ARRAY)
-				 || artype.equals(BuiltinType.BARRAY)
-				 || artype.equals(BuiltinType.CARRAY)) {
+				 || artype == BuiltinType.BARRAY
+				 || artype == BuiltinType.CARRAY) {
 					// array getter or setter
 					indexexpr = cast(indexexpr, BuiltinType.INT);
 					Expr getexpr;
-					if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
+					if (artype == BuiltinType.BARRAY || artype == BuiltinType.CARRAY) {
 						getexpr = new ALoadExpr(arexpr, indexexpr, BuiltinType.INT);
 					} else if (artype instanceof ArrayType) {
 						getexpr = new ALoadExpr(arexpr, indexexpr, ((ArrayType)artype).elementType());
@@ -1067,7 +1067,7 @@ public class Parser {
 					}
 					if (Token.isAssignment(t.nextToken())) {
 						Expr rexpr = makeAssignRval(getexpr, t.ttype, parseExpr(scope));
-						if (artype.isSubtypeOf(BuiltinType.BARRAY) || artype.isSubtypeOf(BuiltinType.CARRAY)) {
+						if (artype == BuiltinType.BARRAY || artype == BuiltinType.CARRAY) {
 							rexpr = cast(rexpr, BuiltinType.INT);
 						} else if (artype instanceof ArrayType) {
 							rexpr = cast(rexpr, ((ArrayType)artype).elementType());
@@ -1137,8 +1137,8 @@ public class Parser {
 		if (type instanceof NamedType && type.superType() == null)
 			type = unit.getType(type.toString());
 		if (type.isSubtypeOf(BuiltinType.ARRAY)
-		 || type.equals(BuiltinType.BARRAY)
-		 || type.equals(BuiltinType.CARRAY)) {
+		 || type == BuiltinType.BARRAY
+		 || type == BuiltinType.CARRAY) {
 			if (member.equals("len")) {
 				return new ALenExpr(expr);
 			}
@@ -1214,7 +1214,7 @@ public class Parser {
 		while (t.nextToken() != '}') {
 			t.pushBack();
 			lastexpr = parseExpr(block);
-			if (lastexpr.rettype().equals(BuiltinType.NONE))
+			if (lastexpr.rettype() == BuiltinType.NONE)
 				block.exprs.addElement(lastexpr);
 			else
 				block.exprs.addElement(new DiscardExpr(lastexpr));
@@ -1238,8 +1238,7 @@ public class Parser {
 			case Token.GTGT:
 			case Token.LTLT:
 			case Token.GTGTGT: {
-				if (!ltype.isSubtypeOf(BuiltinType.INT) && !ltype.isSubtypeOf(BuiltinType.LONG)
-					|| !rtype.isSubtypeOf(BuiltinType.INT))
+				if (ltype != BuiltinType.INT && ltype != BuiltinType.LONG || rtype != BuiltinType.INT)
 						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				return new BinaryExpr(left, op, right);
 			}
@@ -1258,12 +1257,12 @@ public class Parser {
 				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
 			}
 			case Token.AMPAMP: {
-				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
+				if (ltype != BuiltinType.BOOL || rtype != BuiltinType.BOOL)
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				return new IfExpr(left, right, new ConstExpr(-1, Boolean.FALSE));
 			}
 			case Token.BARBAR: {
-				if (!ltype.isSubtypeOf(BuiltinType.BOOL) || !rtype.isSubtypeOf(BuiltinType.BOOL))
+				if (ltype != BuiltinType.BOOL || rtype != BuiltinType.BOOL)
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				return new IfExpr(left, new ConstExpr(-1, Boolean.TRUE), right);
 			}
@@ -1272,7 +1271,7 @@ public class Parser {
 			case '*':
 			case '/':
 			case '%': {
-				if (ltype.isSubtypeOf(BuiltinType.STRING)) {
+				if (ltype == BuiltinType.STRING) {
 					// string concatenation
 					right = cast(right, BuiltinType.ANY);
 					if (left instanceof ConcatExpr) {
@@ -1295,7 +1294,7 @@ public class Parser {
 			case '&':
 			case '|': {
 				Type btype = binaryCastType(ltype, rtype);
-				if (!btype.isSubtypeOf(BuiltinType.BOOL) && !btype.isSubtypeOf(BuiltinType.INT) && !btype.isSubtypeOf(BuiltinType.LONG))
+				if (btype != BuiltinType.BOOL && btype != BuiltinType.INT && btype != BuiltinType.LONG)
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				return new BinaryExpr(cast(left,btype), op, cast(right,btype));
 			}
@@ -1361,7 +1360,7 @@ public class Parser {
 				} else if (!toarray.elementType().isSupertypeOf(fromarray.elementType())) {
 					throw new ParseException("Cast to the incompatible type when copying from "+fromarray+" to "+toarray);
 				}
-			} else if (!toarray.elementType().equals(BuiltinType.ANY)) {
+			} else if (toarray.elementType() != BuiltinType.ANY) {
 				warn(W_TYPESAFE, "Unsafe type cast when copying from Array to "+toarray);
 			}
 		}
@@ -1404,14 +1403,14 @@ public class Parser {
 	 */
 	private Expr cast(Expr expr, Type toType) throws ParseException {
 		Type fromType = expr.rettype();
-		if (fromType.equals(BuiltinType.NONE)) {
-			if (toType.equals(BuiltinType.NONE)) return expr;
+		if (fromType == BuiltinType.NONE) {
+			if (toType == BuiltinType.NONE) return expr;
 			else throw new ParseException("Cannot convert from <none> to "+toType);
 		}
-		if (toType.equals(BuiltinType.NONE)) {
+		if (toType == BuiltinType.NONE) {
 			return new DiscardExpr(expr);
 		}
-		if (toType.isSupertypeOf(fromType) || toType.equals(BuiltinType.ANY)) {
+		if (toType.isSupertypeOf(fromType) || toType == BuiltinType.ANY) {
 			return expr;
 		}
 		if (toType.isSubtypeOf(fromType)) {
@@ -1428,19 +1427,19 @@ public class Parser {
 	 * Computes return type of binary operator.
 	 */
 	private Type binaryCastType(Type ltype, Type rtype) {
-		if (ltype.equals(BuiltinType.NULL)) return rtype;
-		if (rtype.equals(BuiltinType.NULL)) return ltype;
+		if (ltype == BuiltinType.NULL) return rtype;
+		if (rtype == BuiltinType.NULL) return ltype;
 		if (ltype.isSubtypeOf(BuiltinType.NUMBER) && rtype.isSubtypeOf(BuiltinType.NUMBER)) {
 		int choice = 0;
-			if (ltype.isSubtypeOf(BuiltinType.DOUBLE)) choice = 4;
-			else if (ltype.isSubtypeOf(BuiltinType.FLOAT)) choice = 3;
-			else if (ltype.isSubtypeOf(BuiltinType.LONG)) choice = 2;
-			else if (ltype.isSubtypeOf(BuiltinType.INT)) choice = 1;
+			if (ltype == BuiltinType.DOUBLE) choice = 4;
+			else if (ltype == BuiltinType.FLOAT) choice = 3;
+			else if (ltype == BuiltinType.LONG) choice = 2;
+			else if (ltype == BuiltinType.INT) choice = 1;
 			if (choice > 0) {
-				if (rtype.isSubtypeOf(BuiltinType.DOUBLE)) choice = Math.max(choice, 4);
-				else if (rtype.isSubtypeOf(BuiltinType.FLOAT)) choice = Math.max(choice, 3);
-				else if (rtype.isSubtypeOf(BuiltinType.LONG)) choice = Math.max(choice, 2);
-				else if (rtype.isSubtypeOf(BuiltinType.INT)) choice = Math.max(choice, 1);
+				if (rtype == BuiltinType.DOUBLE) choice = Math.max(choice, 4);
+				else if (rtype == BuiltinType.FLOAT) choice = Math.max(choice, 3);
+				else if (rtype == BuiltinType.LONG) choice = Math.max(choice, 2);
+				else if (rtype == BuiltinType.INT) choice = Math.max(choice, 1);
 			}
 			switch (choice) {
 				case 4: return BuiltinType.DOUBLE;
