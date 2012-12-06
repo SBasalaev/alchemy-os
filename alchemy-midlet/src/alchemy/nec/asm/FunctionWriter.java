@@ -67,12 +67,24 @@ public class FunctionWriter implements Opcodes {
 			case AASTORE:
 			case BASTORE:
 			case CASTORE:
+			case SASTORE:
+			case ZASTORE:
+			case IASTORE:
+			case LASTORE:
+			case FASTORE:
+			case DASTORE:
 				visitStack(-3);
 				break;
 			case ACMP:
 			case AALOAD:
 			case BALOAD:
 			case CALOAD:
+			case SALOAD:
+			case ZALOAD:
+			case IALOAD:
+			case LALOAD:
+			case FALOAD:
+			case DALOAD:
 			case DADD:
 			case DCMP:
 			case DDIV:
@@ -116,6 +128,12 @@ public class FunctionWriter implements Opcodes {
 			case AALEN:
 			case BALEN:
 			case CALEN:
+			case SALEN:
+			case ZALEN:
+			case IALEN:
+			case LALEN:
+			case FALEN:
+			case DALEN:
 			case D2F:
 			case D2I:
 			case D2L:
@@ -135,9 +153,17 @@ public class FunctionWriter implements Opcodes {
 			case NEWAA:
 			case NEWBA:
 			case NEWCA:
+			case NEWSA:
+			case NEWZA:
+			case NEWIA:
+			case NEWLA:
+			case NEWFA:
+			case NEWDA:
 			case NOP:
 			case RET_NULL:
 			case SWAP:
+			case I2C:
+			case C2I:
 				break;
 			case DUP:
 				visitStack(1);
