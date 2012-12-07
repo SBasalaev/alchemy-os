@@ -124,7 +124,7 @@ public class NEL extends NativeApp {
 				offset = count;
 				String infile = c.toFile(infiles.elementAt(fi).toString());
 				DataInputStream data = new DataInputStream(FSManager.fs().read(infile));
-				if (data.readInt() != 0xC0DE0200)
+				if (data.readInt() != 0xC0DE0201)
 					throw new Exception("Unsupported object format in "+infile);
 				int lflags = data.readUnsignedByte();
 				if (lflags != 0)
@@ -254,7 +254,7 @@ public class NEL extends NativeApp {
 			//writing output
 			String outfile = c.toFile(outname);
 			DataOutputStream out = new DataOutputStream(FSManager.fs().write(outfile));
-			out.writeInt(0xC0DE0200);
+			out.writeInt(0xC0DE0201);
 			if (soname != null) {
 				out.writeByte(Opcodes.LFLAG_SONAME | Opcodes.LFLAG_DEPS);
 				out.writeUTF(soname);
@@ -352,7 +352,7 @@ public class NEL extends NativeApp {
 
 	private LibInfo loadFromECode(InputStream in) throws Exception {
 		DataInputStream data = new DataInputStream(in);
-		if (data.readUnsignedShort() > 0x0200)
+		if (data.readUnsignedShort() > SUPPORTED)
 			throw new Exception("Unsupported format version");
 		LibInfo info = new LibInfo();
 		Vector symbols = new Vector();

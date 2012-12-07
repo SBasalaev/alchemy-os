@@ -42,8 +42,9 @@ public class Parser {
 	private static final int W_MAIN = 1;
 	private static final int W_CAST = 2;
 	private static final int W_VARS = 3;
+	private static final int W_DEPRECATED = 4;
 	
-	static final String[] WARN_STRINGS = {"typesafe", "main", "cast", "vars"};
+	static final String[] WARN_STRINGS = {"typesafe", "main", "cast", "vars", "deprecated"};
 
 	// eXperimental feature categories
 	private static final int X_TRY = 1;
@@ -74,6 +75,9 @@ public class Parser {
 		try {
 			// adding builtin types
 			unit.putType(BuiltinType.ANY);
+			unit.putType(BuiltinType.BYTE);
+			unit.putType(BuiltinType.CHAR);
+			unit.putType(BuiltinType.SHORT);
 			unit.putType(BuiltinType.INT);
 			unit.putType(BuiltinType.LONG);
 			unit.putType(BuiltinType.FLOAT);
@@ -84,6 +88,9 @@ public class Parser {
 			unit.putType(BuiltinType.FUNCTION);
 			unit.putType(BuiltinType.STRUCTURE);
 			unit.putType(BuiltinType.ERROR);
+			// adding legacy types
+			unit.putType(new NamedType("BArray", new ArrayType(BuiltinType.BYTE)));
+			unit.putType(new NamedType("CArray", new ArrayType(BuiltinType.CHAR)));
 			// adding builtin functions
 			parseFile("/res/nec/embed.eh");
 			// parsing
@@ -306,6 +313,10 @@ public class Parser {
 				if (type == null) {
 					throw new ParseException("Undefined type "+t);
 				}
+				if (t.svalue.equals("BArray"))
+					warn(W_DEPRECATED, "Type BArray is deprecated, use [Byte]");
+				else if (t.svalue.equals("CArray"))
+					warn(W_DEPRECATED, "Type CArray is deprecated, use [Char]");
 				return type;
 			}
 			case '(': { //function type
@@ -558,7 +569,7 @@ public class Parser {
 				// building expression
 				Expr[] init = new Expr[exprs.size()];
 				for (int i=0; i<init.length; i++) {
-					init[i] = (Expr)exprs.elementAt(i);
+					init[i] = cast( (Expr)exprs.elementAt(i), eltype);
 				}
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
@@ -1403,23 +1414,14 @@ public class Parser {
 		if (ltype == BuiltinType.NULL) return rtype;
 		if (rtype == BuiltinType.NULL) return ltype;
 		if (ltype.isSubtypeOf(BuiltinType.NUMBER) && rtype.isSubtypeOf(BuiltinType.NUMBER)) {
-		int choice = 0;
-			if (ltype == BuiltinType.DOUBLE) choice = 4;
-			else if (ltype == BuiltinType.FLOAT) choice = 3;
-			else if (ltype == BuiltinType.LONG) choice = 2;
-			else if (ltype == BuiltinType.INT) choice = 1;
-			if (choice > 0) {
-				if (rtype == BuiltinType.DOUBLE) choice = Math.max(choice, 4);
-				else if (rtype == BuiltinType.FLOAT) choice = Math.max(choice, 3);
-				else if (rtype == BuiltinType.LONG) choice = Math.max(choice, 2);
-				else if (rtype == BuiltinType.INT) choice = Math.max(choice, 1);
-			}
-			switch (choice) {
-				case 4: return BuiltinType.DOUBLE;
-				case 3: return BuiltinType.FLOAT;
-				case 2: return BuiltinType.LONG;
-				case 1: return BuiltinType.INT;
-			}
+			Type ctype = BuiltinType.INT;
+			if (ltype == BuiltinType.DOUBLE || rtype == BuiltinType.DOUBLE)
+				ctype = BuiltinType.DOUBLE;
+			else if (ltype == BuiltinType.FLOAT || rtype == BuiltinType.FLOAT)
+				ctype = BuiltinType.FLOAT;
+			else if (ltype == BuiltinType.LONG || rtype == BuiltinType.LONG)
+				ctype = BuiltinType.LONG;
+			return ctype;
 		}
 		return Type.commonSupertype(ltype, rtype);
 	}
