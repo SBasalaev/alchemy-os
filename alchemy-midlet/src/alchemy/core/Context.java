@@ -21,6 +21,7 @@ package alchemy.core;
 import alchemy.core.types.Int;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
+import alchemy.fs.devfs.NullInputStream;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
@@ -531,10 +532,15 @@ public class Context {
 		else return thread.getPriority();
 	}
 
-	private class ContextThread extends Thread {
+	/** A thread of running Alchemy program. */
+	public class ContextThread extends Thread {
 
 		public ContextThread(String progname) {
 			super(progname);
+		}
+		
+		public Context context() {
+			return Context.this;
 		}
 
 		public void run() {

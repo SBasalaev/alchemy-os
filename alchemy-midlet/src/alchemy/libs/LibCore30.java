@@ -309,7 +309,7 @@ public class LibCore30 extends NativeLibrary {
 			final boolean[] ar = (boolean[]) a;
 			for (int i=0; i < ar.length; i++) {
 				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
+				sb.append(ar[i] ? 1 : 0);
 			}
 			return sb.append(']').toString();
 		} else if (a instanceof int[]) {

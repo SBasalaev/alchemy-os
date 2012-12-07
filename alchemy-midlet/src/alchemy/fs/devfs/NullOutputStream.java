@@ -16,20 +16,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.core;
+package alchemy.fs.devfs;
 
-import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * The input stream that always returns EOF.
- *
+ * An output stream that just ignores the data.
  * @author Sergey Basalaev
  */
-class NullInputStream extends InputStream {
-
-	public NullInputStream() { }
-
-	public int read() {
-		return -1;
-	}
+public class NullOutputStream extends OutputStream {
+	public NullOutputStream() { }
+	public void write(int b) { }
 }
