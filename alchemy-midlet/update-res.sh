@@ -2,6 +2,8 @@
 
 echo 'Updating installscripts...'
 cd ../installscripts/install
+# Create empty directories in case git got rid of them
+mkdir -p bin lib cfg res tmp home cfg/pkg/db/sources cfg/pkg/db/lists
 arh c install.arh *
 cd -
 mv ../installscripts/install/install.arh res/
