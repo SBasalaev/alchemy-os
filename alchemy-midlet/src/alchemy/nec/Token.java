@@ -47,6 +47,8 @@ public final class Token {
 	public static final int IDENTIFIER = -8;
 	/** Boolean literal. */
 	public static final int BOOL = -9;
+	/** Character literal. */
+	public static final int CHAR = -10;
 
 	/* OPERATORS */
 	

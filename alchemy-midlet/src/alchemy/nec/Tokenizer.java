@@ -107,7 +107,7 @@ class Tokenizer {
 			if (ch != '\'') {
 				throw new ParseException("Unclosed character literal");
 			}
-			return ttype = Token.INT;
+			return ttype = Token.CHAR;
 		}
 
 		//string literal

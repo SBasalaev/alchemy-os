@@ -18,6 +18,7 @@
 
 package alchemy.nec;
 
+import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 import alchemy.nec.tree.*;
 import java.util.Vector;
@@ -433,7 +434,7 @@ public class Optimizer implements ExprVisitor {
 	/**
 	 * <pre>
 	 * CF:
-	 *   cast (Number) const  =&gt;  const
+	 *   cast (Number) const =&gt;  const
 	 * </pre>
 	 */
 	public Object visitCast(CastExpr cast, Object scope) {
@@ -444,30 +445,48 @@ public class Optimizer implements ExprVisitor {
 			Object cnst = ((ConstExpr)cast.expr).value;
 			if (cnst instanceof Int) {
 				int i = ((Int)cnst).value;
-				if (toType.equals(BuiltinType.DOUBLE)) {
+				if (toType == BuiltinType.DOUBLE) {
 					cnst = new Double(i);
-				} else if (toType.equals(BuiltinType.FLOAT)) {
+				} else if (toType == BuiltinType.FLOAT) {
 					cnst = new Float(i);
-				} else if (toType.equals(BuiltinType.LONG)) {
+				} else if (toType == BuiltinType.LONG) {
 					cnst = new Long(i);
+				} else if (toType == BuiltinType.CHAR) {
+					cnst = Char.toChar((char)i);
+				} else if (toType == BuiltinType.SHORT) {
+					cnst = Int.toInt((short)i);
+				} else if (toType == BuiltinType.BYTE) {
+					cnst = Int.toInt((byte)i);
 				}
 			} else if (cnst instanceof Long) {
 				long l = ((Long)cnst).longValue();
-				if (toType.equals(BuiltinType.DOUBLE)) {
+				if (toType == BuiltinType.DOUBLE) {
 					cnst = new Double(l);
-				} else if (toType.equals(BuiltinType.FLOAT)) {
+				} else if (toType == BuiltinType.FLOAT) {
 					cnst = new Float(l);
-				} else if (toType.equals(BuiltinType.INT)) {
+				} else if (toType == BuiltinType.INT) {
 					cnst = Int.toInt((int)l);
+				} else if (toType == BuiltinType.CHAR) {
+					cnst = Char.toChar((char)l);
+				} else if (toType == BuiltinType.SHORT) {
+					cnst = Int.toInt((short)l);
+				} else if (toType == BuiltinType.BYTE) {
+					cnst = Int.toInt((byte)l);
 				}
 			} else if (cnst instanceof Float) {
 				float f = ((Float)cnst).floatValue();
-				if (toType.equals(BuiltinType.DOUBLE)) {
+				if (toType == BuiltinType.DOUBLE) {
 					cnst = new Double(f);
-				} else if (toType.equals(BuiltinType.LONG)) {
+				} else if (toType == BuiltinType.LONG) {
 					cnst = new Long((long)f);
-				} else if (toType.equals(BuiltinType.INT)) {
+				} else if (toType == BuiltinType.INT) {
 					cnst = Int.toInt((int)f);
+				} else if (toType == BuiltinType.CHAR) {
+					cnst = Char.toInt((char)f);
+				} else if (toType == BuiltinType.SHORT) {
+					cnst = Int.toInt((short)f);
+				} else if (toType == BuiltinType.BYTE) {
+					cnst = Int.toInt((byte)f);
 				}
 			} else if (cnst instanceof Double) {
 				double d = ((Double)cnst).doubleValue();
@@ -477,6 +496,12 @@ public class Optimizer implements ExprVisitor {
 					cnst = new Long((long)d);
 				} else if (toType.equals(BuiltinType.INT)) {
 					cnst = Int.toInt((int)d);
+				} else if (toType == BuiltinType.CHAR) {
+					cnst = Char.toInt((char)d);
+				} else if (toType == BuiltinType.SHORT) {
+					cnst = Int.toInt((short)d);
+				} else if (toType == BuiltinType.BYTE) {
+					cnst = Int.toInt((byte)d);
 				}
 			}
 			return new ConstExpr(((ConstExpr)cast.expr).line, cnst);

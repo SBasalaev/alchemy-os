@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
+import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
@@ -104,7 +105,6 @@ public class Parser {
 		}
 		return unit;
 	}
-
 
 	/**
 	 * Finds file referenced in 'use' directive.
@@ -573,6 +573,8 @@ public class Parser {
 				}
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
+			case Token.CHAR:
+				return new ConstExpr(lnum, Char.toChar((char)t.ivalue));
 			case Token.INT:
 				return new ConstExpr(lnum, Int.toInt(t.ivalue));
 			case Token.LONG:
@@ -1222,6 +1224,10 @@ public class Parser {
 			case Token.GTGT:
 			case Token.LTLT:
 			case Token.GTGTGT: {
+				if (ltype == BuiltinType.BYTE || ltype == BuiltinType.SHORT || ltype == BuiltinType.CHAR) {
+					ltype = BuiltinType.INT;
+					left = cast(left, ltype);
+				}
 				if (ltype != BuiltinType.INT && ltype != BuiltinType.LONG || rtype != BuiltinType.INT)
 						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				return new BinaryExpr(left, op, right);
@@ -1255,7 +1261,7 @@ public class Parser {
 			case '*':
 			case '/':
 			case '%': {
-				if (ltype == BuiltinType.STRING) {
+				if (ltype == BuiltinType.STRING && op == '+') {
 					// string concatenation
 					right = cast(right, BuiltinType.ANY);
 					if (left instanceof ConcatExpr) {
@@ -1292,10 +1298,17 @@ public class Parser {
 	}
 
 	/**
-	 * Does special type checkings and casts for the following functions:
-	 *   Function.curry   - checks if argument is acceptable, computes returned type
-	 *   Structure.clone  - the returned type is the same as of argument
-	 *   acopy            - checks types of arrays
+	 * Does special type checkings and type casts for some functions.
+	 * <dl>
+	 * <dt>{@code Function.curry}</dt>
+	 * <dd>checks if argument is acceptable, computes returned type</dd>
+	 *
+	 * <dt>{@code Structure.clone}</dt>
+	 * <dd>the returned type is the same as of argument</dd>
+	 *
+	 * <dt>{@code acopy}</dt>
+	 * <dd>checks if array elements are assignment compatible</dd>
+	 * </dl>
 	 */
 	private Expr makeFCall(int lnum, Func f, Expr[] args) throws ParseException {
 		FCallExpr expr = new FCallExpr(new ConstExpr(lnum, f), args);

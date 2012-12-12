@@ -230,22 +230,93 @@ public class EAsmWriter implements ExprVisitor {
 		cast.expr.accept(this, unused);
 		Type from = cast.expr.rettype();
 		Type to = cast.rettype();
-		if (from == BuiltinType.INT) {
-			if (to == BuiltinType.LONG) writer.visitInsn(Opcodes.I2L);
-			else if (to == BuiltinType.FLOAT) writer.visitInsn(Opcodes.I2F);
-			else if (to == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.I2D);
+		if (from == BuiltinType.BYTE) {
+			if (to == BuiltinType.CHAR) {
+				writer.visitInsn(Opcodes.I2C);
+			} else if (to == BuiltinType.LONG) {
+				writer.visitInsn(Opcodes.I2L);
+			} else if (to == BuiltinType.FLOAT) {
+				writer.visitInsn(Opcodes.I2F);
+			} else if (to == BuiltinType.DOUBLE) {
+				writer.visitInsn(Opcodes.I2D);
+			}
+		} else if (from == BuiltinType.SHORT) {
+			if (to == BuiltinType.BYTE) {
+				writer.visitInsn(Opcodes.I2B);
+			} else if (to == BuiltinType.CHAR) {
+				writer.visitInsn(Opcodes.I2C);
+			} else if (to == BuiltinType.LONG) {
+				writer.visitInsn(Opcodes.I2L);
+			} else if (to == BuiltinType.FLOAT) {
+				writer.visitInsn(Opcodes.I2F);
+			} else if (to == BuiltinType.DOUBLE) {
+				writer.visitInsn(Opcodes.I2D);
+			}
+		} else if (from == BuiltinType.CHAR || from == BuiltinType.INT) {
+			if (to == BuiltinType.BYTE) {
+				writer.visitInsn(Opcodes.I2B);
+			} else if (to == BuiltinType.SHORT) {
+				writer.visitInsn(Opcodes.I2S);
+			} else if (to == BuiltinType.CHAR) {
+				writer.visitInsn(Opcodes.I2C);
+			} else if (to == BuiltinType.LONG) {
+				writer.visitInsn(Opcodes.I2L);
+			} else if (to == BuiltinType.FLOAT) {
+				writer.visitInsn(Opcodes.I2F);
+			} else if (to == BuiltinType.DOUBLE) {
+				writer.visitInsn(Opcodes.I2D);
+			}
 		} else if (from == BuiltinType.LONG) {
-			if (to == BuiltinType.INT) writer.visitInsn(Opcodes.L2I);
-			else if (to == BuiltinType.FLOAT) writer.visitInsn(Opcodes.L2F);
-			else if (to == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.L2D);
-		} else if (from == BuiltinType.FLOAT) {
-			if (to == BuiltinType.LONG) writer.visitInsn(Opcodes.F2L);
-			else if (to == BuiltinType.INT) writer.visitInsn(Opcodes.F2I);
-			else if (to == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.F2D);
-		} else if (from == BuiltinType.DOUBLE) {
-			if (to == BuiltinType.LONG) writer.visitInsn(Opcodes.D2L);
-			else if (to == BuiltinType.FLOAT) writer.visitInsn(Opcodes.D2F);
-			else if (to == BuiltinType.INT) writer.visitInsn(Opcodes.D2I);
+			if (to == BuiltinType.BYTE) {
+				writer.visitInsn(Opcodes.L2I);
+				writer.visitInsn(Opcodes.I2B);
+			} else if (to == BuiltinType.SHORT) {
+				writer.visitInsn(Opcodes.L2I);
+				writer.visitInsn(Opcodes.I2S);
+			} else if (to == BuiltinType.CHAR) {
+				writer.visitInsn(Opcodes.L2I);
+				writer.visitInsn(Opcodes.I2C);
+			} else if (to == BuiltinType.INT) {
+				writer.visitInsn(Opcodes.L2I);
+			} else if (to == BuiltinType.FLOAT) {
+				writer.visitInsn(Opcodes.L2F);
+			} else if (to == BuiltinType.DOUBLE) {
+				writer.visitInsn(Opcodes.L2D);
+			}
+		} else if (from == BuiltinType.FLOAT) {			
+			if (to == BuiltinType.BYTE) {
+				writer.visitInsn(Opcodes.F2I);
+				writer.visitInsn(Opcodes.I2B);
+			} else if (to == BuiltinType.SHORT) {
+				writer.visitInsn(Opcodes.F2I);
+				writer.visitInsn(Opcodes.I2S);
+			} else if (to == BuiltinType.CHAR) {
+				writer.visitInsn(Opcodes.F2I);
+				writer.visitInsn(Opcodes.I2C);
+			} else if (to == BuiltinType.INT) {
+				writer.visitInsn(Opcodes.F2I);
+			} else if (to == BuiltinType.LONG) {
+				writer.visitInsn(Opcodes.F2L);
+			} else if (to == BuiltinType.DOUBLE) {
+				writer.visitInsn(Opcodes.F2D);
+			}
+		} else if (from == BuiltinType.DOUBLE) {			
+			if (to == BuiltinType.BYTE) {
+				writer.visitInsn(Opcodes.D2I);
+				writer.visitInsn(Opcodes.I2B);
+			} else if (to == BuiltinType.SHORT) {
+				writer.visitInsn(Opcodes.D2I);
+				writer.visitInsn(Opcodes.I2S);
+			} else if (to == BuiltinType.CHAR) {
+				writer.visitInsn(Opcodes.D2I);
+				writer.visitInsn(Opcodes.I2C);
+			} else if (to == BuiltinType.INT) {
+				writer.visitInsn(Opcodes.D2I);
+			} else if (to == BuiltinType.LONG) {
+				writer.visitInsn(Opcodes.D2L);
+			} else if (to == BuiltinType.FLOAT) {
+				writer.visitInsn(Opcodes.D2F);
+			}
 		}
 		return null;
 	}

@@ -42,7 +42,7 @@ public interface Opcodes {
 	byte IAND        = (byte)0x1A;
 	byte IOR         = (byte)0x1B;
 	byte IXOR        = (byte)0x1C;
-	// 0x1D;
+	byte I2B         = (byte)0x1D;
 	byte RET_NULL    = (byte)0x1E;
 	byte RETURN      = (byte)0x1F;
 	byte LADD        = (byte)0x20;
@@ -142,6 +142,7 @@ public interface Opcodes {
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
 	
+	byte CPUSH       = (byte)0xD7;
 	byte NEWZA       = (byte)0xD8;
 	byte ZALOAD      = (byte)0xD9;
 	byte ZASTORE     = (byte)0xDA;
@@ -181,5 +182,5 @@ public interface Opcodes {
 	byte TABLESWITCH = (byte)0xFC;
 	byte LOOKUPSWITCH= (byte)0xFD;
 	byte I2C         = (byte)0xFE;
-	byte C2I         = (byte)0xFF;
+	byte I2S         = (byte)0xFF;
 }

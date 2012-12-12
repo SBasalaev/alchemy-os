@@ -196,6 +196,14 @@ class EFunction extends Function {
 					stack[head] = ((Int)stack[head]).toChar();
 					break;
 				}
+				case Opcodes.I2B: {
+					stack[head] = Int.toInt((byte)ival(stack[head]));
+					break;
+				}
+				case Opcodes.I2S: {
+					stack[head] = Int.toInt((short)ival(stack[head]));
+					break;
+				}
 
 			//INTEGER ARITHMETICS
 				case Opcodes.IADD: {
@@ -862,6 +870,11 @@ class EFunction extends Function {
 				case Opcodes.SIPUSH: //sipush <short>
 					head++;
 					stack[head] = Ival((code[ct] << 8) | (code[ct+1]& 0xff));
+					ct += 2;
+					break;
+				case Opcodes.CPUSH: // cpush <ushort>
+					head++;
+					stack[head] = Cval((char)((code[ct] << 8) | (code[ct+1]& 0xff)));
 					ct += 2;
 					break;
 			} /* the big switch */
