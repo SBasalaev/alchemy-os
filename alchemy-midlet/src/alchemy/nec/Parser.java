@@ -89,9 +89,6 @@ public class Parser {
 			unit.putType(BuiltinType.FUNCTION);
 			unit.putType(BuiltinType.STRUCTURE);
 			unit.putType(BuiltinType.ERROR);
-			// adding legacy types
-			unit.putType(new NamedType("BArray", new ArrayType(BuiltinType.BYTE)));
-			unit.putType(new NamedType("CArray", new ArrayType(BuiltinType.CHAR)));
 			// adding builtin functions
 			parseFile("/res/nec/embed.eh");
 			// parsing
@@ -310,13 +307,17 @@ public class Parser {
 		switch (t.nextToken()) {
 			case Token.IDENTIFIER: { //scalar type
 				Type type = scope.getType(t.svalue);
+				if (t.svalue.equals("BArray")) {
+					warn(W_DEPRECATED, "Type BArray is deprecated, use [Byte]");
+					return new ArrayType(BuiltinType.BYTE);
+				}
+				if (t.svalue.equals("CArray")) {
+					warn(W_DEPRECATED, "Type CArray is deprecated, use [Char]");
+					return new ArrayType(BuiltinType.CHAR);
+				}
 				if (type == null) {
 					throw new ParseException("Undefined type "+t);
 				}
-				if (t.svalue.equals("BArray"))
-					warn(W_DEPRECATED, "Type BArray is deprecated, use [Byte]");
-				else if (t.svalue.equals("CArray"))
-					warn(W_DEPRECATED, "Type CArray is deprecated, use [Char]");
 				return type;
 			}
 			case '(': { //function type
