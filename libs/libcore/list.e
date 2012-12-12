@@ -46,7 +46,7 @@ def List.insert(at: Int, val: Any) {
   }
 }
 
-def List.insertall(at: Int, vals: Array) {
+def List.insertall(at: Int, vals: [Any]) {
   var size = this.size
   if (at >= 0 && at <= size && vals.len > 0) {
     if (this.data.len < size + vals.len)
@@ -60,7 +60,7 @@ def List.insertall(at: Int, vals: Array) {
 
 def List.add(val: Any) = this.insert(this.size, val)
 
-def List.addall(vals: Array) = this.insertall(this.size, vals)
+def List.addall(vals: [Any]) = this.insertall(this.size, vals)
 
 def List.remove(at: Int) {
   var size = this.size-1
@@ -146,7 +146,7 @@ def List.mapself(f: (Any):Any) {
   }
 }
 
-def _quicksort(a: Array, low: Int, high: Int, f: (Any,Any):Int) {
+def _quicksort(a: [Any], low: Int, high: Int, f: (Any,Any):Int) {
   var i = low;
   var j = high;
   var x = a[(low+high)/2]

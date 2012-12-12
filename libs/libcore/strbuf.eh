@@ -3,9 +3,11 @@
 type StrBuf < Any;
 
 def new_strbuf(): StrBuf;
+const `StrBuf.new` = new_strbuf
 
 def StrBuf.ch(at: Int): Char;
 const `StrBuf.get` = `StrBuf.ch`
+
 def StrBuf.chars(from: Int, to: Int, buf: CArray, ofs: Int); 
 def StrBuf.append(a: Any): StrBuf;
 def StrBuf.addch(ch: Char): StrBuf;

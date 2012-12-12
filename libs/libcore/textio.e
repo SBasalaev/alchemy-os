@@ -20,7 +20,7 @@ def Reader.read(): Int {
   this.dec(this.in)
 }
 
-def Reader.readarray(buf: CArray, ofs: Int, len: Int): Int {
+def Reader.readarray(buf: [Char], ofs: Int, len: Int): Int {
   if (len == 0) {
     0
   } else {
@@ -79,6 +79,10 @@ def Reader.skip(n: Long): Long {
   }
 }
 
+def Reader.reset() {
+  this.in.reset()
+}
+
 def Reader.close() {
   this.in.close()
 }
@@ -96,8 +100,8 @@ def Writer.write(ch: Int) {
   this.enc(this.out, ch)
 }
 
-def Writer.writearray(buf: CArray, ofs: Int, len: Int) {
-  for (var i=0, i<len, i=i+1) {
+def Writer.writearray(buf: [Char], ofs: Int, len: Int) {
+  for (var i=0, i<len, i += 1) {
     this.write(buf[ofs+i])
   }
 }
@@ -112,7 +116,7 @@ def Writer.println(str: String) {
   this.write('\n')
 }
 
-def Writer.printf(fmt: String, args: Array) {
+def Writer.printf(fmt: String, args: [Any]) {
   this.print(fmt.format(args))
 }
 

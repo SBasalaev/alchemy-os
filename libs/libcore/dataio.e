@@ -23,12 +23,10 @@ def IStream.readubyte(): Int {
     null
 }
 
-def IStream.readbyte(): Int {
+def IStream.readbyte(): Byte {
   var b = this.read()
-  if (b >= 128)
-    b-256
-  else if (b >= 0)
-    b
+  if (b >= 0)
+    b.cast(Byte)
   else
     null
 }
@@ -36,21 +34,19 @@ def IStream.readbyte(): Int {
 def IStream.readushort(): Int {
   var b1 = this.read()
   var b2 = this.read()
-  if (b2 < 0)
-    null
-  else
+  if (b2 >= 0)
     (b1 << 8) | b2
+  else
+    null
 }
 
-def IStream.readshort(): Int {
+def IStream.readshort(): Short {
   var b1 = this.read()
   var b2 = this.read()
-  if (b2 < 0)
-    null
-  else if (b1 >= 128)
-    ((b1 << 8) | b2) - 65536
+  if (b2 >= 0)
+    ((b1 << 8) | b2).cast(Short)
   else
-    (b1 << 8) | b2
+    null
 }
 
 def IStream.readint(): Int {
@@ -58,19 +54,19 @@ def IStream.readint(): Int {
   var b2 = this.read()
   var b3 = this.read()
   var b4 = this.read()
-  if (b4 < 0)
-    null
-  else
+  if (b4 >= 0)
     (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
+  else
+    null
 }
 
 def IStream.readlong(): Long {
-  var buf = new BArray(8)
+  var buf = new [Byte](8)
   if (this.readarray(buf, 0, 8) < 8)
     null
   else {
     var l = 0l
-    for (var i=0, i<8, i=i+1) {
+    for (var i=0, i<8, i+=1) {
       l = (l << 8) | (buf[i] & 0xff)
     }
     l
@@ -98,7 +94,7 @@ def IStream.readutf(): String {
   if (len == null) {
     null
   } else {
-    var buf = new BArray(len)
+    var buf = new [Byte](len)
     if (this.readarray(buf, 0, len) < len) {
       null
     } else {
@@ -108,9 +104,9 @@ def IStream.readutf(): String {
 }
 
 def readbool(): Bool = stdin().readbool()
-def readbyte(): Int = stdin().readbyte()
+def readbyte(): Byte = stdin().readbyte()
 def readubyte(): Int = stdin().readubyte()
-def readshort(): Int = stdin().readshort()
+def readshort(): Short = stdin().readshort()
 def readushort(): Int = stdin().readushort()
 def readint(): Int = stdin().readint()
 def readlong(): Long = stdin().readlong()

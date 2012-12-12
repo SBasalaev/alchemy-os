@@ -1,11 +1,11 @@
 // data I/O routines
 
-use "io"
+use "io.eh"
 
 def IStream.readbool(): Bool;
-def IStream.readbyte(): Int;
+def IStream.readbyte(): Byte;
 def IStream.readubyte(): Int;
-def IStream.readshort(): Int;
+def IStream.readshort(): Short;
 def IStream.readushort(): Int;
 def IStream.readint(): Int;
 def IStream.readlong(): Long;
@@ -14,9 +14,9 @@ def IStream.readdouble(): Double;
 def IStream.readutf(): String;
 
 def readbool(): Bool;
-def readbyte(): Int;
+def readbyte(): Byte;
 def readubyte(): Int;
-def readshort(): Int;
+def readshort(): Short;
 def readushort(): Int;
 def readint(): Int;
 def readlong(): Long;

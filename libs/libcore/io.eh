@@ -16,31 +16,31 @@ def setout(out: OStream);
 def seterr(err: OStream);
 
 def IStream.read(): Int;
-def IStream.readarray(buf: BArray, ofs: Int, len: Int): Int;
+def IStream.readarray(buf: [Byte], ofs: Int, len: Int): Int;
 def IStream.skip(num: Long): Long;
 def IStream.available(): Int;
 def IStream.reset();
 def IStream.close();
 
 def read(): Int;
-def readarray(buf: BArray, ofs: Int, len: Int): Int;
+def readarray(buf: [Byte], ofs: Int, len: Int): Int;
 def skip(num: Long): Long;
 def readline(): String;
 
 def OStream.write(b: Int);
-def OStream.writearray(buf: BArray, ofs: Int, len: Int);
+def OStream.writearray(buf: [Byte], ofs: Int, len: Int);
 def OStream.print(a: Any);
 def OStream.println(a: Any);
 def OStream.flush();
-def OStream.printf(fmt: String, args: Array);
+def OStream.printf(fmt: String, args: [Any]);
 def OStream.close();
 
 def write(b: Int);
-def writearray(buf: BArray, ofs: Int, len: Int);
+def writearray(buf: [Byte], ofs: Int, len: Int);
 def print(a: Any);
 def println(a: Any);
 def flush();
-def printf(fmt: String, args: Array);
+def printf(fmt: String, args: [Any]);
 
 def pathfile(path: String): String;
 def pathdir(path: String): String;
@@ -80,13 +80,13 @@ def readurl(url: String): IStream;
 
 def matches_glob(path: String, glob: String): Bool;
 
-def istream_from_ba(buf: BArray): IStream;
+def istream_from_ba(buf: [Byte]): IStream;
 
 type BArrayOStream < OStream;
 
 def new_baostream(): BArrayOStream;
 def BArrayOStream.len(): Int;
-def BArrayOStream.tobarray(): BArray;
+def BArrayOStream.tobarray(): [Byte];
 def BArrayOStream.reset();
 
 def new_pipe(): StreamConnection;

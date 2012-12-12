@@ -17,23 +17,22 @@ def String.todouble(): Double;
 
 def String.len(): Int;
 def String.ch(at: Int): Char;
-const `String.get` = `String.ch`
 def String.indexof(ch: Char): Int;
 def String.lindexof(ch: Char): Int;
 def String.find(sub: String): Int;
 def String.substr(from: Int, to: Int): String;
-const `String.range` = `String.substr`
 def String.ucase(): String;
 def String.lcase(): String;
 def String.concat(str: String): String;
 def String.cmp(str: String): Int;
 def String.trim(): String;
 def String.split(ch: Char): [String];
-def String.format(args: Array): String;
-def String.chars(): CArray;
-def String.utfbytes(): BArray;
+def String.format(args: [Any]): String;
+def String.chars(): [Char];
+def String.utfbytes(): [Byte];
 def String.hash(): Int;
 
-def ca2str(ca: CArray): String;
-def ba2utf(ba: BArray): String;
+def ca2str(ca: [Char]): String;
+def ba2utf(ba: [Byte]): String;
 def chstr(ch: Char): String;
+const `Char.tostr` = chstr;
