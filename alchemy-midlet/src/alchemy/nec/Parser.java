@@ -1119,7 +1119,25 @@ public class Parser {
 	
 	private Expr parseDot(Scope scope, Expr expr) throws IOException, ParseException {
 		int lnum = t.lineNumber();
-		if (t.nextToken() != Token.IDENTIFIER)
+		// parse value.cast(Type)
+		if (t.nextToken() == Token.KEYWORD && t.svalue.equals("cast")) {
+			expect('(');
+			Type toType = parseType(scope);
+			expect(')');
+			if (toType.equals(expr.rettype())) {
+				warn(W_CAST, "Unnecessary cast to the same type");
+				return expr;
+			}
+			if (toType.isSupertypeOf(expr.rettype())) {
+				warn(W_CAST, "Unnecessary cast to the supertype");
+				return expr;
+			}
+			if (expr.rettype().isSupertypeOf(toType)) {
+				return new CastExpr(toType, expr);
+			}
+			return cast(expr, toType);
+		}
+		if (t.ttype != Token.IDENTIFIER && t.ttype != Token.KEYWORD)
 			throw new ParseException("Identifier expected after '.'");
 		String member = t.svalue;
 		Type type = expr.rettype();
