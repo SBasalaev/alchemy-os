@@ -44,7 +44,7 @@ public class LibCore30 extends NativeLibrary {
 	}
 
 	public NativeFunction loadFunction(String name, int index) {
-		return new LibCore30Func(name, index);
+		return new LibCore31Func(name, index);
 	}
 
 	/**

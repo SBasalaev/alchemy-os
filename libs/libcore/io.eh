@@ -19,6 +19,7 @@ def IStream.read(): Int;
 def IStream.readarray(buf: BArray, ofs: Int, len: Int): Int;
 def IStream.skip(num: Long): Long;
 def IStream.available(): Int;
+def IStream.reset();
 def IStream.close();
 
 def read(): Int;

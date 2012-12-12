@@ -47,11 +47,11 @@ import javax.microedition.io.StreamConnection;
  * Core runtime function set.
  * @author Sergey Basalaev
  */
-class LibCore30Func extends NativeFunction {
+class LibCore31Func extends NativeFunction {
 
 	private static final Random rnd = new Random(0);
 
-	public LibCore30Func(String name, int index) {
+	public LibCore31Func(String name, int index) {
 		super(name, index);
 	}
 
@@ -547,6 +547,9 @@ class LibCore30Func extends NativeFunction {
 			case 168: // chstr(ch: Char): String
 				      // DEPRECATED: use ch.tostr()
 				return String.valueOf((char)ival(args[0]));
+			case 169: // IStream.reset()
+				((InputStream)args[0]).reset();
+				return null;
 			default:
 				return null;
 		}
