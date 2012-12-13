@@ -31,6 +31,7 @@ public class AlchemyException extends Exception {
 	
 	private Vector functions = new Vector();
 	private Vector dbgInfo = new Vector();
+	private Throwable cause;
 
 	public final int errcode;
 	
@@ -51,6 +52,7 @@ public class AlchemyException extends Exception {
 	
 	public AlchemyException(Throwable cause) {
 		super(cause.getMessage());
+		this.cause = cause;
 		errcode = (cause instanceof NullPointerException) ? ERR_NULL
 				: (cause instanceof Error) ? ERR_SYSTEM
 				: (cause instanceof IOException) ? ERR_IO
@@ -80,7 +82,10 @@ public class AlchemyException extends Exception {
 		String msg = getMessage();
 		StringBuffer sb = new StringBuffer();
 		switch (errcode) {
-			case ERR_SYSTEM: sb.append("System error"); break;
+			case ERR_SYSTEM:
+				sb.append("System failure");
+				if (cause != null) sb.append(" (").append(cause.getClass().getName()).append(')');
+				break;
 			case ERR_NULL: sb.append("null value"); break;
 			case ERR_IO: sb.append("I/O error"); break;
 			case ERR_RANGE: sb.append("Out of range"); break;
@@ -93,7 +98,8 @@ public class AlchemyException extends Exception {
 			case ERR_INTERRUPT: sb.append("Process interrupted"); break;
 			default:
 				if (msg == null || msg.length() == 0) {
-					sb.append("Unknown or user defined error");
+					sb.append("Error");
+					if (cause != null) sb.append(" (").append(cause.getClass().getName()).append(')');
 				}
 		}
 		if (msg != null && msg.length() != 0) {
