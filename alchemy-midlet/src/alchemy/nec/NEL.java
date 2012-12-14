@@ -48,7 +48,7 @@ public class NEL extends NativeApp {
 	static private final int SUPPORTED = 0x0201;
 
 	static private final String VERSION =
-			"Native E linker version 1.3";
+			"Native Ether linker version 1.3.1";
 
 	static private final String HELP =
 			"Usage: el [options] <input>...\nOptions:\n" +
@@ -118,7 +118,7 @@ public class NEL extends NativeApp {
 			}
 			//processing objects
 			Vector pool = new Vector();
-			int[] reloctable = new int[128];
+			char[] reloctable = new char[128];
 			int count = 0, offset;
 			for (int fi=0; fi < infiles.size(); fi++) {
 				offset = count;
@@ -215,11 +215,11 @@ public class NEL extends NativeApp {
 						}
 					}
 					if (reloctable.length == count) {
-						int[] newrelocs = new int[count << 1];
+						char[] newrelocs = new char[count << 1];
 						System.arraycopy(reloctable, 0, newrelocs, 0, count);
 						reloctable = newrelocs;
 					}
-					reloctable[count] = objindex;
+					reloctable[count] = (char)objindex;
 					count++;
 				}
 				data.close();
@@ -228,6 +228,7 @@ public class NEL extends NativeApp {
 			for (Enumeration e = pool.elements(); e.hasMoreElements(); ) {
 				Object obj = e.nextElement();
 				if (obj instanceof InFunc) {
+					// relocating code
 					InFunc f = (InFunc)obj;
 					for (int ri=f.relocs.length-1; ri >= 0; ri--) {
 						int r = f.relocs[ri]; // address in code with number to fix
@@ -236,6 +237,8 @@ public class NEL extends NativeApp {
 						f.code[r] = (byte)(newaddr >> 8);
 						f.code[r+1] = (byte)newaddr;
 					}
+					// relocating source
+					if (f.lnumtable != null) f.lnumtable[0] = reloctable[f.lnumtable[0] + f.reloffset];
 				} else if (obj.getClass() == NELFunc.class) {
 					throw new Exception("Unresolved symbol: "+obj);
 				}

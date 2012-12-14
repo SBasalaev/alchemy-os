@@ -40,7 +40,7 @@ public class EAsmWriter implements ExprVisitor {
 	public EAsmWriter(boolean dbg) {
 		debug = dbg;
 	}
-	
+
 	public void writeTo(Unit unit, OutputStream out) throws IOException {
 		UnitWriter uw = new UnitWriter();
 		uw.visitVersion(0x0201);
