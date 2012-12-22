@@ -1247,6 +1247,10 @@ public class Parser {
 					ltype = BuiltinType.INT;
 					left = cast(left, ltype);
 				}
+				if (rtype == BuiltinType.BYTE || rtype == BuiltinType.SHORT || rtype == BuiltinType.CHAR) {
+					rtype = BuiltinType.INT;
+					right = cast(right, ltype);
+				}
 				if (ltype != BuiltinType.INT && ltype != BuiltinType.LONG || rtype != BuiltinType.INT)
 						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 				return new BinaryExpr(left, op, right);
