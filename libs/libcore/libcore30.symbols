@@ -168,3 +168,4 @@ IStream.available
 this_process
 chstr
 IStream.reset
+timeof

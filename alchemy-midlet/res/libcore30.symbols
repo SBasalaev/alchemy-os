@@ -167,3 +167,5 @@ new_pipe
 IStream.available
 this_process
 chstr
+IStream.reset
+timeof

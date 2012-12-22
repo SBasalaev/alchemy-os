@@ -550,6 +550,17 @@ class LibCore31Func extends NativeFunction {
 			case 169: // IStream.reset()
 				((InputStream)args[0]).reset();
 				return null;
+			case 170: { // timeof(year: Int, month: Int, day: Int, hour: Int, min: Int, sec: Int, millis: Int): Long
+				Calendar cal = Calendar.getInstance();
+				cal.set(Calendar.YEAR, ival(args[0]));
+				cal.set(Calendar.MONTH, ival(args[1]));
+				cal.set(Calendar.DAY_OF_MONTH, ival(args[2]));
+				cal.set(Calendar.HOUR_OF_DAY, ival(args[3]));
+				cal.set(Calendar.MINUTE, ival(args[4]));
+				cal.set(Calendar.SECOND, ival(args[5]));
+				cal.set(Calendar.MILLISECOND, ival(args[6]));
+				return Lval(cal.getTime().getTime());
+			}
 			default:
 				return null;
 		}

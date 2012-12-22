@@ -11,3 +11,4 @@ def second(time: Long): Int;
 def millis(time: Long): Int;
 
 def systime(): Long;
+def timeof(year: Int, month: Int, day: Int, hour: Int, min: Int, sec: Int, millis: Int): Long;
