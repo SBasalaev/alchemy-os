@@ -766,6 +766,10 @@ public class Optimizer implements ExprVisitor {
 	 * DCE:
 	 *   if (true) e1 else e2   =&gt;  e1
 	 *   if (false) e1 else e2  =&gt;  e2
+	 *
+	 * CF:
+	 *   if (cond) { } else expr  =&gt;  if (!cond) expr
+	 *   if (cond) { } else { }   =&gt;  cond
 	 * </pre>
 	 */
 	public Object visitIf(IfExpr ifexpr, Object scope) {
@@ -778,6 +782,17 @@ public class Optimizer implements ExprVisitor {
 				return ifexpr.ifexpr;
 			} else {
 				return ifexpr.elseexpr;
+			}
+		}
+		if (ifexpr.ifexpr instanceof NoneExpr) {
+			optimized = true;
+			if (ifexpr.elseexpr instanceof NoneExpr) {
+				return ifexpr.condition;
+			} else {
+				ifexpr.condition = new UnaryExpr('!', ifexpr.condition);
+				Expr empty = ifexpr.ifexpr;
+				ifexpr.ifexpr = ifexpr.elseexpr;
+				ifexpr.elseexpr = empty;
 			}
 		}
 /* Makes line numbers inconsistent, it is better to handle "if (!expr)" by EAsmWriter
@@ -814,6 +829,9 @@ public class Optimizer implements ExprVisitor {
 	 * <pre>
 	 * DCE:
 	 *   switch (const) { ... }  =&gt;  branch
+	 *
+	 * CF:
+	 *   switch { else: expr }  =&gt;  expr
 	 * </pre>
 	 */
 	public Object visitSwitch(SwitchExpr swexpr, Object scope) {
@@ -834,6 +852,12 @@ public class Optimizer implements ExprVisitor {
 					if (indices[i] == choice) return swexpr.exprs.elementAt(br);
 				}
 			}
+			if (swexpr.elseexpr != null) return swexpr.elseexpr;
+			else return new NoneExpr();
+		}
+		// optimize if there is only else branch
+		if (swexpr.keys.isEmpty()) {
+			optimized = true;
 			if (swexpr.elseexpr != null) return swexpr.elseexpr;
 			else return new NoneExpr();
 		}
