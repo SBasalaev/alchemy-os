@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2012, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -79,8 +79,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			return;
 		}
 		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+
-			"\n\nCopyright (c) 2011-2012, Sergey Basalaev\n" +
-			"http://alchemy-os.googlecode.com\n" +
+			"\n\nCopyright (c) 2011-2013, Sergey Basalaev\n" +
+			"http://alchemy-os.org\n" +
 			"\n" +
 			"This MIDlet is free software and is licensed under GNU GPL version 3\n" +
 			"A copy of the GNU GPL may be found at http://www.gnu.org/licenses/\n";
