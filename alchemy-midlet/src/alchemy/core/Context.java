@@ -165,6 +165,8 @@ public class Context {
 	private String[] cmdArgs;
 	/** Priority hint. */
 	private int priority = Thread.NORM_PRIORITY;
+	/** To use library cache or not. */
+	private boolean usecache;
 
 	/* CONSTRUCTORS */
 
@@ -182,8 +184,17 @@ public class Context {
 	 * Creates new context with given parent.
 	 */
 	public Context(Context parent) {
+		this(parent, true);
+	}
+
+	/**
+	 * Create new context with given parent and
+	 * cache usage policy.
+	 */
+	public Context(Context parent, boolean usecache) {
 		if (parent == null) throw new IllegalArgumentException();
 		this.parent = parent;
+		this.usecache = usecache;
 		art = parent.art;
 		stdin = parent.stdin;
 		stdout = parent.stdout;
@@ -377,9 +388,13 @@ public class Context {
 		if (!FSManager.fs().canExec(libfile))
 			throw new InstantiationException("Permission denied: "+libfile);
 		//searching in cache
-		long tstamp = FSManager.fs().lastModified(libfile);
-		Library lib = art.cache.getLibrary(libfile, tstamp);
-		if (lib != null) return lib;
+		Library lib = null;
+		long tstamp = 0L;
+		if (usecache) {
+			tstamp = FSManager.fs().lastModified(libfile);
+			lib = art.cache.getLibrary(libfile, tstamp);
+			if (lib != null) return lib;
+		}
 		//reading magic number and building
 		InputStream in = FSManager.fs().read(libfile);
 		try {
@@ -394,7 +409,8 @@ public class Context {
 					fname = Filesystem.fparent(libfile)+'/'+fname;
 				}
 				lib = loadLibForPath(fname, pathlist);
-				art.cache.putLibrary(libfile, tstamp, lib);
+				if (usecache)
+					art.cache.putLibrary(libfile, tstamp, lib);
 				return lib;
 			//parsing shebang
 			} else if (magic == (short)(('#'<<8)|'!')) {
@@ -406,7 +422,8 @@ public class Context {
 				HashLibrary hl = new HashLibrary();
 				hl.putFunc(new ShebangFunction(progname, args));
 				hl.lock();
-				art.cache.putLibrary(libfile, tstamp, hl);
+				if (usecache)
+					art.cache.putLibrary(libfile, tstamp, hl);
 				return hl;
 			}
 			LibBuilder builder = art.builders.get((short)magic);
@@ -415,7 +432,8 @@ public class Context {
 			lib = builder.build(this, in);
 			in.close();
 			//caching
-			art.cache.putLibrary(libfile, tstamp, lib);
+			if (usecache)
+				art.cache.putLibrary(libfile, tstamp, lib);
 		} finally {
 			try { in.close(); } catch (IOException ioe) { }
 		}
