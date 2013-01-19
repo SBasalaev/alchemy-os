@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo 'Installing Alchemy OS 2.0.2'
+echo 'Installing Alchemy OS 2.0.3'
 
 echo 'Installing core components...'
 # in case this file does not exist
