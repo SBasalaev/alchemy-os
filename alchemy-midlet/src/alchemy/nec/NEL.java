@@ -87,7 +87,7 @@ public class NEL extends NativeApp {
 					linklibs.addElement(arg.substring(2));
 				}
 			} else if (arg.startsWith("-L")) {
-				c.setEnv("LIBPATH", c.getEnv("LIBPATH")+':'+arg.substring(3));
+				c.setEnv("LIBPATH", c.getEnv("LIBPATH")+':'+arg.substring(2));
 			} else if (arg.startsWith("-s") && arg.length() > 2) {
 				soname = arg.substring(2);
 			} else if (arg.charAt(0) == '-') {
