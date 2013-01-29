@@ -193,7 +193,7 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.I2C: {
-					stack[head] = ((Int)stack[head]).toChar();
+					stack[head] = Int.toInt((char)ival(stack[head]));
 					break;
 				}
 				case Opcodes.I2B: {
@@ -638,7 +638,7 @@ class EFunction extends Function {
 				case Opcodes.CALOAD: {
 					int at = ival(stack[head]);
 					head--;
-					stack[head] = Cval( ((char[])stack[head])[at] );
+					stack[head] = Ival( ((char[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.ZALOAD: {
@@ -694,7 +694,7 @@ class EFunction extends Function {
 					break;
 				}
 				case Opcodes.CASTORE: {
-					char val = cval(stack[head]);
+					char val = (char) ival(stack[head]);
 					int at = ival(stack[head-1]);
 					char[] array = (char[])stack[head-2];
 					array[at] = val;
@@ -870,11 +870,6 @@ class EFunction extends Function {
 				case Opcodes.SIPUSH: //sipush <short>
 					head++;
 					stack[head] = Ival((code[ct] << 8) | (code[ct+1]& 0xff));
-					ct += 2;
-					break;
-				case Opcodes.CPUSH: // cpush <ushort>
-					head++;
-					stack[head] = Cval((char)((code[ct] << 8) | (code[ct+1]& 0xff)));
 					ct += 2;
 					break;
 			} /* the big switch */

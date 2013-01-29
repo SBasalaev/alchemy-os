@@ -18,7 +18,6 @@
 
 package alchemy.nec.asm;
 
-import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.tree.Null;
@@ -233,12 +232,6 @@ public class FunctionWriter implements Opcodes {
 		if (cnst instanceof Boolean) {
 			if (cnst.equals(Boolean.TRUE)) data.write(ICONST_1);
 			else data.write(ICONST_0);
-			written = true;
-		} else if (cnst instanceof Char) {
-			int ch = ((Char)cnst).value;
-			data.write(CPUSH);
-			data.write(ch >> 8);
-			data.write(ch);
 			written = true;
 		} else if (cnst instanceof Int) {
 			int i = ((Int)cnst).value;

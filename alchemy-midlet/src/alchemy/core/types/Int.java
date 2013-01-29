@@ -60,19 +60,7 @@ public class Int {
 		else return new Int(i);
 	}
 	
-	public static Int toInt(Int i) {
-		if (i instanceof Char) {
-			return Int.toInt(i.value);
-		} else {
-			return i;
-		}
-	}
-	
 	public String toString() {
 		return Integer.toString(value);
-	}
-	
-	public Char toChar() {
-		return Char.toChar((char)value);
 	}
 }

@@ -19,7 +19,6 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
-import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
@@ -334,9 +333,7 @@ public class Parser {
 					t.pushBack();
 					rettype = BuiltinType.NONE;
 				}
-				FunctionType type = new FunctionType();
-				type.rettype = rettype;
-				type.args = new Type[argtypes.size()];
+				FunctionType type = new FunctionType(rettype, new Type[argtypes.size()]);
 				for (int i=argtypes.size()-1; i>=0; i--) {
 					type.args[i] = (Type)argtypes.elementAt(i);
 				}
@@ -400,9 +397,7 @@ public class Parser {
 		}
 		//populating fields
 		func.locals = args;
-		FunctionType ftype = new FunctionType();
-		ftype.rettype = rettype;
-		ftype.args = new Type[args.size()];
+		FunctionType ftype = new FunctionType(rettype, new Type[args.size()]);
 		for (int i=args.size()-1; i>=0; i--) {
 			ftype.args[i] = ((Var)args.elementAt(i)).type;
 		}
@@ -574,8 +569,6 @@ public class Parser {
 				}
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
-			case Token.CHAR:
-				return new ConstExpr(lnum, Char.toChar((char)t.ivalue));
 			case Token.INT:
 				return new ConstExpr(lnum, Int.toInt(t.ivalue));
 			case Token.LONG:
@@ -901,9 +894,7 @@ public class Parser {
 			}
 			//populating fields
 			func.locals = args;
-			FunctionType ftype = new FunctionType();
-			ftype.rettype = rettype;
-			ftype.args = new Type[args.size()];
+			FunctionType ftype = new FunctionType(rettype, new Type[args.size()]);
 			for (int i=args.size()-1; i>=0; i--) {
 				ftype.args[i] = ((Var)args.elementAt(i)).type;
 			}
@@ -1343,14 +1334,9 @@ public class Parser {
 				FunctionType ftype = (FunctionType)args[1].rettype();
 				if (ftype.args.length == 0)
 					throw new ParseException("Cannot curry function that takes no arguments");
-				FunctionType redftype = new FunctionType();
-				redftype.rettype = ftype.rettype;
-				redftype.args = new Type[ftype.args.length-1];
+				FunctionType redftype = new FunctionType(ftype.rettype, new Type[ftype.args.length-1]);
 				System.arraycopy(ftype.args, 1, redftype.args, 0, redftype.args.length);
-				FunctionType newftype = new FunctionType();
-				newftype.rettype = redftype;
-				newftype.args = new Type[1];
-				newftype.args[0] = ftype.args[0];
+				FunctionType newftype = new FunctionType(redftype, new Type[] { ftype.args[0] });
 				return new CastExpr(newftype, expr);
 			}
 			FunctionType oldftype = (FunctionType)args[0].rettype();
@@ -1363,9 +1349,7 @@ public class Parser {
 				throw new ParseException("Cannot curry with given argument: "+pe.getMessage());
 			}
 			// creating new type
-			FunctionType newftype = new FunctionType();
-			newftype.rettype = oldftype.rettype;
-			newftype.args = new Type[oldftype.args.length-1];
+			FunctionType newftype = new FunctionType(oldftype.rettype, new Type[oldftype.args.length-1]);
 			System.arraycopy(oldftype.args, 1, newftype.args, 0, newftype.args.length);
 			return new CastExpr(newftype, expr);
 		} else if (f.signature.equals("Structure.clone") && args[0].rettype() instanceof StructureType) {

@@ -160,7 +160,6 @@ public interface Opcodes {
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
 	
-	byte CPUSH       = (byte)0xD7;
 	byte NEWZA       = (byte)0xD8;
 	byte ZALOAD      = (byte)0xD9;
 	byte ZASTORE     = (byte)0xDA;

@@ -28,8 +28,13 @@ package alchemy.nec.tree;
  * @author Sergey Basalaev
  */
 public class FunctionType extends Type {
-	public Type rettype;
-	public Type[] args;
+	public final Type rettype;
+	public final Type[] args;
+
+	public FunctionType(Type rettype, Type[] args) {
+		this.rettype = rettype;
+		this.args = args;
+	}
 
 	public boolean equals(Object obj) {
 		if (obj == null) return false;

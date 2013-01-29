@@ -18,7 +18,6 @@
 
 package alchemy.nec.tree;
 
-import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 
 /**
@@ -38,9 +37,7 @@ public class ConstExpr extends Expr {
 	}
 
 	public Type rettype() {
-		if (value instanceof Char) {
-			return BuiltinType.CHAR;
-		} else if (value instanceof Int) {
+		if (value instanceof Int) {
 			return BuiltinType.INT;
 		} else if (value instanceof Long) {
 			return BuiltinType.LONG;

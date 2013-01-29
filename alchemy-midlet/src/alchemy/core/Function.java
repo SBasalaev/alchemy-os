@@ -18,7 +18,6 @@
 
 package alchemy.core;
 
-import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 
 /**
@@ -106,11 +105,6 @@ public abstract class Function {
 		return signature;
 	}
 
-	/** Boxing method for character values. */
-	protected static Char Cval(char value) {
-		return Char.toChar(value);
-	}
-	
 	/** Boxing method for integer values. */
 	protected static Int Ival(int value) {
 		return Int.toInt(value);
@@ -142,10 +136,6 @@ public abstract class Function {
 	/** Unboxing method for Int values. */
 	protected static int ival(Object obj) {
 		return ((Int)obj).value;
-	}
-	
-	protected static char cval(Object obj) {
-		return (char)((Int)obj).value;
 	}
 
 	/** Unboxing method for Int values.

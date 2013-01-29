@@ -126,7 +126,7 @@ class LibCore31Func extends NativeFunction {
 			case 24: // String.len(): Int
 				return Ival(((String)args[0]).length());
 			case 25: // String.ch(at: Int): Char
-				return Cval(((String)args[0]).charAt(ival(args[1])));
+				return Ival(((String)args[0]).charAt(ival(args[1])));
 			case 26: // String.indexof(ch: Char): Int
 				return Ival(((String)args[0]).indexOf(ival(args[1])));
 			case 27: // String.lindexof(ch: Char): Int
@@ -193,9 +193,8 @@ class LibCore31Func extends NativeFunction {
 			}
 			case 47: // StrBuf.append(a: Any): StrBuf
 				return ((StringBuffer)args[0]).append(args[1]);
-			case 48: // StrBuf.addch(ch: Int): StrBuf
-				     // DEPRECATED: Use StrBuf.append(cast (Char) ch)
-				return ((StringBuffer)args[0]).append(cval(args[1]));
+			case 48: // StrBuf.addch(ch: Char): StrBuf
+				return ((StringBuffer)args[0]).append((char)ival(args[1]));
 			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
 				return ((StringBuffer)args[0]).delete(ival(args[1]), ival(args[2]));
 			case 50: // StrBuf.delch(at: Int): StrBuf
@@ -203,10 +202,9 @@ class LibCore31Func extends NativeFunction {
 			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), args[2]);
 			case 52: // StrBuf.insch(at: Int, ch: Char): StrBuf
-				     // DEPRECATED: Use StrBuf.insert(at: Int, cast (Char) ch): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), cval(args[2]));
+				return ((StringBuffer)args[0]).insert(ival(args[1]), (char) ival(args[2]));
 			case 53: // StrBuf.setch(at: Int, ch: Char): StrBuf
-				((StringBuffer)args[0]).setCharAt(ival(args[1]), cval(args[2]));
+				((StringBuffer)args[0]).setCharAt(ival(args[1]), (char) ival(args[2]));
 				return args[0];
 			case 54: // StrBuf.len(): Int
 				return Ival(((StringBuffer)args[0]).length());
@@ -387,7 +385,7 @@ class LibCore31Func extends NativeFunction {
 				return clone;
 			}
 			case 115: // String.split(ch: Char): [String]
-				return IO.split((String)args[0], cval(args[1]));
+				return IO.split((String)args[0], (char) ival(args[1]));
 			case 116: // String.toint(): Int
 				try {
 					return Ival(Integer.parseInt((String)args[0]));
@@ -453,7 +451,7 @@ class LibCore31Func extends NativeFunction {
 				((Hashtable)args[0]).clear();
 				return null;
 			case 130: // StrBuf.ch(at: Int): Char
-				return Cval(((StringBuffer)args[0]).charAt(ival(args[1])));
+				return Ival(((StringBuffer)args[0]).charAt(ival(args[1])));
 			case 131: // Int.tobase(base: Int): String
 				return Integer.toString(ival(args[0]), ival(args[1]));
 			case 132: // Long.tobase(base: Int): String
@@ -587,7 +585,7 @@ class LibCore31Func extends NativeFunction {
 				return;
 			} else if (dest instanceof char[]) {
 				final char[] to = (char[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = cval(from[sofs+i]);
+				for (int i=0; i<len; i++) to[dofs+i] = (char) ival(from[sofs+i]);
 				return;
 			} else if (dest instanceof boolean[]) {
 				final boolean[] to = (boolean[])dest;
@@ -623,7 +621,7 @@ class LibCore31Func extends NativeFunction {
 				return;
 			} else if (src instanceof char[]) {
 				final char[] from = (char[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Cval(from[sofs+i]);
+				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
 				return;
 			} else if (src instanceof boolean[]) {
 				final boolean[] from = (boolean[])src;

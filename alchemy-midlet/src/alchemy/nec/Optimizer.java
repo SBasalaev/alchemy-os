@@ -18,7 +18,6 @@
 
 package alchemy.nec;
 
-import alchemy.core.types.Char;
 import alchemy.core.types.Int;
 import alchemy.nec.tree.*;
 import java.util.Vector;
@@ -451,8 +450,6 @@ public class Optimizer implements ExprVisitor {
 					cnst = new Float(i);
 				} else if (toType == BuiltinType.LONG) {
 					cnst = new Long(i);
-				} else if (toType == BuiltinType.CHAR) {
-					cnst = Char.toChar((char)i);
 				} else if (toType == BuiltinType.SHORT) {
 					cnst = Int.toInt((short)i);
 				} else if (toType == BuiltinType.BYTE) {
@@ -466,8 +463,6 @@ public class Optimizer implements ExprVisitor {
 					cnst = new Float(l);
 				} else if (toType == BuiltinType.INT) {
 					cnst = Int.toInt((int)l);
-				} else if (toType == BuiltinType.CHAR) {
-					cnst = Char.toChar((char)l);
 				} else if (toType == BuiltinType.SHORT) {
 					cnst = Int.toInt((short)l);
 				} else if (toType == BuiltinType.BYTE) {
@@ -481,8 +476,6 @@ public class Optimizer implements ExprVisitor {
 					cnst = new Long((long)f);
 				} else if (toType == BuiltinType.INT) {
 					cnst = Int.toInt((int)f);
-				} else if (toType == BuiltinType.CHAR) {
-					cnst = Char.toInt((char)f);
 				} else if (toType == BuiltinType.SHORT) {
 					cnst = Int.toInt((short)f);
 				} else if (toType == BuiltinType.BYTE) {
@@ -496,8 +489,6 @@ public class Optimizer implements ExprVisitor {
 					cnst = new Long((long)d);
 				} else if (toType.equals(BuiltinType.INT)) {
 					cnst = Int.toInt((int)d);
-				} else if (toType == BuiltinType.CHAR) {
-					cnst = Char.toInt((char)d);
 				} else if (toType == BuiltinType.SHORT) {
 					cnst = Int.toInt((short)d);
 				} else if (toType == BuiltinType.BYTE) {
