@@ -208,6 +208,15 @@ def List.toarray(): [Any] {
   arr
 }
 
+def List.copyinto(from: Int, buf: Array, ofs: Int, len: Int) {
+  if (from + len > this.size) {
+    len = this.size - from
+  }
+  if (len > 0) {
+    acopy(this.data, from, buf, ofs, len)
+  }
+}
+
 def List.tostr(): String {
   var sb = new_strbuf()
   sb.addch('[')
