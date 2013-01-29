@@ -47,9 +47,8 @@ public class Parser {
 	static final String[] WARN_STRINGS = {"typesafe", "semantic", "cast", "vars", "deprecated"};
 
 	// eXperimental feature categories
-	private static final int X_TRY = 1;
 	
-	static final String[] X_STRINGS = {"try"};
+	static final String[] X_STRINGS = {};
 	
 	private final Context c;
 	private final int target;
@@ -937,8 +936,6 @@ public class Parser {
 			unit.funcs.addElement(func);
 			return new ConstExpr(lnum, func);
 		} else if (keyword.equals("try")) {
-			if ((Xmask & X_TRY) == 0)
-				throw new ParseException("Experimental try/catch support is disabled. Use -Xtry to enable it.");
 			Expr tryexpr = parseExpr(scope);
 			if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("catch"))
 				throw new ParseException("'catch' expected after 'try <expr>'");
