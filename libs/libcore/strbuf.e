@@ -5,6 +5,6 @@
 
 use "strbuf.eh"
 
-def StrBuf.replace(from: Int, to: Int, by: Any): StrBuf {
+def StrBuf.replace(from: Int, to: Int, by: String): StrBuf {
   this.delete(from, to).insert(from, by)
 }

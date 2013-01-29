@@ -35,4 +35,3 @@ def String.hash(): Int;
 def ca2str(ca: [Char]): String;
 def ba2utf(ba: [Byte]): String;
 def chstr(ch: Char): String;
-const `Char.tostr` = chstr;

@@ -28,7 +28,7 @@ def flistfilter(path: String, glob: String): [String] {
     var file = files[i]
     if (matches_glob(file, glob)) list.add(file)
   }
-  // small hack, TODO: typed lists
-  var a: Array = list.toarray()
-  a
+  var strings = new [String](list.len())
+  list.copyinto(0, strings, 0, strings.len)
+  strings
 }
