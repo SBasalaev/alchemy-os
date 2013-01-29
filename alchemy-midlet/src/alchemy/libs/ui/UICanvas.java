@@ -18,7 +18,7 @@
 
 package alchemy.libs.ui;
 
-import alchemy.core.types.Int;
+import alchemy.core.Int;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;

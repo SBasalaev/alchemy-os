@@ -19,7 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
-import alchemy.core.types.Int;
+import alchemy.core.Int;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.nec.tree.*;

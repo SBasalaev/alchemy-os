@@ -19,7 +19,7 @@
 package alchemy.nec;
 
 import alchemy.core.Context;
-import alchemy.core.types.Int;
+import alchemy.core.Int;
 import alchemy.evm.ELibBuilder;
 import alchemy.evm.Opcodes;
 import alchemy.fs.FSManager;

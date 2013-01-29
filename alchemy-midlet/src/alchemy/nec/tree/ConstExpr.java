@@ -18,7 +18,7 @@
 
 package alchemy.nec.tree;
 
-import alchemy.core.types.Int;
+import alchemy.core.Int;
 
 /**
  * Constant expression.

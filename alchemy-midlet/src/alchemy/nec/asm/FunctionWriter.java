@@ -18,7 +18,7 @@
 
 package alchemy.nec.asm;
 
-import alchemy.core.types.Int;
+import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.tree.Null;
 import java.io.ByteArrayOutputStream;

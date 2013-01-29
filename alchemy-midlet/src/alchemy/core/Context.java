@@ -18,7 +18,6 @@
 
 package alchemy.core;
 
-import alchemy.core.types.Int;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.fs.devfs.NullInputStream;
