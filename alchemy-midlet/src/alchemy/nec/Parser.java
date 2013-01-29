@@ -39,12 +39,12 @@ public class Parser {
 	// Warning categories
 	private static final int W_ERROR = -1;
 	private static final int W_TYPESAFE = 0;
-	private static final int W_MAIN = 1;
+	private static final int W_SEMANTIC = 1;
 	private static final int W_CAST = 2;
 	private static final int W_VARS = 3;
 	private static final int W_DEPRECATED = 4;
 	
-	static final String[] WARN_STRINGS = {"typesafe", "main", "cast", "vars", "deprecated"};
+	static final String[] WARN_STRINGS = {"typesafe", "semantic", "cast", "vars", "deprecated"};
 
 	// eXperimental feature categories
 	private static final int X_TRY = 1;
@@ -360,11 +360,14 @@ public class Parser {
 		String str = t.svalue;
 		String fname;
 		NamedType methodholder = null;
+		boolean isConstructor = false;
 		if (t.nextToken() == '.') {
 			methodholder = unit.getType(str);
 			if (methodholder == null)
 				throw new ParseException("Type "+str+" is not defined");
-			if (t.nextToken() != Token.WORD)
+			if (t.nextToken() == Token.KEYWORD && t.svalue.equals("new"))
+				isConstructor = true;
+			else if (t.ttype != Token.WORD)
 				throw new ParseException("Function name expected, got "+t);
 			fname = methodholder.toString()+'.'+t.svalue;
 		} else {
@@ -373,7 +376,7 @@ public class Parser {
 		}
 		expect('(');
 		Vector args = new Vector();
-		if (methodholder != null) {
+		if (!isConstructor && methodholder != null) {
 			args.addElement(new Var("this", methodholder));
 		}
 		boolean first = true;
@@ -395,6 +398,8 @@ public class Parser {
 			t.pushBack();
 			rettype = BuiltinType.NONE;
 		}
+		if (isConstructor && !methodholder.equals(rettype))
+			warn(W_SEMANTIC, "Constructor returns value of different type than " + methodholder);
 		//populating fields
 		func.locals = args;
 		FunctionType ftype = new FunctionType(rettype, new Type[args.size()]);
@@ -406,19 +411,19 @@ public class Parser {
 		//some checkings
 		if (fname.equals("main")) {
 			if (args.size() != 1) {
-				warn(W_MAIN, "Incorrect number of arguments in main(), should be ([String])");
+				warn(W_SEMANTIC, "Incorrect number of arguments in main(), should be ([String])");
 			} else {
 				Type argtype = ((Var)args.elementAt(0)).type;
 				Type shouldbe = new ArrayType(BuiltinType.STRING);
 				if (!argtype.isSupertypeOf(shouldbe)) {
-					throw new ParseException("Incompatible argument type in main()");
+					warn(W_SEMANTIC, "Incompatible argument type in main()");
 				}
 				if (!argtype.equals(shouldbe)) {
-					warn(W_MAIN, "argument of main() should be of type [String]");
+					warn(W_SEMANTIC, "argument of main() should be of type [String]");
 				}
 			}
 			if (rettype != BuiltinType.INT && rettype != BuiltinType.NONE) {
-				warn(W_MAIN, "Incompatible return type in main(), should be Int or <none>.");
+				warn(W_SEMANTIC, "Incompatible return type in main(), should be Int or <none>.");
 			}
 		}
 		return func;
@@ -646,7 +651,6 @@ public class Parser {
 				warn(W_CAST, "Unnecessary cast to the supertype");
 			}
 			if (expr.rettype().isSupertypeOf(toType)) {
-				//warn(W_TYPESAFE, "Unsafe type cast from "+expr.rettype()+" to "+toType);
 				return new CastExpr(toType, expr);
 			}
 			return cast(expr, toType);
@@ -812,44 +816,59 @@ public class Parser {
 			}
 		} else if (keyword.equals("new")) {
 			Type type = parseType(scope);
-			if (type instanceof StructureType) {
-				StructureType struct = (StructureType)type;
-				Expr[] init = new Expr[struct.fields.length];
-				boolean first = true;
-				switch (t.nextToken()) {
-					case '{':
-						while (t.nextToken() != '}') {
-							t.pushBack();
-							if (first) first = false;
-							else expect(',');
-							if (t.nextToken() != Token.WORD)
-								throw new ParseException("Identifier expected in structure constructor");
-							int index = struct.fields.length-1;
-							while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
-							if (index < 0)
-								throw new ParseException("Type "+type+" has no member named "+t.svalue);
-							expect('=');
-							init[index] = cast(parseExpr(scope), struct.fields[index].type);
-						}
-						break;
-					case '(':
+			if (type instanceof NamedType) {
+				if (t.nextToken() == '{') {
+					// extended structure constructor
+					if (!(type instanceof StructureType))
+						throw new ParseException("Extended constructor but type " + type + " is not structure");
+					boolean first = true;
+					StructureType struct = (StructureType)type;
+					Expr[] init = new Expr[struct.fields.length];
+					while (t.nextToken() != '}') {
+						t.pushBack();
+						if (first) first = false;
+						else expect(',');
+						if (t.nextToken() != Token.WORD)
+							throw new ParseException("Identifier expected in structure constructor");
+						int index = struct.fields.length-1;
+						while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
+						if (index < 0)
+							throw new ParseException("Type "+type+" has no member named "+t.svalue);
+						expect('=');
+						init[index] = cast(parseExpr(scope), struct.fields[index].type);
+					}
+					return new NewArrayByEnumExpr(lnum, type, init);
+				} else if (t.ttype == '(') {
+					Func newmethod = findMethod(type, "new");
+					if (newmethod == null) {
+						// default structure constructor
+						if (!(type instanceof StructureType))
+							throw new ParseException("Type " + type + " has no 'new' method");
+						boolean first = true;
+						StructureType struct = (StructureType)type;
+						Expr[] init = new Expr[struct.fields.length];
 						for (int i=0; i < init.length; i++) {
 							if (first) first = false;
 							else expect(',');
 							init[i] = cast(parseExpr(scope), struct.fields[i].type);
 						}
 						expect(')');
-						break;
-					default:
-						throw new ParseException("'(' or '{' expected in structure constructor");
+						return new NewArrayByEnumExpr(lnum, type, init);
+					} else {
+						// calling Type.new
+						return parseFCall(scope, new ConstExpr(lnum, newmethod), null);
+					}
+				} else {
+					throw new ParseException(t.toString() + " unexpected here");
 				}
-				return new NewArrayByEnumExpr(lnum, type, init);
 			} else if (type instanceof ArrayType) {
 				if (t.nextToken() == '(') {
+					// new array of given size
 					Expr lenexpr = cast(parseExpr(scope), BuiltinType.INT);
 					expect(')');
 					return new NewArrayExpr(lnum, type, lenexpr);
 				} else if (t.ttype == '{') {
+					// new array with given elements
 					Vector vinit = new Vector();
 					Type eltype = ((ArrayType)type).elementType();
 					while (t.nextToken() != '}') {
@@ -865,7 +884,7 @@ public class Parser {
 					throw new ParseException("'(' or '{' expected in constructor");
 				}
 			} else {
-				throw new ParseException("Applying 'new' to neither array nor structure");
+				throw new ParseException("Type "+ type +" has no 'new' method");
 			}
 		} else if (keyword.equals("def")) {
 			// anonymous function
