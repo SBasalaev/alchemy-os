@@ -44,7 +44,7 @@ public final class Token {
 	/** Keyword. */
 	public static final int KEYWORD = -7;
 	/** Identifier. */
-	public static final int IDENTIFIER = -8;
+	public static final int WORD = -8;
 	/** Boolean literal. */
 	public static final int BOOL = -9;
 	/** Character literal. */

@@ -160,7 +160,7 @@ public class Parser {
 				String next = resolveFile(t.svalue);
 				parseFile(next);
 			} else if (t.svalue.equals("const")) {
-				if (t.nextToken() != Token.IDENTIFIER)
+				if (t.nextToken() != Token.WORD)
 					throw new ParseException("Constant name expected after 'const'");
 				String name = t.svalue;
 				expect('=');
@@ -172,7 +172,7 @@ public class Parser {
 				cnst.constValue = ((ConstExpr)expr).value;
 				unit.addVar(cnst);
 			} else if (t.svalue.equals("type")) {
-				if (t.nextToken() != Token.IDENTIFIER)
+				if (t.nextToken() != Token.WORD)
 					throw new ParseException("Type name expected after 'type'");
 				String typename = t.svalue;
 				if (typename.equals("Any"))
@@ -209,7 +209,7 @@ public class Parser {
 						throw new ParseException(t.toString()+" unexpected here");
 				}
 			} else if (t.svalue.equals("var")) {
-				if (t.nextToken() != Token.IDENTIFIER)
+				if (t.nextToken() != Token.WORD)
 					throw new ParseException("Variable name expected after 'var'");
 				String varname = t.svalue;
 				expect(':');
@@ -283,7 +283,7 @@ public class Parser {
 			t.pushBack();
 			if (first) first = false;
 			else expect(',');
-			if (t.nextToken() != Token.IDENTIFIER)
+			if (t.nextToken() != Token.WORD)
 				throw new ParseException("Field name expected, got "+t);
 			String fieldname = t.svalue;
 			expect(':');
@@ -304,7 +304,7 @@ public class Parser {
 	 */
 	private Type parseType(Scope scope) throws ParseException, IOException {
 		switch (t.nextToken()) {
-			case Token.IDENTIFIER: { //scalar type
+			case Token.WORD: { //scalar type
 				Type type = scope.getType(t.svalue);
 				if (t.svalue.equals("BArray")) {
 					warn(W_DEPRECATED, "Type BArray is deprecated, use [Byte]");
@@ -355,7 +355,7 @@ public class Parser {
 	private Func parseFuncDef() throws ParseException, IOException {
 		Func func = new Func(unit);
 		//parsing def
-		if (t.nextToken() != Token.IDENTIFIER)
+		if (t.nextToken() != Token.WORD)
 			throw new ParseException("Function name expected, got "+t);
 		String str = t.svalue;
 		String fname;
@@ -364,7 +364,7 @@ public class Parser {
 			methodholder = unit.getType(str);
 			if (methodholder == null)
 				throw new ParseException("Type "+str+" is not defined");
-			if (t.nextToken() != Token.IDENTIFIER)
+			if (t.nextToken() != Token.WORD)
 				throw new ParseException("Function name expected, got "+t);
 			fname = methodholder.toString()+'.'+t.svalue;
 		} else {
@@ -381,7 +381,7 @@ public class Parser {
 			t.pushBack();
 			if (first) first = false;
 			else expect(',');
-			if (t.nextToken() != Token.IDENTIFIER)
+			if (t.nextToken() != Token.WORD)
 				throw new ParseException("Variable name expected, got "+t);
 			String varname = t.svalue;
 			expect(':');
@@ -429,7 +429,7 @@ public class Parser {
 	 */
 	private static int[] priorops = {
 			// if word operators are to appear they have the lowest priority
-			Token.KEYWORD, Token.IDENTIFIER, 0, 0,
+			Token.KEYWORD, Token.WORD, 0, 0,
 			'^', 0, 0, 0,
 			Token.BARBAR, '|', 0, 0,
 			Token.AMPAMP, '&', 0, 0,
@@ -585,7 +585,7 @@ public class Parser {
 				return new ConstExpr(lnum, (t.svalue.equals("true") ? Boolean.TRUE : Boolean.FALSE));
 			case Token.KEYWORD:
 				return parseKeyword(scope, t.svalue);
-			case Token.IDENTIFIER: {
+			case Token.WORD: {
 				String str = t.svalue;
 				Var var = scope.getVar(str);
 				if (var == null) throw new ParseException("Variable "+str+" is not defined");
@@ -767,7 +767,7 @@ public class Parser {
 			return swexpr;
 		} else if (keyword.equals("var") || keyword.equals("const")) {
 			boolean isConst = keyword.equals("const");
-			if (t.nextToken() != Token.IDENTIFIER)
+			if (t.nextToken() != Token.WORD)
 				throw new ParseException("Identifier expected after 'var'");
 			String varname = t.svalue;
 			Type vartype = null;
@@ -822,7 +822,7 @@ public class Parser {
 							t.pushBack();
 							if (first) first = false;
 							else expect(',');
-							if (t.nextToken() != Token.IDENTIFIER)
+							if (t.nextToken() != Token.WORD)
 								throw new ParseException("Identifier expected in structure constructor");
 							int index = struct.fields.length-1;
 							while (index >= 0 && !struct.fields[index].name.equals(t.svalue)) index--;
@@ -880,7 +880,7 @@ public class Parser {
 				t.pushBack();
 				if (first) first = false;
 				else expect(',');
-				if (t.nextToken() != Token.IDENTIFIER)
+				if (t.nextToken() != Token.WORD)
 					throw new ParseException("Variable name expected, got "+t);
 				String varname = t.svalue;
 				expect(':');
@@ -928,7 +928,7 @@ public class Parser {
 			if (t.nextToken() == '(') {
 				if (t.nextToken() != Token.KEYWORD || !t.svalue.equals("var"))
 					throw new ParseException("'var' expected");
-				if (t.nextToken() != Token.IDENTIFIER)
+				if (t.nextToken() != Token.WORD)
 					throw new ParseException("Identifier expected");
 				v = new Var(t.svalue, BuiltinType.ERROR);
 				if (catchblock.addVar(v)) {
@@ -1130,7 +1130,7 @@ public class Parser {
 			}
 			return cast(expr, toType);
 		}
-		if (t.ttype != Token.IDENTIFIER && t.ttype != Token.KEYWORD)
+		if (t.ttype != Token.WORD && t.ttype != Token.KEYWORD)
 			throw new ParseException("Identifier expected after '.'");
 		String member = t.svalue;
 		Type type = expr.rettype();

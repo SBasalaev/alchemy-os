@@ -138,7 +138,7 @@ class Tokenizer {
 				throw new ParseException("Unclosed identifier literal");
 			}
 			svalue = id.toString();
-			return ttype = Token.IDENTIFIER;
+			return ttype = Token.WORD;
 		}
 
 		//dot and numbers
@@ -283,7 +283,7 @@ class Tokenizer {
 			    id.equals("try") || id.equals("catch") || id.equals("const")||
 			    id.equals("switch") || id.equals("goto"))
 				return ttype = Token.KEYWORD;
-			return ttype = Token.IDENTIFIER;
+			return ttype = Token.WORD;
 		}
 
 		//operators and comments
@@ -511,7 +511,7 @@ class Tokenizer {
 			case Token.GTGTGTEQ:
 				return ">>>=";
 			case Token.KEYWORD:
-			case Token.IDENTIFIER:
+			case Token.WORD:
 			case Token.QUOTED:
 			case Token.BOOL:
 				return svalue;
