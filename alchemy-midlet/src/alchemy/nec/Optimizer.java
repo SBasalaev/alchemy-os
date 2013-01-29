@@ -442,6 +442,7 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			Type toType = cast.toType;
 			Object cnst = ((ConstExpr)cast.expr).value;
+			int line = ((ConstExpr)cast.expr).line;
 			if (cnst instanceof Int) {
 				int i = ((Int)cnst).value;
 				if (toType == BuiltinType.DOUBLE) {
@@ -454,6 +455,8 @@ public class Optimizer implements ExprVisitor {
 					cnst = Int.toInt((short)i);
 				} else if (toType == BuiltinType.BYTE) {
 					cnst = Int.toInt((byte)i);
+				} else if (toType == BuiltinType.CHAR) {
+					return new CharConstExpr(line, Int.toInt((char)i));
 				}
 			} else if (cnst instanceof Long) {
 				long l = ((Long)cnst).longValue();
@@ -467,6 +470,8 @@ public class Optimizer implements ExprVisitor {
 					cnst = Int.toInt((short)l);
 				} else if (toType == BuiltinType.BYTE) {
 					cnst = Int.toInt((byte)l);
+				} else if (toType == BuiltinType.CHAR) {
+					return new CharConstExpr(line, Int.toInt((char)l));
 				}
 			} else if (cnst instanceof Float) {
 				float f = ((Float)cnst).floatValue();
@@ -480,6 +485,8 @@ public class Optimizer implements ExprVisitor {
 					cnst = Int.toInt((short)f);
 				} else if (toType == BuiltinType.BYTE) {
 					cnst = Int.toInt((byte)f);
+				} else if (toType == BuiltinType.CHAR) {
+					return new CharConstExpr(line, Int.toInt((char)f));
 				}
 			} else if (cnst instanceof Double) {
 				double d = ((Double)cnst).doubleValue();
@@ -493,9 +500,11 @@ public class Optimizer implements ExprVisitor {
 					cnst = Int.toInt((short)d);
 				} else if (toType == BuiltinType.BYTE) {
 					cnst = Int.toInt((byte)d);
+				} else if (toType == BuiltinType.CHAR) {
+					return new CharConstExpr(line, Int.toInt((char)d));
 				}
 			}
-			return new ConstExpr(((ConstExpr)cast.expr).line, cnst);
+			return new ConstExpr(line, cnst);
 		}
 		return cast;
 	}
@@ -505,7 +514,7 @@ public class Optimizer implements ExprVisitor {
 	 * CF:
 	 *   const op const  =&gt;  const
 	 * 
-	 * HELP COMPILER:
+	 * HELP COMPILER (so it can check only rvalue):
 	 *   0 &lt; expr   =&gt;  expr &gt; 0
 	 *   0 &gt; expr   =&gt;  expr &lt; 0
 	 *   0 &lt;= expr  =&gt;  expr &gt;= 0
@@ -756,7 +765,12 @@ public class Optimizer implements ExprVisitor {
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
 				if (!(cnst instanceof Func)) {
 					optimized = true;
-					return new ConstExpr(((ConstExpr)fcall.args[0]).line, String.valueOf(cnst));
+					int line = ((ConstExpr)fcall.args[0]).line;
+					if (fcall.args[0].rettype().equals(BuiltinType.CHAR)) {
+						return new ConstExpr(line, String.valueOf((char) ((Int)cnst).value));
+					} else {
+						return new ConstExpr(line, String.valueOf(cnst));
+					}
 				}
 			}
 /* Inlining functions will be a part of -O2

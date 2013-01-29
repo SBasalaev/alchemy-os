@@ -25,7 +25,7 @@ package alchemy.core;
  *
  * @author Sergey Basalaev
  */
-public class Int {
+public final class Int {
 	private static final Int[] cache;
 	
 	public static final Int ONE;
@@ -42,7 +42,7 @@ public class Int {
 	
 	public final int value;
 	
-	protected Int(int val) { this.value = val; }
+	private Int(int val) { this.value = val; }
 
 	public boolean equals(Object obj) {
 		if (obj == null) return false;

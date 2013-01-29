@@ -569,6 +569,8 @@ public class Parser {
 				}
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
+			case Token.CHAR:
+				return new CharConstExpr(lnum, Int.toInt(t.ivalue));
 			case Token.INT:
 				return new ConstExpr(lnum, Int.toInt(t.ivalue));
 			case Token.LONG:
@@ -1322,6 +1324,15 @@ public class Parser {
 	 *
 	 * <dt>{@code acopy}</dt>
 	 * <dd>checks if array elements are assignment compatible</dd>
+	 *
+	 * <dt>{@code StrBuf.append(Char)}</dt>
+	 * <dd>replaces by StrBuf.addch(Char)</dd>
+	 *
+	 * <dt>{@code StrBuf.insert(at, Char)}</dt>
+	 * <dd>replaces by StrBuf.insch(at, Char)</dd>
+	 *
+	 * <dt>{@code print(obj)}, {@code println(obj)}, {@code OStream.print(obj)}, {@code OStream.println(obj)}</dt>
+	 * <dd>replaces argument by {@code obj.tostr()}</dd>
 	 * </dl>
 	 */
 	private Expr makeFCall(int lnum, Func f, Expr[] args) throws ParseException {
@@ -1367,6 +1378,26 @@ public class Parser {
 			} else if (toarray.elementType() != BuiltinType.ANY) {
 				warn(W_TYPESAFE, "Unsafe type cast when copying from Array to "+toarray);
 			}
+		} else if (f.signature.equals("StrBuf.append") && args[1].rettype().equals(BuiltinType.CHAR)) {
+			f.hits--;
+			Func addch = unit.getFunc("StrBuf.addch");
+			addch.hits++;
+			return new FCallExpr(new ConstExpr(lnum, addch), args);
+		} else if (f.signature.equals("StrBuf.insert") && args[2].rettype().equals(BuiltinType.CHAR)) {
+			f.hits--;
+			Func insch = unit.getFunc("StrBuf.insch");
+			insch.hits++;
+			return new FCallExpr(new ConstExpr(lnum, insch), args);
+		} else if ((f.signature.equals("print") || f.signature.equals("println")) &&
+				!args[0].rettype().equals(BuiltinType.STRING)) {
+			Func tostr = findMethod(args[0].rettype(), "tostr");
+			tostr.hits++;
+			args[0] = new FCallExpr(new ConstExpr(lnum, tostr), new Expr[] { args[0] });
+		} else if ((f.signature.equals("OStream.print") || f.signature.equals("OStream.println")) &&
+				!args[1].rettype().equals(BuiltinType.STRING)) {
+			Func tostr = findMethod(args[0].rettype(), "tostr");
+			tostr.hits++;
+			args[1] = new FCallExpr(new ConstExpr(lnum, tostr), new Expr[] { args[1] });
 		}
 		return expr;
 	}
