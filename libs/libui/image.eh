@@ -11,7 +11,7 @@ type IStream;
 def image_from_argb(argb: [Int], w: Int, h: Int, alpha: Bool): Image;
 def image_from_file(file: String): Image;
 def image_from_stream(in: IStream): Image;
-def image_from_data(data: BArray): Image;
+def image_from_data(data: [Byte]): Image;
 def image_from_image(im: Image, x: Int, y: Int, w: Int, h: Int): Image;
 
-def Image.get_argb(argb: Array, ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int);
+def Image.get_argb(argb: [Int], ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int);
