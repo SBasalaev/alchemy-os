@@ -1,3 +1,1 @@
-#@alchemy.libs.LibCore30
-soname=libcore.3.so
-symbols=/libcore30.symbols
+#=libcore.3.0.so

@@ -29,9 +29,9 @@ import java.util.Hashtable;
  * Alchemy core runtime library.
  * 
  * @author Sergey Basalaev
- * @version 3.0
+ * @version 3.1
  */
-public class LibCore30 extends NativeLibrary {
+public class LibCore31 extends NativeLibrary {
 
 	/**
 	 * Constructor without parameters to load
@@ -39,8 +39,8 @@ public class LibCore30 extends NativeLibrary {
 	 * @throws IOException if I/O error occured while reading
 	 *         function definitions file
 	 */
-	public LibCore30() throws IOException {
-		super("/libcore30.symbols");
+	public LibCore31() throws IOException {
+		super("/libcore31.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {
