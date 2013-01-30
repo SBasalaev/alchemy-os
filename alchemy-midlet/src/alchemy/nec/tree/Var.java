@@ -33,8 +33,7 @@ public class Var {
 	public boolean isConst = false;
 	
 	/**
-	 * If not null, contains value of this constant.
-	 * If null then value is not known at the time of compilation.
+	 * If not null, contains constant or default value of variable.
 	 */
 	public Object constValue = null;
 	

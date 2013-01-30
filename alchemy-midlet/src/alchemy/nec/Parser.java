@@ -62,6 +62,8 @@ public class Parser {
 	/** Files that are already parsed. */
 	private Vector parsed = new Vector();
 	
+	private final Optimizer constOptimizer = new Optimizer();
+	
 	public Parser(Context c, int target, int Wmask, int Xmask) {
 		this.c = c;
 		this.target = target;
@@ -158,18 +160,6 @@ public class Parser {
 					throw new ParseException("String literal expected after 'use'");
 				String next = resolveFile(t.svalue);
 				parseFile(next);
-			} else if (t.svalue.equals("const")) {
-				if (t.nextToken() != Token.WORD)
-					throw new ParseException("Constant name expected after 'const'");
-				String name = t.svalue;
-				expect('=');
-				Expr expr = (Expr)parseExpr(unit).accept(new Optimizer(), unit);
-				if (!(expr instanceof ConstExpr))
-					throw new ParseException("Constant expression expected");
-				Var cnst = new Var(name, expr.rettype());
-				cnst.isConst = true;
-				cnst.constValue = ((ConstExpr)expr).value;
-				unit.addVar(cnst);
 			} else if (t.svalue.equals("type")) {
 				if (t.nextToken() != Token.WORD)
 					throw new ParseException("Type name expected after 'type'");
@@ -207,13 +197,47 @@ public class Parser {
 					default:
 						throw new ParseException(t.toString()+" unexpected here");
 				}
-			} else if (t.svalue.equals("var")) {
+			} else if (t.svalue.equals("var") || t.svalue.equals("const")) {
+				boolean isConst = t.svalue.equals("const");
 				if (t.nextToken() != Token.WORD)
-					throw new ParseException("Variable name expected after 'var'");
+					throw new ParseException("Variable name expected");
 				String varname = t.svalue;
-				expect(':');
-				Type vartype = parseType(unit);
-				unit.addVar(new Var(varname, vartype));
+				Type vartype = null;
+				Expr varvalue = null;
+				// parsing type
+				if (t.nextToken() == ':') {
+					vartype = parseType(unit);
+				} else {
+					t.pushBack();
+				}
+				// parsing value
+				if (t.nextToken() == '=') {
+					varvalue = (Expr) parseExpr(unit).accept(constOptimizer, unit);
+					if (!(varvalue instanceof ConstExpr))
+						throw new ParseException("Constant expression expected");
+					if (vartype == null) {
+						vartype = varvalue.rettype();
+					} else {
+						varvalue = (Expr)cast(varvalue, vartype).accept(constOptimizer, unit);
+					}
+				} else {
+					t.pushBack();
+				}
+				// defining variable
+				if (vartype == null) {
+					throw new ParseException("Type of "+varname+" is not defined");
+				}
+				Var v = new Var(varname, vartype);
+				if (isConst) {
+					v.isConst = true;
+					if (varvalue == null) {
+						throw new ParseException("Constant "+varname+" is not initialized");
+					}
+				}
+				if (varvalue != null) {
+					v.constValue = ((ConstExpr)varvalue).value;
+				}
+				unit.addVar(v);
 			} else if (t.svalue.equals("def")) {
 				Func fdef = parseFuncDef();
 				Var fvar = unit.getVar(fdef.signature);
@@ -605,12 +629,22 @@ public class Parser {
 					vexpr = new VarExpr(lnum, var);
 				} else {
 					// convert to  cast(type)getstatic("var#hash")
-					Func getstatic = unit.getFunc("getstatic");
-					getstatic.hits++;
-					vexpr = new CastExpr(
+					if (var.constValue != null) {
+						Func getstaticdef = unit.getFunc("getstaticdef");
+						getstaticdef.hits++;
+						vexpr = new CastExpr(
+							var.type,
+							new FCallExpr(new ConstExpr(lnum, getstaticdef),
+							new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())),
+							             new ConstExpr(lnum, var.constValue)}));
+					} else {
+						Func getstatic = unit.getFunc("getstatic");
+						getstatic.hits++;
+						vexpr = new CastExpr(
 							var.type,
 							new FCallExpr(new ConstExpr(lnum, getstatic),
 							new Expr[] { new ConstExpr(lnum, var.name+'#'+Integer.toHexString(var.hashCode())) }));
+					}
 				}
 				if (Token.isAssignment(t.nextToken())) {
 					if (var.isConst)
@@ -723,7 +757,7 @@ public class Parser {
 					do {
 						t.pushBack();
 						if (!branchkeyv.isEmpty()) expect(',');
-						Expr branchindex = (Expr)parseExpr(scope).accept(new Optimizer(), scope);
+						Expr branchindex = (Expr)parseExpr(scope).accept(constOptimizer, scope);
 						if (!(branchindex instanceof ConstExpr))
 							throw new ParseException("Constant expression expected in switch key");
 						if (branchindex.rettype() != BuiltinType.INT)
