@@ -223,7 +223,7 @@ public class FunctionWriter implements Opcodes {
 	}
 	
 	/** Visit LDC instruction with given object.
-	 * The class of argument must be one of null,
+	 * The class of argument must be one of Null,
 	 * Boolean, Int, Long, Float, Double,
 	 * String, FuncObject.
 	 */
@@ -339,6 +339,8 @@ public class FunctionWriter implements Opcodes {
 			case IF_ICMPGT:
 			case IF_ICMPLE:
 			case IF_ICMPLT:
+			case IF_ACMPEQ:
+			case IF_ACMPNE:
 				visitStack(-2);
 				break;
 			default:

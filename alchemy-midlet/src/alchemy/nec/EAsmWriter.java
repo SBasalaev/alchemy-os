@@ -378,6 +378,15 @@ public class EAsmWriter implements ExprVisitor {
 					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGE : Opcodes.IF_ICMPLT, jumpto);
 					break;
 			}
+		} else if (cmp.operator == Token.EQEQ || cmp.operator == Token.NOTEQ) {
+			// object comparison
+			cmp.lvalue.accept(this, null);
+			cmp.rvalue.accept(this, null);
+			if (cmp.operator == Token.EQEQ) {
+				writer.visitJumpInsn(cond ? Opcodes.IF_ACMPEQ : Opcodes.IF_ACMPNE, jumpto);
+			} else {
+				writer.visitJumpInsn(cond ? Opcodes.IF_ACMPNE : Opcodes.IF_ACMPEQ, jumpto);
+			}
 		} else {
 			// general comparison
 			cmp.lvalue.accept(this, null);
