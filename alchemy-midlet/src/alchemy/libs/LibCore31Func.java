@@ -140,7 +140,7 @@ class LibCore31Func extends NativeFunction {
 			case 31: // String.lcase(): String
 				return ((String)args[0]).toLowerCase();
 			case 32: // String.concat(str: String): String
-				return ((String)args[0]).concat((String)args[1]);
+				return ((String)args[0]).concat(LibCore30.stringValue(args[1]));
 			case 33: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
 			case 34: // String.chars(): [Char]
@@ -410,9 +410,9 @@ class LibCore31Func extends NativeFunction {
 				} catch (NumberFormatException nfe) {
 					return null;
 				}
-			case 120: // getstatic(key: Any): Any
+			case 120: // getstatic(key: String): Any
 				return c.get(args[0]);
-			case 121: // setstatic(key: Any, val: Any)
+			case 121: // setstatic(key: String, val: Any)
 				c.set(args[0], args[1]);
 				return null;
 			case 122: // String.format(args: [Any]): String
@@ -543,7 +543,6 @@ class LibCore31Func extends NativeFunction {
 			case 167: // this_process(): Process;
 				return c;
 			case 168: // chstr(ch: Char): String
-				      // DEPRECATED: use ch.tostr()
 				return String.valueOf((char)ival(args[0]));
 			case 169: // IStream.reset()
 				((InputStream)args[0]).reset();
@@ -558,6 +557,14 @@ class LibCore31Func extends NativeFunction {
 				cal.set(Calendar.SECOND, ival(args[5]));
 				cal.set(Calendar.MILLISECOND, ival(args[6]));
 				return Lval(cal.getTime().getTime());
+			}
+			case 171: { // getstaticdef(key: String, dflt: Any): Any
+				Object obj = c.get(args[0]);
+				if (obj == null) {
+					c.set(args[0], args[1]);
+					obj = args[1];
+				}
+				return obj;
 			}
 			default:
 				return null;
