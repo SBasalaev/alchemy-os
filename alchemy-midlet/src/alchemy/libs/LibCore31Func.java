@@ -122,7 +122,7 @@ class LibCore31Func extends NativeFunction {
 				c.setCurDir(c.toFile((String)args[0]));
 				return null;
 			case 23: // relpath(f: String): String
-				return LibCore30.relPath(c, c.toFile((String)args[0]));
+				return LibCore31.relPath(c, c.toFile((String)args[0]));
 			case 24: // String.len(): Int
 				return Ival(((String)args[0]).length());
 			case 25: // String.ch(at: Int): Char
@@ -140,7 +140,7 @@ class LibCore31Func extends NativeFunction {
 			case 31: // String.lcase(): String
 				return ((String)args[0]).toLowerCase();
 			case 32: // String.concat(str: String): String
-				return ((String)args[0]).concat(LibCore30.stringValue(args[1]));
+				return ((String)args[0]).concat(LibCore31.stringValue(args[1]));
 			case 33: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
 			case 34: // String.chars(): [Char]
@@ -221,7 +221,7 @@ class LibCore31Func extends NativeFunction {
 			case 60: // space_used(root: String): Long
 				return Lval(FSManager.fs().spaceUsed(c.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
-				return LibCore30.stringValue(args[0]);
+				return LibCore31.stringValue(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
 			case 63: // IStream.close()
@@ -302,17 +302,17 @@ class LibCore31Func extends NativeFunction {
 			case 87: // sqrt(a: Double): Double
 				return Dval(Math.sqrt(dval(args[0])));
 			case 88: // ipow(a: Double, n: Int): Double
-				return Dval(LibCore30.ipow(dval(args[0]), ival(args[1])));
+				return Dval(LibCore31.ipow(dval(args[0]), ival(args[1])));
 			case 89: // exp(a: Double): Double
-				return Dval(LibCore30.exp(dval(args[0])));
+				return Dval(LibCore31.exp(dval(args[0])));
 			case 90: // log(a: Double): Double
-				return Dval(LibCore30.log(dval(args[0])));
+				return Dval(LibCore31.log(dval(args[0])));
 			case 91: // asin(a: Double): Double
-				return Dval(LibCore30.asin(dval(args[0])));
+				return Dval(LibCore31.asin(dval(args[0])));
 			case 92: // acos(a: Double): Double
-				return Dval(LibCore30.acos(dval(args[0])));
+				return Dval(LibCore31.acos(dval(args[0])));
 			case 93: // atan(a: Double): Double
-				return Dval(LibCore30.atan(dval(args[0])));
+				return Dval(LibCore31.atan(dval(args[0])));
 			case 94: // ca2str(chars: [Char]): String
 				return new String((char[])args[0]);
 			case 95: // ba2utf(bytes: [Byte]): String

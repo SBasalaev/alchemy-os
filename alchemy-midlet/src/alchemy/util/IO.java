@@ -18,7 +18,7 @@
 
 package alchemy.util;
 
-import alchemy.libs.LibCore30;
+import alchemy.libs.LibCore31;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -154,13 +154,13 @@ public final class IO {
 	
 	public static void print(OutputStream s, Object obj) {
 		try {
-			s.write(utfEncode(LibCore30.stringValue(obj)));
+			s.write(utfEncode(LibCore31.stringValue(obj)));
 		} catch (IOException ioe) { }
 	}
 	
 	public static void println(OutputStream s, Object obj) {
 		try {
-			s.write(utfEncode(LibCore30.stringValue(obj)));
+			s.write(utfEncode(LibCore31.stringValue(obj)));
 			s.write('\n');
 			s.flush();
 		} catch (IOException ioe) { }
@@ -211,7 +211,7 @@ public final class IO {
 				buf.append(fmt.substring(0, index));
 				char param = fmt.charAt(index+1);
 				if (param >= '0' && param <= '9') {
-					buf.append(LibCore30.stringValue(args[param-'0']));
+					buf.append(LibCore31.stringValue(args[param-'0']));
 				} else {
 					buf.append(param);
 				}
