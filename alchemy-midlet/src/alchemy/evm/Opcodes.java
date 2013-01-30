@@ -160,6 +160,11 @@ public interface Opcodes {
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
 	
+	byte IINC        = (byte)0xD3;
+	byte JSR         = (byte)0xD4;
+	byte RET         = (byte)0xD5;
+	byte IF_ACMPEQ   = (byte)0xD6;
+	byte IF_ACMPNE   = (byte)0xD7;
 	byte NEWZA       = (byte)0xD8;
 	byte ZALOAD      = (byte)0xD9;
 	byte ZASTORE     = (byte)0xDA;

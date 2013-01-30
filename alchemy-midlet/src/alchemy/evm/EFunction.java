@@ -541,6 +541,35 @@ class EFunction extends Function {
 					head -= 2;
 					break;
 				}
+				case Opcodes.IF_ACMPEQ: { //if_acmpeq <ushort>
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (stack[head-1] != null
+							? stack[head-1].equals(stack[head])
+							: stack[head] == null) ct = itmp;
+					head -= 2;
+					break;
+				}
+				case Opcodes.IF_ACMPNE: { //if_acmpne <ushort>
+					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					ct += 2;
+					if (stack[head-1] != null
+							? !stack[head-1].equals(stack[head])
+							: stack[head] != null) ct = itmp;
+					head -= 2;
+					break;
+				}
+				case Opcodes.JSR: { //jsr <ushort>
+					head++;
+					stack[head] = Ival(ct+2);
+					ct = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
+					break;					
+				}
+				case Opcodes.RET: { //ret
+					ct = ival(stack[head]);
+					head--;
+					break;
+				}
 			//FUNCTION CALLS
 				case Opcodes.CALL_0:
 				case Opcodes.CALL_1:
@@ -859,19 +888,29 @@ class EFunction extends Function {
 					ct += 2;
 					break;
 				}
-				case Opcodes.POP:
+				case Opcodes.POP: {
 					head--;
 					break;
-				case Opcodes.BIPUSH: //bipush <byte>
+				}
+				case Opcodes.BIPUSH: { //bipush <byte>
 					head++;
 					stack[head] = Ival(code[ct]);
 					ct++;
 					break;
-				case Opcodes.SIPUSH: //sipush <short>
+				}
+				case Opcodes.SIPUSH: { //sipush <short>
 					head++;
 					stack[head] = Ival((code[ct] << 8) | (code[ct+1]& 0xff));
 					ct += 2;
 					break;
+				}
+				case Opcodes.IINC: { //iinc <ubyte> <byte>
+					int idx = code[ct] & 0xff;
+					ct++;
+					int inc = code[ct] & 0xff;
+					ct++;
+					locals[idx] = Int.toInt(((Int)locals[idx]).value + inc);
+				}
 			} /* the big switch */
 		} catch (Throwable e) {
 			// the instruction on which error occured
