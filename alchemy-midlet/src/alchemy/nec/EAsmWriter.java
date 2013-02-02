@@ -30,7 +30,10 @@ import java.io.OutputStream;
 import java.util.Vector;
 
 /**
- *
+ * Writes bytecode of the parsed unit.
+ * Argument of {@code visit*} methods specifies
+ * whether the expression should also write return
+ * from function or not.
  * @author Sergey Basalaev
  */
 public class EAsmWriter implements ExprVisitor {
@@ -50,20 +53,170 @@ public class EAsmWriter implements ExprVisitor {
 			if (f.body != null && f.hits > 0) {
 				writer = uw.visitFunction(f.signature, true, f.type.args.length);
 				if (debug) writer.visitSource(f.source);
-				f.body.accept(this, null);
-				if (f.type.rettype == BuiltinType.NONE) {
-					writer.visitInsn(Opcodes.RET_NULL);
-				} else {
-					writer.visitInsn(Opcodes.RETURN);
-				}
+				f.body.accept(this, Boolean.TRUE);
 				writer.visitEnd();
 			}
 		}
 		uw.writeTo(out);
 	}
+
+	/**
+	 * Visits condition of conditional expressions.
+	 * Argument <i>cond</i> specifies value of <i>expr</i>
+	 * on which jump should be performed.
+	 */
+	private void visitCondition(Expr expr, Label jumpto, boolean cond) {
+		if (expr instanceof ConstExpr) {
+			// true or false, jump if matches cond
+			ConstExpr cnst = (ConstExpr) expr;
+			if (cnst.value != Boolean.TRUE ^ cond) {
+				writer.visitJumpInsn(Opcodes.GOTO, jumpto);
+			}
+		} else if (expr instanceof UnaryExpr) {
+			// may be only !expr
+			UnaryExpr unary = (UnaryExpr) expr;
+			visitCondition(unary.expr, jumpto, !cond);
+		} else if (expr instanceof ComparisonExpr) {
+			ComparisonExpr cmp = (ComparisonExpr) expr;
+			if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value == Null.NULL) {
+				// comparison with null
+				cmp.lvalue.accept(this, null);
+				if (cmp.operator == Token.EQEQ) {
+					writer.visitJumpInsn(cond ? Opcodes.IFNULL : Opcodes.IFNNULL, jumpto);
+				} else {
+					writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
+				}
+			} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Int.ZERO)
+			        && cmp.lvalue.rettype() == BuiltinType.INT) {
+				// integer comparison with zero
+				cmp.lvalue.accept(this, null);
+				switch (cmp.operator) {
+					case '<':
+						writer.visitJumpInsn(cond ? Opcodes.IFLT : Opcodes.IFGE, jumpto);
+						break;
+					case '>':
+						writer.visitJumpInsn(cond ? Opcodes.IFGT : Opcodes.IFLE, jumpto);
+						break;
+					case Token.LTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
+						break;
+					case Token.GTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLT, jumpto);
+						break;
+					case Token.EQEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFEQ : Opcodes.IFNE, jumpto);
+						break;
+					case Token.NOTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
+						break;
+				}
+			} else if ((cmp.lvalue.rettype() == BuiltinType.INT || cmp.rvalue.rettype() == BuiltinType.INT)
+					&& cmp.operator != Token.EQEQ && cmp.operator != Token.NOTEQ) {
+				// integer comparison
+				cmp.lvalue.accept(this, null);
+				cmp.rvalue.accept(this, null);
+				switch (cmp.operator) {
+					case '<':
+						writer.visitJumpInsn(cond ? Opcodes.IF_ICMPLT : Opcodes.IF_ICMPGE, jumpto);
+						break;
+					case '>':
+						writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGT : Opcodes.IF_ICMPLE, jumpto);
+						break;
+					case Token.LTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IF_ICMPLE : Opcodes.IF_ICMPGT, jumpto);
+						break;
+					case Token.GTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGE : Opcodes.IF_ICMPLT, jumpto);
+						break;
+				}
+			} else if (cmp.operator == Token.EQEQ || cmp.operator == Token.NOTEQ) {
+				// object comparison
+				cmp.lvalue.accept(this, null);
+				cmp.rvalue.accept(this, null);
+				if (cmp.operator == Token.EQEQ) {
+					writer.visitJumpInsn(cond ? Opcodes.IF_ACMPEQ : Opcodes.IF_ACMPNE, jumpto);
+				} else {
+					writer.visitJumpInsn(cond ? Opcodes.IF_ACMPNE : Opcodes.IF_ACMPEQ, jumpto);
+				}
+			} else {
+				// general comparison
+				cmp.lvalue.accept(this, null);
+				cmp.rvalue.accept(this, null);
+				Type type = Type.commonSupertype(cmp.lvalue.rettype(), cmp.rvalue.rettype());
+				if (type == BuiltinType.INT) {
+					writer.visitInsn(Opcodes.ICMP);
+				} else if (type == BuiltinType.LONG) {
+					writer.visitInsn(Opcodes.LCMP);
+				} else if (type == BuiltinType.FLOAT) {
+					writer.visitInsn(Opcodes.FCMP);
+				} else if (type == BuiltinType.DOUBLE) {
+					writer.visitInsn(Opcodes.DCMP);
+				} else {
+					writer.visitInsn(Opcodes.ACMP);
+				}
+				switch (cmp.operator) {
+					case '<':
+						writer.visitJumpInsn(cond ? Opcodes.IFLT : Opcodes.IFGE, jumpto);
+						break;
+					case '>':
+						writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLE, jumpto);
+						break;
+					case Token.LTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
+						break;
+					case Token.GTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLT, jumpto);
+						break;
+					case Token.EQEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFEQ : Opcodes.IFNE, jumpto);
+						break;
+					case Token.NOTEQ:
+						writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
+						break;
+				}
+			}
+		} else if (expr instanceof IfExpr) {
+			IfExpr ifexpr = (IfExpr) expr;
+			Label elsebranch = new Label();
+			Label afterif = new Label();
+			if (ifexpr.ifexpr instanceof ConstExpr) {
+				Object cnst = ((ConstExpr)ifexpr.ifexpr).value;
+				if (cnst == Boolean.TRUE ^ cond) {
+					visitCondition(ifexpr.condition, afterif, true);
+					visitCondition(ifexpr.elseexpr, jumpto, cond);
+					writer.visitLabel(afterif);
+				} else {
+					visitCondition(ifexpr.condition, jumpto, true);
+					visitCondition(ifexpr.elseexpr, jumpto, cond);
+					writer.visitLabel(afterif);
+				}
+			} else if (ifexpr.elseexpr instanceof ConstExpr) {
+				Object cnst = ((ConstExpr)ifexpr.elseexpr).value;
+				if (cnst == Boolean.TRUE ^ cond) {
+					visitCondition(ifexpr.condition, afterif, false);
+					visitCondition(ifexpr.ifexpr, jumpto, cond);
+					writer.visitLabel(afterif);
+				} else {
+					visitCondition(ifexpr.condition, jumpto, false);
+					visitCondition(ifexpr.ifexpr, jumpto, cond);
+					writer.visitLabel(afterif);
+				}
+			} else {
+				visitCondition(ifexpr.condition, elsebranch, false);
+				visitCondition(ifexpr.ifexpr, jumpto, cond);
+				writer.visitJumpInsn(Opcodes.GOTO, afterif);
+				writer.visitLabel(elsebranch);
+				visitCondition(ifexpr.elseexpr, jumpto, cond);
+				writer.visitLabel(afterif);
+			}
+		} else {
+			expr.accept(this, Boolean.FALSE);
+			writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
+		}
+	}
 	
-	public Object visitALen(ALenExpr alen, Object unused) {
-		alen.arrayexpr.accept(this, unused);
+	public Object visitALen(ALenExpr alen, Object isReturn) {
+		alen.arrayexpr.accept(this, Boolean.FALSE);
 		Type artype = (ArrayType)alen.arrayexpr.rettype();
 		Type eltype = null;
 		if (artype instanceof ArrayType)
@@ -87,12 +240,15 @@ public class EAsmWriter implements ExprVisitor {
 		} else {
 			writer.visitInsn(Opcodes.AALEN);
 		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitALoad(ALoadExpr aload, Object unused) {
-		aload.arrayexpr.accept(this, unused);
-		aload.indexexpr.accept(this, unused);
+	public Object visitALoad(ALoadExpr aload, Object isReturn) {
+		aload.arrayexpr.accept(this, Boolean.FALSE);
+		aload.indexexpr.accept(this, Boolean.FALSE);
 		Type artype = aload.arrayexpr.rettype();
 		Type eltype = null;
 		if (artype instanceof ArrayType)
@@ -116,13 +272,16 @@ public class EAsmWriter implements ExprVisitor {
 		} else {
 			writer.visitInsn(Opcodes.AALOAD);
 		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitAStore(AStoreExpr astore, Object unused) {
-		astore.arrayexpr.accept(this, unused);
-		astore.indexexpr.accept(this, unused);
-		astore.assignexpr.accept(this, unused);
+	public Object visitAStore(AStoreExpr astore, Object isReturn) {
+		astore.arrayexpr.accept(this, Boolean.FALSE);
+		astore.indexexpr.accept(this, Boolean.FALSE);
+		astore.assignexpr.accept(this, Boolean.FALSE);
 		Type artype = astore.arrayexpr.rettype();
 		Type eltype = null;
 		if (artype instanceof ArrayType)
@@ -146,18 +305,24 @@ public class EAsmWriter implements ExprVisitor {
 		} else {
 			writer.visitInsn(Opcodes.AASTORE);
 		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RET_NULL);
+		}
 		return null;
 	}
 
-	public Object visitAssign(AssignExpr assign, Object unused) {
-		assign.expr.accept(this, unused);
+	public Object visitAssign(AssignExpr assign, Object isReturn) {
+		assign.expr.accept(this, Boolean.FALSE);
 		writer.visitVarInsn(Opcodes.STORE, assign.var.index);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RET_NULL);
+		}
 		return null;
 	}
 	
-	public Object visitBinary(BinaryExpr binary, Object unused) {
-		binary.lvalue.accept(this, unused);
-		binary.rvalue.accept(this, unused);
+	public Object visitBinary(BinaryExpr binary, Object isReturn) {
+		binary.lvalue.accept(this, Boolean.FALSE);
+		binary.rvalue.accept(this, Boolean.FALSE);
 		Type type = binary.rettype();
 		switch (binary.operator) {
 			case '+':
@@ -215,19 +380,22 @@ public class EAsmWriter implements ExprVisitor {
 				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LUSHR);
 				break;
 		}
-		return null;
-	}
-
-	public Object visitBlock(BlockExpr block, Object unused) {
-		for (int i=0; i<block.exprs.size(); i++) {
-			Expr expr = (Expr)block.exprs.elementAt(i);
-			expr.accept(this, unused);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
 		}
 		return null;
 	}
 
-	public Object visitCast(CastExpr cast, Object unused) {
-		cast.expr.accept(this, unused);
+	public Object visitBlock(BlockExpr block, Object isReturn) {
+		for (int i=0; i<block.exprs.size(); i++) {
+			Expr expr = (Expr)block.exprs.elementAt(i);
+			expr.accept(this, (isReturn == Boolean.TRUE && i == block.exprs.size()-1) ? Boolean.TRUE : Boolean.FALSE);
+		}
+		return null;
+	}
+
+	public Object visitCast(CastExpr cast, Object isReturn) {
+		cast.expr.accept(this, Boolean.FALSE);
 		Type from = cast.expr.rettype();
 		Type to = cast.rettype();
 		if (from == BuiltinType.BYTE) {
@@ -318,140 +486,45 @@ public class EAsmWriter implements ExprVisitor {
 				writer.visitInsn(Opcodes.D2F);
 			}
 		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 	
-	/** 
-	 * Writes comparison with subsequent jump.
-	 * If cond is <code>true</code>, jump is performed when condition
-	 * is fulfilled, otherwise jump is performed when condition fails.
-	 */
-	private void visitCmpInIf(ComparisonExpr cmp, Label jumpto, boolean cond) {
-		if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value == Null.NULL) {
-			// comparison with null
-			cmp.lvalue.accept(this, null);
-			if (cmp.operator == Token.EQEQ) {
-				writer.visitJumpInsn(cond ? Opcodes.IFNULL : Opcodes.IFNNULL, jumpto);
-			} else {
-				writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
-			}
-		} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Int.ZERO)
-		        && cmp.lvalue.rettype() == BuiltinType.INT) {
-			// integer comparison with zero
-			cmp.lvalue.accept(this, null);
-			switch (cmp.operator) {
-				case '<':
-					writer.visitJumpInsn(cond ? Opcodes.IFLT : Opcodes.IFGE, jumpto);
-					break;
-				case '>':
-					writer.visitJumpInsn(cond ? Opcodes.IFGT : Opcodes.IFLE, jumpto);
-					break;
-				case Token.LTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
-					break;
-				case Token.GTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLT, jumpto);
-					break;
-				case Token.EQEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFEQ : Opcodes.IFNE, jumpto);
-					break;
-				case Token.NOTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
-					break;
-			}
-		} else if ((cmp.lvalue.rettype() == BuiltinType.INT || cmp.rvalue.rettype() == BuiltinType.INT)
-				&& cmp.operator != Token.EQEQ && cmp.operator != Token.NOTEQ) {
-			// integer comparison
-			cmp.lvalue.accept(this, null);
-			cmp.rvalue.accept(this, null);
-			switch (cmp.operator) {
-				case '<':
-					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPLT : Opcodes.IF_ICMPGE, jumpto);
-					break;
-				case '>':
-					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGT : Opcodes.IF_ICMPLE, jumpto);
-					break;
-				case Token.LTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPLE : Opcodes.IF_ICMPGT, jumpto);
-					break;
-				case Token.GTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IF_ICMPGE : Opcodes.IF_ICMPLT, jumpto);
-					break;
-			}
-		} else if (cmp.operator == Token.EQEQ || cmp.operator == Token.NOTEQ) {
-			// object comparison
-			cmp.lvalue.accept(this, null);
-			cmp.rvalue.accept(this, null);
-			if (cmp.operator == Token.EQEQ) {
-				writer.visitJumpInsn(cond ? Opcodes.IF_ACMPEQ : Opcodes.IF_ACMPNE, jumpto);
-			} else {
-				writer.visitJumpInsn(cond ? Opcodes.IF_ACMPNE : Opcodes.IF_ACMPEQ, jumpto);
-			}
-		} else {
-			// general comparison
-			cmp.lvalue.accept(this, null);
-			cmp.rvalue.accept(this, null);
-			Type type = Type.commonSupertype(cmp.lvalue.rettype(), cmp.rvalue.rettype());
-			if (type == BuiltinType.INT) {
-				writer.visitInsn(Opcodes.ICMP);
-			} else if (type == BuiltinType.LONG) {
-				writer.visitInsn(Opcodes.LCMP);
-			} else if (type == BuiltinType.FLOAT) {
-				writer.visitInsn(Opcodes.FCMP);
-			} else if (type == BuiltinType.DOUBLE) {
-				writer.visitInsn(Opcodes.DCMP);
-			} else {
-				writer.visitInsn(Opcodes.ACMP);
-			}
-			switch (cmp.operator) {
-				case '<':
-					writer.visitJumpInsn(cond ? Opcodes.IFLT : Opcodes.IFGE, jumpto);
-					break;
-				case '>':
-					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLE, jumpto);
-					break;
-				case Token.LTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFLE : Opcodes.IFGT, jumpto);
-					break;
-				case Token.GTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFGE : Opcodes.IFLT, jumpto);
-					break;
-				case Token.EQEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFEQ : Opcodes.IFNE, jumpto);
-					break;
-				case Token.NOTEQ:
-					writer.visitJumpInsn(cond ? Opcodes.IFNE : Opcodes.IFEQ, jumpto);
-					break;
-			}
-		}
-	}
-
-	public Object visitComparison(ComparisonExpr cmp, Object unused) {
+	public Object visitComparison(ComparisonExpr cmp, Object isReturn) {
 		Label lfalse = new Label();
 		Label lafter = new Label();
-		visitCmpInIf(cmp, lfalse, false);
+		visitCondition(cmp, lfalse, false);
 		writer.visitLdcInsn(Boolean.TRUE);
-		writer.visitJumpInsn(Opcodes.GOTO, lafter);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		} else {
+			writer.visitJumpInsn(Opcodes.GOTO, lafter);
+		}
 		writer.visitLabel(lfalse);
 		writer.visitLdcInsn(Boolean.FALSE);
 		writer.visitLabel(lafter);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitConcat(ConcatExpr concat, Object unused) {
+	public Object visitConcat(ConcatExpr concat, Object isReturn) {
 		if (concat.exprs.size() == 1) {
 			Expr str1 = (Expr)concat.exprs.elementAt(0);
-			str1.accept(this, unused);
+			str1.accept(this, Boolean.FALSE);
 		} else if (concat.exprs.size() == 2) {
 			Expr str1 = (Expr)concat.exprs.elementAt(0);
 			Expr str2 = (Expr)concat.exprs.elementAt(1);
 			writer.visitLdcInsn(new FuncObject("String.concat"));
-			str1.accept(this, unused);
+			str1.accept(this, Boolean.FALSE);
 			if (str2.rettype() == BuiltinType.STRING) {
-				str2.accept(this, unused);
+				str2.accept(this, Boolean.FALSE);
 			} else {
 				writer.visitLdcInsn(new FuncObject("Any.tostr"));
-				str2.accept(this, unused);
+				str2.accept(this, Boolean.FALSE);
 				writer.visitCallInsn(Opcodes.CALL, 1);
 			}
 			writer.visitCallInsn(Opcodes.CALL, 2);
@@ -470,95 +543,97 @@ public class EAsmWriter implements ExprVisitor {
 			writer.visitLdcInsn(new FuncObject("new_strbuf"));
 			writer.visitCallInsn(Opcodes.CALL, 0);
 			for (int i=0; i<concat.exprs.size(); i++) {
-				((Expr)concat.exprs.elementAt(i)).accept(this, unused);
+				((Expr)concat.exprs.elementAt(i)).accept(this, Boolean.FALSE);
 				writer.visitCallInsn(Opcodes.CALL, 2);
 			}
 			writer.visitCallInsn(Opcodes.CALL, 1);
 		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitConst(ConstExpr cexpr, Object unused) {
+	public Object visitConst(ConstExpr cexpr, Object isReturn) {
 		if (debug && cexpr.line >= 0) writer.visitLine(cexpr.line);
 		Object obj = cexpr.value;
+		if (isReturn == Boolean.TRUE && obj == Null.NULL) {
+			writer.visitInsn(Opcodes.RET_NULL);
+			return null;
+		}
 		if (obj instanceof Func) {
 			obj = new FuncObject(((Func)obj).signature);
 		}
 		writer.visitLdcInsn(obj);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitDiscard(DiscardExpr disc, Object unused) {
-		disc.expr.accept(this, unused);
+	public Object visitDiscard(DiscardExpr disc, Object isReturn) {
+		disc.expr.accept(this, Boolean.FALSE);
 		writer.visitInsn(Opcodes.POP);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RET_NULL);
+		}
 		return null;
 	}
 
-	public Object visitDoWhile(DoWhileExpr wexpr, Object unused) {
+	public Object visitDoWhile(DoWhileExpr wexpr, Object isReturn) {
 		Label lstart = new Label();
 		Label lafter = new Label();
 		// writing body
 		writer.visitLabel(lstart);
-		wexpr.body.accept(this, unused);
+		wexpr.body.accept(this, Boolean.FALSE);
 		// writing condition
-		if (wexpr.condition instanceof ConstExpr && ((ConstExpr)wexpr.condition).value.equals(Boolean.TRUE)) {
-			writer.visitJumpInsn(Opcodes.GOTO, lstart);
-		} else if (wexpr.condition instanceof ComparisonExpr) {
-			visitCmpInIf((ComparisonExpr)wexpr.condition, lstart, true);
-		} else if (wexpr.condition instanceof UnaryExpr) {
-			((UnaryExpr)wexpr.condition).expr.accept(this, unused);
-			writer.visitJumpInsn(Opcodes.IFEQ, lstart);
-		} else {
-			wexpr.condition.accept(this, unused);
-			writer.visitJumpInsn(Opcodes.IFNE, lstart);
-		}
+		visitCondition(wexpr.condition, lstart, true);
 		writer.visitLabel(lafter);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RET_NULL);
+		}
 		return null;
 	}
 
-	public Object visitFCall(FCallExpr fcall, Object unused) {
-		fcall.fload.accept(this, unused);
+	public Object visitFCall(FCallExpr fcall, Object isReturn) {
+		fcall.fload.accept(this, Boolean.FALSE);
 		for (int i=0; i<fcall.args.length; i++) {
-			fcall.args[i].accept(this, unused);
+			fcall.args[i].accept(this, Boolean.FALSE);
 		}
 		if (fcall.rettype() == BuiltinType.NONE) {
 			writer.visitCallInsn(Opcodes.CALV, fcall.args.length);
+			if (isReturn == Boolean.TRUE) {
+				writer.visitInsn(Opcodes.RET_NULL);
+			}
 		} else {
 			writer.visitCallInsn(Opcodes.CALL, fcall.args.length);
+			if (isReturn == Boolean.TRUE) {
+				writer.visitInsn(Opcodes.RETURN);
+			}
 		}
 		return null;
 	}
 
-	public Object visitIf(IfExpr ifexpr, Object unused) {
+	public Object visitIf(IfExpr ifexpr, Object isReturn) {
 		Label lelse = new Label();
 		Label lafter = new Label();
 		// writing if condition
-		if (ifexpr.condition instanceof ComparisonExpr) {
-			visitCmpInIf((ComparisonExpr)ifexpr.condition, lelse, false);
-		} else if (ifexpr.condition instanceof UnaryExpr) {
-			((UnaryExpr)ifexpr.condition).expr.accept(this, unused);
-			writer.visitJumpInsn(Opcodes.IFNE, lelse);
-		} else {
-			ifexpr.condition.accept(this, unused);
-			writer.visitJumpInsn(Opcodes.IFEQ, lelse);
-		}
+		visitCondition(ifexpr.condition, lelse, false);
 		// writing if body
-		ifexpr.ifexpr.accept(this, unused);
+		ifexpr.ifexpr.accept(this, isReturn);
 		// writing else body
-		if (ifexpr.elseexpr instanceof NoneExpr) {
-			writer.visitLabel(lelse);
-		} else {
+		if (!(ifexpr.elseexpr instanceof NoneExpr) && isReturn != Boolean.TRUE) {
 			writer.visitJumpInsn(Opcodes.GOTO, lafter);
-			writer.visitLabel(lelse);
-			ifexpr.elseexpr.accept(this, unused);
 		}
+		writer.visitLabel(lelse);
+		ifexpr.elseexpr.accept(this, isReturn);
 		writer.visitLabel(lafter);
 		return null;
 	}
 
-	public Object visitNewArray(NewArrayExpr newarray, Object unused) {
+	public Object visitNewArray(NewArrayExpr newarray, Object isReturn) {
 		if (debug) writer.visitLine(newarray.line);
-		newarray.lengthexpr.accept(this, unused);
+		newarray.lengthexpr.accept(this, Boolean.FALSE);
 		Type artype = newarray.rettype();
 		Type eltype = null;
 		if (artype instanceof ArrayType)
@@ -582,10 +657,13 @@ public class EAsmWriter implements ExprVisitor {
 		} else {
 			writer.visitInsn(Opcodes.NEWAA);
 		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object unused) {
+	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object isReturn) {
 		if (debug) writer.visitLine(newarray.line);
 		writer.visitLdcInsn(Int.toInt(newarray.initializers.length));
 		Type artype = newarray.rettype();
@@ -616,7 +694,7 @@ public class EAsmWriter implements ExprVisitor {
 			if (e != null) {
 				writer.visitInsn(Opcodes.DUP);
 				writer.visitLdcInsn(Int.toInt(i));
-				e.accept(this, unused);
+				e.accept(this, Boolean.FALSE);
 				if (eltype == BuiltinType.BYTE) {
 					writer.visitInsn(Opcodes.BASTORE);
 				} else if (eltype == BuiltinType.CHAR) {
@@ -638,15 +716,21 @@ public class EAsmWriter implements ExprVisitor {
 				}
 			}
 		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitNone(NoneExpr none, Object unused) {
+	public Object visitNone(NoneExpr none, Object isReturn) {
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RET_NULL);
+		}
 		return null;
 	}
 
-	public Object visitSwitch(SwitchExpr swexpr, Object unused) {
-		swexpr.indexexpr.accept(this, unused);
+	public Object visitSwitch(SwitchExpr swexpr, Object isReturn) {
+		swexpr.indexexpr.accept(this, Boolean.FALSE);
 		// computing count of numbers, min, max
 		int count = 0;
 		int min = 0;
@@ -690,8 +774,10 @@ public class EAsmWriter implements ExprVisitor {
 			if (swexpr.elseexpr != null) {
 				writer.visitTableSwitch(min, max, ldflt, labels);
 				writer.visitLabel(ldflt);
-				swexpr.elseexpr.accept(this, unused);
-				writer.visitJumpInsn(Opcodes.GOTO, lafter);
+				swexpr.elseexpr.accept(this, isReturn);
+				if (isReturn != Boolean.TRUE) {
+					writer.visitJumpInsn(Opcodes.GOTO, lafter);
+				}
 			} else {
 				writer.visitTableSwitch(min, max, lafter, labels);
 			}
@@ -712,8 +798,10 @@ public class EAsmWriter implements ExprVisitor {
 			if (swexpr.elseexpr != null) {
 				writer.visitLookupSwitch(ldflt, keys, labels);
 				writer.visitLabel(ldflt);
-				swexpr.elseexpr.accept(this, unused);
-				writer.visitJumpInsn(Opcodes.GOTO, lafter);
+				swexpr.elseexpr.accept(this, isReturn);
+				if (isReturn != Boolean.TRUE) {
+					writer.visitJumpInsn(Opcodes.GOTO, lafter);
+				}
 			} else {
 				writer.visitLookupSwitch(lafter, keys, labels);
 			}
@@ -722,8 +810,8 @@ public class EAsmWriter implements ExprVisitor {
 		for (int i=0; i<labelsunique.length; i++) {
 			Expr e = (Expr)swexpr.exprs.elementAt(i);
 			writer.visitLabel(labelsunique[i]);
-			e.accept(this, unused);
-			if (i != labelsunique.length-1) {
+			e.accept(this, isReturn);
+			if (isReturn != Boolean.TRUE && i != labelsunique.length-1) {
 				writer.visitJumpInsn(Opcodes.GOTO, lafter);
 			}
 		}
@@ -731,13 +819,15 @@ public class EAsmWriter implements ExprVisitor {
 		return null;
 	}
 
-	public Object visitTryCatch(TryCatchExpr trycatch, Object unused) {
+	public Object visitTryCatch(TryCatchExpr trycatch, Object isReturn) {
 		Label trystart = new Label();
 		Label tryend = new Label();
 		Label aftertry = new Label();
 		writer.visitLabel(trystart);
-		trycatch.tryexpr.accept(this, unused);
-		writer.visitJumpInsn(Opcodes.GOTO, aftertry);
+		trycatch.tryexpr.accept(this, isReturn);
+		if (isReturn != Boolean.TRUE) {
+			writer.visitJumpInsn(Opcodes.GOTO, aftertry);
+		}
 		writer.visitLabel(tryend);
 		writer.visitTryCatchHandler(trystart, tryend);
 		if (trycatch.catchvar == null) {
@@ -745,26 +835,26 @@ public class EAsmWriter implements ExprVisitor {
 		} else {
 			writer.visitVarInsn(Opcodes.STORE, trycatch.catchvar.index);
 		}
-		trycatch.catchexpr.accept(this, unused);
+		trycatch.catchexpr.accept(this, isReturn);
 		writer.visitLabel(aftertry);
 		return null;
 	}
 	
-	public Object visitUnary(UnaryExpr unary, Object unused) {
+	public Object visitUnary(UnaryExpr unary, Object isReturn) {
 		Type type = unary.rettype();
 		switch (unary.operator) {
 			case '+':
-				unary.expr.accept(this, unused);
-				break;
+				unary.expr.accept(this, isReturn);
+				return null;
 			case '-':
-				unary.expr.accept(this, unused);
+				unary.expr.accept(this, Boolean.FALSE);
 				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.INEG);
 				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LNEG);
 				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FNEG);
 				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DNEG);
 				break;
 			case '~':
-				unary.expr.accept(this, unused);
+				unary.expr.accept(this, Boolean.FALSE);
 				if (type == BuiltinType.INT) {
 					writer.visitLdcInsn(Int.M_ONE);
 					writer.visitInsn(Opcodes.IXOR);
@@ -775,39 +865,38 @@ public class EAsmWriter implements ExprVisitor {
 				break;
 			case '!':
 				writer.visitLdcInsn(Int.ONE);
-				unary.expr.accept(this, unused);
+				unary.expr.accept(this, Boolean.FALSE);
 				writer.visitInsn(Opcodes.ISUB);
 				break;
+		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
 		}
 		return null;
 	}
 
-	public Object visitVar(VarExpr vexpr, Object unused) {
+	public Object visitVar(VarExpr vexpr, Object isReturn) {
 		if (debug) writer.visitLine(vexpr.line);
 		writer.visitVarInsn(Opcodes.LOAD, vexpr.var.index);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
 		return null;
 	}
 
-	public Object visitWhile(WhileExpr wexpr, Object unused) {
+	public Object visitWhile(WhileExpr wexpr, Object isReturn) {
 		Label lstart = new Label();
 		Label lafter = new Label();
 		// writing condition
 		writer.visitLabel(lstart);
-		if (wexpr.condition instanceof ConstExpr && ((ConstExpr)wexpr.condition).value.equals(Boolean.TRUE)) {
-			// nothing to check
-		} else if (wexpr.condition instanceof ComparisonExpr) {
-			visitCmpInIf((ComparisonExpr)wexpr.condition, lafter, false);
-		} else if (wexpr.condition instanceof UnaryExpr) {
-			((UnaryExpr)wexpr.condition).expr.accept(this, unused);
-			writer.visitJumpInsn(Opcodes.IFNE, lafter);
-		} else {
-			wexpr.condition.accept(this, unused);
-			writer.visitJumpInsn(Opcodes.IFEQ, lafter);
-		}
+		visitCondition(wexpr.condition, lafter, false);
 		// writing body
-		wexpr.body.accept(this, unused);
+		wexpr.body.accept(this, Boolean.FALSE);
 		writer.visitJumpInsn(Opcodes.GOTO, lstart);
 		writer.visitLabel(lafter);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RET_NULL);
+		}
 		return null;
 	}
 }
