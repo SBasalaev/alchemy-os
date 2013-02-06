@@ -149,7 +149,7 @@ public class ELibBuilder implements LibBuilder {
 						}
 					}
 					//constructing function
-					Function func = new EFunction(libname, fname, cpool, stacksize, localsize, code, lnumtable, errtable);
+					Function func = new EtherFunction(libname, fname, cpool, stacksize, localsize, code, lnumtable, errtable);
 					cpool[cindex] = func;
 					if ((fflags & Opcodes.FFLAG_SHARED) != 0) lib.putFunc(func);
 				} break;

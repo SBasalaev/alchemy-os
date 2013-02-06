@@ -24,10 +24,10 @@ import alchemy.core.Function;
 import alchemy.core.Int;
 
 /**
- * Embedded Virtual Machine.
+ * Ether Virtual Machine.
  * @author Sergey Basalaev
  */
-class EFunction extends Function {
+class EtherFunction extends Function {
 
 	private final int stacksize;
 	private final int localsize;
@@ -37,7 +37,7 @@ class EFunction extends Function {
 	private final Object[] cpool;
 	private final String libname;
 
-	public EFunction(String libname, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
+	public EtherFunction(String libname, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
 		super(funcname);
 		this.libname = libname;
 		this.stacksize = stacksize;
