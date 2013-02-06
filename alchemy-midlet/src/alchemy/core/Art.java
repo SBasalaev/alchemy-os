@@ -19,7 +19,6 @@
 package alchemy.core;
 
 import alchemy.evm.ELibBuilder;
-import alchemy.nlib.NativeLibBuilder;
 
 /**
  * Alchemy runtime.
@@ -31,7 +30,6 @@ public final class Art {
 	LibCache cache = new LibCache();
 
 	ELibBuilder etherbuilder = new ELibBuilder();
-	NativeLibBuilder nativebuilder = new NativeLibBuilder();
 
 	/**
 	 * Creates new Alchemy runtime.

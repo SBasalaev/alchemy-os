@@ -408,7 +408,19 @@ public class Context {
 					return hl;
 				}
 				case ('#' << 8) | '@': { // native library
-					lib = art.nativebuilder.build(this, in);
+					UTFReader r = new UTFReader(in);
+					String classname = r.readLine();
+					try {
+						lib = (Library)Class.forName(classname).newInstance();
+					} catch (ClassNotFoundException cnfe) {
+						throw new InstantiationException("Class not found: "+classname);
+					} catch (IllegalAccessException iae) {
+						throw new InstantiationException("Class not accessible: "+classname);
+					} catch (ClassCastException cce) {
+						throw new InstantiationException("Not a library: "+classname);
+					} catch (NoClassDefFoundError ncdfe) {
+						throw new InstantiationException("Unsupported API: " + ncdfe.getMessage());
+					}
 					in.close();
 					art.cache.putLibrary(libfile, tstamp, lib);
 					return lib;
