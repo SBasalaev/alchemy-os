@@ -384,42 +384,47 @@ public class Context {
 		InputStream in = FSManager.fs().read(libfile);
 		try {
 			int magic = (in.read() << 8) | in.read();
-			if (magic < 0)
-				throw new InstantiationException("Unknown library format");
-			//parsing link
-			if (magic == (short)(('#'<<8)|'=')) {
-				String fname = new UTFReader(in).readLine();
-				in.close();
-				if (fname.charAt(0) != '/') {
-					fname = Filesystem.fparent(libfile)+'/'+fname;
+			switch (magic) {
+				case ('#' << 8) | '=': { // link to another library
+					String fname = new UTFReader(in).readLine();
+					in.close();
+					if (fname.charAt(0) != '/') {
+						fname = Filesystem.fparent(libfile)+'/'+fname;
+					}
+					lib = loadLibForPath(fname, pathlist);
+					art.cache.putLibrary(libfile, tstamp, lib);
+					return lib;
 				}
-				lib = loadLibForPath(fname, pathlist);
-				art.cache.putLibrary(libfile, tstamp, lib);
-				return lib;
-			//parsing shebang
-			} else if (magic == (short)(('#'<<8)|'!')) {
-				String[] args = IO.split(new UTFReader(in).readLine(), ' ');
-				in.close();
-				String progname = args[0];
-				System.arraycopy(args, 1, args, 0, args.length-1);
-				args[args.length-1] = libfile.toString();
-				HashLibrary hl = new HashLibrary();
-				hl.putFunc(new ShebangFunction(progname, args));
-				hl.lock();
-				art.cache.putLibrary(libfile, tstamp, hl);
-				return hl;
+				case ('#' << 8) | '!': { // shebang
+					String[] args = IO.split(new UTFReader(in).readLine(), ' ');
+					in.close();
+					String progname = args[0];
+					System.arraycopy(args, 1, args, 0, args.length-1);
+					args[args.length-1] = libfile.toString();
+					HashLibrary hl = new HashLibrary();
+					hl.putFunc(new ShebangFunction(progname, args));
+					hl.lock();
+					art.cache.putLibrary(libfile, tstamp, hl);
+					return hl;
+				}
+				case ('#' << 8) | '@': { // native library
+					lib = art.nativebuilder.build(this, in);
+					in.close();
+					art.cache.putLibrary(libfile, tstamp, lib);
+					return lib;
+				}
+				case 0xC0DE: { // Ether library
+					lib = art.etherbuilder.build(this, in);
+					in.close();
+					art.cache.putLibrary(libfile, tstamp, lib);
+					return lib;
+				}
+				default:
+					throw new InstantiationException("Unknown library format");
 			}
-			LibBuilder builder = art.builders.get((short)magic);
-			if (builder == null)
-				throw new InstantiationException("Unknown library format");
-			lib = builder.build(this, in);
-			in.close();
-			//caching
-			art.cache.putLibrary(libfile, tstamp, lib);
 		} finally {
 			try { in.close(); } catch (IOException ioe) { }
 		}
-		return lib;
 	}
 
 	/**

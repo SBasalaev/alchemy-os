@@ -18,7 +18,8 @@
 
 package alchemy.core;
 
-import alchemy.fs.Filesystem;
+import alchemy.evm.ELibBuilder;
+import alchemy.nlib.NativeLibBuilder;
 
 /**
  * Alchemy runtime.
@@ -28,7 +29,9 @@ public final class Art {
 
 	private Context root;
 	LibCache cache = new LibCache();
-	BuilderMap builders = new BuilderMap();
+
+	ELibBuilder etherbuilder = new ELibBuilder();
+	NativeLibBuilder nativebuilder = new NativeLibBuilder();
 
 	/**
 	 * Creates new Alchemy runtime.
@@ -42,12 +45,5 @@ public final class Art {
 	 */
 	public Context rootContext() {
 		return root;
-	}
-
-	/**
-	 * Associates given builder with given magic.
-	 */
-	public void setLibBuilder(short magic, LibBuilder builder) {
-		builders.put(magic, builder);
 	}
 }

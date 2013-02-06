@@ -50,8 +50,6 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			FSManager.mount("", prop.get(InstallInfo.FS_TYPE), prop.get(InstallInfo.FS_INIT));
 			//setting up environment
 			runtime = new Art();
-			runtime.setLibBuilder((short)0xC0DE, new ELibBuilder());
-			runtime.setLibBuilder((short)(('#'<<8)|'@'), new NativeLibBuilder());
 			Context root = runtime.rootContext();
 			root.setEnv("PATH", "/bin");
 			root.setEnv("LIBPATH", "/lib");
