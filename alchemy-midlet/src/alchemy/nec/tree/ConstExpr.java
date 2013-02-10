@@ -29,7 +29,7 @@ import alchemy.core.Int;
 public class ConstExpr extends Expr {
 
 	public final Object value;
-	public final int line;
+	private final int line;
 
 	public ConstExpr(int lnum, Object obj) {
 		line = lnum;

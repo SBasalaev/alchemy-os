@@ -26,7 +26,7 @@ public class NewArrayExpr extends Expr {
 
 	private final Type type;
 	public Expr lengthexpr;
-	public final int line;
+	private final int line;
 
 	public NewArrayExpr(int lnum, Type type, Expr lengthexpr) {
 		this.line = lnum;

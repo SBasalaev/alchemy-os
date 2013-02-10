@@ -25,7 +25,7 @@ package alchemy.nec.tree;
 public class VarExpr extends Expr {
 
 	public Var var;
-	public final int line;
+	private final int line;
 
 	public VarExpr(int lnum, Var v) {
 		this.line = lnum;

@@ -73,7 +73,7 @@ public class FunctionWriter implements Opcodes {
 		if (len == 0) {
 			throw new IllegalStateException("Source is not visited");
 		}
-		if (dbgtable.length() < 2 || dbgtable.charAt(dbgtable.length()-2) != num) {
+		if (num >= 0 && (len < 2 || dbgtable.charAt(len-2) != num)) {
 			dbgtable.append((char)num).append((char)data.size());
 		}
 	}

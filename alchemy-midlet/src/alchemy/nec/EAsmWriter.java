@@ -555,7 +555,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitConst(ConstExpr cexpr, Object isReturn) {
-		if (debug && cexpr.line >= 0) writer.visitLine(cexpr.line);
+		if (debug) writer.visitLine(cexpr.lineNumber());
 		Object obj = cexpr.value;
 		if (isReturn == Boolean.TRUE && obj == Null.NULL) {
 			writer.visitInsn(Opcodes.RET_NULL);
@@ -632,7 +632,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitNewArray(NewArrayExpr newarray, Object isReturn) {
-		if (debug) writer.visitLine(newarray.line);
+		if (debug) writer.visitLine(newarray.lineNumber());
 		newarray.lengthexpr.accept(this, Boolean.FALSE);
 		Type artype = newarray.rettype();
 		Type eltype = null;
@@ -664,7 +664,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object isReturn) {
-		if (debug) writer.visitLine(newarray.line);
+		if (debug) writer.visitLine(newarray.lineNumber());
 		writer.visitLdcInsn(Int.toInt(newarray.initializers.length));
 		Type artype = newarray.rettype();
 		Type eltype = null;
@@ -876,7 +876,7 @@ public class EAsmWriter implements ExprVisitor {
 	}
 
 	public Object visitVar(VarExpr vexpr, Object isReturn) {
-		if (debug) writer.visitLine(vexpr.line);
+		if (debug) writer.visitLine(vexpr.lineNumber());
 		writer.visitVarInsn(Opcodes.LOAD, vexpr.var.index);
 		if (isReturn == Boolean.TRUE) {
 			writer.visitInsn(Opcodes.RETURN);

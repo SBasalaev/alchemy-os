@@ -85,7 +85,7 @@ public class Optimizer implements ExprVisitor {
 				Expr e = newarray.initializers[i];
 				if (e != null) block.exprs.addElement(new DiscardExpr(e));
 			}
-			block.exprs.addElement(new ConstExpr(newarray.line, Int.toInt(newarray.initializers.length)));
+			block.exprs.addElement(new ConstExpr(newarray.lineNumber(), Int.toInt(newarray.initializers.length)));
 			return block;
 		}
 		return alen;
@@ -389,7 +389,7 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 			}
-			return new ConstExpr(((ConstExpr)binary.lvalue).line, c1);
+			return new ConstExpr(binary.lineNumber(), c1);
 		}
 		return binary;
 	}
@@ -442,7 +442,7 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			Type toType = cast.toType;
 			Object cnst = ((ConstExpr)cast.expr).value;
-			int line = ((ConstExpr)cast.expr).line;
+			int line = cast.lineNumber();
 			if (cnst instanceof Int) {
 				int i = ((Int)cnst).value;
 				if (toType == BuiltinType.DOUBLE) {
@@ -583,7 +583,7 @@ public class Optimizer implements ExprVisitor {
 					}
 					break;
 			}
-			return new ConstExpr(((ConstExpr)cmp.lvalue).line, c1);
+			return new ConstExpr(cmp.lineNumber(), c1);
 		} else if (cmp.lvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)cmp.lvalue).value;
 			if (cnst.equals(Int.ZERO)) {
@@ -634,7 +634,7 @@ public class Optimizer implements ExprVisitor {
 				Object o1 = ((ConstExpr)e1).value;
 				Object o2 = ((ConstExpr)e2).value;
 				if (!(o1 instanceof Func) && !(o2 instanceof Func)) {
-					exprs.setElementAt(new ConstExpr(((ConstExpr)e1).line, String.valueOf(o1)+o2), i);
+					exprs.setElementAt(new ConstExpr(e1.lineNumber(), String.valueOf(o1)+o2), i);
 					exprs.removeElementAt(i+1);
 					optimized = true;
 				} else {
@@ -777,8 +777,8 @@ public class Optimizer implements ExprVisitor {
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
 				if (!(cnst instanceof Func)) {
 					optimized = true;
-					int line = ((ConstExpr)fcall.args[0]).line;
-					if (fcall.args[0].rettype().equals(BuiltinType.CHAR)) {
+					int line = fcall.lineNumber();
+					if (fcall.args[0].rettype() == BuiltinType.CHAR) {
 						return new ConstExpr(line, String.valueOf((char) ((Int)cnst).value));
 					} else {
 						return new ConstExpr(line, String.valueOf(cnst));
@@ -983,7 +983,7 @@ public class Optimizer implements ExprVisitor {
 					break;
 			}
 			optimized = true;
-			return new ConstExpr(((ConstExpr)unary.expr).line, cnst);
+			return new ConstExpr(unary.lineNumber(), cnst);
 		}
 		// optimize !(expr cmp expr)
 		if (unary.expr instanceof ComparisonExpr) {
