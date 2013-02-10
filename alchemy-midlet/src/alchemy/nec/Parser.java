@@ -839,6 +839,22 @@ public class Parser {
 					throw new ParseException("Constant "+varname+" is not initialized");
 				}
 			}
+			// initializing primitive type
+			if (vartype instanceof BuiltinType && varvalue == null) {
+				if (vartype == BuiltinType.BOOL) {
+					varvalue = new ConstExpr(lnum, Boolean.FALSE);
+				} else if (vartype == BuiltinType.INT || vartype == BuiltinType.SHORT
+				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
+					varvalue = new ConstExpr(lnum, Int.ZERO);
+				} else if (vartype == BuiltinType.LONG) {
+					varvalue = new ConstExpr(lnum, new Long(0l));
+				} else if (vartype == BuiltinType.FLOAT) {
+					varvalue = new ConstExpr(lnum, new Float(0f));
+				} else if (vartype == BuiltinType.DOUBLE) {
+					varvalue = new ConstExpr(lnum, new Double(0d));
+				}
+			}
+			// adding variable and returning expression
 			if (scope.addVar(v)) {
 				warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
 			}
