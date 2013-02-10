@@ -514,6 +514,9 @@ public class Optimizer implements ExprVisitor {
 	 * CF:
 	 *   const op const  =&gt;  const
 	 * 
+	 *   bool == bool  =&gt;  !(bool ^ bool)
+	 *   bool != bool  =&gt;  bool ^ bool
+	 * 
 	 * HELP COMPILER (so it can check only rvalue):
 	 *   0 &lt; expr   =&gt;  expr &gt; 0
 	 *   0 &gt; expr   =&gt;  expr &lt; 0
@@ -597,6 +600,15 @@ public class Optimizer implements ExprVisitor {
 					case Token.GTEQ: cmp.operator = Token.LTEQ; break;
 				}
 				return cmp;
+			}
+		}
+		if (cmp.lvalue.rettype() == BuiltinType.BOOL && cmp.rvalue.rettype() == BuiltinType.BOOL) {
+			optimized = true;
+			Expr binary = new BinaryExpr(cmp.lvalue, '^', cmp.rvalue);
+			if (cmp.operator == Token.EQEQ) {
+				return new UnaryExpr('!', binary);
+			} else {
+				return binary;
 			}
 		}
 		return cmp;
@@ -924,6 +936,10 @@ public class Optimizer implements ExprVisitor {
 	 *  !(a &gt; b)   =&gt;  a &lt;= b
 	 *  !(a &lt;= b)  =&gt;  a &gt; b
 	 *  !(a &gt;= b)  =&gt;  a &lt; b
+	 * 
+	 *  !!expr  =&gt;  expr
+	 *  --expr  =&gt;  expr
+	 *  ~~expr  =&gt;  expr
 	 * </pre>
 	 */
 	public Object visitUnary(UnaryExpr unary, Object scope) {
@@ -982,6 +998,11 @@ public class Optimizer implements ExprVisitor {
 				case Token.NOTEQ: cmp.operator = Token.EQEQ; break;
 			}
 			return cmp;
+		}
+		// optimize double unary
+		if (unary.expr instanceof UnaryExpr && ((UnaryExpr)unary.expr).operator == unary.operator) {
+			optimized = true;
+			return ((UnaryExpr)unary.expr).expr;
 		}
 		return unary;
 	}
