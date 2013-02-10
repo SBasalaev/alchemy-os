@@ -413,7 +413,7 @@ public class Parser {
 	}
 
 	/**
-	 * Parses definition of function (without the body).
+	 * Parses definition of function (without a body).
 	 */
 	private Func parseFuncDef() throws ParseException, IOException {
 		Func func = new Func(unit);
@@ -461,8 +461,6 @@ public class Parser {
 			t.pushBack();
 			rettype = BuiltinType.NONE;
 		}
-		if (isConstructor && !methodholder.equals(rettype))
-			warn(W_SEMANTIC, "Constructor returns value of different type than " + methodholder);
 		//populating fields
 		func.locals = args;
 		FunctionType ftype = new FunctionType(rettype, new Type[args.size()]);
@@ -471,7 +469,9 @@ public class Parser {
 		}
 		func.signature = fname;
 		func.type = ftype;
-		//some checkings
+		// semantic checks
+		if (isConstructor && !methodholder.equals(rettype))
+			warn(W_SEMANTIC, "Constructor returns value of different type than " + methodholder);
 		if (fname.equals("main")) {
 			if (args.size() != 1) {
 				warn(W_SEMANTIC, "Incorrect number of arguments in main(), should be ([String])");
@@ -488,6 +488,15 @@ public class Parser {
 			if (rettype != BuiltinType.INT && rettype != BuiltinType.NONE) {
 				warn(W_SEMANTIC, "Incompatible return type in main(), should be Int or <none>.");
 			}
+		}
+		if (methodholder != null) {
+			String methodname = fname.substring(fname.lastIndexOf('.')+1);
+			if (methodname.equals("eq") &&
+					(rettype != BuiltinType.BOOL || ftype.args.length != 2 || !ftype.args[1].equals(methodholder)))
+				warn(W_SEMANTIC, "Method " + fname + " cannot be used as override for equality operators");
+			else if (methodname.equals("cmp") &&
+					(rettype != BuiltinType.INT || args.size() != 2 || !ftype.args[1].equals(methodholder)))
+				warn(W_SEMANTIC, "Method " + fname + " cannot be used as override for comparison operators");
 		}
 		return func;
 	}
@@ -1096,7 +1105,7 @@ public class Parser {
 			args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
 		}
 		if (fload instanceof ConstExpr) {
-			return makeFCall(((ConstExpr)fload).line, (Func)((ConstExpr)fload).value, args);
+			return makeFCall(fload.lineNumber(), (Func)((ConstExpr)fload).value, args);
 		} else {
 			return new FCallExpr(fload, args);
 		}
@@ -1211,15 +1220,16 @@ public class Parser {
 		}
 	}
 	
-	private Func findMethod(Type type, String name) throws ParseException {
-		Type stype = type;
+	private Func findMethod(Type ownertype, String name) throws ParseException {
+		Type stype = ownertype;
 		while (stype != null) {
 			Var mvar = unit.getVar(stype.toString()+'.'+name);
 			if (mvar != null) {
-				if (mvar.isConst && mvar.constValue instanceof Func)
-					return (Func)mvar.constValue;
-				else
-					throw new ParseException("Cannot use variable as method");
+				if (mvar.isConst && mvar.constValue instanceof Func) {
+					return (Func) mvar.constValue;
+				} else {
+					throw new ParseException("Cannot use variable " + mvar.name + " as method");
+				}
 			}
 			stype = stype.superType();
 		}
@@ -1376,6 +1386,19 @@ public class Parser {
 			case Token.EQEQ:
 			case Token.NOTEQ: {
 				Type btype = binaryCastType(ltype, rtype);
+				if (btype == BuiltinType.ANY && ltype != BuiltinType.ANY && rtype != BuiltinType.ANY) {
+					throw new ParseException("Incomparable types " + ltype + " and " + rtype);
+				}
+				Func eqmethod = findMethod(ltype, "eq");
+				if (eqmethod != null) {
+					if (eqmethod.type.rettype == BuiltinType.BOOL &&
+							eqmethod.type.args.length == 2 && eqmethod.type.args[1].isSupertypeOf(rtype)) {
+						eqmethod.hits++;
+						Expr fcall = makeFCall(left.lineNumber(), eqmethod, new Expr[] {left, right});
+						return (op == Token.EQEQ) ? fcall : new UnaryExpr('!', fcall);
+					}
+					warn(W_SEMANTIC, "Method " + eqmethod.signature + " is not used as override for " + opstring(op));
+				}
 				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
 			}
 			case Token.AMPAMP: {
