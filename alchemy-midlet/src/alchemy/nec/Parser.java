@@ -27,6 +27,7 @@ import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -36,6 +37,14 @@ import java.util.Vector;
  */
 public class Parser {
 	
+	// deprecated symbols
+	private static final Hashtable deprecated = new Hashtable();
+
+	static {
+		deprecated.put("bacopy", "Use acopy for all arrays.");
+		deprecated.put("cacopy", "Use acopy for all arrays.");
+	}
+
 	// Warning categories
 	private static final int W_ERROR = -1;
 	private static final int W_TYPESAFE = 0;
@@ -236,6 +245,17 @@ public class Parser {
 				}
 				if (varvalue != null) {
 					v.constValue = ((ConstExpr)varvalue).value;
+				} else if (vartype == BuiltinType.BOOL) {
+					v.constValue = Boolean.FALSE;
+				} else if (vartype == BuiltinType.INT || vartype == BuiltinType.SHORT
+				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
+					v.constValue = Int.ZERO;
+				} else if (vartype == BuiltinType.LONG) {
+					v.constValue = new Long(0l);
+				} else if (vartype == BuiltinType.FLOAT) {
+					v.constValue = new Float(0f);
+				} else if (vartype == BuiltinType.DOUBLE) {
+					v.constValue = new Double(0d);
 				}
 				unit.addVar(v);
 			} else if (t.svalue.equals("def")) {
@@ -314,6 +334,26 @@ public class Parser {
 			Var var = new Var(fieldname, vartype);
 			var.index = fields.size();
 			fields.addElement(var);
+			if (t.nextToken() == '=') {
+				Expr varvalue = (Expr) cast(parseExpr(unit), vartype).accept(constOptimizer, unit);
+				if (!(varvalue instanceof ConstExpr))
+					throw new ParseException("Constant expression expected");
+				var.constValue = ((ConstExpr)varvalue).value;
+			} else {
+				t.pushBack();
+				if (vartype == BuiltinType.BOOL) {
+					var.constValue = Boolean.FALSE;
+				} else if (vartype == BuiltinType.INT || vartype == BuiltinType.SHORT
+				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
+					var.constValue = Int.ZERO;
+				} else if (vartype == BuiltinType.LONG) {
+					var.constValue = new Long(0l);
+				} else if (vartype == BuiltinType.FLOAT) {
+					var.constValue = new Float(0f);
+				} else if (vartype == BuiltinType.DOUBLE) {
+					var.constValue = new Double(0d);
+				}
+			}
 		}
 		struct.fields = new Var[fields.size()];
 		for (int i=fields.size()-1; i>=0; i--) {
@@ -615,6 +655,9 @@ public class Parser {
 				return parseKeyword(scope, t.svalue);
 			case Token.WORD: {
 				String str = t.svalue;
+				if (deprecated.get(str) != null) {
+					warn(W_DEPRECATED, "Function " + str + " is deprecated. " + deprecated.get(str));
+				}
 				Var var = scope.getVar(str);
 				if (var == null) throw new ParseException("Variable "+str+" is not defined");
 				// making get expression
@@ -869,10 +912,11 @@ public class Parser {
 				if (t.nextToken() == '{') {
 					// extended structure constructor
 					if (!(type instanceof StructureType))
-						throw new ParseException("Extended constructor but type " + type + " is not structure");
+						throw new ParseException("Extended constructor but type " + type + " is not a structure");
 					boolean first = true;
 					StructureType struct = (StructureType)type;
 					Expr[] init = new Expr[struct.fields.length];
+					// parse explicit initializers
 					while (t.nextToken() != '}') {
 						t.pushBack();
 						if (first) first = false;
@@ -885,6 +929,12 @@ public class Parser {
 							throw new ParseException("Type "+type+" has no member named "+t.svalue);
 						expect('=');
 						init[index] = cast(parseExpr(scope), struct.fields[index].type);
+					}
+					// add implicit initializers
+					for (int i=0; i < init.length; i++) {
+						if (init[i] == null && struct.fields[i].constValue != null) {
+							init[i] = new ConstExpr(t.lineNumber(), struct.fields[i].constValue);
+						}
 					}
 					return new NewArrayByEnumExpr(lnum, type, init);
 				} else if (t.ttype == '(') {
