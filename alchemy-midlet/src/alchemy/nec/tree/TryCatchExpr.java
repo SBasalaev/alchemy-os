@@ -41,6 +41,10 @@ public class TryCatchExpr extends Expr {
 		return tryexpr.rettype();
 	}
 
+	public int lineNumber() {
+		return tryexpr.lineNumber();
+	}
+	
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitTryCatch(this, data);
 	}

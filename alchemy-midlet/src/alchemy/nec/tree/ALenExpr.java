@@ -36,6 +36,10 @@ public class ALenExpr extends Expr {
 		return BuiltinType.INT;
 	}
 
+	public int lineNumber() {
+		return arrayexpr.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitALen(this, data);
 	}

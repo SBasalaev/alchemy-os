@@ -21,6 +21,7 @@ package alchemy.nec.tree;
 import java.util.Vector;
 
 /**
+ * String concatenation expression.
  *
  * @author Sergey Basalaev
  */
@@ -32,6 +33,10 @@ public class ConcatExpr extends Expr {
 
 	public Type rettype() {
 		return BuiltinType.STRING;
+	}
+
+	public int lineNumber() {
+		return ((Expr)exprs.elementAt(0)).lineNumber();
 	}
 
 	public Object accept(ExprVisitor v, Object data) {

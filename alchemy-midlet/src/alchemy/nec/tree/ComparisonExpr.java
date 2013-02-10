@@ -39,6 +39,10 @@ public class ComparisonExpr extends Expr {
 		return BuiltinType.BOOL;
 	}
 
+	public int lineNumber() {
+		return lvalue.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitComparison(this, data);
 	}

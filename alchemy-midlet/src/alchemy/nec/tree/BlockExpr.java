@@ -50,6 +50,11 @@ public class BlockExpr extends Expr implements Scope {
 		return last.rettype();
 	}
 
+	public int lineNumber() {
+		if (exprs.isEmpty()) return -1;
+		return ((Expr)exprs.elementAt(0)).lineNumber();
+	}
+
 	public NamedType getType(String alias) {
 		return parent.getType(alias);
 	}

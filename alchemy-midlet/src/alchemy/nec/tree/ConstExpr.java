@@ -56,6 +56,10 @@ public class ConstExpr extends Expr {
 		}
 	}
 
+	public int lineNumber() {
+		return line;
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitConst(this, data);
 	}

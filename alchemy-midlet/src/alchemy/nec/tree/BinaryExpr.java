@@ -43,6 +43,10 @@ public class BinaryExpr extends Expr {
 		return lvalue.rettype();
 	}
 
+	public int lineNumber() {
+		return lvalue.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitBinary(this, data);
 	}

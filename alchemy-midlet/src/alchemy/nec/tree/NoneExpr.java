@@ -32,6 +32,10 @@ public class NoneExpr extends Expr {
 		return BuiltinType.NONE;
 	}
 
+	public int lineNumber() {
+		return -1;
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitNone(this, data);
 	}

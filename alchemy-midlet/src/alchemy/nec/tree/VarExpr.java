@@ -36,6 +36,10 @@ public class VarExpr extends Expr {
 		return var.type;
 	}
 
+	public int lineNumber() {
+		return line;
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitVar(this, data);
 	}

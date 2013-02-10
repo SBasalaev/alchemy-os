@@ -37,6 +37,10 @@ public class CastExpr extends Expr {
 		return toType;
 	}
 
+	public int lineNumber() {
+		return expr.lineNumber();
+	}
+	
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitCast(this, data);
 	}

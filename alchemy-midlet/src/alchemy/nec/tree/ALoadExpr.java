@@ -39,6 +39,10 @@ public class ALoadExpr extends Expr {
 		return returnType;
 	}
 
+	public int lineNumber() {
+		return arrayexpr.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitALoad(this, data);
 	}

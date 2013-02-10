@@ -38,6 +38,10 @@ public class NewArrayExpr extends Expr {
 		return type;
 	}
 
+	public int lineNumber() {
+		return line;
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitNewArray(this, data);
 	}

@@ -29,5 +29,8 @@ public abstract class Expr {
 	/** Type that this expression returns. */
 	public abstract Type rettype();
 
+	/** Returns line in the source on which expression starts. */
+	public abstract int lineNumber();
+	
 	public abstract Object accept(ExprVisitor v, Object data);
 }

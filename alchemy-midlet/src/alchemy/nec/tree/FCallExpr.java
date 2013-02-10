@@ -41,6 +41,10 @@ public class FCallExpr extends Expr {
 		return ftype.rettype;
 	}
 
+	public int lineNumber() {
+		return fload.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitFCall(this, data);
 	}

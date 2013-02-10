@@ -45,6 +45,10 @@ public class IfExpr extends Expr {
 		return ifexpr.rettype();
 	}
 
+	public int lineNumber() {
+		return condition.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitIf(this, data);
 	}

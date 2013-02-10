@@ -38,6 +38,10 @@ public class WhileExpr extends Expr {
 		return BuiltinType.NONE;
 	}
 
+	public int lineNumber() {
+		return condition.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitWhile(this, data);
 	}

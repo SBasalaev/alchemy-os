@@ -33,6 +33,10 @@ public class DiscardExpr extends Expr {
 		return BuiltinType.NONE;
 	}
 
+	public int lineNumber() {
+		return expr.lineNumber();
+	}
+	
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitDiscard(this, data);
 	}

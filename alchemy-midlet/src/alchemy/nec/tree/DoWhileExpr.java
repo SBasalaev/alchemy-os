@@ -38,6 +38,10 @@ public class DoWhileExpr extends Expr {
 		return BuiltinType.NONE;
 	}
 
+	public int lineNumber() {
+		return body.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitDoWhile(this, data);
 	}

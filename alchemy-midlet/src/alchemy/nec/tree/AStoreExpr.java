@@ -39,6 +39,10 @@ public class AStoreExpr extends Expr {
 		return BuiltinType.NONE;
 	}
 
+	public int lineNumber() {
+		return arrayexpr.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitAStore(this, data);
 	}

@@ -38,6 +38,10 @@ public class NewArrayByEnumExpr extends Expr {
 		return type;
 	}
 
+	public int lineNumber() {
+		return line;
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitNewArrayByEnum(this, data);
 	}

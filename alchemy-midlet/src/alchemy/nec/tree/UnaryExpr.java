@@ -37,6 +37,10 @@ public class UnaryExpr extends Expr {
 		return expr.rettype();
 	}
 
+	public int lineNumber() {
+		return expr.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitUnary(this, data);
 	}

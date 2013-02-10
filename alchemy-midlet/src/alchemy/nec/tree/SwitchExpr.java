@@ -50,6 +50,10 @@ public class SwitchExpr extends Expr {
 		return ((Expr)exprs.firstElement()).rettype();
 	}
 
+	public int lineNumber() {
+		return indexexpr.lineNumber();
+	}
+
 	public Object accept(ExprVisitor v, Object data) {
 		return v.visitSwitch(this, data);
 	}
