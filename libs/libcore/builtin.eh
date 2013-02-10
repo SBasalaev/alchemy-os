@@ -19,3 +19,9 @@ def String.len(): Int;
 const `String.range` = `String.substr`;
 
 def String.hash(): Int;
+
+def acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int);
+const bacopy = acopy;
+const cacopy = acopy;
+
+def Structure.clone(): Structure;
