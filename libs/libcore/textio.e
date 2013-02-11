@@ -1,5 +1,5 @@
 /* Core library: Text I/O
- * (C) 2011-2012 Sergey Basalaev
+ * (C) 2011-2013 Sergey Basalaev
  * Licensed under GPL v3 with linkage exception
  */
 

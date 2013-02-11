@@ -16,11 +16,9 @@ def String.tofloat(): Float;
 def String.todouble(): Double;
 
 def String.len(): Int;
-def String.ch(at: Int): Char;
 def String.indexof(ch: Char): Int;
 def String.lindexof(ch: Char): Int;
 def String.find(sub: String): Int;
-def String.substr(from: Int, to: Int): String;
 def String.ucase(): String;
 def String.lcase(): String;
 def String.concat(str: String): String;
@@ -34,4 +32,3 @@ def String.hash(): Int;
 
 def ca2str(ca: [Char]): String;
 def ba2utf(ba: [Byte]): String;
-def chstr(ch: Char): String;

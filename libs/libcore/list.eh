@@ -28,3 +28,4 @@ def List.reverse(): List;
 def List.toarray(): [Any];
 def List.copyinto(from: Int, buf: Array, ofs: Int, len: Int);
 def List.tostr(): String;
+def List.eq(other: List): Bool;

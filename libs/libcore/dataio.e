@@ -1,52 +1,43 @@
 /* Core library: data I/O functions
- * (C) 2011-2012 Sergey Basalaev
+ * (C) 2011-2013 Sergey Basalaev
  * Licensed under GPL v3 with linkage exception
  */
 
 use "dataio.eh"
 use "math.eh"
 use "string.eh"
+use "error.eh"
 
 def IStream.readbool(): Bool {
   var b = this.read()
-  if (b >= 0)
-    b != 0
-  else
-    null
+  if (b < 0) error(ERR_IO, "End of stream")
+  b != 0
 }
 
 def IStream.readubyte(): Int {
   var b = this.read()
-  if (b >= 0)
-    b
-  else
-    null
+  if (b < 0) error(ERR_IO, "End of stream")
+  b
 }
 
 def IStream.readbyte(): Byte {
   var b = this.read()
-  if (b >= 0)
-    b.cast(Byte)
-  else
-    null
+  if (b < 0) error(ERR_IO, "End of stream")
+  b.cast(Byte)
 }
 
 def IStream.readushort(): Int {
   var b1 = this.read()
   var b2 = this.read()
-  if (b2 >= 0)
-    (b1 << 8) | b2
-  else
-    null
+  if (b2 < 0) error(ERR_IO, "End of stream")
+  (b1 << 8) | b2
 }
 
 def IStream.readshort(): Short {
   var b1 = this.read()
   var b2 = this.read()
-  if (b2 >= 0)
-    ((b1 << 8) | b2).cast(Short)
-  else
-    null
+  if (b2 < 0) error(ERR_IO, "End of stream")
+  ((b1 << 8) | b2).cast(Short)
 }
 
 def IStream.readint(): Int {
@@ -54,53 +45,35 @@ def IStream.readint(): Int {
   var b2 = this.read()
   var b3 = this.read()
   var b4 = this.read()
-  if (b4 >= 0)
-    (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
-  else
-    null
+  if (b4 < 0) error(ERR_IO, "End of stream")
+  (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
 }
 
 def IStream.readlong(): Long {
   var buf = new [Byte](8)
   if (this.readarray(buf, 0, 8) < 8)
-    null
-  else {
-    var l = 0l
-    for (var i=0, i<8, i+=1) {
-      l = (l << 8) | (buf[i] & 0xff)
-    }
-    l
+    error(ERR_IO, "End of stream")
+  var l = 0l
+  for (var i=0, i<8, i+=1) {
+    l = (l << 8) | (buf[i] & 0xff)
   }
+  l
 }
 
 def IStream.readfloat(): Float {
-  var i = this.readint()
-  if (i == null)
-    null
-  else
-    ibits2f(i)
+  ibits2f(this.readint())
 }
 
 def IStream.readdouble(): Double {
-  var l = this.readlong()
-  if (l == null)
-    null
-  else
-    lbits2d(l)
+  lbits2d(this.readlong())
 }
 
 def IStream.readutf(): String {
   var len = this.readushort()
-  if (len == null) {
-    null
-  } else {
-    var buf = new [Byte](len)
-    if (this.readarray(buf, 0, len) < len) {
-      null
-    } else {
-      ba2utf(buf)
-    }
-  }
+  var buf = new [Byte](len)
+  if (this.readarray(buf, 0, len) < len)
+    error(ERR_IO, "End of stream")
+  ba2utf(buf)
 }
 
 def readbool(): Bool = stdin().readbool()

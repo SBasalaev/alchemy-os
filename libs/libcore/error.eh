@@ -15,4 +15,4 @@ const ERR_MEDIA = 111
 
 def Error.code(): Int;
 def Error.msg(): String;
-def error(code: Int, msg: String);
+def error(code: Int = FAIL, msg: String = null);

@@ -1,7 +1,5 @@
 /* Input/Output */
 
-use "connection.eh"
-
 const EOF = -1
 
 type IStream < Any;
@@ -85,8 +83,7 @@ def istream_from_ba(buf: [Byte]): IStream;
 type BArrayOStream < OStream;
 
 def new_baostream(): BArrayOStream;
+const `BArrayOStream.new` = new_baostream;
 def BArrayOStream.len(): Int;
 def BArrayOStream.tobarray(): [Byte];
 def BArrayOStream.reset();
-
-def new_pipe(): StreamConnection;

@@ -1,5 +1,5 @@
 /* Core library: List implementation
- * (C) 2011-2012, Sergey Basalaev
+ * (C) 2011-2013, Sergey Basalaev
  * Licensed under GPL v3 with linkage exception
  */
 
@@ -225,4 +225,12 @@ def List.tostr(): String {
     sb.append(this.data[i])
   }
   sb.addch(']').tostr()
+}
+
+def List.eq(other: List): Bool {
+  var result = other != null && this.size == other.size
+  for (var i=0, result && i < this.size, i+=1) {
+    result = this.data[i] == other.data[i]
+  }
+  result
 }
