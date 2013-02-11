@@ -633,8 +633,10 @@ public class Optimizer implements ExprVisitor {
 			if (e1 instanceof ConstExpr && e2 instanceof ConstExpr) {
 				Object o1 = ((ConstExpr)e1).value;
 				Object o2 = ((ConstExpr)e2).value;
+				if (e1 instanceof CharConstExpr) o1 = String.valueOf((char)((Int)o1).value);
+				if (e2 instanceof CharConstExpr) o2 = String.valueOf((char)((Int)o2).value);
 				if (!(o1 instanceof Func) && !(o2 instanceof Func)) {
-					exprs.setElementAt(new ConstExpr(e1.lineNumber(), String.valueOf(o1)+o2), i);
+					exprs.setElementAt(new ConstExpr(e1.lineNumber(), String.valueOf(o1).concat(String.valueOf(o2))), i);
 					exprs.removeElementAt(i+1);
 					optimized = true;
 				} else {
