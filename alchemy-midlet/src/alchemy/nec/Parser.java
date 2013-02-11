@@ -48,12 +48,13 @@ public class Parser {
 	// Warning categories
 	private static final int W_ERROR = -1;
 	private static final int W_TYPESAFE = 0;
-	private static final int W_SEMANTIC = 1;
-	private static final int W_CAST = 2;
-	private static final int W_VARS = 3;
-	private static final int W_DEPRECATED = 4;
+	private static final int W_MAIN = 1;
+	private static final int W_OPERATORS = 2;
+	private static final int W_CAST = 3;
+	private static final int W_HIDDEN = 4;
+	private static final int W_DEPRECATED = 5;
 	
-	static final String[] WARN_STRINGS = {"typesafe", "semantic", "cast", "vars", "deprecated"};
+	static final String[] WARN_STRINGS = {"typesafe", "main", "operators", "cast", "hidden", "deprecated"};
 
 	// eXperimental feature categories
 	
@@ -471,32 +472,35 @@ public class Parser {
 		func.type = ftype;
 		// semantic checks
 		if (isConstructor && !methodholder.equals(rettype))
-			warn(W_SEMANTIC, "Constructor returns value of different type than " + methodholder);
+			warn(W_OPERATORS, "Constructor returns value of different type than " + methodholder);
 		if (fname.equals("main")) {
 			if (args.size() != 1) {
-				warn(W_SEMANTIC, "Incorrect number of arguments in main(), should be ([String])");
+				warn(W_MAIN, "Incorrect number of arguments in main(), should be ([String])");
 			} else {
 				Type argtype = ((Var)args.elementAt(0)).type;
 				Type shouldbe = new ArrayType(BuiltinType.STRING);
 				if (!argtype.isSupertypeOf(shouldbe)) {
-					warn(W_SEMANTIC, "Incompatible argument type in main()");
+					warn(W_MAIN, "Incompatible argument type in main()");
 				}
 				if (!argtype.equals(shouldbe)) {
-					warn(W_SEMANTIC, "argument of main() should be of type [String]");
+					warn(W_MAIN, "argument of main() should be of type [String]");
 				}
 			}
 			if (rettype != BuiltinType.INT && rettype != BuiltinType.NONE) {
-				warn(W_SEMANTIC, "Incompatible return type in main(), should be Int or <none>.");
+				warn(W_MAIN, "Incompatible return type in main(), should be Int or <none>.");
 			}
 		}
 		if (methodholder != null) {
 			String methodname = fname.substring(fname.lastIndexOf('.')+1);
 			if (methodname.equals("eq") &&
 					(rettype != BuiltinType.BOOL || ftype.args.length != 2 || !ftype.args[1].equals(methodholder)))
-				warn(W_SEMANTIC, "Method " + fname + " cannot be used as override for equality operators");
+				warn(W_OPERATORS, "Method " + fname + " cannot be used as override for equality operators");
 			else if (methodname.equals("cmp") &&
 					(rettype != BuiltinType.INT || args.size() != 2 || !ftype.args[1].equals(methodholder)))
-				warn(W_SEMANTIC, "Method " + fname + " cannot be used as override for comparison operators");
+				warn(W_OPERATORS, "Method " + fname + " cannot be used as override for comparison operators");
+			else if (methodname.equals("tostr") &&
+					(rettype != BuiltinType.STRING || ftype.args.length != 1))
+				warn(W_OPERATORS, "Method " + fname + " cannot be used as override for Any.tostr()");
 		}
 		return func;
 	}
@@ -592,27 +596,49 @@ public class Parser {
 		switch (ttype) {
 			case ';':
 				return new NoneExpr();
-			case '+':
+			case '+': {
+				Expr sub = parsePostfix(scope, parseExprNoop(scope));
+				Type type = sub.rettype();
+				if (type.isSubtypeOf(BuiltinType.NUMBER))
+					return sub;
+				throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
+			}
 			case '-': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
-				if (!type.isSubtypeOf(BuiltinType.NUMBER))
-					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
-				return new UnaryExpr(ttype, sub);				
+				if (type.isSubtypeOf(BuiltinType.NUMBER))
+					return new UnaryExpr(ttype, sub);
+				Func method = findMethod(type, "minus");
+				if (method != null && method.type.args.length == 1) {
+					method.hits++;
+					return makeFCall(sub.lineNumber(), method, new Expr[] { sub });
+				}
+				throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
 			}
 			case '~': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
-				if (type != BuiltinType.INT && type != BuiltinType.LONG)
-					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
-				return new UnaryExpr(ttype, sub);				
+				if (type == BuiltinType.BYTE || type == BuiltinType.SHORT || type == BuiltinType.CHAR) {
+					sub = cast(sub, BuiltinType.INT);
+					type = BuiltinType.INT;
+				}
+				if (type == BuiltinType.INT || type == BuiltinType.LONG) {
+					return new UnaryExpr(ttype, sub);
+				}
+				throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
 			}
 			case '!': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
-				if (type != BuiltinType.BOOL)
-					throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
-				return new UnaryExpr(ttype, sub);				
+				if (type == BuiltinType.BOOL) {
+					return new UnaryExpr(ttype, sub);
+				}
+				Func method = findMethod(type, "not");
+				if (method != null && method.type.args.length == 1) {
+					method.hits++;
+					return makeFCall(sub.lineNumber(), method, new Expr[] { sub });
+				}
+				throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
 			}
 			case '{':
 				return parseBlock(scope);
@@ -908,7 +934,7 @@ public class Parser {
 			}
 			// adding variable and returning expression
 			if (scope.addVar(v)) {
-				warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
+				warn(W_HIDDEN, "Variable "+v.name+" hides another variable with the same name");
 			}
 			if (varvalue != null) {
 				return new AssignExpr(v, varvalue);
@@ -1057,7 +1083,7 @@ public class Parser {
 					throw new ParseException("Identifier expected");
 				v = new Var(t.svalue, BuiltinType.ERROR);
 				if (catchblock.addVar(v)) {
-					warn(W_VARS, "Variable "+v.name+" hides another variable with the same name");
+					warn(W_HIDDEN, "Variable "+v.name+" hides another variable with the same name");
 				}
 				expect(')');
 			} else {
@@ -1358,49 +1384,53 @@ public class Parser {
 	private Expr makeBinaryExpr(Expr left, int op, Expr right) throws ParseException {
 		Type ltype = left.rettype();
 		Type rtype = right.rettype();
+		Type btype = binaryCastType(ltype, rtype);
+		// if built-in operators apply, return them
 		switch (op) {
 			case Token.GTGT:
 			case Token.LTLT:
-			case Token.GTGTGT: {
-				if (ltype == BuiltinType.BYTE || ltype == BuiltinType.SHORT || ltype == BuiltinType.CHAR) {
-					ltype = BuiltinType.INT;
-					left = cast(left, ltype);
+			case Token.GTGTGT:
+				if (btype == BuiltinType.INT || btype == BuiltinType.LONG) {
+					if (ltype == BuiltinType.BYTE || ltype == BuiltinType.SHORT || ltype == BuiltinType.CHAR) {
+						ltype = BuiltinType.INT;
+						left = cast(left, ltype);
+					}
+					if (rtype == BuiltinType.BYTE || rtype == BuiltinType.SHORT || rtype == BuiltinType.CHAR) {
+						rtype = BuiltinType.INT;
+						right = cast(right, ltype);
+					}
+					if (ltype == BuiltinType.INT && (ltype == BuiltinType.LONG || rtype == BuiltinType.INT))
+						return new BinaryExpr(left, op, right);
 				}
-				if (rtype == BuiltinType.BYTE || rtype == BuiltinType.SHORT || rtype == BuiltinType.CHAR) {
-					rtype = BuiltinType.INT;
-					right = cast(right, ltype);
-				}
-				if (ltype != BuiltinType.INT && ltype != BuiltinType.LONG || rtype != BuiltinType.INT)
-						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				return new BinaryExpr(left, op, right);
-			}
+				break;
 			case '<':
 			case '>':
 			case Token.LTEQ:
-			case Token.GTEQ: {
-				if (!(ltype.isSubtypeOf(BuiltinType.NUMBER)) || !(rtype.isSubtypeOf(BuiltinType.NUMBER)))
-					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				Type btype = binaryCastType(ltype, rtype);
-				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
-			}
+			case Token.GTEQ:
+				if (ltype.isSubtypeOf(BuiltinType.NUMBER) && rtype.isSubtypeOf(BuiltinType.NUMBER)) {
+					return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
+				}
+				Func cmpmethod = findMethod(ltype, "cmp");
+				if (cmpmethod != null && cmpmethod.type.rettype == BuiltinType.INT &&
+						cmpmethod.type.args.length == 2 && cmpmethod.type.args[1].isSupertypeOf(rtype)) {
+					cmpmethod.hits++;
+					Expr fcall = makeFCall(left.lineNumber(), cmpmethod, new Expr[] {left, right});
+					return new ComparisonExpr(fcall, op, new ConstExpr(-1, Int.ZERO));
+				}
+				break;
 			case Token.EQEQ:
-			case Token.NOTEQ: {
-				Type btype = binaryCastType(ltype, rtype);
+			case Token.NOTEQ:
 				if (btype == BuiltinType.ANY && ltype != BuiltinType.ANY && rtype != BuiltinType.ANY) {
 					throw new ParseException("Incomparable types " + ltype + " and " + rtype);
 				}
 				Func eqmethod = findMethod(ltype, "eq");
-				if (eqmethod != null) {
-					if (eqmethod.type.rettype == BuiltinType.BOOL &&
-							eqmethod.type.args.length == 2 && eqmethod.type.args[1].isSupertypeOf(rtype)) {
-						eqmethod.hits++;
-						Expr fcall = makeFCall(left.lineNumber(), eqmethod, new Expr[] {left, right});
-						return (op == Token.EQEQ) ? fcall : new UnaryExpr('!', fcall);
-					}
-					warn(W_SEMANTIC, "Method " + eqmethod.signature + " is not used as override for " + opstring(op));
+				if (eqmethod != null && eqmethod.type.rettype == BuiltinType.BOOL &&
+						eqmethod.type.args.length == 2 && eqmethod.type.args[1].isSupertypeOf(rtype)) {
+					eqmethod.hits++;
+					Expr fcall = makeFCall(left.lineNumber(), eqmethod, new Expr[] {left, right});
+					return (op == Token.EQEQ) ? fcall : new UnaryExpr('!', fcall);
 				}
 				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
-			}
 			case Token.AMPAMP: {
 				if (ltype != BuiltinType.BOOL || rtype != BuiltinType.BOOL)
 					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
@@ -1415,10 +1445,16 @@ public class Parser {
 			case '-':
 			case '*':
 			case '/':
-			case '%': {
-				if (ltype == BuiltinType.STRING && op == '+') {
+			case '%':
+				if (ltype == BuiltinType.STRING && op == '+' && rtype != BuiltinType.NONE) {
 					// string concatenation
-					right = cast(right, BuiltinType.ANY);
+					if (rtype != BuiltinType.CHAR) {
+						Func tostr = findMethod(rtype, "tostr");
+						if (!tostr.signature.equals("Any.tostr") && tostr.type.rettype == BuiltinType.STRING && tostr.type.args.length == 1) {
+							tostr.hits++;
+							right = makeFCall(left.lineNumber(), tostr, new Expr[] { right });
+						}
+					}
 					if (left instanceof ConcatExpr) {
 						((ConcatExpr)left).exprs.addElement(right);
 						return left;
@@ -1428,28 +1464,40 @@ public class Parser {
 						cexpr.exprs.addElement(right);
 						return cexpr;
 					}
-				} else {
-					Type btype = binaryCastType(ltype, rtype);
-					if (!(btype.isSubtypeOf(BuiltinType.NUMBER)))
-						throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
+				} else if (btype.isSubtypeOf(BuiltinType.NUMBER)) {
 					return new BinaryExpr(cast(left,btype), op, cast(right,btype));
 				}
-			}
+				break;
 			case '^':
 			case '&':
 			case '|': {
-				Type btype = binaryCastType(ltype, rtype);
-				if (btype != BuiltinType.BOOL && btype != BuiltinType.INT && btype != BuiltinType.LONG)
-					throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
-				return new BinaryExpr(cast(left,btype), op, cast(right,btype));
-			}
-			default: {
-				//should not happen, but...
-				throw new ParseException("There is a bug in compiler."
-					+" Please report it with your source code and"
-					+"the following error message: unusual operator "+opstring(op));
+				if (btype == BuiltinType.BOOL || btype == BuiltinType.INT || btype == BuiltinType.LONG) {
+					return new BinaryExpr(cast(left,btype), op, cast(right,btype));
+				}
 			}
 		}
+		// searching method that overloads operator
+		String methodname = null;
+		switch (op) {
+			case Token.LTLT: methodname = "shl"; break;
+			case Token.GTGT: methodname = "shr"; break;
+			case Token.GTGTGT: methodname = "ushr"; break;
+			case '+': methodname = "add"; break;
+			case '-': methodname = "sub"; break;
+			case '*': methodname = "mul"; break;
+			case '/': methodname = "div"; break;
+			case '%': methodname = "mod"; break;
+			case '^': methodname = "xor"; break;
+			case '&': methodname = "and"; break;
+			case '|': methodname = "or"; break;
+		}
+		Func method = null;
+		if (methodname != null) method = findMethod(ltype, methodname);
+		if (method != null && method.type.args.length == 2 && method.type.args[1].isSupertypeOf(rtype)) {
+			method.hits++;
+			return makeFCall(left.lineNumber(), method, new Expr[] { left, right });
+		}
+		throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 	}
 
 	/**
