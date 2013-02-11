@@ -444,6 +444,7 @@ public class Parser {
 			args.addElement(new Var("this", methodholder));
 		}
 		boolean first = true;
+		boolean defaults = false;
 		while (t.nextToken() != ')') {
 			t.pushBack();
 			if (first) first = false;
@@ -453,7 +454,21 @@ public class Parser {
 			String varname = t.svalue;
 			expect(':');
 			Type vartype = parseType(func);
-			args.addElement(new Var(varname, vartype));
+			Var var = new Var(varname, vartype);
+			args.addElement(var);
+			if (t.nextToken() == '=') {
+				defaults = true;
+				Expr expr = (Expr) cast(parseExpr(unit), vartype).accept(constOptimizer, unit);
+				if (expr instanceof ConstExpr) {
+					var.constValue = ((ConstExpr)expr).value;
+				} else {
+					throw new ParseException("Constant expression expected");
+				}
+			} else if (defaults) {
+				throw new ParseException("No default provided for argument " + varname);
+			} else {
+				t.pushBack();
+			}
 		}
 		Type rettype;
 		if (t.nextToken() == ':') {
@@ -1141,9 +1156,17 @@ public class Parser {
 			else expect(',');
 			vargs.addElement(parseExpr(scope));
 		}
+		// add default argument values
+		if (vargs.size() < ftype.args.length && fload instanceof ConstExpr) {
+			Func f = (Func) ((ConstExpr)fload).value;
+			for (int i=vargs.size(); i < ftype.args.length; i++) {
+				Var v = (Var) f.locals.elementAt(i);
+				if (v.constValue != null) vargs.addElement(new ConstExpr(-1, v.constValue));
+			}
+		}
 		if (ftype.args.length != vargs.size()) {
 			if (fload instanceof ConstExpr) {
-				Func f = (Func)((ConstExpr)fload).value;
+				Func f = (Func) ((ConstExpr)fload).value;
 				throw new ParseException("Wrong number of arguments in call to "+f.signature+"()");
 			} else {
 				throw new ParseException("Wrong number of arguments in function call");
