@@ -515,35 +515,19 @@ public class EAsmWriter implements ExprVisitor {
 		if (concat.exprs.size() == 1) {
 			Expr str1 = (Expr)concat.exprs.elementAt(0);
 			str1.accept(this, Boolean.FALSE);
-		} else if (concat.exprs.size() == 2) {
-			Expr str1 = (Expr)concat.exprs.elementAt(0);
-			Expr str2 = (Expr)concat.exprs.elementAt(1);
-			writer.visitLdcInsn(new FuncObject("String.concat"));
-			str1.accept(this, Boolean.FALSE);
-			if (str2.rettype() == BuiltinType.STRING) {
-				str2.accept(this, Boolean.FALSE);
-			} else {
-				writer.visitLdcInsn(new FuncObject("Any.tostr"));
-				str2.accept(this, Boolean.FALSE);
-				writer.visitCallInsn(Opcodes.CALL, 1);
-			}
-			writer.visitCallInsn(Opcodes.CALL, 2);
 		} else {
 			writer.visitLdcInsn(new FuncObject("Any.tostr"));
-			writer.visitLdcInsn(new FuncObject("StrBuf.append"));
-			writer.visitInsn(Opcodes.DUP);
-			int l = concat.exprs.size()-2;
-			while (l > 1) {
-				writer.visitInsn(Opcodes.DUP2);
-				l -= 2;
-			}
-			if (l > 0) {
-				writer.visitInsn(Opcodes.DUP);
-			}
 			writer.visitLdcInsn(new FuncObject("new_strbuf"));
 			writer.visitCallInsn(Opcodes.CALL, 0);
 			for (int i=0; i<concat.exprs.size(); i++) {
-				((Expr)concat.exprs.elementAt(i)).accept(this, Boolean.FALSE);
+				Expr expr = (Expr)concat.exprs.elementAt(i);
+				if (expr.rettype() == BuiltinType.CHAR) {
+					writer.visitLdcInsn(new FuncObject("StrBuf.addch"));
+				} else {
+					writer.visitLdcInsn(new FuncObject("StrBuf.append"));
+				}
+				writer.visitInsn(Opcodes.SWAP);
+				expr.accept(this, Boolean.FALSE);
 				writer.visitCallInsn(Opcodes.CALL, 2);
 			}
 			writer.visitCallInsn(Opcodes.CALL, 1);
