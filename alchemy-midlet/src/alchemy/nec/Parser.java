@@ -611,7 +611,7 @@ public class Parser {
 				Func method = findMethod(type, "minus");
 				if (method != null && method.type.args.length == 1) {
 					method.hits++;
-					return makeFCall(sub.lineNumber(), method, new Expr[] { sub });
+					return new FCallExpr(new ConstExpr(sub.lineNumber(), method), new Expr[] { sub });
 				}
 				throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
 			}
@@ -636,7 +636,7 @@ public class Parser {
 				Func method = findMethod(type, "not");
 				if (method != null && method.type.args.length == 1) {
 					method.hits++;
-					return makeFCall(sub.lineNumber(), method, new Expr[] { sub });
+					return new FCallExpr(new ConstExpr(sub.lineNumber(), method), new Expr[] { sub });
 				}
 				throw new ParseException("Operator "+(char)ttype+" cannot be applied to "+type);
 			}
@@ -837,7 +837,7 @@ public class Parser {
 						if (!branchkeyv.isEmpty()) expect(',');
 						Expr branchindex = (Expr)parseExpr(scope).accept(constOptimizer, scope);
 						if (!(branchindex instanceof ConstExpr))
-							throw new ParseException("Constant expression expected in switch key");
+							throw new ParseException("Constant expression expected.");
 						if (branchindex.rettype() != BuiltinType.INT)
 							throw new ParseException("switch key is required to be integer");
 						Int idx = (Int)((ConstExpr)branchindex).value;
@@ -1104,11 +1104,34 @@ public class Parser {
 	
 	/**
 	 * Parses expression part after '(' (function application).
+	 *
+	 * <p>
+	 * Does special type checkings and type casts for some functions.
+	 * <dl>
+	 * <dt>{@code Function.curry}</dt>
+	 * <dd>checks if argument is acceptable, computes returned type</dd>
+	 *
+	 * <dt>{@code Structure.clone}</dt>
+	 * <dd>the returned type is the same as of argument</dd>
+	 *
+	 * <dt>{@code acopy}</dt>
+	 * <dd>checks if array elements are assignment compatible</dd>
+	 *
+	 * <dt>{@code StrBuf.append(Char)}</dt>
+	 * <dd>replaces by StrBuf.addch(Char)</dd>
+	 *
+	 * <dt>{@code StrBuf.insert(at, Char)}</dt>
+	 * <dd>replaces by StrBuf.insch(at, Char)</dd>
+	 *
+	 * <dt>{@code print(obj)}, {@code println(obj)}, {@code OStream.print(obj)}, {@code OStream.println(obj)}</dt>
+	 * <dd>replaces argument by {@code obj.tostr()}</dd>
+	 * </dl>
 	 */
 	private Expr parseFCall(Scope scope, Expr fload, Expr firstarg) throws IOException, ParseException {
 		if (!(fload.rettype() instanceof FunctionType))
 			throw new ParseException("Applying () to non-function expression");
 		FunctionType ftype = (FunctionType)fload.rettype();
+		// parse arguments
 		Vector vargs = new Vector();
 		if (firstarg != null) vargs.addElement(firstarg);
 		boolean first = true;
@@ -1126,15 +1149,54 @@ public class Parser {
 				throw new ParseException("Wrong number of arguments in function call");
 			}
 		}
+		// cast arguments to needed types
 		Expr[] args = new Expr[vargs.size()];
 		for (int i=0; i<args.length; i++) {
 			args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
 		}
+		// special processing for some functions
 		if (fload instanceof ConstExpr) {
-			return makeFCall(fload.lineNumber(), (Func)((ConstExpr)fload).value, args);
-		} else {
-			return new FCallExpr(fload, args);
+			Func f = (Func) ((ConstExpr)fload).value;
+			if (f.signature.equals("Function.curry") && args[0].rettype() instanceof FunctionType) {
+				return makeCurry(args[0], args[1]);
+			} else if (f.signature.equals("Structure.clone") && args[0].rettype() instanceof StructureType) {
+				return new CastExpr(args[0].rettype(), new FCallExpr(fload, args));
+			} else if (f.signature.equals("acopy") && args[2].rettype() instanceof ArrayType) {
+				ArrayType toarray = (ArrayType)args[2].rettype();
+				if (args[0].rettype() instanceof ArrayType) {
+					ArrayType fromarray = (ArrayType)args[0].rettype();
+					if (toarray.elementType().isSubtypeOf(fromarray.elementType())
+						&& !toarray.elementType().equals(fromarray.elementType())) {
+						warn(W_TYPESAFE, "Unsafe type cast when copying from "+fromarray+" to "+toarray);
+					} else if (!toarray.elementType().isSupertypeOf(fromarray.elementType())) {
+						throw new ParseException("Cast to the incompatible type when copying from "+fromarray+" to "+toarray);
+					}
+				} else if (toarray.elementType() != BuiltinType.ANY) {
+					warn(W_TYPESAFE, "Unsafe type cast when copying from Array to "+toarray);
+				}
+			} else if (f.signature.equals("StrBuf.append") && args[1].rettype().equals(BuiltinType.CHAR)) {
+				f.hits--;
+				Func addch = unit.getFunc("StrBuf.addch");
+				addch.hits++;
+				return new FCallExpr(new ConstExpr(fload.lineNumber(), addch), args);
+			} else if (f.signature.equals("StrBuf.insert") && args[2].rettype().equals(BuiltinType.CHAR)) {
+				f.hits--;
+				Func insch = unit.getFunc("StrBuf.insch");
+				insch.hits++;
+				return new FCallExpr(new ConstExpr(fload.lineNumber(), insch), args);
+			} else if ((f.signature.equals("print") || f.signature.equals("println")) &&
+					!args[0].rettype().equals(BuiltinType.STRING)) {
+				Func tostr = findMethod(args[0].rettype(), "tostr");
+				tostr.hits++;
+				args[0] = new FCallExpr(new ConstExpr(fload.lineNumber(), tostr), new Expr[] { args[0] });
+			} else if ((f.signature.equals("OStream.print") || f.signature.equals("OStream.println")) &&
+					!args[1].rettype().equals(BuiltinType.STRING)) {
+				Func tostr = findMethod(args[0].rettype(), "tostr");
+				tostr.hits++;
+				args[1] = new FCallExpr(new ConstExpr(fload.lineNumber(), tostr), new Expr[] { args[1] });
+			}
 		}
+		return new FCallExpr(fload, args);
 	}
 	
 	/**
@@ -1151,15 +1213,12 @@ public class Parser {
 				Expr endexpr = cast(parseExpr(scope), BuiltinType.INT);
 				expect(']');
 				Func method = findMethod(artype, "range");
-				if (method == null)
-					throw new ParseException("Method "+artype+".range not found");
-				if (method.type.args.length != 3 ||
-				   method.type.args[1] != BuiltinType.INT ||
-				   method.type.args[2] != BuiltinType.INT)
-					throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
+				if (method == null || method.type.args.length != 3 ||
+				   method.type.args[1] != BuiltinType.INT || method.type.args[2] != BuiltinType.INT)
+						throw new ParseException("Operator [:] cannot be applied to " + artype);
 				Expr startexpr = new ConstExpr(lnum, Int.ZERO);
 				method.hits++;
-				return makeFCall(lnum, method, new Expr[] {arexpr, startexpr, endexpr});
+				return new FCallExpr(new ConstExpr(lnum, method), new Expr[] {arexpr, startexpr, endexpr});
 			}
 		} else {
 			t.pushBack();
@@ -1167,35 +1226,27 @@ public class Parser {
 			if (t.nextToken() == ':') {
 				if (t.nextToken() == ']') { // range with implicit end
 					Func method = findMethod(artype, "len");
-					if (method == null)
-						throw new ParseException("Method "+artype+".len not found");
-					if (method.type.args.length != 1 || method.type.rettype != BuiltinType.INT)
-						throw new ParseException("Method "+artype+".len must be ():Int to use [] notation");
+					if (method == null || method.type.args.length != 1 || method.type.rettype != BuiltinType.INT)
+						throw new ParseException("Operator [:] cannot be applied to " + artype + ", no suitable len()");
 					method.hits++;
-					Expr endexpr = makeFCall(lnum, method, new Expr[] {arexpr});
+					Expr endexpr = new FCallExpr(new ConstExpr(lnum, method), new Expr[] {arexpr});
 					method = findMethod(artype, "range");
-					if (method == null)
-						throw new ParseException("Method "+artype+".range not found");
-					if (method.type.args.length != 3 ||
-					   method.type.args[1] != BuiltinType.INT ||
-					   method.type.args[2] != BuiltinType.INT)
-						throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
+					if (method == null || method.type.args.length != 3 ||
+					   method.type.args[1] != BuiltinType.INT || method.type.args[2] != BuiltinType.INT)
+						throw new ParseException("Operator [:] cannot be applied to " + artype);
 					indexexpr = cast(indexexpr, BuiltinType.INT);
 					method.hits++;
-					return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, endexpr});
+					return new FCallExpr(new ConstExpr(lnum, method), new Expr[] {arexpr, indexexpr, endexpr});
 				} else {
 					t.pushBack();
 					Expr endexpr = cast(parseExpr(scope), BuiltinType.INT);
 					expect(']');
 					Func method = findMethod(artype, "range");
-					if (method == null)
-						throw new ParseException("Method "+artype+".range not found");
-					if (method.type.args.length != 3 ||
-					   method.type.args[1] != BuiltinType.INT ||
-					   method.type.args[2] != BuiltinType.INT)
-						throw new ParseException("Method "+artype+".range must be (Int,Int) to use [] notation");
+					if (method == null || method.type.args.length != 3 ||
+					   method.type.args[1] != BuiltinType.INT || method.type.args[2] != BuiltinType.INT)
+						throw new ParseException("Operator [:] cannot be applied to " + artype);
 					method.hits++;
-					return makeFCall(lnum, method, new Expr[] {arexpr, indexexpr, endexpr});
+					return new FCallExpr(new ConstExpr(lnum, method), new Expr[] {arexpr, indexexpr, endexpr});
 				}
 			} else { // not a range
 				t.pushBack();
@@ -1219,24 +1270,20 @@ public class Parser {
 					Expr getexpr = null;
 					if (operator != '=') {
 						getmethod = findMethod(artype, "get");
-						if (getmethod == null)
-							throw new ParseException("Method "+artype+".get not found");
-						if (getmethod.type.args.length != 2)
-							throw new ParseException("Method "+artype+".get must accept one argument to use [] notation");
+						if (getmethod == null || getmethod.type.args.length != 2)
+							throw new ParseException("Operator [] cannot be applied to " + artype);
 						indexexpr = cast(indexexpr, getmethod.type.args[1]);
 						getmethod.hits++;
-						getexpr = makeFCall(lnum, getmethod, new Expr[] {arexpr, indexexpr});
+						getexpr = new FCallExpr(new ConstExpr(lnum, getmethod), new Expr[] {arexpr, indexexpr});
 					}
 					if (Token.isAssignment(operator)) {
 						Func setmethod = findMethod(artype, "set");
-						if (setmethod == null)
-							throw new ParseException("Method "+artype+".set not found");
-						if (setmethod.type.args.length != 3)
-							throw new ParseException("Method "+artype+".set must accept two arguments to use [] notation");
+						if (setmethod == null || setmethod.type.args.length != 3)
+							throw new ParseException("Operator []= cannot be applied to " + artype);
 						indexexpr = cast(indexexpr, setmethod.type.args[1]);
 						Expr rexpr = cast(makeAssignRval(getexpr, operator, parseExpr(scope)), setmethod.type.args[2]);
 						setmethod.hits++;
-						return makeFCall(lnum, setmethod, new Expr[] {arexpr, indexexpr, rexpr});
+						return new FCallExpr(new ConstExpr(lnum, setmethod), new Expr[] {arexpr, indexexpr, rexpr});
 					} else {
 						t.pushBack();
 						return getexpr;
@@ -1319,16 +1366,12 @@ public class Parser {
 		if (method != null) {
 			method.hits++;
 			if (t.nextToken() == '(') {
+				// applying method
 				return parseFCall(scope, new ConstExpr(lnum, method), expr);
 			} else {
 				t.pushBack();
 				// creating partially applied function
-				Func curry = unit.getFunc("Function.curry");
-				curry.hits++;
-				Expr[] args = new Expr[2];
-				args[0] = new ConstExpr(lnum, method);
-				args[1] = expr;
-				return makeFCall(lnum, curry, args);
+				return makeCurry(new ConstExpr(lnum, method), expr);
 			}
 		}
 		// no such method, trying getter and setter
@@ -1342,7 +1385,7 @@ public class Parser {
 			if (getter.type.args.length != 1)
 				throw new ParseException("Getter for " + type + "." + member + " must accept no arguments");
 			getter.hits++;
-			getexpr = makeFCall(lnum, getter, new Expr[] { expr });
+			getexpr = new FCallExpr(new ConstExpr(lnum, getter), new Expr[] { expr });
 		}
 		if (Token.isAssignment(operator)) {
 			if (setter == null)
@@ -1351,7 +1394,7 @@ public class Parser {
 				throw new ParseException("Setter for " + type + "." + member + " must accept one argument");
 			setter.hits++;
 			Expr setexpr = cast(makeAssignRval(getexpr, operator, parseExpr(scope)), setter.type.args[1]);
-			return makeFCall(lnum, setter, new Expr[] { expr, setexpr });
+			return new FCallExpr(new ConstExpr(lnum, setter), new Expr[] { expr, setexpr });
 		} else {
 			t.pushBack();
 			return getexpr;
@@ -1414,7 +1457,7 @@ public class Parser {
 				if (cmpmethod != null && cmpmethod.type.rettype == BuiltinType.INT &&
 						cmpmethod.type.args.length == 2 && cmpmethod.type.args[1].isSupertypeOf(rtype)) {
 					cmpmethod.hits++;
-					Expr fcall = makeFCall(left.lineNumber(), cmpmethod, new Expr[] {left, right});
+					Expr fcall = new FCallExpr(new ConstExpr(left.lineNumber(), cmpmethod), new Expr[] {left, right});
 					return new ComparisonExpr(fcall, op, new ConstExpr(-1, Int.ZERO));
 				}
 				break;
@@ -1427,7 +1470,7 @@ public class Parser {
 				if (eqmethod != null && eqmethod.type.rettype == BuiltinType.BOOL &&
 						eqmethod.type.args.length == 2 && eqmethod.type.args[1].isSupertypeOf(rtype)) {
 					eqmethod.hits++;
-					Expr fcall = makeFCall(left.lineNumber(), eqmethod, new Expr[] {left, right});
+					Expr fcall = new FCallExpr(new ConstExpr(left.lineNumber(), eqmethod), new Expr[] {left, right});
 					return (op == Token.EQEQ) ? fcall : new UnaryExpr('!', fcall);
 				}
 				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
@@ -1452,7 +1495,7 @@ public class Parser {
 						Func tostr = findMethod(rtype, "tostr");
 						if (!tostr.signature.equals("Any.tostr") && tostr.type.rettype == BuiltinType.STRING && tostr.type.args.length == 1) {
 							tostr.hits++;
-							right = makeFCall(left.lineNumber(), tostr, new Expr[] { right });
+							right = new FCallExpr(new ConstExpr(left.lineNumber(), tostr), new Expr[] { right });
 						}
 					}
 					if (left instanceof ConcatExpr) {
@@ -1495,98 +1538,44 @@ public class Parser {
 		if (methodname != null) method = findMethod(ltype, methodname);
 		if (method != null && method.type.args.length == 2 && method.type.args[1].isSupertypeOf(rtype)) {
 			method.hits++;
-			return makeFCall(left.lineNumber(), method, new Expr[] { left, right });
+			return new FCallExpr(new ConstExpr(left.lineNumber(), method), new Expr[] { left, right });
 		}
 		throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 	}
 
-	/**
-	 * Does special type checkings and type casts for some functions.
-	 * <dl>
-	 * <dt>{@code Function.curry}</dt>
-	 * <dd>checks if argument is acceptable, computes returned type</dd>
-	 *
-	 * <dt>{@code Structure.clone}</dt>
-	 * <dd>the returned type is the same as of argument</dd>
-	 *
-	 * <dt>{@code acopy}</dt>
-	 * <dd>checks if array elements are assignment compatible</dd>
-	 *
-	 * <dt>{@code StrBuf.append(Char)}</dt>
-	 * <dd>replaces by StrBuf.addch(Char)</dd>
-	 *
-	 * <dt>{@code StrBuf.insert(at, Char)}</dt>
-	 * <dd>replaces by StrBuf.insch(at, Char)</dd>
-	 *
-	 * <dt>{@code print(obj)}, {@code println(obj)}, {@code OStream.print(obj)}, {@code OStream.println(obj)}</dt>
-	 * <dd>replaces argument by {@code obj.tostr()}</dd>
-	 * </dl>
-	 */
-	private Expr makeFCall(int lnum, Func f, Expr[] args) throws ParseException {
-		FCallExpr expr = new FCallExpr(new ConstExpr(lnum, f), args);
-		if (f.signature.equals("Function.curry") && args[0].rettype() instanceof FunctionType) {
-			// extra special for f.curry
-			if (args[0] instanceof ConstExpr
-					&& ((Func)((ConstExpr)args[0]).value).signature.equals("Function.curry")
-					&& args[1].rettype() instanceof FunctionType) {
-				FunctionType ftype = (FunctionType)args[1].rettype();
-				if (ftype.args.length == 0)
-					throw new ParseException("Cannot curry function that takes no arguments");
-				FunctionType redftype = new FunctionType(ftype.rettype, new Type[ftype.args.length-1]);
-				System.arraycopy(ftype.args, 1, redftype.args, 0, redftype.args.length);
-				FunctionType newftype = new FunctionType(redftype, new Type[] { ftype.args[0] });
-				return new CastExpr(newftype, expr);
-			}
-			FunctionType oldftype = (FunctionType)args[0].rettype();
-			if (oldftype.args.length == 0)
-				throw new ParseException("Cannot curry function that takes no arguments");
-			// testing whether the second argument can be accepted
-			try {
-				cast(args[1], oldftype.args[0]);
-			} catch (ParseException pe) {
-				throw new ParseException("Cannot curry with given argument: "+pe.getMessage());
-			}
-			// creating new type
-			FunctionType newftype = new FunctionType(oldftype.rettype, new Type[oldftype.args.length-1]);
-			System.arraycopy(oldftype.args, 1, newftype.args, 0, newftype.args.length);
-			return new CastExpr(newftype, expr);
-		} else if (f.signature.equals("Structure.clone") && args[0].rettype() instanceof StructureType) {
-			return new CastExpr(args[0].rettype(), expr);
-		} else if (f.signature.equals("acopy") && args[2].rettype() instanceof ArrayType) {
-			ArrayType toarray = (ArrayType)args[2].rettype();
-			if (args[0].rettype() instanceof ArrayType) {
-				ArrayType fromarray = (ArrayType)args[0].rettype();
-				if (toarray.elementType().isSubtypeOf(fromarray.elementType())
-					&& !toarray.elementType().equals(fromarray.elementType())) {
-					warn(W_TYPESAFE, "Unsafe type cast when copying from "+fromarray+" to "+toarray);
-				} else if (!toarray.elementType().isSupertypeOf(fromarray.elementType())) {
-					throw new ParseException("Cast to the incompatible type when copying from "+fromarray+" to "+toarray);
-				}
-			} else if (toarray.elementType() != BuiltinType.ANY) {
-				warn(W_TYPESAFE, "Unsafe type cast when copying from Array to "+toarray);
-			}
-		} else if (f.signature.equals("StrBuf.append") && args[1].rettype().equals(BuiltinType.CHAR)) {
-			f.hits--;
-			Func addch = unit.getFunc("StrBuf.addch");
-			addch.hits++;
-			return new FCallExpr(new ConstExpr(lnum, addch), args);
-		} else if (f.signature.equals("StrBuf.insert") && args[2].rettype().equals(BuiltinType.CHAR)) {
-			f.hits--;
-			Func insch = unit.getFunc("StrBuf.insch");
-			insch.hits++;
-			return new FCallExpr(new ConstExpr(lnum, insch), args);
-		} else if ((f.signature.equals("print") || f.signature.equals("println")) &&
-				!args[0].rettype().equals(BuiltinType.STRING)) {
-			Func tostr = findMethod(args[0].rettype(), "tostr");
-			tostr.hits++;
-			args[0] = new FCallExpr(new ConstExpr(lnum, tostr), new Expr[] { args[0] });
-		} else if ((f.signature.equals("OStream.print") || f.signature.equals("OStream.println")) &&
-				!args[1].rettype().equals(BuiltinType.STRING)) {
-			Func tostr = findMethod(args[0].rettype(), "tostr");
-			tostr.hits++;
-			args[1] = new FCallExpr(new ConstExpr(lnum, tostr), new Expr[] { args[1] });
+	private Expr makeCurry(Expr fload, Expr argument) throws ParseException {
+		Func curry = unit.getFunc("Function.curry");
+		curry.hits++;
+		FCallExpr expr = new FCallExpr(new ConstExpr(fload.lineNumber(), curry), new Expr[] { fload, argument });
+		if (!(fload.rettype() instanceof FunctionType)) {
+			warn(W_TYPESAFE, "Function.curry is not type safe since actual function type is unknown");
 		}
-		return expr;
+		// extra special for f.curry
+		if (fload instanceof ConstExpr
+				&& ((Func)((ConstExpr)fload).value).signature.equals("Function.curry")
+				&& argument.rettype() instanceof FunctionType) {
+			FunctionType ftype = (FunctionType)argument.rettype();
+			if (ftype.args.length == 0)
+				throw new ParseException("Cannot curry function that takes no arguments");
+			FunctionType redftype = new FunctionType(ftype.rettype, new Type[ftype.args.length-1]);
+			System.arraycopy(ftype.args, 1, redftype.args, 0, redftype.args.length);
+			FunctionType newftype = new FunctionType(redftype, new Type[] { ftype.args[0] });
+			return new CastExpr(newftype, expr);
+		}
+		// testing whether function accepts arguments
+		FunctionType oldftype = (FunctionType)fload.rettype();
+		if (oldftype.args.length == 0)
+			throw new ParseException("Cannot curry function that takes no arguments");
+		// testing whether the second argument can be accepted
+		try {
+			cast(argument, oldftype.args[0]);
+		} catch (ParseException pe) {
+			throw new ParseException("Cannot curry with given argument: "+pe.getMessage());
+		}
+		// creating new type
+		FunctionType newftype = new FunctionType(oldftype.rettype, new Type[oldftype.args.length-1]);
+		System.arraycopy(oldftype.args, 1, newftype.args, 0, newftype.args.length);
+		return new CastExpr(newftype, expr);
 	}
 	
 	private Expr makeAssignRval(Expr get, int operator, Expr right) throws ParseException {
