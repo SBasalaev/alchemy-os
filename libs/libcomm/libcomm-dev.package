@@ -6,4 +6,5 @@ Summary: library to access COMM and IrDA ports - development headers
 Depends: libcore-dev, libcomm1
 Author: Sergey Basalaev
 Maintainer: sbasalaev@gmail.com
+Copyright: (C) 2012-2013 Sergey Basalaev
 License: GPL-3+exception
