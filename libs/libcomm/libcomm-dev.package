@@ -1,6 +1,6 @@
 Package: libcomm-dev
 Source: libcomm
-Version: 1.0-1
+Version: 1.0.1-1
 Section: libdevel
 Summary: library to access COMM and IrDA ports - development headers
 Depends: libcore-dev, libcomm1

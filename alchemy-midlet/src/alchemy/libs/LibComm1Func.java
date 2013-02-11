@@ -19,6 +19,7 @@
 package alchemy.libs;
 
 import alchemy.core.Context;
+import alchemy.core.Int;
 import alchemy.nlib.NativeFunction;
 import alchemy.util.IO;
 import javax.microedition.io.CommConnection;
@@ -46,7 +47,7 @@ class LibComm1Func extends NativeFunction {
 				StringBuffer url = new StringBuffer("comm://");
 				url.append((String)args[0]);
 				Object[] params = (Object[])args[1];
-				if (params[0] != null) url.append(";baudrate=").append(ival(params[0]));
+				if (params[0] != Int.ZERO) url.append(";baudrate=").append(ival(params[0]));
 				if (params[1] != null) url.append(";bitsperchar=").append(ival(params[1]));
 				if (params[2] != null) url.append(";stopbits=").append(ival(params[2]));
 				if (params[3] != null) url.append(";parity=").append((String)params[3]);
