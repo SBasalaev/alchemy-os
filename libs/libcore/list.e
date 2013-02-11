@@ -18,7 +18,7 @@ def List.grow(newlen: Int) {
   this.data = newdata
 }
 
-def new_list(): List = new List(0, new [Any](10))
+def new_list(): List = new List {size = 0, data = new [Any](10)}
 
 def List.len(): Int = this.size
 
