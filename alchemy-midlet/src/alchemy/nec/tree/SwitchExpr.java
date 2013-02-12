@@ -44,10 +44,12 @@ public class SwitchExpr extends Expr {
 	
 	public Vector exprs = new Vector();
 	
+	public Type rettype;
+	
 	public SwitchExpr() { }
 
 	public Type rettype() {
-		return ((Expr)exprs.firstElement()).rettype();
+		return rettype;
 	}
 
 	public int lineNumber() {

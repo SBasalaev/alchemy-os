@@ -556,7 +556,7 @@ public class Parser {
 			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || (opchar <= -20 && opchar >= -30)) {
 				operators.addElement(Int.toInt(opchar));
 			} else {
-				t.pushBack();
+				if (t.ttype != ';') t.pushBack();
 				break;
 			}
 		}
@@ -827,7 +827,9 @@ public class Parser {
 			expect('(');
 			// do not cast, other numeric type may be put here by mistake
 			Expr indexexpr = parseExpr(scope);
-			if (indexexpr.rettype() != BuiltinType.INT)
+			Type indextype = indexexpr.rettype();
+			if (indextype != BuiltinType.INT && indextype != BuiltinType.SHORT &&
+			    indextype != BuiltinType.BYTE && indextype != BuiltinType.CHAR)
 				throw new ParseException("Index of switch must be Int");
 			expect(')');
 			expect('{');
@@ -847,11 +849,9 @@ public class Parser {
 					do {
 						t.pushBack();
 						if (!branchkeyv.isEmpty()) expect(',');
-						Expr branchindex = (Expr)parseExpr(scope).accept(constOptimizer, scope);
+						Expr branchindex = (Expr) cast(parseExpr(scope), BuiltinType.INT).accept(constOptimizer, scope);
 						if (!(branchindex instanceof ConstExpr))
 							throw new ParseException("Constant expression expected.");
-						if (branchindex.rettype() != BuiltinType.INT)
-							throw new ParseException("switch key is required to be integer");
 						Int idx = (Int)((ConstExpr)branchindex).value;
 						if (keysunique.contains(idx))
 							throw new ParseException("branch for "+idx+" is already defined in this switch");
@@ -891,6 +891,7 @@ public class Parser {
 			swexpr.elseexpr = elseexpr;
 			swexpr.keys = keys;
 			swexpr.exprs = exprs;
+			swexpr.rettype = type;
 			return swexpr;
 		} else if (keyword.equals("var") || keyword.equals("const")) {
 			boolean isConst = keyword.equals("const");
@@ -1425,7 +1426,7 @@ public class Parser {
 		BlockExpr block = new BlockExpr(scope);
 		Expr lastexpr = null;
 		while (t.nextToken() != '}') {
-			while (t.ttype == ';') t.nextToken();
+			if (t.ttype == ';') continue;
 			t.pushBack();
 			lastexpr = parseExpr(block);
 			if (lastexpr.rettype() == BuiltinType.NONE)
@@ -1487,12 +1488,14 @@ public class Parser {
 				if (btype == BuiltinType.ANY && ltype != BuiltinType.ANY && rtype != BuiltinType.ANY) {
 					throw new ParseException("Incomparable types " + ltype + " and " + rtype);
 				}
-				Func eqmethod = findMethod(ltype, "eq");
-				if (eqmethod != null && eqmethod.type.rettype == BuiltinType.BOOL &&
-						eqmethod.type.args.length == 2 && eqmethod.type.args[1].isSupertypeOf(rtype)) {
-					eqmethod.hits++;
-					Expr fcall = new FCallExpr(new ConstExpr(left.lineNumber(), eqmethod), new Expr[] {left, right});
-					return (op == Token.EQEQ) ? fcall : new UnaryExpr('!', fcall);
+				if (ltype != BuiltinType.NULL && rtype != BuiltinType.NULL) {
+					Func eqmethod = findMethod(ltype, "eq");
+					if (eqmethod != null && eqmethod.type.rettype == BuiltinType.BOOL &&
+							eqmethod.type.args.length == 2 && eqmethod.type.args[1].isSupertypeOf(rtype)) {
+						eqmethod.hits++;
+						Expr fcall = new FCallExpr(new ConstExpr(left.lineNumber(), eqmethod), new Expr[] {left, right});
+						return (op == Token.EQEQ) ? fcall : new UnaryExpr('!', fcall);
+					}
 				}
 				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
 			case Token.AMPAMP: {
