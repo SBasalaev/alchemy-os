@@ -1,7 +1,7 @@
 Package: libcore-dev
 Source: libcore
 Section: libdevel
-Version: 3.1.0-1
+Version: 3.1.1-1
 Summary: headers for standard library
 Author: Sergey Basalaev
 Maintainer: sbasalaev@gmail.com

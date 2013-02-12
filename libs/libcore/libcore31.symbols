@@ -170,3 +170,7 @@ chstr
 IStream.reset
 timeof
 getstaticdef
+String.startswith
+IStream.readfully
+OStream.writeall
+sys_property

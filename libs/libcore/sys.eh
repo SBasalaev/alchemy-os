@@ -7,3 +7,5 @@ def sleep(millis: Int);
 
 def exec_wait(prog: String, args: [String]): Int;
 def exec(prog: String, args: [String]);
+
+def sys_property(str: String): String;

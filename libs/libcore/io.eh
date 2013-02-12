@@ -15,6 +15,7 @@ def seterr(err: OStream);
 
 def IStream.read(): Int;
 def IStream.readarray(buf: [Byte], ofs: Int, len: Int): Int;
+def IStream.readfully(): [Byte];
 def IStream.skip(num: Long): Long;
 def IStream.available(): Int;
 def IStream.reset();
@@ -31,6 +32,7 @@ def OStream.print(a: Any);
 def OStream.println(a: Any);
 def OStream.flush();
 def OStream.printf(fmt: String, args: [Any]);
+def OStream.writeall(input: IStream);
 def OStream.close();
 
 def write(b: Int);

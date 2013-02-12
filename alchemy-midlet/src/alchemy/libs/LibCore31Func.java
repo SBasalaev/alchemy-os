@@ -566,6 +566,15 @@ class LibCore31Func extends NativeFunction {
 				}
 				return obj;
 			}
+			case 172: // String.startswith(str: String, offset: Int): Bool
+				return Ival(((String)args[0]).startsWith((String)args[1], ival(args[2])));
+			case 173: // IStream.readfully(): [Byte]
+				return IO.readFully((InputStream)args[0]);
+			case 174: // OStream.writeall(input: IStream)
+				IO.writeAll((InputStream)args[1], (OutputStream)args[0]);
+				return null;
+			case 175: // sys_property(key: String): String
+				return System.getProperty((String)args[0]);
 			default:
 				return null;
 		}
