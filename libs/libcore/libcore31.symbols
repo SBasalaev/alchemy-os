@@ -174,3 +174,4 @@ String.startswith
 IStream.readfully
 OStream.writeall
 sys_property
+String.replace

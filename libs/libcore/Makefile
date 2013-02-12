@@ -1,9 +1,9 @@
 LIB=libcoree.3.1.so
 SONAME=libcoree.3.so
 LINKS=libcoree.3.0.so libcoree.3.so libcoree.so
-HEADERS=builtin.eh connection.eh dataio.eh dict.eh dl.eh error.eh func.eh io.eh list.eh math.eh pipe.eh rnd.eh strbuf.eh string.eh sys.eh textio.eh time.eh
-SOURCES=dataio.e io.e list.e math.e strbuf.e string.e sys.e textio.e
-OBJECTS=dataio.o io.o list.o math.o strbuf.o string.o sys.o textio.o
+HEADERS=builtin.eh connection.eh dataio.eh dict.eh dl.eh error.eh func.eh i18n.eh io.eh list.eh math.eh pipe.eh rnd.eh strbuf.eh string.eh sys.eh textio.eh time.eh
+SOURCES=dataio.e i18n.e io.e list.e math.e strbuf.e string.e sys.e textio.e
+OBJECTS=dataio.o i18n.o io.o list.o math.o strbuf.o string.o sys.o textio.o
 
 all: ${LIB} ${LINKS}
 
@@ -24,6 +24,9 @@ libcoree.so:
 
 dataio.o: dataio.e
  ec dataio.e -o dataio.o
+
+i18n.o: i18n.e
+ ec i18n.e -o i18n.o
 
 io.o: io.e
  ec io.e -o io.o

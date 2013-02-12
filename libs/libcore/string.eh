@@ -30,6 +30,7 @@ def String.chars(): [Char];
 def String.utfbytes(): [Byte];
 def String.startswith(prefix: String, ofs: Int = 0): Bool;
 def String.endswith(suffix: String): Bool;
+def String.replace(oldch: Char, newch: Char): String;
 def String.hash(): Int;
 
 def ca2str(ca: [Char]): String;

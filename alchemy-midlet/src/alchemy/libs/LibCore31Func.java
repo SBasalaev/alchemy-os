@@ -575,6 +575,8 @@ class LibCore31Func extends NativeFunction {
 				return null;
 			case 175: // sys_property(key: String): String
 				return System.getProperty((String)args[0]);
+			case 176: // String.replace(oldch: Char, newch: Char): String
+				return ((String)args[0]).replace((char)ival(args[1]), (char)ival(args[2]));
 			default:
 				return null;
 		}
