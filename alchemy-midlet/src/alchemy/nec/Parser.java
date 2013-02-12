@@ -100,7 +100,7 @@ public class Parser {
 			unit.putType(BuiltinType.STRUCTURE);
 			unit.putType(BuiltinType.ERROR);
 			// adding builtin functions
-			parseFile("/res/nec/embed.eh");
+			parseFile("/inc/builtin.eh");
 			// parsing
 			parseFile(source);
 		} catch (ParseException pe) {
@@ -553,7 +553,6 @@ public class Parser {
 		while (true) {
 			exprs.addElement(parsePostfix(scope, parseExprNoop(scope)));
 			int opchar = t.nextToken();
-			if (opchar == ';') break;
 			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || (opchar <= -20 && opchar >= -30)) {
 				operators.addElement(Int.toInt(opchar));
 			} else {
@@ -609,8 +608,6 @@ public class Parser {
 		int ttype = t.nextToken();
 		int lnum = t.lineNumber();
 		switch (ttype) {
-			case ';':
-				return new NoneExpr();
 			case '+': {
 				Expr sub = parsePostfix(scope, parseExprNoop(scope));
 				Type type = sub.rettype();
@@ -1428,6 +1425,7 @@ public class Parser {
 		BlockExpr block = new BlockExpr(scope);
 		Expr lastexpr = null;
 		while (t.nextToken() != '}') {
+			while (t.ttype == ';') t.nextToken();
 			t.pushBack();
 			lastexpr = parseExpr(block);
 			if (lastexpr.rettype() == BuiltinType.NONE)
@@ -1463,9 +1461,9 @@ public class Parser {
 					}
 					if (rtype == BuiltinType.BYTE || rtype == BuiltinType.SHORT || rtype == BuiltinType.CHAR) {
 						rtype = BuiltinType.INT;
-						right = cast(right, ltype);
+						right = cast(right, rtype);
 					}
-					if (ltype == BuiltinType.INT && (ltype == BuiltinType.LONG || rtype == BuiltinType.INT))
+					if (rtype == BuiltinType.INT && (ltype == BuiltinType.LONG || ltype == BuiltinType.INT))
 						return new BinaryExpr(left, op, right);
 				}
 				break;
