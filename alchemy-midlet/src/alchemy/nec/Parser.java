@@ -556,7 +556,7 @@ public class Parser {
 			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || (opchar <= -20 && opchar >= -30)) {
 				operators.addElement(Int.toInt(opchar));
 			} else {
-				if (t.ttype != ';') t.pushBack();
+				t.pushBack();
 				break;
 			}
 		}
@@ -839,7 +839,8 @@ public class Parser {
 			Vector keysunique = new Vector(); // Int
 			Vector exprs = new Vector(); // Expr
 			while (t.nextToken() != '}') {
-				if (t.ttype == Token.KEYWORD && t.svalue.equals("else")) {
+				if (t.ttype == ';') continue;
+				else if (t.ttype == Token.KEYWORD && t.svalue.equals("else")) {
 					if (elseexpr != null)
 						throw new ParseException("else branch is already defined in this switch");
 					expect(':');
