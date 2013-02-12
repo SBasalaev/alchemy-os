@@ -62,6 +62,7 @@ public class AlchemyException extends Exception {
 				: (cause instanceof ArithmeticException) ? ERR_DIVBYZERO
 				: (cause instanceof InterruptedException) ? ERR_INTERRUPT
 				: (cause instanceof MediaException) ? ERR_MEDIA
+				: (cause instanceof AlchemyException) ? ((AlchemyException)cause).errcode
 				: FAIL;
 	}
 	
