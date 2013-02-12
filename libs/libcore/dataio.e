@@ -30,14 +30,14 @@ def IStream.readushort(): Int {
   var b1 = this.read()
   var b2 = this.read()
   if (b2 < 0) error(ERR_IO, "End of stream")
-  (b1 << 8) | b2
+  ;(b1 << 8) | b2
 }
 
 def IStream.readshort(): Short {
   var b1 = this.read()
   var b2 = this.read()
   if (b2 < 0) error(ERR_IO, "End of stream")
-  ((b1 << 8) | b2).cast(Short)
+  ;((b1 << 8) | b2).cast(Short)
 }
 
 def IStream.readint(): Int {
@@ -46,7 +46,7 @@ def IStream.readint(): Int {
   var b3 = this.read()
   var b4 = this.read()
   if (b4 < 0) error(ERR_IO, "End of stream")
-  (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
+  ;(b1 << 24) | (b2 << 16) | (b3 << 8) | b4
 }
 
 def IStream.readlong(): Long {

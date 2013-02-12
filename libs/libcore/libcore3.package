@@ -1,8 +1,9 @@
 Package: libcore3
 Source: libcore
-Version: 3.1.0~alpha2-1
+Version: 3.1.0-1
 Section: libs
 Summary: standard library which is used by all programs
 Author: Sergey Basalaev
 Maintainer: sbasalaev@gmail.com
+Copyright: (c) 2011-2013 Sergey Basalaev
 License: GPL-3+exception
