@@ -7,6 +7,7 @@ type Player < Any;
 
 type IStream;
 def new_player(in: IStream, ctype: String): Player;
+const `Player.new` = new_player;
 def Player.get_ctype(): String;
 def Player.set_loops(count: Int);
 def Player.get_duration(): Long;

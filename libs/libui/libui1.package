@@ -1,8 +1,8 @@
 Package: libui1
 Source: libui
-Version: 1.0.4-1
+Version: 1.0.6
 Section: libs
 Summary: graphical interface library
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2011-2013 Sergey Basalaev
 License: GPL-3+exception

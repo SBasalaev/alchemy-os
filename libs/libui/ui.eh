@@ -21,7 +21,15 @@ def ui_set_screen(scr: Screen);
 
 type Menu < Any;
 
-def new_menu(text: String, priority: Int): Menu;
+const MT_SCREEN = 1
+const MT_BACK = 2
+const MT_CANCEL = 3
+const MT_OK = 4
+const MT_HELP = 5
+const MT_STOP = 6
+const MT_EXIT = 7
+
+def new_menu(text: String, priority: Int, mtype: Int = MT_SCREEN): Menu;
 def Menu.get_text(): String;
 def Menu.get_priority(): Int;
 

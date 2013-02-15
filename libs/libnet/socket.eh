@@ -5,6 +5,7 @@ use "connection.eh"
 type Socket < StreamConnection;
 
 def new_socket(host: String, port: Int): Socket;
+const `Socket.new` = new_socket;
 
 def Socket.get_host(): String;
 def Socket.get_port(): Int;
@@ -24,6 +25,7 @@ def Socket.set_rcvbuf(size: Int);
 type SecureSocket < Socket;
 
 def new_securesocket(host: String, port: Int): SecureSocket;
+const `SecureSocket.new` = new_securesocket;
 
 type SecInfo;
 def SecureSocket.get_secinfo(): SecInfo;

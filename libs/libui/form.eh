@@ -5,6 +5,7 @@ use "font.eh"
 type Form < Screen;
 
 def new_form(): Form;
+const `Form.new` = new_form;
 
 type Item < Any;
 
@@ -22,6 +23,7 @@ def Form.clear();
 type TextItem < Item;
 
 def new_textitem(label: String, text: String): TextItem;
+const `TextItem.new` = new_textitem;
 def TextItem.get_text(): String;
 def TextItem.set_text(text: String);
 def TextItem.get_font(): Int;
@@ -30,10 +32,12 @@ def TextItem.set_font(font: Int);
 type HyperlinkItem < TextItem;
 
 def new_hyperlinkitem(label: String, text: String);
+const `HyperlinkItem.new` = new_hyperlinkitem;
 
 type ImageItem < Item;
 
 def new_imageitem(label: String, img: Image): ImageItem;
+const `ImageItem.new` = new_imageitem;
 def ImageItem.get_image(): Image;
 def ImageItem.set_image(img: Image);
 def ImageItem.get_alttext(): String;
@@ -41,7 +45,8 @@ def ImageItem.set_alttext(text: String);
 
 type EditItem < Item;
 
-def new_edititem(label: String, text: String, mode: Int, maxsize: Int): EditItem;
+def new_edititem(label: String, text: String = "", mode: Int = EDIT_ANY, maxsize: Int = 50): EditItem;
+const `EditItem.new` = new_edititem;
 def EditItem.get_text(): String;
 def EditItem.set_text(text: String);
 def EditItem.get_maxsize(): Int;
@@ -52,6 +57,7 @@ def EditItem.get_caret(): Int;
 type GaugeItem < Item;
 
 def new_gaugeitem(label: String, max: Int, init: Int): GaugeItem;
+const `GaugeItem.new` = new_gaugeitem;
 def GaugeItem.get_value(): Int;
 def GaugeItem.set_value(val: Int);
 def GaugeItem.get_maxvalue(): Int;
@@ -63,13 +69,15 @@ const DATE_TIME = 3
 
 type DateItem <  Item;
 
-def new_dateitem(label: String, mode: Int): DateItem;
+def new_dateitem(label: String, mode: Int = DATE_ONLY): DateItem;
+const `DateItem.new` = new_dateitem;
 def DateItem.get_date(): Long;
 def DateItem.set_date(date: Long);
 
 type CheckItem < Item;
 
 def new_checkitem(label: String, text: String, checked: Bool): CheckItem;
+const `CheckItem.new` = new_checkitem;
 def CheckItem.get_checked(): Bool;
 def CheckItem.set_checked(checked: Bool);
 def CheckItem.get_text(): String;
@@ -78,6 +86,7 @@ def CheckItem.set_text(text: String);
 type RadioItem < Item;
 
 def new_radioitem(label: String, strings: [String]): RadioItem;
+const `RadioItem.new` = new_radioitem;
 def RadioItem.get_index(): Int;
 def RadioItem.set_index(index: Int);
 def RadioItem.add(str: String);
@@ -91,3 +100,4 @@ def RadioItem.len(): Int;
 type PopupItem < RadioItem;
 
 def new_popupitem(label: String, strings: [String]): PopupItem;
+const `PopupItem.new` = new_popupitem;

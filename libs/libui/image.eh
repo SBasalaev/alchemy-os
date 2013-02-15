@@ -4,6 +4,7 @@ type Image < Any;
 
 /* mutable image */
 def new_image(w: Int, h: Int): Image;
+const `Image.new` = new_image;
 def Image.graphics(): Graphics;
 
 /* immutable images */

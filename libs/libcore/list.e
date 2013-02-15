@@ -3,7 +3,7 @@
  * Licensed under GPL v3 with linkage exception
  */
 
-use "sys.eh"
+use "error.eh"
 use "strbuf.eh"
 use "string.eh"
 
@@ -23,15 +23,20 @@ def new_list(): List = new List {size = 0, data = new [Any](10)}
 def List.len(): Int = this.size
 
 def List.get(at: Int): Any {
-  if (at >= 0 && at < this.size)
+  if (at >= 0 && at < this.size) {
     this.data[at]
-  else
+  } else {
+    error(ERR_RANGE)
     null
+  }
 }
 
 def List.set(at: Int, val: Any) {
-  if (at >= 0 && at < this.size)
+  if (at >= 0 && at < this.size) {
     this.data[at] = val
+  } else {
+    error(ERR_RANGE)
+  }
 }
 
 def List.insert(at: Int, val: Any) {
@@ -43,24 +48,30 @@ def List.insert(at: Int, val: Any) {
       acopy(this.data, at, this.data, at+1, size-at)
     this.data[at] = val
     this.size = size+1
+  } else {
+    error(ERR_RANGE)
   }
 }
 
-def List.insertall(at: Int, vals: [Any]) {
+def List.insertall(at: Int, vals: Array) {
   var size = this.size
-  if (at >= 0 && at <= size && vals.len > 0) {
-    if (this.data.len < size + vals.len)
-      this.grow(this.data.len + vals.len)
-    if (size-at > 0)
-      acopy(this.data, at, this.data, at+vals.len, size-at)
-    acopy(vals, 0, this.data, at, vals.len)
-    this.size = size + vals.len
+  if (at >= 0 && at <= size) {
+    if (vals.len > 0) {
+      if (this.data.len < size + vals.len)
+        this.grow(this.data.len + vals.len)
+      if (size-at > 0)
+        acopy(this.data, at, this.data, at+vals.len, size-at)
+      acopy(vals, 0, this.data, at, vals.len)
+      this.size = size + vals.len
+    }
+  } else {
+    error(ERR_RANGE)
   }
 }
 
 def List.add(val: Any) = this.insert(this.size, val)
 
-def List.addall(vals: [Any]) = this.insertall(this.size, vals)
+def List.addall(vals: Array) = this.insertall(this.size, vals)
 
 def List.remove(at: Int) {
   var size = this.size-1
@@ -69,11 +80,13 @@ def List.remove(at: Int) {
       acopy(this.data, at+1, this.data, at, size-at)
     this.data[size] = null
     this.size = size
+  } else {
+    error(ERR_RANGE)
   }
 }
 
 def List.clear() {
-  for (var i=this.size-1, i>=0, i=i-1)
+  for (var i=this.size-1, i>=0, i-=1)
     this.data[i] = null
   this.size = 0
 }
@@ -84,6 +97,7 @@ def List.range(from: Int, to: Int): List {
     acopy(this.data, from, data, 0, data.len)
     new List(data.len, data)
   } else {
+    error(ERR_RANGE)
     null
   }
 }

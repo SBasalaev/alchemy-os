@@ -1,9 +1,8 @@
 Package: libmedia1
 Source: libmedia
-Version: 1.0-2
+Version: 1.0.2
 Section: libs
 Summary: media library
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
-Copyright: (C) 2012 Sergey Basalaev
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (C) 2012-2013 Sergey Basalaev
 License: GPL-3+exception

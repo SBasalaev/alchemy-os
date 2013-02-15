@@ -175,3 +175,4 @@ IStream.readfully
 OStream.writeall
 sys_property
 String.replace
+buildlibrary

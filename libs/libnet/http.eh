@@ -5,6 +5,7 @@ use "connection.eh"
 type Http < StreamConnection;
 
 def new_http(host: String): Http;
+const `Http.new` = new_http;
 
 const HEAD = "HEAD"
 const GET = "GET"
@@ -67,6 +68,7 @@ def Http.get_modified(): Long;
 type Https < Http;
 
 def new_https(host: String): Https;
+const `Https.new` = new_https;
 
 def Https.get_port(): Int;
 

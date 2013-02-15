@@ -1,9 +1,8 @@
 Package: libcomm1
 Source: libcomm
-Version: 1.0.1-1
+Version: 1.0.1
 Section: libs
 Summary: library to access COMM, IrDA and USB ports
-Author: Sergey Basalaev
-Maintainer: sbasalaev@gmail.com
+Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
 Copyright: (c) 2012-2013 Sergey Basalaev
 License: GPL-3+exception
