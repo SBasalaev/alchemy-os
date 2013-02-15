@@ -53,7 +53,7 @@ def List.insert(at: Int, val: Any) {
   }
 }
 
-def List.insertall(at: Int, vals: Array) {
+def List.insertall(at: Int, vals: [Any]) {
   var size = this.size
   if (at >= 0 && at <= size) {
     if (vals.len > 0) {
@@ -71,7 +71,7 @@ def List.insertall(at: Int, vals: Array) {
 
 def List.add(val: Any) = this.insert(this.size, val)
 
-def List.addall(vals: Array) = this.insertall(this.size, vals)
+def List.addall(vals: [Any]) = this.insertall(this.size, vals)
 
 def List.remove(at: Int) {
   var size = this.size-1
