@@ -23,6 +23,7 @@ import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
+import alchemy.evm.ELibBuilder;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.libs.core.Pipe;
@@ -577,6 +578,12 @@ class LibCore31Func extends NativeFunction {
 				return System.getProperty((String)args[0]);
 			case 176: // String.replace(oldch: Char, newch: Char): String
 				return ((String)args[0]).replace((char)ival(args[1]), (char)ival(args[2]));
+			case 177: { // buildlibrary(in: IStream)
+				InputStream in = (InputStream) args[0];
+				if (in.read() != 0xC0 || in.read() != 0xDE)
+					throw new InstantiationException("Not an Ether library");
+				return new ELibBuilder().build(c, in);
+			}
 			default:
 				return null;
 		}

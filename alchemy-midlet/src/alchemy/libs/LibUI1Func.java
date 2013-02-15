@@ -77,18 +77,7 @@ class LibUI1Func extends NativeFunction {
 			case 5: // image_from_image(im: Image, x: Int, y: Int, w: Int, h: Int): Image
 				return Image.createImage((Image)args[0], ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]), 0);
 			case 6: { // Image.get_argb(argb: [Int], ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int)
-				Object[] data = (Object[])args[1];
-				int ofs = ival(args[2]);
-				int scanlen = ival(args[3]);
-				int x = ival(args[4]);
-				int y = ival(args[5]);
-				int w = ival(args[6]);
-				int h = ival(args[7]);
-				int[] argb = new int[scanlen * h];
-				((Image)args[0]).getRGB(argb, 0, scanlen, x, y, w, h);
-				for (int i=argb.length-1; i>=0; i--) {
-					data[ofs+i] = Ival(argb[i]);
-				}
+				((Image)args[0]).getRGB((int[])args[1], ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]), ival(args[7]));
 				return null;
 			}
 			case 7: // Graphics.get_color(): Int
@@ -210,8 +199,11 @@ class LibUI1Func extends NativeFunction {
 				return null;
 			case 42: // ui_get_screen(): Screen
 				return UIServer.getScreen(c);
-			case 43: // new_menu(text: String, priority: Int): Menu
-				return new Command((String)args[0], Command.SCREEN, ival(args[1]));
+			case 43: // new_menu(text: String, priority: Int, mtype: Int): Menu
+				// second argument with condition for compatibility with 2.0
+				return new Command((String)args[0],
+						args.length > 2 ? ival(args[2]) : Command.SCREEN,
+						ival(args[1]));
 			case 44: // Menu.get_text(): String
 				return ((Command)args[0]).getLabel();
 			case 45: // Menu.get_priority(): Int
