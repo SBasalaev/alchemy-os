@@ -62,8 +62,8 @@ TextItem.set_text
 TextItem.get_font
 TextItem.set_font
 new_imageitem
-Imageitem.get_image
-Imageitem.set_image
+ImageItem.get_image
+ImageItem.set_image
 new_edititem
 EditItem.get_text
 EditItem.set_text
@@ -129,3 +129,4 @@ ui_set_app_icon
 ui_vibrate
 ui_flash
 Canvas.has_hold_event
+new_hyperimageitem

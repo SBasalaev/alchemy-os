@@ -30,6 +30,7 @@ const MT_STOP = 6
 const MT_EXIT = 7
 
 def new_menu(text: String, priority: Int, mtype: Int = MT_SCREEN): Menu;
+const `Menu.new` = new_menu;
 def Menu.get_text(): String;
 def Menu.get_priority(): Int;
 
@@ -46,6 +47,7 @@ const EV_KEY_RELEASE = 5;
 const EV_PTR_PRESS = 6;
 const EV_PTR_RELEASE = 7;
 const EV_PTR_DRAG = 8;
+const EV_ITEMSTATE = 9;
 
 type UIEvent {
   kind: Int,

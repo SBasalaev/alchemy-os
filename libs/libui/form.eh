@@ -43,6 +43,11 @@ def ImageItem.set_image(img: Image);
 def ImageItem.get_alttext(): String;
 def ImageItem.set_alttext(text: String);
 
+type HyperimageItem < ImageItem;
+
+def new_hyperimageitem(label: String, img: Image);
+const `HyperimageItem.new` = new_hyperimageitem;
+
 type EditItem < Item;
 
 def new_edititem(label: String, text: String = "", mode: Int = EDIT_ANY, maxsize: Int = 50): EditItem;
