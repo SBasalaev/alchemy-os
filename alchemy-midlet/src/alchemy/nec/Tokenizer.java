@@ -281,7 +281,7 @@ class Tokenizer {
 			    id.equals("cast")|| id.equals("var")|| id.equals("type") ||
 			    id.equals("null")|| id.equals("new")|| id.equals("for")  ||
 			    id.equals("try") || id.equals("catch") || id.equals("const")||
-			    id.equals("switch") || id.equals("goto"))
+			    id.equals("switch") || id.equals("goto") || id.equals("super"))
 				return ttype = Token.KEYWORD;
 			return ttype = Token.WORD;
 		}

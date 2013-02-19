@@ -286,15 +286,91 @@ public class Parser {
 							prev.locals = fdef.locals; //actual names for impl.
 							fdef = prev;
 						}
-						Expr body;
-						if (t.ttype == '{') {
-							body = parseBlock(fdef);
-						} else {
-							body = parseExpr(fdef);
+						if (t.ttype != '=') {
+							t.pushBack();
 						}
-						fdef.body = cast(body, fdef.type.rettype);
-						fdef.hits++;
-						fdef.source = Filesystem.fname((String)files.peek());
+						if (fdef.isConstructor) {
+							int lnum  = t.lineNumber();
+							Type rettype = unit.getType(fdef.type.rettype.toString());
+							if (!(rettype instanceof StructureType))
+								throw new ParseException("Constructors can only be defined for structures");
+							StructureType rtype = (StructureType) rettype;
+							// defining <init>
+							Func init = makeInitDef(fdef);
+							boolean isBlock = t.nextToken() == '{';
+							if (!isBlock) t.pushBack();
+							Expr superinit = new NoneExpr();
+							boolean supercalled = t.nextToken() == Token.KEYWORD && t.svalue.equals("super");
+							if (supercalled) {
+								expect('(');
+								Type stype = rtype.superType();
+								if (stype == BuiltinType.STRUCTURE) {
+									expect(')');
+								} else {
+									Func supermethod = findMethod(stype, "new");
+									if (supermethod == null)
+										throw new ParseException("Method " + stype +".new not defined");
+									supermethod = makeInitDef(supermethod);
+									superinit = parseFCall(init, new ConstExpr(lnum, supermethod),
+											new VarExpr(lnum, (Var) init.locals.firstElement()));
+								}
+							} else {
+								t.pushBack();
+								Type stype = rtype.superType();
+								if (stype != BuiltinType.STRUCTURE) {
+									Func supermethod = findMethod(stype, "new");
+									if (supermethod == null)
+										throw new ParseException("Method " + stype + ".new not defined");
+									supermethod = makeInitDef(supermethod);
+									if (supermethod.type.args.length > 1)
+										throw new ParseException("super() call expected");
+									superinit = new FCallExpr(new ConstExpr(lnum, supermethod),
+											new Expr[]{ new VarExpr(lnum, (Var) init.locals.firstElement()) });
+								}
+							}
+							BlockExpr initblock = new BlockExpr(init);
+							initblock.exprs.addElement(superinit);
+							if (isBlock) {
+								initblock.exprs.addElement(cast(parseBlock(initblock), BuiltinType.NONE));
+							} else if (!supercalled) {
+								initblock.exprs.addElement(cast(parseExpr(initblock), BuiltinType.NONE));
+							}
+							init.body = initblock;
+							unit.funcs.addElement(init);
+							// defining constructor body
+							//
+							// def Type.new(...): Type {
+							//   var this = new Type { }
+							//   this.<init>(...)
+							//   this
+							// }
+							BlockExpr block = new BlockExpr(fdef);
+							Var th = new Var("this", rtype);
+							block.addVar(th);
+
+							Expr[] implicit = new Expr[rtype.fields.length];
+							for (int i=0; i < implicit.length; i++) {
+								if (rtype.fields[i].constValue != null)
+									implicit[i] = new ConstExpr(lnum, rtype.fields[i].constValue);
+							}
+							block.exprs.addElement(new AssignExpr(th, new NewArrayByEnumExpr(lnum, rtype, implicit)));
+
+							Expr[] explicit = new Expr[fdef.locals.size()+1];
+							explicit[0] = new VarExpr(lnum, th);
+							for (int i=1; i < explicit.length; i++) {
+								explicit[i] = new VarExpr(lnum, (Var)fdef.locals.elementAt(i-1));
+							}
+							block.exprs.addElement(new FCallExpr(new ConstExpr(lnum, init), explicit));
+
+							block.exprs.addElement(new VarExpr(lnum, th));
+							fdef.body = block;
+							fdef.hits++;
+							fdef.source = Filesystem.fname((String)files.peek());
+						} else {
+							fdef.body = cast(parseExpr(fdef), fdef.type.rettype);
+							fdef.hits++;
+							fdef.source = Filesystem.fname((String)files.peek());
+						}
 						break;
 					default:
 						throw new ParseException(t.toString()+" unexpected here");
@@ -307,6 +383,26 @@ public class Parser {
 		t = oldt;
 		c.setCurDir(olddir);
 		parsed.addElement(files.pop());
+	}
+	
+	/** Creates Type.&lt;init&gt; from Type.new */
+	private Func makeInitDef(Func constructor) {
+		Type rtype = constructor.type.rettype;
+		Func init = new Func(unit);
+		init.hits++;
+		init.signature = rtype.toString() + ".<init>";
+		init.source = Filesystem.fname((String)files.peek());
+		Type[] initargs = new Type[constructor.type.args.length + 1];
+		initargs[0] = rtype;
+		System.arraycopy(constructor.type.args, 0, initargs, 1, initargs.length-1);
+		init.type = new FunctionType(BuiltinType.NONE, initargs);
+		init.locals = new Vector();
+		init.locals.addElement(new Var("this", rtype));
+		for (int i=0; i < constructor.locals.size(); i++) {
+			Var var = (Var) constructor.locals.elementAt(i);
+			init.locals.addElement(var.clone());
+		}
+		return init;
 	}
 	
 	private StructureType parseStruct(String name, Type parent) throws ParseException, IOException {
@@ -424,13 +520,12 @@ public class Parser {
 		String str = t.svalue;
 		String fname;
 		NamedType methodholder = null;
-		boolean isConstructor = false;
 		if (t.nextToken() == '.') {
 			methodholder = unit.getType(str);
 			if (methodholder == null)
 				throw new ParseException("Type "+str+" is not defined");
 			if (t.nextToken() == Token.KEYWORD && t.svalue.equals("new"))
-				isConstructor = true;
+				func.isConstructor = true;
 			else if (t.ttype != Token.WORD)
 				throw new ParseException("Function name expected, got "+t);
 			fname = methodholder.toString()+'.'+t.svalue;
@@ -440,7 +535,7 @@ public class Parser {
 		}
 		expect('(');
 		Vector args = new Vector();
-		if (!isConstructor && methodholder != null) {
+		if (!func.isConstructor && methodholder != null) {
 			args.addElement(new Var("this", methodholder));
 		}
 		boolean first = true;
@@ -475,7 +570,7 @@ public class Parser {
 			rettype = parseType(func);
 		} else {
 			t.pushBack();
-			rettype = BuiltinType.NONE;
+			rettype = (func.isConstructor) ? methodholder : BuiltinType.NONE;
 		}
 		//populating fields
 		func.locals = args;
@@ -486,7 +581,7 @@ public class Parser {
 		func.signature = fname;
 		func.type = ftype;
 		// semantic checks
-		if (isConstructor && !methodholder.equals(rettype))
+		if (func.isConstructor && !methodholder.equals(rettype))
 			warn(W_OPERATORS, "Constructor returns value of different type than " + methodholder);
 		if (fname.equals("main")) {
 			if (args.size() != 1) {
@@ -1111,6 +1206,13 @@ public class Parser {
 			trycatch.catchexpr = catchblock;
 			trycatch.catchvar = v;
 			return trycatch;
+		} else if (keyword.equals("super")) {
+			Var th = scope.getVar("this");
+			if (th == null)
+				throw new ParseException("Variable " + this + " not found");
+			Type stype = th.type.superType();
+			if (stype == null) stype = BuiltinType.ANY;
+			return new CastExpr(stype, new VarExpr(lnum, th));
 		} else {
 			throw new ParseException(t.toString()+" unexpected here");
 		}
@@ -1645,6 +1747,12 @@ public class Parser {
 		}
 		if (toType == BuiltinType.NONE) {
 			return new DiscardExpr(expr);
+		}
+		if (fromType instanceof NamedType && fromType.superType() == null) {
+			fromType = unit.getType(fromType.toString());
+		}
+		if (toType instanceof NamedType && toType.superType() == null) {
+			toType = unit.getType(toType.toString());
 		}
 		if (toType.isSupertypeOf(fromType) || toType == BuiltinType.ANY) {
 			return expr;

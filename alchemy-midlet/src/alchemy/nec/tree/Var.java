@@ -44,4 +44,11 @@ public class Var {
 		this.name = name;
 		this.type = type;
 	}
+	
+	public Var clone() {
+		Var newvar = new Var(this.name, this.type);
+		newvar.isConst = isConst;
+		newvar.constValue = constValue;
+		return newvar;
+	}
 }

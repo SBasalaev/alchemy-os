@@ -44,6 +44,8 @@ public class Func implements Scope {
 	 */
 	public int hits;
 	
+	public boolean isConstructor;
+	
 	public Func(Unit u) {
 		this.unit = u;
 	}
