@@ -29,9 +29,11 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.ItemCommandListener;
+import javax.microedition.lcdui.ItemStateListener;
 import javax.microedition.lcdui.List;
 
 /**
@@ -70,6 +72,8 @@ public final class UIServer {
 	public static final Int EVENT_PTR_RELEASE = Int.toInt(7);
 	/** Event type for canvas pointer drag. */
 	public static final Int EVENT_PTR_DRAG = Int.toInt(8);
+	/** Event type for changed state of item. */
+	public static final Int EVENT_ITEM_STATE = Int.toInt(9);
 	
 	/** Display set by Alchemy MIDlet. */
 	private static Display display;
@@ -79,7 +83,6 @@ public final class UIServer {
 	
 	private static final UIContextListener l = new UIContextListener();
 	private static final UICommandListener cl = new UICommandListener();
-	private static final UIItemCommandListener icl = new UIItemCommandListener();
 	
 	private static final List appList;
 	private static final Command appCommand = new Command("Switch to...", Command.BACK, 100);
@@ -218,9 +221,14 @@ public final class UIServer {
 	}
 	
 	/** Registers UI server as listener for item events. */
-	public static void registerItem(Item item) {
+	public static void registerItem(Form form, Item item) {
 		item.setDefaultCommand(itemCommand);
-		item.setItemCommandListener(icl);
+		item.setItemCommandListener(new UIItemCommandListener(form));
+	}
+	
+	/** Registers UI server as listener for item state change events. */
+	public static void registerForm(Form form) {
+		form.setItemStateListener(new UIItemStateListener(form));
 	}
 
 	public static String getDefaultTitle(Context c) {
@@ -276,8 +284,27 @@ public final class UIServer {
 	
 	/** Generates item menu events. */
 	private static class UIItemCommandListener implements ItemCommandListener {
+		private final Form form;
+		
+		public UIItemCommandListener(Form f) {
+			this.form = f;
+		}
+		
 		public void commandAction(Command command, Item item) {
-			pushEvent(null, EVENT_ITEM_MENU, item);
+			pushEvent(form, EVENT_ITEM_MENU, item);
+		}
+	}
+	
+	/** Generates item state events. */
+	private static class UIItemStateListener implements ItemStateListener {
+		private final Form form;
+		
+		public UIItemStateListener(Form form) {
+			this.form = form;
+		}
+		
+		public void itemStateChanged(Item item) {
+			pushEvent(form, EVENT_ITEM_STATE, item);
 		}
 	}
 	

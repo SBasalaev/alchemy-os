@@ -26,7 +26,9 @@ import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeFunction;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.Date;
+import java.util.Vector;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
@@ -53,24 +55,34 @@ class LibUI1Func extends NativeFunction {
 	public LibUI1Func(String name, int index) {
 		super(name, index);
 	}
+	
+	private static final Vector hyperitems = new Vector();
 
+	private static boolean isHyperItem(Item item) {
+		synchronized (hyperitems) {
+			for (int i=hyperitems.size()-1; i >= 0; i--) {
+				WeakReference ref = (WeakReference) hyperitems.elementAt(i);
+				if (ref.get() == null)
+					hyperitems.removeElementAt(i);
+				else if (ref.get() == item)
+					return true;
+			}
+		}
+		return false;
+	}
+	
 	protected Object execNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // new_image(w: Int, h: Int): Image
 				return Image.createImage(ival(args[0]), ival(args[1]));
 			case 1: // Image.graphics(): Graphics
 				return ((Image)args[0]).getGraphics();
-			case 2: { // image_from_argb(argb: Array, w: Int, h: Int, alpha: Bool): Image
-				Object[] data = (Object[])args[0];
-				final int[] argb = new int[data.length];
-				for (int i=argb.length-1; i>=0; i--) {
-					argb[i] = ival(data[i]);
-				}
-				return Image.createRGBImage(argb, ival(args[1]), ival(args[2]), true);
+			case 2: { // image_from_argb(argb: [Int], w: Int, h: Int, alpha: Bool): Image
+				return Image.createRGBImage((int[])args[0], ival(args[1]), ival(args[2]), true);
 			}
 			case 3: // image_from_stream(in: IStream): Image
 				return Image.createImage((InputStream)args[0]);
-			case 4: { // image_from_data(data: BArray): Image
+			case 4: { // image_from_data(data: [Byte]): Image
 				final byte[] data = (byte[])args[0];
 				return Image.createImage(data, 0, data.length);
 			}
@@ -214,19 +226,40 @@ class LibUI1Func extends NativeFunction {
 			case 47: // Screen.remove_menu(menu: Menu)
 				((Displayable)args[0]).removeCommand((Command)args[1]);
 				return null;
-			case 48: // new_form(): Form
-				return new Form(UIServer.getDefaultTitle(c));
-			case 49: // Form.add(item: Item)
-				((Form)args[0]).append((Item)args[1]);
+			case 48: { // new_form(): Form
+				Form form = new Form(UIServer.getDefaultTitle(c));
+				UIServer.registerForm(form);
+				return form;
+			}
+			case 49: { // Form.add(item: Item)
+				Form form = (Form)args[0];
+				Item item = (Item)args[1];
+				if (isHyperItem(item)) {
+					UIServer.registerItem(form, item);
+				}
+				form.append(item);
 				return null;
+			}
 			case 50: // Form.get(at: Int): Item
 				return ((Form)args[0]).get(ival(args[1]));
-			case 51: // Form.set(at: Int, item: Item)
-				((Form)args[0]).set(ival(args[1]), (Item)args[2]);
+			case 51: {// Form.set(at: Int, item: Item)
+				Form form = (Form)args[0];
+				Item item = (Item)args[2];
+				if (isHyperItem(item)) {
+					UIServer.registerItem(form, item);
+				}
+				form.set(ival(args[1]), item);
 				return null;
-			case 52: // Form.insert(at: Int, item: Item)
-				((Form)args[0]).insert(ival(args[1]), (Item)args[2]);
+			}
+			case 52: { // Form.insert(at: Int, item: Item)
+				Form form = (Form)args[0];
+				Item item = (Item)args[2];
+				if (isHyperItem(item)) {
+					UIServer.registerItem(form, item);
+				}
+				form.insert(ival(args[1]), item);
 				return null;
+			}
 			case 53: // Form.remove(at: Int)
 				((Form)args[0]).delete(ival(args[1]));
 				return null;
@@ -396,7 +429,7 @@ class LibUI1Func extends NativeFunction {
 				return Ival(((List)args[0]).size());
 			case 111: { // new_hyperlinkitem(label: String, text: String)
 				StringItem item = new StringItem((String)args[0], (String)args[1], Item.HYPERLINK);
-				UIServer.registerItem(item);
+				hyperitems.addElement(item);
 				return item;
 			}
 			case 112: // ImageItem.get_alttext(): String
@@ -452,6 +485,11 @@ class LibUI1Func extends NativeFunction {
 				return Ival(UIServer.flash(ival(args[0])));
 			case 130: // Canvas.has_hold_event(): Bool
 				return Ival(((UICanvas)args[0]).hasRepeatEvents());
+			case 131: { // new_hyperimageitem(label: String, img: Image)
+				ImageItem item = new ImageItem((String)args[0], (Image)args[1], Item.LAYOUT_NEWLINE_AFTER, "", Item.HYPERLINK);
+				hyperitems.addElement(item);
+				return item;
+			}
 			default:
 				return null;
 		}
