@@ -153,7 +153,7 @@ class LibCore31Func extends NativeFunction {
 			case 37: // setenv(key: String, value: String)
 				c.setEnv(((String)args[0]), (String)args[1]);
 				return null;
-			case 38: // utfbytes(str: String): BArray
+			case 38: // utfbytes(str: String): [Byte]
 				return IO.utfEncode((String)args[0]);
 			case 39: // datestr(date: Long): String
 				return new Date(lval(args[0])).toString();
@@ -193,7 +193,7 @@ class LibCore31Func extends NativeFunction {
 				return Ival(cal.get(Calendar.SECOND));
 			}
 			case 47: // StrBuf.append(a: Any): StrBuf
-				return ((StringBuffer)args[0]).append(args[1]);
+				return ((StringBuffer)args[0]).append(LibCore31.stringValue(args[1]));
 			case 48: // StrBuf.addch(ch: Char): StrBuf
 				return ((StringBuffer)args[0]).append((char)ival(args[1]));
 			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
@@ -201,7 +201,7 @@ class LibCore31Func extends NativeFunction {
 			case 50: // StrBuf.delch(at: Int): StrBuf
 				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
 			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), args[2]);
+				return ((StringBuffer)args[0]).insert(ival(args[1]), LibCore31.stringValue(args[2]));
 			case 52: // StrBuf.insch(at: Int, ch: Char): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), (char) ival(args[2]));
 			case 53: // StrBuf.setch(at: Int, ch: Char): StrBuf
@@ -265,17 +265,17 @@ class LibCore31Func extends NativeFunction {
 				return null;
 			}
 			case 72: // bacopy(src: [Byte], sofs: Int, dest: [Byte], dofs: Int, len: Int)
-				// DEPRECATED
+				// DEPRECATED: remove in 2.2
 			case 73: // cacopy(src: [Char], sofs: Int, dest: [Char], dofs: Int, len: Int)
-				// DEPRECATED
+				// DEPRECATED: remove in 2.2
 			case 74: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
 				arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
 			case 75: // fprint(out: OStream, a: Any): OStream
-				IO.print((OutputStream)args[0], args[1]);
+				IO.print((OutputStream)args[0], LibCore31.stringValue(args[1]));
 				return args[0];
 			case 76: // fprintln(out: OStream, a: Any): OStream
-				IO.println((OutputStream)args[0], args[1]);
+				IO.println((OutputStream)args[0], LibCore31.stringValue(args[1]));
 				return args[0];
 			case 77: // stdin(): IStream
 				return c.stdin;
@@ -526,7 +526,7 @@ class LibCore31Func extends NativeFunction {
 				return null;
 			case 159: // Process.get_exitcode(): Int
 				return Ival(((Context)args[0]).getExitCode());
-			case 160: // istream_from_ba(buf: BArray): IStream
+			case 160: // istream_from_ba(buf: [Byte]): IStream
 				return new ByteArrayInputStream((byte[])args[0]);
 			case 161: // new_baostream(): BArrayOStream
 				return new ByteArrayOutputStream();
