@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/sh -e
 
-echo 'Installing Alchemy OS 2.1 Alpha 2'
+echo 'Installing Alchemy OS 2.1 Beta 1'
 
 echo 'Installing core components...'
 # in case this file does not exist
@@ -14,13 +14,12 @@ echo 'Removing deprecated components'
 pkg remove libcore2 libui0.1 libpkg0 libfiletype0
 
 echo 'Adding software sources...'
-#echo 'http://alchemy-os.org/pkg 2.1' >> /cfg/pkg/sources
-#echo 'http://alchemy-os.org/pkg 2.1-nonfree' >> /cfg/pkg/sources
+echo 'http://alchemy-os.org/pkg 2.1' >> /cfg/pkg/sources
+echo 'http://alchemy-os.org/pkg 2.1-nonfree' >> /cfg/pkg/sources
 
 echo '#=nec' > /bin/ec
 echo '#=elink' > /bin/el
 
-echo >> /cfg/init.user
 echo 'sh /cfg/init.user' > /cfg/init
 echo 'appmenu' >> /cfg/init
 
