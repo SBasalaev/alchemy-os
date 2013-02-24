@@ -18,11 +18,12 @@
 
 package alchemy.util;
 
-import alchemy.libs.LibCore31;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 /**
@@ -154,13 +155,13 @@ public final class IO {
 	
 	public static void print(OutputStream s, Object obj) {
 		try {
-			s.write(utfEncode(LibCore31.stringValue(obj)));
+			s.write(utfEncode(stringValue(obj)));
 		} catch (IOException ioe) { }
 	}
 	
 	public static void println(OutputStream s, Object obj) {
 		try {
-			s.write(utfEncode(LibCore31.stringValue(obj)));
+			s.write(utfEncode(stringValue(obj)));
 			s.write('\n');
 			s.flush();
 		} catch (IOException ioe) { }
@@ -211,7 +212,7 @@ public final class IO {
 				buf.append(fmt.substring(0, index));
 				char param = fmt.charAt(index+1);
 				if (param >= '0' && param <= '9') {
-					buf.append(LibCore31.stringValue(args[param-'0']));
+					buf.append(stringValue(args[param-'0']));
 				} else {
 					buf.append(param);
 				}
@@ -291,4 +292,93 @@ public final class IO {
         return nameofs == namelen;
     }
 
+
+	public static String stringValue(Object a) {
+		if (a instanceof Object[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final Object[] ar = (Object[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(stringValue(ar[i]));
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof char[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final char[] ar = (char[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append((int)ar[i]);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof byte[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final byte[] ar = (byte[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i]);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof short[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final short[] ar = (short[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i]);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof boolean[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final boolean[] ar = (boolean[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i] ? 1 : 0);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof int[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final int[] ar = (int[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i]);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof long[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final long[] ar = (long[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i]);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof float[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final float[] ar = (float[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i]);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof double[]) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final double[] ar = (double[]) a;
+			for (int i=0; i < ar.length; i++) {
+				if (i != 0) sb.append(", ");
+				sb.append(ar[i]);
+			}
+			return sb.append(']').toString();
+		} else if (a instanceof Hashtable) {
+			StringBuffer sb = new StringBuffer().append('[');
+			final Hashtable h = (Hashtable)a;
+			boolean first = true;
+			for (Enumeration e = h.keys(); e.hasMoreElements(); ) {
+				Object key = e.nextElement();
+				if (first) first = false;
+				else sb.append(", ");
+				sb.append(stringValue(key)).append('=').append(stringValue(h.get(key)));
+			}
+			return sb.append(']').toString();
+		} else {
+			return String.valueOf(a);
+		}
+	}
 }

@@ -141,7 +141,7 @@ class LibCore31Func extends NativeFunction {
 			case 31: // String.lcase(): String
 				return ((String)args[0]).toLowerCase();
 			case 32: // String.concat(str: String): String
-				return ((String)args[0]).concat(LibCore31.stringValue(args[1]));
+				return ((String)args[0]).concat(IO.stringValue(args[1]));
 			case 33: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
 			case 34: // String.chars(): [Char]
@@ -193,7 +193,7 @@ class LibCore31Func extends NativeFunction {
 				return Ival(cal.get(Calendar.SECOND));
 			}
 			case 47: // StrBuf.append(a: Any): StrBuf
-				return ((StringBuffer)args[0]).append(LibCore31.stringValue(args[1]));
+				return ((StringBuffer)args[0]).append(IO.stringValue(args[1]));
 			case 48: // StrBuf.addch(ch: Char): StrBuf
 				return ((StringBuffer)args[0]).append((char)ival(args[1]));
 			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
@@ -201,7 +201,7 @@ class LibCore31Func extends NativeFunction {
 			case 50: // StrBuf.delch(at: Int): StrBuf
 				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
 			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), LibCore31.stringValue(args[2]));
+				return ((StringBuffer)args[0]).insert(ival(args[1]), IO.stringValue(args[2]));
 			case 52: // StrBuf.insch(at: Int, ch: Char): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), (char) ival(args[2]));
 			case 53: // StrBuf.setch(at: Int, ch: Char): StrBuf
@@ -222,7 +222,7 @@ class LibCore31Func extends NativeFunction {
 			case 60: // space_used(root: String): Long
 				return Lval(FSManager.fs().spaceUsed(c.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
-				return LibCore31.stringValue(args[0]);
+				return IO.stringValue(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
 			case 63: // IStream.close()
@@ -272,10 +272,10 @@ class LibCore31Func extends NativeFunction {
 				arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
 			case 75: // fprint(out: OStream, a: Any): OStream
-				IO.print((OutputStream)args[0], LibCore31.stringValue(args[1]));
+				IO.print((OutputStream)args[0], IO.stringValue(args[1]));
 				return args[0];
 			case 76: // fprintln(out: OStream, a: Any): OStream
-				IO.println((OutputStream)args[0], LibCore31.stringValue(args[1]));
+				IO.println((OutputStream)args[0], IO.stringValue(args[1]));
 				return args[0];
 			case 77: // stdin(): IStream
 				return c.stdin;
