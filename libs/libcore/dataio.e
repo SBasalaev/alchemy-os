@@ -71,7 +71,7 @@ def IStream.readdouble(): Double {
 def IStream.readutf(): String {
   var len = this.readushort()
   var buf = new [Byte](len)
-  if (this.readarray(buf, 0, len) < len)
+  if (len > 0 && this.readarray(buf, 0, len) < len)
     error(ERR_IO, "End of stream")
   ba2utf(buf)
 }

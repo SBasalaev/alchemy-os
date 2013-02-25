@@ -8,7 +8,7 @@ OBJECTS=dataio.o i18n.o io.o list.o math.o strbuf.o string.o sys.o textio.o
 all: ${LIB} ${LINKS}
 
 ${LIB}: ${OBJECTS}
- env "LIBPATH=native/" el ${OBJECTS} -o ${LIB} -s${SONAME}
+ el ${OBJECTS} -o ${LIB} -s${SONAME}
 
 libcoree.3.0.so:
  echo '#=libcoree.3.1.so' > libcoree.3.0.so
