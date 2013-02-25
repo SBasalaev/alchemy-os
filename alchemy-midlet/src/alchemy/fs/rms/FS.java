@@ -485,9 +485,9 @@ public final class FS extends Filesystem implements Closeable {
 
 		public synchronized int read(byte[] b, int off, int len) throws IOException {
 			if (buf == null) throw new IOException("Stream is closed");
-			if (pos == buf.length) return -1;
 			if (off < 0 || len < 0 || off+len > b.length) throw new ArrayIndexOutOfBoundsException();
 			if (len == 0) return 0;
+			if (pos == buf.length) return -1;
 			int reallen = buf.length-pos;
 			if (reallen == 0) return -1;
 			if (reallen > len) reallen = len;
