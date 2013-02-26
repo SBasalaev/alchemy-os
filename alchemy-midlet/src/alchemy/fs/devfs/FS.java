@@ -47,7 +47,7 @@ public final class FS extends Filesystem {
 	static public final String DEV_STDERR = "stderr";
 	
 	public InputStream read(String file) throws IOException {
-		String name = file.substring(1);
+		String name = file.length() < 2 ? file : file.substring(1);
 		if (DEV_NULL.equals(name)) {
 			return new NullInputStream();
 		} else if (DEV_STDIN.equals(name)) {
@@ -60,7 +60,7 @@ public final class FS extends Filesystem {
 	}
 
 	public OutputStream write(String file) throws IOException {
-		String name = file.substring(1);
+		String name = file.length() < 2 ? file : file.substring(1);
 		if (DEV_NULL.equals(name)) {
 			return new NullOutputStream();
 		} else if (DEV_STDOUT.equals(name)) {
@@ -86,12 +86,13 @@ public final class FS extends Filesystem {
 	}
 
 	public boolean exists(String file) {
+		if (file.length() == 0) return true;
 		String name = file.substring(1);
 		return DEV_NULL.equals(name) || DEV_STDIN.equals(name) || DEV_STDOUT.equals(name) || DEV_STDERR.equals(name);
 	}
 
 	public boolean isDirectory(String file) {
-		return false;
+		return file.length() == 0;
 	}
 
 	public void create(String file) throws IOException {
@@ -111,11 +112,13 @@ public final class FS extends Filesystem {
 	}
 
 	public boolean canRead(String file) {
+		if (file.length() == 0) return true;
 		String name = file.substring(1);
 		return DEV_NULL.equals(name) || DEV_STDIN.equals(name);
 	}
 
 	public boolean canWrite(String file) {
+		if (file.length() == 0) return false;
 		String name = file.substring(1);
 		return DEV_NULL.equals(name) || DEV_STDOUT.equals(name) || DEV_STDERR.equals(name);
 	}
