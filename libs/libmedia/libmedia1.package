@@ -1,6 +1,6 @@
 Package: libmedia1
 Source: libmedia
-Version: 1.0.2
+Version: 1.0.3
 Section: libs
 Summary: media library
 Maintainer: Sergey Basalaev <sbasalaev@gmail.com>

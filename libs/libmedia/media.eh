@@ -1,5 +1,5 @@
 
-def play_tone(note: Int, duration: Int, volume: Int);
+def play_tone(note: Int, duration: Int, volume: Int = 100);
 
 def get_supported_ctypes(): [String];
 
