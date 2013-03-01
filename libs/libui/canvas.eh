@@ -27,7 +27,7 @@ const ACT_B = 10
 const ACT_C = 11
 const ACT_D = 12
 
-def new_canvas(full: Bool): Canvas;
+def new_canvas(full: Bool = false): Canvas;
 const `Canvas.new` = new_canvas;
 def Canvas.graphics(): Graphics;
 def Canvas.read_key(): Int;

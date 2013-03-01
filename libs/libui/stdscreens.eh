@@ -27,7 +27,7 @@ def new_listbox(strings: [String], images: [Image], select: Menu): ListBox;
 const `ListBox.new` = new_listbox;
 def ListBox.get_index(): Int;
 def ListBox.set_index(index: Int);
-def ListBox.add(str: String, img: Image);
+def ListBox.add(str: String, img: Image = null);
 def ListBox.insert(at: Int, str: String, img: Image = null);
 def ListBox.set(at: Int, str: String, img: Image = null);
 def ListBox.delete(at: Int);
