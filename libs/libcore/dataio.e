@@ -129,7 +129,8 @@ def OStream.writedouble(d: Double) {
 def OStream.writeutf(str: String) {
   var buf = str.utfbytes()
   this.writeshort(buf.len)
-  this.writearray(buf, 0, buf.len)
+  if (buf.len > 0)
+    this.writearray(buf, 0, buf.len)
 }
 
 def writebool(b: Bool) = stdout().writebool(b)
