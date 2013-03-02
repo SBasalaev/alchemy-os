@@ -134,7 +134,7 @@ class MountFilesystem extends Filesystem {
 		Mount mount = FSManager.findMount(nfile);
 		nfile = npath(mount, nfile);
 		if (nfile.length() == 0) throw new IOException("Cannot remove mounted directory");
-		mount.fs.remove(npath(mount, nfile));		
+		mount.fs.remove(nfile);
 	}
 
 	public long size(String file) throws IOException {

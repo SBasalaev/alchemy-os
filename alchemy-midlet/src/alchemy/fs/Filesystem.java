@@ -31,20 +31,17 @@ public abstract class Filesystem {
 
 	/** Helper method for implementations that returns name part of the path. */
 	public static String fname(String path) {
-		if (path.length() == 0) {
-			return path;
-		} else {
-			return path.substring(path.lastIndexOf('/') + 1);
-		}
+		if (path.length() == 0) return path;
+		int lastslash = path.lastIndexOf('/');
+		if (lastslash >= 0) return path.substring(lastslash + 1);
+		return path;
 	}
 
 	/** Helper method for implementations that returns dir part of the path. */
 	public static String fparent(String file) {
-		if (file.length() == 0) {
-			return null;
-		} else {
-			return file.substring(0, file.lastIndexOf('/'));
-		}
+		int lastslash = file.lastIndexOf('/');
+		if (lastslash < 0) return null;
+		return file.substring(0, lastslash);
 	}
 
 	/** Constructor for subclasses. */

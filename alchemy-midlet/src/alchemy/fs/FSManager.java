@@ -21,7 +21,8 @@ package alchemy.fs;
 import alchemy.util.Closeable;
 import alchemy.util.Initable;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Manages pool of file systems.
@@ -34,7 +35,8 @@ public class FSManager {
 	
 	private FSManager() { }
 	
-	private static final Vector mounts = new Vector();
+	/** Maps dirs to mounts. */
+	private static final Hashtable mounted = new Hashtable();
 	
 	private static final Filesystem filesys = new MountFilesystem();
 	
@@ -75,7 +77,7 @@ public class FSManager {
 	}
 	
 	/**
-	 * Mounts specified file system to given directory.
+	 * Mounts specified file system to the given directory.
 	 * File system class is determined as
 	 * <pre>alchemy.fs.${type}.FS</pre>
 	 */
@@ -85,15 +87,9 @@ public class FSManager {
 			Class fsclass = Class.forName("alchemy.fs."+type+".FS");
 			Filesystem fs = (Filesystem)fsclass.newInstance();
 			if (fs instanceof Initable) ((Initable)fs).init(options);
-			synchronized (mounts) {
-				int index = mounts.size()-1;
-				while (index > 0) {
-					Mount mount = (Mount) mounts.elementAt(index);
-					if (mount.path.compareTo(path) <= 0) break;
-					index--;
-				}
-				mounts.insertElementAt(new Mount(path, fs), index+1);
-			}
+			Mount oldmount = (Mount) mounted.put(path, new Mount (path, fs));
+			if (oldmount != null && oldmount.fs instanceof Closeable)
+				((Closeable)oldmount.fs).close();
 		} catch (ClassNotFoundException cnfe) {
 			throw new IOException("FS driver not found: "+type);
 		} catch (Exception e) {
@@ -110,19 +106,10 @@ public class FSManager {
 	 */
 	public static boolean umount(String dir) {
 		String path = normalize(dir);
-		synchronized (mounts) {
-			for (int i=mounts.size()-1; i >= 0; i--) {
-				Mount m = (Mount) mounts.elementAt(i);
-				if (m.path.equals(path)) {
-					mounts.removeElementAt(i);
-					if (m.fs instanceof Closeable) {
-						((Closeable) m.fs).close();
-					}
-					return true;
-				}
-			}
-		}
-		return false;
+		Mount oldmount = (Mount) mounted.remove(path);
+		if (oldmount != null && oldmount.fs instanceof Closeable)
+			((Closeable)oldmount.fs).close();
+		return oldmount != null;
 	}
 	
 	/**
@@ -133,29 +120,24 @@ public class FSManager {
 	}
 	
 	/** Closes all file systems. */
-	public static void umountAll() {
-		synchronized (mounts) {
-			for (int i=mounts.size()-1; i >= 0; i--) {
-				Mount mount = (Mount) mounts.elementAt(i);
-				Filesystem fs = mount.fs;
-				if (fs instanceof Closeable) ((Closeable)fs).close();
-			}
-			mounts.setSize(0);
+	public static synchronized void umountAll() {
+		for (Enumeration e = mounted.elements(); e.hasMoreElements(); ) {
+			Mount mount = (Mount) e.nextElement();
+			if (mount.fs instanceof Closeable) ((Closeable)mount.fs).close();
 		}
+		mounted.clear();
 	}
 	
 	/**
 	 * Used by MountFilesystem.
 	 * Returns filesystem on which corresponding file is mounted.
+	 * File must be normalized.
 	 */
-	static Mount findMount(String file) {
-		synchronized (mounts) {
-			for (int i=mounts.size()-1; i >= 0; i--) {
-				Mount mount = (Mount) mounts.elementAt(i);
-				if (file.startsWith(mount.path)) return mount;
-			}
+	static synchronized Mount findMount(String file) {
+		Object ret = null;
+		while ((ret = mounted.get(file)) == null && file != null) {
+			file = Filesystem.fparent(file);
 		}
-		// if root is mounted, we should never reach this string
-		return null;
+		return (Mount) ret;
 	}
 }
