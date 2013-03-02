@@ -18,16 +18,13 @@
 
 package alchemy.fs.devfs;
 
-import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * The input stream that always returns EOF.
- *
+ * An output stream that just ignores the data.
  * @author Sergey Basalaev
  */
-public class NullInputStream extends InputStream {
-	public NullInputStream() { }
-	public int read() { return -1; }
-	public void reset() { }
-	public boolean markSupported() { return true; }
+public class SinkOutputStream extends OutputStream {
+	public SinkOutputStream() { }
+	public void write(int b) { }
 }

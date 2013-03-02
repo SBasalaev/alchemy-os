@@ -20,9 +20,12 @@ package alchemy.fs.devfs;
 
 import alchemy.core.Context.ContextThread;
 import alchemy.fs.Filesystem;
+import alchemy.util.IO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Hashtable;
+import javax.microedition.io.Connector;
 
 /**
  * Device file system for Alchemy OS.
@@ -40,38 +43,66 @@ import java.io.OutputStream;
  * @author Sergey Basalaev
  */
 public final class FS extends Filesystem {
-
-	static public final String DEV_NULL = "null";
-	static public final String DEV_STDIN = "stdin";
-	static public final String DEV_STDOUT = "stdout";
-	static public final String DEV_STDERR = "stderr";
 	
+	private final Hashtable sharedinputs = new Hashtable();
+	private final  Hashtable sharedoutputs = new Hashtable();
+	private final String[] stddevs = {"stdin", "stdout", "stderr", "null", "zero", "random"};
+	private final String[] commdevs;
+	
+	public FS() {
+		SinkOutputStream sink = new SinkOutputStream();
+		sharedoutputs.put("zero", sink);
+		sharedoutputs.put("null", sink);
+
+		sharedinputs.put("zero", new SinkInputStream(0));
+		sharedinputs.put("null", new SinkInputStream(-1));
+		sharedinputs.put("random", new RandomInputStream());
+
+		String comm = System.getProperty("microedition.commports");
+		commdevs = (comm == null) ? new String[0] : IO.split(comm, ',');
+	}
+
 	public InputStream read(String file) throws IOException {
-		String name = file.length() < 2 ? file : file.substring(1);
-		if (DEV_NULL.equals(name)) {
-			return new NullInputStream();
-		} else if (DEV_STDIN.equals(name)) {
+		String name = fname(file);
+		if ("stdin".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ContextThread) {
 				return ((ContextThread)th).context().stdin;
+			}
+		}
+		InputStream input = (InputStream) sharedinputs.get(name);
+		if (input != null) {
+			return input;
+		}
+		for (int i=0; i<commdevs.length; i++) {
+			if (commdevs[i].equals(name)) {
+				return Connector.openInputStream("comm:" + name);
 			}
 		}
 		throw new IOException("No such device");
 	}
 
 	public OutputStream write(String file) throws IOException {
-		String name = file.length() < 2 ? file : file.substring(1);
-		if (DEV_NULL.equals(name)) {
-			return new NullOutputStream();
-		} else if (DEV_STDOUT.equals(name)) {
+		String name = fname(file);
+		if ("stdout".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ContextThread) {
 				return ((ContextThread)th).context().stdout;
 			}
-		} else if (DEV_STDERR.equals(name)) {
+		}
+		if ("stderr".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ContextThread) {
 				return ((ContextThread)th).context().stderr;
+			}
+		}
+		OutputStream output = (OutputStream) sharedoutputs.get(name);
+		if (output != null) {
+			return output;
+		}
+		for (int i=0; i<commdevs.length; i++) {
+			if (commdevs[i].equals(name)) {
+				return Connector.openOutputStream("comm:" + name);
 			}
 		}
 		throw new IOException("No such device");
@@ -82,13 +113,22 @@ public final class FS extends Filesystem {
 	}
 
 	public String[] list(String file) throws IOException {
-		return new String[] { DEV_NULL, DEV_STDIN, DEV_STDOUT, DEV_STDERR };
+		String[] alldevs = new String[stddevs.length + commdevs.length];
+		System.arraycopy(stddevs, 0, alldevs, 0, stddevs.length);
+		System.arraycopy(commdevs, 0, alldevs, stddevs.length, commdevs.length);
+		return alldevs;
 	}
 
 	public boolean exists(String file) {
-		if (file.length() == 0) return true;
-		String name = file.substring(1);
-		return DEV_NULL.equals(name) || DEV_STDIN.equals(name) || DEV_STDOUT.equals(name) || DEV_STDERR.equals(name);
+		String name = fname(file);
+		if (name.length() == 0) return true;
+		for (int i=0; i<stddevs.length; i++) {
+			if (name.equals(stddevs[i])) return true;
+		}
+		for (int i=0; i<commdevs.length; i++) {
+			if (name.equals(commdevs[i])) return true;
+		}
+		return false;
 	}
 
 	public boolean isDirectory(String file) {
@@ -112,15 +152,23 @@ public final class FS extends Filesystem {
 	}
 
 	public boolean canRead(String file) {
-		if (file.length() == 0) return true;
-		String name = file.substring(1);
-		return DEV_NULL.equals(name) || DEV_STDIN.equals(name);
+		String name = fname(file);
+		if (name.length() == 0 || name.equals("stdin")) return true;
+		if (sharedinputs.contains(name)) return true;
+		for (int i=0; i<commdevs.length; i++) {
+			if (name.equals(commdevs[i])) return true;
+		}
+		return false;
 	}
 
 	public boolean canWrite(String file) {
-		if (file.length() == 0) return false;
-		String name = file.substring(1);
-		return DEV_NULL.equals(name) || DEV_STDOUT.equals(name) || DEV_STDERR.equals(name);
+		String name = fname(file);
+		if (name.equals("stdout") || name.equals("stderr")) return true;
+		if (sharedinputs.contains(name)) return true;
+		for (int i=0; i<commdevs.length; i++) {
+			if (name.equals(commdevs[i])) return true;
+		}
+		return false;
 	}
 
 	public boolean canExec(String file) {

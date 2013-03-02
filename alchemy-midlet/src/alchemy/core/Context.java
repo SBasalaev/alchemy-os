@@ -20,7 +20,7 @@ package alchemy.core;
 
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
-import alchemy.fs.devfs.NullInputStream;
+import alchemy.fs.devfs.SinkInputStream;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
@@ -172,7 +172,7 @@ public class Context {
 	 * Creates root context with given runtime.
 	 */
 	Context(Art runtime) {
-		stdin = new NullInputStream();
+		stdin = new SinkInputStream(-1);
 		stderr = stdout = System.out;
 		curdir = "";
 		art = runtime;

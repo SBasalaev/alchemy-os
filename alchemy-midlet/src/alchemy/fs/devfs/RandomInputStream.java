@@ -18,13 +18,21 @@
 
 package alchemy.fs.devfs;
 
-import java.io.OutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Random;
 
 /**
- * An output stream that just ignores the data.
+ * Input stream that generates pseudorandom data.
+ *
  * @author Sergey Basalaev
  */
-public class NullOutputStream extends OutputStream {
-	public NullOutputStream() { }
-	public void write(int b) { }
+public class RandomInputStream extends InputStream {
+	private final Random rnd = new Random();
+
+	public RandomInputStream() { }
+
+	public int read() throws IOException {
+		return rnd.nextInt(256);
+	}
 }
