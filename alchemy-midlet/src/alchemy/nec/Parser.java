@@ -53,8 +53,11 @@ public class Parser {
 	private static final int W_CAST = 3;
 	private static final int W_HIDDEN = 4;
 	private static final int W_DEPRECATED = 5;
+	private static final int W_INCLUDED = 6;
 	
-	static final String[] WARN_STRINGS = {"typesafe", "main", "operators", "cast", "hidden", "deprecated"};
+	static final String[] WARN_STRINGS = {
+		"typesafe", "main", "operators", "cast",
+		"hidden", "deprecated", "included"};
 
 	// eXperimental feature categories
 	
@@ -259,6 +262,8 @@ public class Parser {
 					v.constValue = new Double(0d);
 				}
 				unit.addVar(v);
+				if (!isConst && files.size() > 1)
+					warn(W_INCLUDED, "Global variable " + v.name + " in included file");
 			} else if (t.svalue.equals("def")) {
 				Func fdef = parseFuncDef();
 				Var fvar = unit.getVar(fdef.signature);
@@ -371,6 +376,8 @@ public class Parser {
 							fdef.hits++;
 							fdef.source = Filesystem.fname((String)files.peek());
 						}
+						if (files.size() > 1)
+							warn(W_INCLUDED, "Function " + fdef.signature + " is implemented in included file");
 						break;
 					default:
 						throw new ParseException(t.toString()+" unexpected here");
@@ -593,11 +600,11 @@ public class Parser {
 					warn(W_MAIN, "Incompatible argument type in main()");
 				}
 				if (!argtype.equals(shouldbe)) {
-					warn(W_MAIN, "argument of main() should be of type [String]");
+					warn(W_MAIN, "Argument of main() should be of type [String]");
 				}
 			}
 			if (rettype != BuiltinType.INT && rettype != BuiltinType.NONE) {
-				warn(W_MAIN, "Incompatible return type in main(), should be Int or <none>.");
+				warn(W_MAIN, "Incompatible return type in main(), should be Int or <none>");
 			}
 		}
 		if (methodholder != null) {
