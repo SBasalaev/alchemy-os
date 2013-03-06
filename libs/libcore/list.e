@@ -53,23 +53,27 @@ def List.insert(at: Int, val: Any) {
   }
 }
 
-def List.insertall(at: Int, vals: [Any]) {
+def List.insertfrom(at: Int, arr: Array, ofs: Int, len: Int) {
   var size = this.size
   if (at >= 0 && at <= size) {
-    if (vals.len > 0) {
-      if (this.data.len < size + vals.len)
-        this.grow(this.data.len + vals.len)
+    if (len > 0) {
+      if (this.data.len < size + len)
+        this.grow(this.data.len + len)
       if (size-at > 0)
-        acopy(this.data, at, this.data, at+vals.len, size-at)
-      acopy(vals, 0, this.data, at, vals.len)
-      this.size = size + vals.len
+        acopy(this.data, at, this.data, at+len, size-at)
+      acopy(arr, ofs, this.data, at, len)
+      this.size = size + len
     }
   } else {
     error(ERR_RANGE)
   }
 }
 
+def List.insertall(at: Int, vals: [Any]) = this.insertfrom(at, vals, 0, vals.len)
+
 def List.add(val: Any) = this.insert(this.size, val)
+
+def List.addfrom(arr: Array, ofs: Int, len: Int) = this.insertfrom(this.size, arr, ofs, len);
 
 def List.addall(vals: [Any]) = this.insertall(this.size, vals)
 
