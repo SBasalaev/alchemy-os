@@ -96,17 +96,17 @@ Summary: package management library
 File: libpkg1_0.3.6.pkg
 
 Package: libui-dev
-Version: 1.0.6
+Version: 1.0.7
 Section: libdevel
 Depends: libui1
 Summary: graphical interface library - development headers
-File: libui-dev_1.0.6.pkg
+File: libui-dev_1.0.7.pkg
 
 Package: libui1
-Version: 1.0.6
+Version: 1.0.7
 Section: libs
 Summary: graphical interface library
-File: libui1_1.0.6.pkg
+File: libui1_1.0.7.pkg
 
 Package: mount
 Version: 2.1
