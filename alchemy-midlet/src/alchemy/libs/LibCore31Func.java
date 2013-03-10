@@ -584,6 +584,9 @@ class LibCore31Func extends NativeFunction {
 					throw new InstantiationException("Not an Ether library");
 				return new ELibBuilder().build(c, in);
 			}
+			case 178: // StrBuf.chars(from: Int, to: Int, buf: [Char], ofs: Int)
+				((StringBuffer)args[0]).getChars(ival(args[1]), ival(args[2]), (char[])(args[3]), ival(args[4]));
+				return null;
 			default:
 				return null;
 		}
