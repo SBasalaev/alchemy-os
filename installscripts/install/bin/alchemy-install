@@ -26,7 +26,7 @@ chmod +x /bin/el
 
 touch /cfg/init.user
 echo 'sh /cfg/init.user' > /cfg/init
-echo 'mount /dev devfs' > /cfg/init
+echo 'mount /dev devfs' >> /cfg/init
 echo 'appmenu' >> /cfg/init
 
 echo 'Installation complete!'
