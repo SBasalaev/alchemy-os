@@ -13,6 +13,7 @@ const MAX_PRIORITY = 10
 
 def this_process(): Process;
 def new_process(): Process;
+const `Process.new` = new_process;
 
 def Process.get_state(): Int;
 
