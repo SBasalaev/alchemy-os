@@ -1598,13 +1598,25 @@ public class Parser {
 				if (btype == BuiltinType.ANY && ltype != BuiltinType.ANY && rtype != BuiltinType.ANY) {
 					throw new ParseException("Incomparable types " + ltype + " and " + rtype);
 				}
+				// if (left == null) right == null else left.eq(right)
 				if (ltype != BuiltinType.NULL && rtype != BuiltinType.NULL) {
 					Func eqmethod = findMethod(ltype, "eq");
 					if (eqmethod != null && eqmethod.type.rettype == BuiltinType.BOOL &&
 							eqmethod.type.args.length == 2 && eqmethod.type.args[1].isSupertypeOf(rtype)) {
 						eqmethod.hits++;
 						Expr fcall = new FCallExpr(new ConstExpr(left.lineNumber(), eqmethod), new Expr[] {left, right});
-						return (op == Token.EQEQ) ? fcall : new UnaryExpr('!', fcall);
+						Expr nullCmp = new ComparisonExpr(left, Token.EQEQ, new ConstExpr(-1, Null.NULL));
+						if (op == Token.EQEQ) {
+							return new IfExpr(
+									nullCmp,
+									new ComparisonExpr(right, Token.EQEQ, new ConstExpr(-1, Null.NULL)),
+									fcall);
+						} else {
+							return new IfExpr(
+									nullCmp,
+									new ComparisonExpr(right, Token.NOTEQ, new ConstExpr(-1, Null.NULL)),
+									new UnaryExpr('!', fcall));
+						}
 					}
 				}
 				return new ComparisonExpr(cast(left,btype), op, cast(right,btype));
