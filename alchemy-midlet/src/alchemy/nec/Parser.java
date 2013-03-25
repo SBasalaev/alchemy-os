@@ -230,6 +230,7 @@ public class Parser {
 						throw new ParseException("Constant expression expected");
 					if (vartype == null) {
 						vartype = varvalue.rettype();
+						if (vartype == BuiltinType.NULL) vartype = BuiltinType.ANY;
 					} else {
 						varvalue = (Expr)cast(varvalue, vartype).accept(constOptimizer, unit);
 					}
@@ -1016,6 +1017,8 @@ public class Parser {
 					vartype = varvalue.rettype();
 					if (vartype == BuiltinType.NONE)
 						throw new ParseException("Cannot convert from <none> to Any");
+					if (vartype == BuiltinType.NULL)
+						vartype = BuiltinType.ANY;
 				} else {
 					varvalue = cast(varvalue, vartype);
 				}
