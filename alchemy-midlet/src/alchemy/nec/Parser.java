@@ -1251,6 +1251,7 @@ public class Parser {
 	 *
 	 * <dt>{@code print(obj)}, {@code println(obj)}, {@code OStream.print(obj)}, {@code OStream.println(obj)}</dt>
 	 * <dd>replaces argument by {@code obj.tostr()}</dd>
+	 *
 	 * </dl>
 	 */
 	private Expr parseFCall(Scope scope, Expr fload, Expr firstarg) throws IOException, ParseException {
@@ -1785,6 +1786,12 @@ public class Parser {
 		}
 		if (fromType.isSubtypeOf(BuiltinType.NUMBER) && toType.isSubtypeOf(BuiltinType.NUMBER)) {
 			return new CastExpr(toType, expr);
+		}
+		if (expr instanceof NewArrayByEnumExpr && fromType instanceof ArrayType && toType instanceof ArrayType) {
+			Type fromElemType = ((ArrayType)fromType).elementType();
+			Type toElemType = ((ArrayType)toType).elementType();
+			if (toElemType.isSupertypeOf(fromElemType))
+				return new NewArrayByEnumExpr(expr.lineNumber(), toType, ((NewArrayByEnumExpr)expr).initializers);
 		}
 		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
 	}
