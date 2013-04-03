@@ -1790,7 +1790,7 @@ public class Parser {
 		if (expr instanceof NewArrayByEnumExpr && fromType instanceof ArrayType && toType instanceof ArrayType) {
 			Type fromElemType = ((ArrayType)fromType).elementType();
 			Type toElemType = ((ArrayType)toType).elementType();
-			if (toElemType.isSupertypeOf(fromElemType))
+			if (toElemType.isSupertypeOf(fromElemType) || ((NewArrayByEnumExpr)expr).initializers.length == 0)
 				return new NewArrayByEnumExpr(expr.lineNumber(), toType, ((NewArrayByEnumExpr)expr).initializers);
 		}
 		throw new ParseException("Cannot convert from "+fromType+" to "+toType);
