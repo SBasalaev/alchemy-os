@@ -46,6 +46,13 @@ public class VarIndexer implements ExprVisitor {
 		}
 	}
 
+	public Object visitAChange(AChangeExpr achange, Object offset) {
+		achange.arrayexpr.accept(this, offset);
+		achange.indexexpr.accept(this, offset);
+		achange.rvalue.accept(this, offset);
+		return null;
+	}
+	
 	public Object visitALen(ALenExpr alen, Object offset) {
 		alen.arrayexpr.accept(this, offset);
 		return null;
@@ -59,8 +66,8 @@ public class VarIndexer implements ExprVisitor {
 
 	public Object visitAStore(AStoreExpr astore, Object offset) {
 		astore.arrayexpr.accept(this, offset);
-		astore.assignexpr.accept(this, offset);
 		astore.indexexpr.accept(this, offset);
+		astore.assignexpr.accept(this, offset);
 		return null;
 	}
 

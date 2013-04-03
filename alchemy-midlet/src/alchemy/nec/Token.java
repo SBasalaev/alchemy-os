@@ -99,4 +99,22 @@ public final class Token {
 	public static boolean isAssignment(int token) {
 		return (token <= -30) || (token == '=');
 	}
+	
+	public static int getAssignOperator(int token) {
+		switch (token) {
+			case PLUSEQ: return '+';
+			case MINUSEQ: return '-';
+			case STAREQ: return '*';
+			case SLASHEQ: return '/';
+			case PERCENTEQ: return '%';
+			case BAREQ: return '|';
+			case AMPEQ: return '&';
+			case HATEQ: return '^';
+			case LTLTEQ: return LTLT;
+			case GTGTEQ: return GTGT;
+			case GTGTGTEQ: return GTGTGT;
+			default:
+				throw new IllegalArgumentException("Not an assignment operator: " + token);
+		}
+	}
 }

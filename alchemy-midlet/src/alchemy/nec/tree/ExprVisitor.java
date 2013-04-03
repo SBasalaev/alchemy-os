@@ -23,6 +23,7 @@ package alchemy.nec.tree;
  * @author Sergey Basalaev
  */
 public interface ExprVisitor {
+	Object visitAChange(AChangeExpr achange, Object data);
 	Object visitALen(ALenExpr alen, Object data);
 	Object visitALoad(ALoadExpr aload, Object data);
 	Object visitAStore(AStoreExpr astore, Object data);

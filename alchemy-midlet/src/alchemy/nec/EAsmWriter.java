@@ -215,6 +215,119 @@ public class EAsmWriter implements ExprVisitor {
 		}
 	}
 	
+	private void visitBinOperator(Type type, int operator) {
+		switch (operator) {
+			case '+':
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IADD);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LADD);
+				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FADD);
+				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DADD);
+				break;
+			case '-':
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.ISUB);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LSUB);
+				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FSUB);
+				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DSUB);
+				break;
+			case '*':
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IMUL);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LMUL);
+				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FMUL);
+				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DMUL);
+				break;
+			case '/':
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IDIV);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LDIV);
+				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FDIV);
+				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DDIV);
+				break;
+			case '%':
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IMOD);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LMOD);
+				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FMOD);
+				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DMOD);
+				break;
+			case '&':
+				if (type == BuiltinType.INT || type == BuiltinType.BOOL) writer.visitInsn(Opcodes.IAND);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LAND);
+				break;
+			case '|':
+				if (type == BuiltinType.INT || type == BuiltinType.BOOL) writer.visitInsn(Opcodes.IOR);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LOR);
+				break;
+			case '^':
+				if (type == BuiltinType.INT || type == BuiltinType.BOOL) writer.visitInsn(Opcodes.IXOR);
+				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LXOR);
+				break;
+			case Token.LTLT:
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.ISHL);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LSHL);
+				break;
+			case Token.GTGT:
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.ISHR);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LSHR);
+				break;
+			case Token.GTGTGT:
+				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IUSHR);
+				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LUSHR);
+				break;
+		}
+	}
+
+	public Object visitAChange(AChangeExpr achange, Object isReturn) {
+		achange.arrayexpr.accept(this, Boolean.FALSE);
+		achange.indexexpr.accept(this, Boolean.FALSE);
+		writer.visitInsn(Opcodes.DUP2);
+		Type artype = achange.arrayexpr.rettype();
+		Type eltype = null;
+		if (artype instanceof ArrayType)
+			eltype = ((ArrayType)artype).elementType();
+		if (eltype == BuiltinType.BYTE) {
+			writer.visitInsn(Opcodes.BALOAD);
+		} else if (eltype == BuiltinType.CHAR) {
+			writer.visitInsn(Opcodes.CALOAD);
+		} else if (eltype == BuiltinType.SHORT) {
+			writer.visitInsn(Opcodes.SALOAD);
+		} else if (eltype == BuiltinType.BOOL) {
+			writer.visitInsn(Opcodes.ZALOAD);
+		} else if (eltype == BuiltinType.INT) {
+			writer.visitInsn(Opcodes.IALOAD);
+		} else if (eltype == BuiltinType.LONG) {
+			writer.visitInsn(Opcodes.LALOAD);
+		} else if (eltype == BuiltinType.FLOAT) {
+			writer.visitInsn(Opcodes.FALOAD);
+		} else if (eltype == BuiltinType.DOUBLE) {
+			writer.visitInsn(Opcodes.DALOAD);
+		} else {
+			writer.visitInsn(Opcodes.AALOAD);
+		}
+		achange.rvalue.accept(this, Boolean.FALSE);
+		visitBinOperator(achange.elementType, achange.operator);
+		if (eltype == BuiltinType.BYTE) {
+			writer.visitInsn(Opcodes.BASTORE);
+		} else if (eltype == BuiltinType.CHAR) {
+			writer.visitInsn(Opcodes.CASTORE);
+		} else if (eltype == BuiltinType.SHORT) {
+			writer.visitInsn(Opcodes.SASTORE);
+		} else if (eltype == BuiltinType.BOOL) {
+			writer.visitInsn(Opcodes.ZASTORE);
+		} else if (eltype == BuiltinType.INT) {
+			writer.visitInsn(Opcodes.IASTORE);
+		} else if (eltype == BuiltinType.LONG) {
+			writer.visitInsn(Opcodes.LASTORE);
+		} else if (eltype == BuiltinType.FLOAT) {
+			writer.visitInsn(Opcodes.FASTORE);
+		} else if (eltype == BuiltinType.DOUBLE) {
+			writer.visitInsn(Opcodes.DASTORE);
+		} else {
+			writer.visitInsn(Opcodes.AASTORE);
+		}
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RET_NULL);
+		}
+		return null;
+	}
+	
 	public Object visitALen(ALenExpr alen, Object isReturn) {
 		alen.arrayexpr.accept(this, Boolean.FALSE);
 		Type artype = (ArrayType)alen.arrayexpr.rettype();
@@ -323,63 +436,7 @@ public class EAsmWriter implements ExprVisitor {
 	public Object visitBinary(BinaryExpr binary, Object isReturn) {
 		binary.lvalue.accept(this, Boolean.FALSE);
 		binary.rvalue.accept(this, Boolean.FALSE);
-		Type type = binary.rettype();
-		switch (binary.operator) {
-			case '+':
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IADD);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LADD);
-				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FADD);
-				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DADD);
-				break;
-			case '-':
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.ISUB);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LSUB);
-				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FSUB);
-				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DSUB);
-				break;
-			case '*':
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IMUL);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LMUL);
-				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FMUL);
-				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DMUL);
-				break;
-			case '/':
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IDIV);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LDIV);
-				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FDIV);
-				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DDIV);
-				break;
-			case '%':
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IMOD);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LMOD);
-				else if (type == BuiltinType.FLOAT) writer.visitInsn(Opcodes.FMOD);
-				else if (type == BuiltinType.DOUBLE) writer.visitInsn(Opcodes.DMOD);
-				break;
-			case '&':
-				if (type == BuiltinType.INT || type == BuiltinType.BOOL) writer.visitInsn(Opcodes.IAND);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LAND);
-				break;
-			case '|':
-				if (type == BuiltinType.INT || type == BuiltinType.BOOL) writer.visitInsn(Opcodes.IOR);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LOR);
-				break;
-			case '^':
-				if (type == BuiltinType.INT || type == BuiltinType.BOOL) writer.visitInsn(Opcodes.IXOR);
-				else if (type.equals(BuiltinType.LONG)) writer.visitInsn(Opcodes.LXOR);
-				break;
-			case Token.LTLT:
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.ISHL);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LSHL);
-				break;
-			case Token.GTGT:
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.ISHR);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LSHR);
-				break;
-			case Token.GTGTGT:
-				if (type == BuiltinType.INT) writer.visitInsn(Opcodes.IUSHR);
-				else if (type == BuiltinType.LONG) writer.visitInsn(Opcodes.LUSHR);
-				break;
-		}
+		visitBinOperator(binary.rettype(), binary.operator);
 		if (isReturn == Boolean.TRUE) {
 			writer.visitInsn(Opcodes.RETURN);
 		}

@@ -64,6 +64,13 @@ public class Optimizer implements ExprVisitor {
 		}
 	}
 
+	public Object visitAChange(AChangeExpr achange, Object scope) {
+		achange.arrayexpr = (Expr)achange.arrayexpr.accept(this, scope);
+		achange.indexexpr = (Expr)achange.indexexpr.accept(this, scope);
+		achange.rvalue = (Expr)achange.rvalue.accept(this, scope);
+		return achange;
+	}
+
 	/**
 	 * <pre>
 	 * CF:

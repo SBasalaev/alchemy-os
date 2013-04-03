@@ -1392,8 +1392,14 @@ public class Parser {
 					Type eltype = ((ArrayType)artype).elementType();
 					Expr getexpr = new ALoadExpr(arexpr, indexexpr, eltype);
 					if (Token.isAssignment(t.nextToken())) {
-						Expr rexpr = makeAssignRval(getexpr, t.ttype, parseExpr(scope));
-						return new AStoreExpr(arexpr, indexexpr, cast(rexpr, eltype));
+						Expr rexpr = cast(makeAssignRval(getexpr, t.ttype, parseExpr(scope)), eltype);
+						if (rexpr instanceof BinaryExpr) {
+							// in this case we can produce more optimized code
+							final BinaryExpr bin = (BinaryExpr)rexpr;
+							return new AChangeExpr(arexpr, indexexpr, eltype, bin.operator, bin.rvalue);
+						} else {
+							return new AStoreExpr(arexpr, indexexpr, rexpr);
+						}
 					} else {
 						t.pushBack();
 						return getexpr;
@@ -1488,7 +1494,13 @@ public class Parser {
 				ALoadExpr ldexpr = new ALoadExpr(expr, indexexpr, fields[index].type);
 				if (Token.isAssignment(t.nextToken())) {
 					Expr rexpr = cast(makeAssignRval(ldexpr, t.ttype, parseExpr(scope)), fields[index].type);
-					return new AStoreExpr(expr, indexexpr, rexpr);
+					if (rexpr instanceof BinaryExpr) {
+						// in this case we can produce more optimized code
+						final BinaryExpr bin = (BinaryExpr)rexpr;
+						return new AChangeExpr(expr, indexexpr, fields[index].type, bin.operator, bin.rvalue);
+					} else {
+						return new AStoreExpr(expr, indexexpr, rexpr);
+					}
 				} else {
 					t.pushBack();
 					return ldexpr;
@@ -1729,33 +1741,10 @@ public class Parser {
 	}
 	
 	private Expr makeAssignRval(Expr get, int operator, Expr right) throws ParseException {
-		switch (operator) {
-			case '=':
-				return right;
-			case Token.PLUSEQ:
-				return makeBinaryExpr(get, '+', right);
-			case Token.MINUSEQ:
-				return makeBinaryExpr(get, '-', right);
-			case Token.STAREQ:
-				return makeBinaryExpr(get, '*', right);
-			case Token.SLASHEQ:
-				return makeBinaryExpr(get, '/', right);
-			case Token.PERCENTEQ:
-				return makeBinaryExpr(get, '%', right);
-			case Token.BAREQ:
-				return makeBinaryExpr(get, '|', right);
-			case Token.AMPEQ:
-				return makeBinaryExpr(get, '&', right);
-			case Token.HATEQ:
-				return makeBinaryExpr(get, '^', right);
-			case Token.LTLTEQ:
-				return makeBinaryExpr(get, Token.LTLT, right);
-			case Token.GTGTEQ:
-				return makeBinaryExpr(get, Token.GTGT, right);
-			case Token.GTGTGTEQ:
-				return makeBinaryExpr(get, Token.GTGTGT, right);
-			default:
-				throw new ParseException("Unexpected operator type "+operator);
+		if (operator == '=') {
+			return right;
+		} else {
+			return makeBinaryExpr(get, Token.getAssignOperator(operator), right);
 		}
 	}
 
