@@ -58,7 +58,7 @@ public class NEC extends NativeApp {
 		String outname = null;
 		String fname = null;
 		boolean wait_outname = false;
-		boolean optimize = true;
+		int optlevel = 1;
 		boolean dbginfo = false;
 		int Wmask = -1; // all warnings
 		int Xmask = 0;
@@ -81,10 +81,12 @@ public class NEC extends NativeApp {
 					IO.println(c.stderr, "Unsupported target: "+arg.substring(2));
 					return 1;
 				}
-			} else if (arg.equals("-O0")) {
-				optimize = false;
 			} else if (arg.startsWith("-O")) {
-				optimize = true;
+				try {
+					optlevel = Integer.parse(arg.substring(2));
+				} catch (Exception e) {
+					optlevel = 1;
+				}
 			} else if (arg.startsWith("-X")) {
 				String Xfeature = arg.substring(2);
 				for (int j=0; j < Parser.X_STRINGS.length; j++) {
@@ -129,7 +131,7 @@ public class NEC extends NativeApp {
 			outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(c, target, Wmask, Xmask);
+		Parser parser = new Parser(c, target, optlevel, Wmask, Xmask);
 		Unit unit = null;
 		try {
 			unit = parser.parse(c.toFile(fname));

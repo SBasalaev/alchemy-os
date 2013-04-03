@@ -59,16 +59,20 @@ public class Parser {
 		"typesafe", "main", "operators", "cast",
 		"hidden", "deprecated", "included"};
 
+	private int Wmask; /* Enabled warnings. */
+
 	// eXperimental feature categories
 	
-	static final String[] X_STRINGS = {};
+	private static final int X_ARRAYOPT = 1;
 	
+	static final String[] X_STRINGS = {"arrayopt"};
+
+	private int Xmask; /* Enabled experimental features. */
+
 	private final Context c;
 	private final int target;
 	private Tokenizer t;
 	private Unit unit;
-	private int Wmask; /* Enabled warnings. */
-	private int Xmask; /* Enabled experimental features. */
 
 	/** Files in the process of parsing. */
 	private Stack files = new Stack();
@@ -77,9 +81,11 @@ public class Parser {
 	
 	private final Optimizer constOptimizer = new Optimizer();
 	
-	public Parser(Context c, int target, int Wmask, int Xmask) {
+	public Parser(Context c, int target, int optlevel, int Wmask, int Xmask) {
 		this.c = c;
 		this.target = target;
+		this.optlevel = optlevel;
+		if (optlevel > 1) Xmask |= X_ARRAYOPT;
 		this.Wmask = Wmask;
 		this.Xmask = Xmask;
 	}
@@ -1393,7 +1399,7 @@ public class Parser {
 					Expr getexpr = new ALoadExpr(arexpr, indexexpr, eltype);
 					if (Token.isAssignment(t.nextToken())) {
 						Expr rexpr = cast(makeAssignRval(getexpr, t.ttype, parseExpr(scope)), eltype);
-						if (rexpr instanceof BinaryExpr) {
+						if ((Xmask & X_ARRAYOPT) != 0 && rexpr instanceof BinaryExpr) {
 							// in this case we can produce more optimized code
 							final BinaryExpr bin = (BinaryExpr)rexpr;
 							return new AChangeExpr(arexpr, indexexpr, eltype, bin.operator, bin.rvalue);
@@ -1494,7 +1500,7 @@ public class Parser {
 				ALoadExpr ldexpr = new ALoadExpr(expr, indexexpr, fields[index].type);
 				if (Token.isAssignment(t.nextToken())) {
 					Expr rexpr = cast(makeAssignRval(ldexpr, t.ttype, parseExpr(scope)), fields[index].type);
-					if (rexpr instanceof BinaryExpr) {
+					if ((Xmask & X_ARRAYOPT) != 0 && rexpr instanceof BinaryExpr) {
 						// in this case we can produce more optimized code
 						final BinaryExpr bin = (BinaryExpr)rexpr;
 						return new AChangeExpr(expr, indexexpr, fields[index].type, bin.operator, bin.rvalue);
