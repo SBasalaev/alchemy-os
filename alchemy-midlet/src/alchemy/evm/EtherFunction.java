@@ -872,7 +872,8 @@ class EtherFunction extends Function {
 					break;
 				}
 				case Opcodes.DUP2: {
-					stack[head+2] = stack[head+1] = stack[head];
+					stack[head+2] = stack[head];
+					stack[head+1] = stack[head-1];
 					head += 2;
 					break;
 				}
