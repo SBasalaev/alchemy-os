@@ -72,7 +72,6 @@ public class Parser {
 
 	private final Context c;
 	private final int target;
-	private final int optlevel;
 	private Tokenizer t;
 	private Unit unit;
 
@@ -86,8 +85,7 @@ public class Parser {
 	public Parser(Context c, int target, int optlevel, int Wmask, int Xmask) {
 		this.c = c;
 		this.target = target;
-		this.optlevel = optlevel;
-		if (optlevel > 1) Xmask |= X_ARRAYOPT;
+		if (optlevel > 1) Xmask |= X_ARRAYOPT | X_IINC;
 		this.Wmask = Wmask;
 		this.Xmask = Xmask;
 	}
