@@ -222,6 +222,15 @@ public class FunctionWriter implements Opcodes {
 		visitStack(opcode == LOAD ? 1 : -1);
 	}
 	
+	public void visitIincInsn(int var, int incr) {
+		if (var < 0 || var > 255) throw new IllegalArgumentException();
+		if (var >= varcount) varcount = var+1;
+		if (incr < Byte.MIN_VALUE || incr > Byte.MAX_VALUE) throw new IllegalArgumentException();
+		data.write(IINC);
+		data.write(var);
+		data.write(incr);
+	}
+	
 	/** Visit LDC instruction with given object.
 	 * The class of argument must be one of Null,
 	 * Boolean, Int, Long, Float, Double,

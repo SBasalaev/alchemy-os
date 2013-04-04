@@ -83,7 +83,7 @@ public class NEC extends NativeApp {
 				}
 			} else if (arg.startsWith("-O")) {
 				try {
-					optlevel = Integer.parse(arg.substring(2));
+					optlevel = Integer.parseInt(arg.substring(2));
 				} catch (Exception e) {
 					optlevel = 1;
 				}
@@ -140,7 +140,7 @@ public class NEC extends NativeApp {
 		}
 		if (unit == null) return -1;
 		//optimizing
-		if (optimize) new Optimizer().visitUnit(unit);
+		if (optlevel > 0) new Optimizer().visitUnit(unit);
 		//writing object code
 		new VarIndexer().visitUnit(unit);
 		EAsmWriter wr = new EAsmWriter(dbginfo);

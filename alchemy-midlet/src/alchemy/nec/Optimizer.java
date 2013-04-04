@@ -812,6 +812,14 @@ public class Optimizer implements ExprVisitor {
 		return fcall;
 	}
 
+	public Object visitIinc(IincExpr iinc, Object scope) {
+		if (iinc.incr == 0) {
+			optimized = true;
+			return new NoneExpr();
+		}
+		return iinc;
+	}
+	
 	/**
 	 * <pre>
 	 * DCE:

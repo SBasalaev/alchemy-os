@@ -64,13 +64,15 @@ public class Parser {
 	// eXperimental feature categories
 	
 	private static final int X_ARRAYOPT = 1;
+	private static final int X_IINC = 2;
 	
-	static final String[] X_STRINGS = {"arrayopt"};
+	static final String[] X_STRINGS = {"arrayopt", "iinc"};
 
 	private int Xmask; /* Enabled experimental features. */
 
 	private final Context c;
 	private final int target;
+	private final int optlevel;
 	private Tokenizer t;
 	private Unit unit;
 
@@ -1398,8 +1400,9 @@ public class Parser {
 					Type eltype = ((ArrayType)artype).elementType();
 					Expr getexpr = new ALoadExpr(arexpr, indexexpr, eltype);
 					if (Token.isAssignment(t.nextToken())) {
-						Expr rexpr = cast(makeAssignRval(getexpr, t.ttype, parseExpr(scope)), eltype);
-						if ((Xmask & X_ARRAYOPT) != 0 && rexpr instanceof BinaryExpr) {
+						int assignop = t.ttype;
+						Expr rexpr = cast(makeAssignRval(getexpr, assignop, parseExpr(scope)), eltype);
+						if ((Xmask & X_ARRAYOPT) != 0 && assignop != '=' && rexpr instanceof BinaryExpr) {
 							// in this case we can produce more optimized code
 							final BinaryExpr bin = (BinaryExpr)rexpr;
 							return new AChangeExpr(arexpr, indexexpr, eltype, bin.operator, bin.rvalue);
@@ -1499,8 +1502,9 @@ public class Parser {
 				ConstExpr indexexpr = new ConstExpr(lnum, Int.toInt(index));
 				ALoadExpr ldexpr = new ALoadExpr(expr, indexexpr, fields[index].type);
 				if (Token.isAssignment(t.nextToken())) {
-					Expr rexpr = cast(makeAssignRval(ldexpr, t.ttype, parseExpr(scope)), fields[index].type);
-					if ((Xmask & X_ARRAYOPT) != 0 && rexpr instanceof BinaryExpr) {
+					int assignop = t.ttype;
+					Expr rexpr = cast(makeAssignRval(ldexpr, assignop, parseExpr(scope)), fields[index].type);
+					if ((Xmask & X_ARRAYOPT) != 0 && rexpr instanceof BinaryExpr && ((BinaryExpr)rexpr).lvalue == ldexpr) {
 						// in this case we can produce more optimized code
 						final BinaryExpr bin = (BinaryExpr)rexpr;
 						return new AChangeExpr(expr, indexexpr, fields[index].type, bin.operator, bin.rvalue);

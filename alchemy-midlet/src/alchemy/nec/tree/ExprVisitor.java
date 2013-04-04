@@ -37,6 +37,7 @@ public interface ExprVisitor {
 	Object visitDiscard(DiscardExpr disc, Object data);
 	Object visitDoWhile(DoWhileExpr wexpr, Object data);
 	Object visitFCall(FCallExpr fcall, Object data);
+	Object visitIinc(IincExpr iinc, Object data);
 	Object visitIf(IfExpr ifexpr, Object data);
 	Object visitNewArray(NewArrayExpr newarray, Object data);
 	Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object data);

@@ -655,6 +655,15 @@ public class EAsmWriter implements ExprVisitor {
 		return null;
 	}
 
+	public Object visitIinc(IincExpr iinc, Object isReturn) {
+		if (debug) writer.visitLine(iinc.lineNumber());
+		writer.visitIincInsn(iinc.var.index, iinc.incr);
+		if (isReturn == Boolean.TRUE) {
+			writer.visitInsn(Opcodes.RETURN);
+		}
+		return null;
+	}
+
 	public Object visitIf(IfExpr ifexpr, Object isReturn) {
 		Label lelse = new Label();
 		Label lafter = new Label();

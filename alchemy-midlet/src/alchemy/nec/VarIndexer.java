@@ -136,6 +136,10 @@ public class VarIndexer implements ExprVisitor {
 		return null;
 	}
 
+	public Object visitIinc(IincExpr iinc, Object offset) {
+		return null;
+	}
+	
 	public Object visitIf(IfExpr ifexpr, Object offset) {
 		ifexpr.condition.accept(this, offset);
 		ifexpr.ifexpr.accept(this, offset);
