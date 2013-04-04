@@ -908,7 +908,7 @@ class EtherFunction extends Function {
 				case Opcodes.IINC: { //iinc <ubyte> <byte>
 					int idx = code[ct] & 0xff;
 					ct++;
-					int inc = code[ct] & 0xff;
+					int inc = code[ct];
 					ct++;
 					locals[idx] = Int.toInt(((Int)locals[idx]).value + inc);
 				}
