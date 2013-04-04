@@ -853,6 +853,16 @@ public class Parser {
 					int operator = t.ttype;
 					Expr value = cast(makeAssignRval(vexpr, operator, parseExpr(scope)), var.type);
 					if (scope.isLocal(var.name)) {
+						if ((Xmask & X_IINC) != 0 && var.type == BuiltinType.INT && value instanceof BinaryExpr) {
+							BinaryExpr bin = (BinaryExpr)value;
+							if (bin.lvalue == vexpr && bin.rvalue instanceof ConstExpr && (bin.operator == '+' || bin.operator == '-')) {
+								int incr = ((Int)((ConstExpr)bin.rvalue).value).value;
+								if (bin.operator == '-') incr = -incr;
+								if (incr >= Byte.MIN_VALUE && incr <= Byte.MAX_VALUE) {
+									return new IincExpr(lnum, var, incr);
+								}
+							}
+						}
 						return new AssignExpr(var, value);
 					} else {
 						// convert to  setstatic("var#hash", value)

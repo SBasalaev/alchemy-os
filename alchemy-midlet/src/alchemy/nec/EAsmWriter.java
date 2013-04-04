@@ -659,7 +659,7 @@ public class EAsmWriter implements ExprVisitor {
 		if (debug) writer.visitLine(iinc.lineNumber());
 		writer.visitIincInsn(iinc.var.index, iinc.incr);
 		if (isReturn == Boolean.TRUE) {
-			writer.visitInsn(Opcodes.RETURN);
+			writer.visitInsn(Opcodes.RET_NULL);
 		}
 		return null;
 	}
