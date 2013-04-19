@@ -20,11 +20,11 @@ Summary: GUI for package manager
 File: alpaca_0.2.5build2.pkg
 
 Package: appmenu
-Version: 0.3.1build2
+Version: 0.3.2
 Section: gui
 Depends: libcore3, libui1
 Summary: application menu
-File: appmenu_0.3.1build2.pkg
+File: appmenu_0.3.2.pkg
 
 Package: coreutils
 Version: 0.5.4
