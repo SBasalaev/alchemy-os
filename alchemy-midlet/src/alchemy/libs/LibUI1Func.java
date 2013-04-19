@@ -429,7 +429,7 @@ class LibUI1Func extends NativeFunction {
 				return Ival(((List)args[0]).size());
 			case 111: { // new_hyperlinkitem(label: String, text: String)
 				StringItem item = new StringItem((String)args[0], (String)args[1], Item.HYPERLINK);
-				hyperitems.addElement(item);
+				hyperitems.addElement(new WeakReference(item));
 				return item;
 			}
 			case 112: // ImageItem.get_alttext(): String
@@ -487,7 +487,7 @@ class LibUI1Func extends NativeFunction {
 				return Ival(((UICanvas)args[0]).hasRepeatEvents());
 			case 131: { // new_hyperimageitem(label: String, img: Image)
 				ImageItem item = new ImageItem((String)args[0], (Image)args[1], Item.LAYOUT_NEWLINE_AFTER, "", Item.HYPERLINK);
-				hyperitems.addElement(item);
+				hyperitems.addElement(new WeakReference(item));
 				return item;
 			}
 			default:
