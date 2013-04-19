@@ -31,7 +31,7 @@ def TextItem.set_font(font: Int);
 
 type HyperlinkItem < TextItem;
 
-def new_hyperlinkitem(label: String, text: String);
+def new_hyperlinkitem(label: String, text: String): HyperlinkItem;
 const `HyperlinkItem.new` = new_hyperlinkitem;
 
 type ImageItem < Item;
@@ -45,7 +45,7 @@ def ImageItem.set_alttext(text: String);
 
 type HyperimageItem < ImageItem;
 
-def new_hyperimageitem(label: String, img: Image);
+def new_hyperimageitem(label: String, img: Image): HyperimageItem;
 const `HyperimageItem.new` = new_hyperimageitem;
 
 type EditItem < Item;

@@ -1,6 +1,6 @@
 Package: libui-dev
 Source: libui
-Version: 1.0.7
+Version: 1.0.8
 Section: libdevel
 Summary: graphical interface library - development headers
 Depends: libui1
