@@ -490,6 +490,10 @@ class LibUI1Func extends NativeFunction {
 				hyperitems.addElement(new WeakReference(item));
 				return item;
 			}
+			case 132: // Image.get_height(): Int
+				return Ival(((Image)args[0]).getHeight());
+			case 133: // Image.get_width(): Int
+				return Ival(((Image)args[0]).getWidth());
 			default:
 				return null;
 		}

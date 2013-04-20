@@ -16,3 +16,5 @@ def image_from_data(data: [Byte]): Image;
 def image_from_image(im: Image, x: Int, y: Int, w: Int, h: Int): Image;
 
 def Image.get_argb(argb: [Int], ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int);
+def Image.get_width(): Int;
+def Image.get_height(): Int;
