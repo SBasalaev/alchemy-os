@@ -118,6 +118,9 @@ public final class UIServer {
 	 * corresponding screen is placed on top of the screen stack.
 	 */
 	public static synchronized void setScreen(Context c, Displayable d) {
+		if (d.getTitle() == null) {
+			d.setTitle(c.getName());
+		}
 		int i = frameIndex(c);
 		if (i >= 0) {
 			((UIFrame)frames.elementAt(i)).d = d;
