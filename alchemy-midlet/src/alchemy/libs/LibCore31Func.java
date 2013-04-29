@@ -231,14 +231,14 @@ class LibCore31Func extends NativeFunction {
 			case 64: // IStream.read(): Int
 				return Ival(((InputStream)args[0]).read());
 			case 65: // IStream.readarray(buf: [Byte], ofs: Int, len: Int): Int
-				return Ival(((InputStream)args[0]).read((byte[])args[1], ival(args[2]), ival(args[3])));
+				return Ival(IO.readarray((InputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3])));
 			case 66: // IStream.skip(n: Long): Long
-				return Lval(((InputStream)args[0]).skip(lval(args[1])));
+				return Lval(IO.skip((InputStream)args[0], lval(args[1])));
 			case 67: // OStream.write(b: Int)
 				((OutputStream)args[0]).write(ival(args[1]));
 				return null;
 			case 68: // OStream.writearray(buf: [Byte], ofs: Int, len: Int)
-				((OutputStream)args[0]).write((byte[])args[1], ival(args[2]), ival(args[3]));
+				IO.writearray((OutputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3]));
 				return null;
 			case 69: // OStream.flush(out: OStream)
 				((OutputStream)args[0]).flush();
@@ -417,7 +417,7 @@ class LibCore31Func extends NativeFunction {
 				c.set(args[0], args[1]);
 				return null;
 			case 122: // String.format(args: [Any]): String
-				return IO.printf((String)args[0], (Object[])args[1]);
+				return IO.sprintf((String)args[0], (Object[])args[1]);
 			case 123: { // Dict.keys(): [Any]
 				Vector keyv = new Vector();
 				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
