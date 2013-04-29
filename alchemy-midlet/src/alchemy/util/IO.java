@@ -27,7 +27,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 /**
- * Miscellaneous I/O utilities used in Alchemy.
+ * Miscellaneous I/O utilities used in Alchemy OS.
  * @author Sergey Basalaev
  */
 public final class IO {
@@ -39,7 +39,7 @@ public final class IO {
 	private IO() { }
 
 	/**
-	 * Decodes bytes to String using modified UTF format.
+	 * Decodes bytes to String using modified UTF-8 format.
 	 * @param b  byte array
 	 * @return decoded string
 	 * @throws UTFDataFormatException  if given byte sequence is not valid UTF
@@ -153,18 +153,142 @@ public final class IO {
 		return ret;
 	}
 	
+	/**
+	 * Reads data from input stream.
+	 * Reading from native streams should be done through
+	 * this function because some phones do not follow the contract of
+	 * {@link InputStream#read(byte[], int, int) InputStream.read}
+	 * accurately.
+	 * 
+	 * Known bugs:
+	 * <ul>
+	 *   <li>Nokia phones fail to read zero bytes</li>
+	 * </ul>
+	 * 
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public static int readarray(InputStream in, byte[] buf, int ofs, int len) throws IOException {
+		if (buf == null)
+			throw new NullPointerException();
+		if (ofs < 0 || len < 0 || ofs+len > buf.length)
+			throw new IndexOutOfBoundsException();
+		if (len == 0)
+			return 0;
+		return in.read(buf, ofs, len);
+	}
+	
+	public static int readarray(InputStream in, byte[] buf) throws IOException {
+		return readarray(in, buf, 0, buf.length);
+	}
+	
+	/**
+	 * Writes data into output stream.
+	 * Writing to native streams should be done through
+	 * this function because some phones do not follow the contract of
+	 * {@link OutputStream#write(byte[], int, int) OutputStream.write}
+	 * accurately.
+	 * 
+	 * Known bugs:
+	 * <ul>
+	 *   <li>Nokia phones fail to write zero bytes</li>
+	 * </ul>
+	 * 
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public static void writearray(OutputStream out, byte[] buf, int ofs, int len) throws IOException {
+		if (buf == null)
+			throw new NullPointerException();
+		if (ofs < 0 || len < 0 || ofs+len > buf.length)
+			throw new IndexOutOfBoundsException();
+		if (len == 0)
+			return;
+		out.write(buf, ofs, len);
+	}
+	
+	public static void writearray(OutputStream out, byte[] buf) throws IOException {
+		writearray(out, buf, 0, buf.length);
+	}
+	
+	/**
+	 * Skips over and discards data from input stream.
+	 * Skipping in native streams should be done through
+	 * this function because some phones do not follow the contract of
+	 * {@link InputStream#skip(long) InputStream.skip}
+	 * accurately.
+	 * 
+	 * Known bugs:
+	 * <ul>
+	 *   <li>Siemens phones implement skip as seek</li>
+	 * </ul>
+	 * 
+	 * @throws IOException 
+	 */
+	public static long skip(InputStream in, long n) throws IOException {
+		if (n <= 0L) return 0L;
+		
+		long remains = n;
+		byte[] buf = new byte[Math.min((int)remains, 1024)];
+		while (remains > 0L) {
+			int skipped = readarray(in, buf, 0, Math.min((int)remains, buf.length));
+			if (skipped <= 0) break;
+			remains -= skipped;
+		}
+		return n - remains;
+	}
+	
 	public static void print(OutputStream s, Object obj) {
 		try {
-			s.write(utfEncode(stringValue(obj)));
+			writearray(s, utfEncode(stringValue(obj)));
 		} catch (IOException ioe) { }
 	}
 	
 	public static void println(OutputStream s, Object obj) {
 		try {
-			s.write(utfEncode(stringValue(obj)));
+			writearray(s, utfEncode(stringValue(obj)));
 			s.write('\n');
 			s.flush();
 		} catch (IOException ioe) { }
+	}
+	
+	/**
+	 * Returns formatted string using specified format string and arguments.
+	 * Format specifiers are substrings of form <code>%n</code> where
+	 * <code>n</code> is from 0 to 9. Each format specifier is substituted
+	 * with corresponding value from array <code>args</code>. Specifier
+	 * <code>%%</code> is substituted with percent character.
+	 * 
+	 * @param fmt   format string
+	 * @param args  arguments referenced by the format specifiers
+	 * @return  a formatted string
+	 */
+	public static String sprintf(String fmt, Object[] args) {
+		StringBuffer buf = new StringBuffer();
+		while (true) {
+			int index = fmt.indexOf('%');
+			if (index < 0 || index == fmt.length()-1) {
+				buf.append(fmt);
+				break;
+			} else {
+				buf.append(fmt.substring(0, index));
+				char param = fmt.charAt(index+1);
+				if (param >= '0' && param <= '9') {
+					buf.append(stringValue(args[param-'0']));
+				} else {
+					buf.append(param);
+				}
+				fmt = fmt.substring(index+2);
+			}
+		}
+		return buf.toString();
+	}
+	
+	public static void writeAll(InputStream from, OutputStream to) throws IOException {
+		byte[] buf = new byte[1024];
+		int len = readarray(from, buf);
+		while (len > 0) {
+			to.write(buf, 0, len);
+			len = readarray(from, buf);
+		}
 	}
 	
 	/**
@@ -189,48 +313,7 @@ public final class IO {
 		}
 		return ret;
 	}
-	
-	/**
-	 * Returns formatted string using specified format string and arguments.
-	 * Format specifiers are substrings of form <code>%n</code> where
-	 * <code>n</code> is from 0 to 9. Each format specifier is substituted
-	 * with corresponding value from array <code>args</code>. Specifier
-	 * <code>%%</code> is substituted with percent character.
-	 * 
-	 * @param fmt   format string
-	 * @param args  arguments referenced by the format specifiers
-	 * @return  a formatted string
-	 */
-	public static String printf(String fmt, Object[] args) {
-		StringBuffer buf = new StringBuffer();
-		while (true) {
-			int index = fmt.indexOf('%');
-			if (index < 0 || index == fmt.length()-1) {
-				buf.append(fmt);
-				break;
-			} else {
-				buf.append(fmt.substring(0, index));
-				char param = fmt.charAt(index+1);
-				if (param >= '0' && param <= '9') {
-					buf.append(stringValue(args[param-'0']));
-				} else {
-					buf.append(param);
-				}
-				fmt = fmt.substring(index+2);
-			}
-		}
-		return buf.toString();
-	}
-	
-	public static void writeAll(InputStream from, OutputStream to) throws IOException {
-		byte[] buf = new byte[1024];
-		int len = from.read(buf);
-		while (len > 0) {
-			to.write(buf, 0, len);
-			len = from.read(buf);
-		}
-	}
-	
+
 	/**
 	 * Checks if given filename matches glob pattern.
 	 * Supported wildcards are <code>*</code> and <code>?</code>.
