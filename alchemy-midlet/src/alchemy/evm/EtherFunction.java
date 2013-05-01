@@ -50,16 +50,10 @@ class EtherFunction extends Function {
 
 	public Object exec(Context c, Object[] args) throws AlchemyException {
 		//initializing
-		final Object[] stack = new Object[stacksize];
-		int head = -1;
+		final Object[] stack = new Object[localsize+stacksize];
+		System.arraycopy(args, 0, stack, 0, args.length);
+		int head = localsize-1;
 		final byte[] code = this.bcode;
-		Object[] locals;
-		if (args.length == localsize) {
-			locals = args;
-		} else {
-			locals = new Object[localsize];
-			System.arraycopy(args, 0, locals, 0, args.length);
-		}
 		int ct = 0;
 		while (true) {
 		try {
@@ -423,12 +417,12 @@ class EtherFunction extends Function {
 				case Opcodes.LOAD_6:
 				case Opcodes.LOAD_7: {
 					head++;
-					stack[head] = locals[instr & 7];
+					stack[head] = stack[instr & 7];
 					break;
 				}
 				case Opcodes.LOAD: { //load <ubyte>
 					head++;
-					stack[head] = locals[code[ct] & 0xff];
+					stack[head] = stack[code[ct] & 0xff];
 					ct++;
 					break;
 				}
@@ -441,12 +435,12 @@ class EtherFunction extends Function {
 				case Opcodes.STORE_5:
 				case Opcodes.STORE_6:
 				case Opcodes.STORE_7: {
-					locals[instr & 7] = stack[head];
+					stack[instr & 7] = stack[head];
 					head--;
 					break;
 				}
 				case Opcodes.STORE: { //store <ubyte>
-					locals[code[ct] & 0xff] = stack[head];
+					stack[code[ct] & 0xff] = stack[head];
 					ct++;
 					head--;
 					break;
@@ -910,7 +904,7 @@ class EtherFunction extends Function {
 					ct++;
 					int inc = code[ct];
 					ct++;
-					locals[idx] = Int.toInt(((Int)locals[idx]).value + inc);
+					stack[idx] = Int.toInt(((Int)stack[idx]).value + inc);
 				}
 			} /* the big switch */
 		} catch (Throwable e) {
