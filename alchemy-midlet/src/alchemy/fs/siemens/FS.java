@@ -95,7 +95,7 @@ public class FS extends Filesystem implements Initable {
 	public InputStream read(String file) throws IOException {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
 		try {
-			return new SiemensInputStream(fc.openInputStream());
+			return fc.openInputStream();
 		} finally {
 			fc.close();
 		}
