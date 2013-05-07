@@ -25,9 +25,24 @@ import alchemy.core.Function;
 /**
  * Skeleton for functions loaded by native libraries.
  * For speed and compactness all functions of native
- * library are implemented in single class. exec()
- * function is a switch where requested function is
- * chosen by integer index.
+ * library are implemented in single class.
+ * 
+ * The execNative method should be implemented using switch on index:
+ * <pre>
+ * protected Object execNative(Context c, Object[] args) throws Exception {
+ *   switch (index) {
+ *     case 0: {
+ *       // implement function with index 0
+ *     }
+ *     case 1: {
+ *       // implement function with index 1
+ *     }
+ *     ...
+ *     default:
+ *       return null
+ *   }
+ * }
+ * </pre>
  * 
  * @author Sergey Basalaev
  */
