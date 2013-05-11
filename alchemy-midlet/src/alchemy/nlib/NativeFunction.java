@@ -27,7 +27,7 @@ import alchemy.core.Function;
  * For speed and compactness all functions of native
  * library are implemented in single class.
  * 
- * The execNative method should be implemented using switch on index:
+ * The invokeNative method should be implemented using switch on index:
  * <pre>
  * protected Object execNative(Context c, Object[] args) throws Exception {
  *   switch (index) {
@@ -62,11 +62,11 @@ public abstract class NativeFunction extends Function {
 		return soname()+':'+signature;
 	}
 	
-	protected abstract Object execNative(Context c, Object[] args) throws Exception;
+	protected abstract Object invokeNative(Context c, Object[] args) throws Exception;
 
-	public final Object exec(Context c, Object[] args) throws AlchemyException {
+	public final Object invoke(Context c, Object[] args) throws AlchemyException {
 		try {
-			return execNative(c, args);
+			return invokeNative(c, args);
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
 			ae.addTraceElement(this, "native");

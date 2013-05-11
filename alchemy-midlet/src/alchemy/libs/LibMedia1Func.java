@@ -34,7 +34,7 @@ class LibMedia1Func extends NativeFunction {
 		super(name, index);
 	}
 
-	protected Object execNative(Context c, Object[] args) throws Exception {
+	protected Object invokeNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // play_tone(note: Int, duration: Int, volume: Int)
 				Manager.playTone(ival(args[0]), ival(args[1]), ival(args[2]));

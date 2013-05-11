@@ -562,7 +562,7 @@ public class Context {
 		public void run() {
 			setState(RUNNING);
 			try {
-				Object r = main.exec(Context.this, new Object[] {cmdArgs});
+				Object r = main.invoke(Context.this, new Object[] {cmdArgs});
 				if (r instanceof Int) {
 					exitcode = ((Int)r).value;
 				}
@@ -614,7 +614,7 @@ public class Context {
 			this.args = args;
 		}
 		
-		public Object exec(Context c, Object[] params) throws AlchemyException {
+		public Object invoke(Context c, Object[] params) throws AlchemyException {
 			String[] givenargs = (String[])(params[0]);
 			String[] cmdargs = new String[args.length + givenargs.length];
 			System.arraycopy(args, 0, cmdargs, 0, args.length);

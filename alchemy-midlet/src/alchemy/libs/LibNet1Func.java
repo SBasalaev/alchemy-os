@@ -40,7 +40,7 @@ class LibNet1Func extends NativeFunction {
 		super(name, index);
 	}
 
-	protected Object execNative(Context c, Object[] args) throws Exception {
+	protected Object invokeNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: { // new_socket(host: String, port: Int): Socket
 				String host = ((String)args[0]).trim();

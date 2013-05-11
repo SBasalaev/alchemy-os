@@ -52,7 +52,7 @@ public abstract class NativeApp extends Library {
 			super("main");
 		}
 
-		public Object exec(Context c, Object[] args) throws AlchemyException {
+		public Object invoke(Context c, Object[] args) throws AlchemyException {
 			try {
 				return Ival(main(c, (String[])args[0]));
 			} catch (Exception e) {

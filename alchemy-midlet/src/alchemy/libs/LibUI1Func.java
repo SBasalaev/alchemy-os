@@ -71,7 +71,7 @@ class LibUI1Func extends NativeFunction {
 		return false;
 	}
 	
-	protected Object execNative(Context c, Object[] args) throws Exception {
+	protected Object invokeNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // new_image(w: Int, h: Int): Image
 				return Image.createImage(ival(args[0]), ival(args[1]));

@@ -56,7 +56,7 @@ class LibCore31Func extends NativeFunction {
 		super(name, index);
 	}
 
-	protected Object execNative(Context c, Object[] args) throws Exception {
+	protected Object invokeNative(Context c, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // pathfile(f: String): String
 				return Filesystem.fname(c.toFile((String)args[0]));
