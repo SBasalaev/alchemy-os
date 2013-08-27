@@ -37,11 +37,13 @@ public abstract class NativeLibrary extends Library {
 	/** Maps function name to function object. */
 	private Hashtable functions = new Hashtable();
 	
-	/** Creates new library using specified symbols file. */
-	public NativeLibrary(String symbols) throws IOException {
+	protected NativeLibrary() { }
+	
+	/** Loads functions using specified symbols file. */
+	public void load(String symbols) throws IOException {
 		UTFReader r = new UTFReader(getClass().getResourceAsStream(symbols));
+		int index = functions.size();
 		String name;
-		int index = 0;
 		while ((name = r.readLine()) != null) {
 			functions.put(name, loadFunction(name, index));
 			index++;

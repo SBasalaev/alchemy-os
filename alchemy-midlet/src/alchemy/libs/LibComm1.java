@@ -30,7 +30,7 @@ import java.io.IOException;
 public class LibComm1 extends NativeLibrary {
 
 	public LibComm1() throws IOException {
-		super("/libcomm1.symbols");
+		load("/libcomm1.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {

@@ -31,7 +31,7 @@ import java.io.IOException;
 public class LibMedia1 extends NativeLibrary {
 
 	public LibMedia1() throws IOException {
-		super("/libmedia1.symbols");
+		load("/libmedia1.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {

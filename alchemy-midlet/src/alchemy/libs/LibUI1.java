@@ -30,7 +30,7 @@ import java.io.IOException;
 public class LibUI1 extends NativeLibrary {
 	
 	public LibUI1() throws IOException {
-		super("/libui1.symbols");
+		load("/libui1.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {

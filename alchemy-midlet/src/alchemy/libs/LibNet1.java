@@ -30,7 +30,7 @@ import java.io.IOException;
 public class LibNet1 extends NativeLibrary {
 
 	public LibNet1() throws IOException {
-		super("/libnet1.symbols");
+		load("/libnet1.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {

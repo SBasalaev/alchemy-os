@@ -22,8 +22,6 @@ import alchemy.core.Context;
 import alchemy.nlib.NativeFunction;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * Alchemy core runtime library.
@@ -40,7 +38,7 @@ public class LibCore31 extends NativeLibrary {
 	 *         function definitions file
 	 */
 	public LibCore31() throws IOException {
-		super("/libcore31.symbols");
+		load("/libcore31.symbols");
 	}
 
 	public NativeFunction loadFunction(String name, int index) {
