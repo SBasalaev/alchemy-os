@@ -18,7 +18,9 @@
 
 package alchemy.nlib;
 
+import alchemy.core.Context;
 import alchemy.core.Function;
+import alchemy.core.Int;
 import alchemy.core.Library;
 import alchemy.util.UTFReader;
 import java.io.IOException;
@@ -39,22 +41,81 @@ public abstract class NativeLibrary extends Library {
 	
 	protected NativeLibrary() { }
 	
-	/** Loads functions using specified symbols file. */
-	public void load(String symbols) throws IOException {
+	/** Loads native functions using specified symbols file. */
+	public final void load(String symbols) throws IOException {
 		UTFReader r = new UTFReader(getClass().getResourceAsStream(symbols));
 		int index = functions.size();
 		String name;
 		while ((name = r.readLine()) != null) {
-			functions.put(name, loadFunction(name, index));
+			functions.put(name, new NativeFunction(this, name, index));
 			index++;
 		}
 		r.close();
 	}
 	
-	/** Returns native function of appropriate class. */
-	public abstract NativeFunction loadFunction(String name, int index);
-
+	/** Invokes native function. */
+	protected abstract Object invokeNative(int index, Context c, Object[] args) throws Exception;
+	
+	/** Returns SONAME of this library. */
+	public abstract String soname();
+	
 	public Function getFunction(String sig) {
 		return (Function)functions.get(sig);
+	}
+
+	/** Boxing method for integer values. */
+	protected static Int Ival(int value) {
+		return Int.toInt(value);
+	}
+
+	/** Boxing method for boolean values.
+	 * Method converts <code>true</code> to <code>Int(1)</code>
+	 * and <code>false</code> to <code>Int(0)</code>.
+	 */
+	protected static Int Ival(boolean value) {
+		return value ? Int.ONE : Int.ZERO;
+	}
+
+	/** Boxing method for long values. */
+	protected static Long Lval(long value) {
+		return new Long(value);
+	}
+
+	/** Boxing method for float values. */
+	protected static Float Fval(float value) {
+		return new Float(value);
+	}
+
+	/** Boxing method for double values. */
+	protected static Double Dval(double value) {
+		return new Double(value);
+	}
+
+	/** Unboxing method for Int values. */
+	protected static int ival(Object obj) {
+		return ((Int)obj).value;
+	}
+
+	/** Unboxing method for Int values.
+	 * Method returns <code>false</code> iff <code>obj</code>
+	 * is <code>Int(0)</code>.
+	 */
+	protected static boolean bval(Object obj) {
+		return ((Int)obj).value != 0;
+	}
+
+	/** Unboxing method for Long values. */
+	protected static long lval(Object obj) {
+		return ((Long)obj).longValue();
+	}
+
+	/** Unboxing method for Float values. */
+	protected static float fval(Object obj) {
+		return ((Float)obj).floatValue();
+	}
+
+	/** Unboxing method for Double values. */
+	protected static double dval(Object obj) {
+		return ((Double)obj).doubleValue();
 	}
 }

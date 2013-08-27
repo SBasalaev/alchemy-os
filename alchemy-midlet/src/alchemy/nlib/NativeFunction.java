@@ -46,27 +46,26 @@ import alchemy.core.Function;
  * 
  * @author Sergey Basalaev
  */
-public abstract class NativeFunction extends Function {
+public final class NativeFunction extends Function {
 	
-	/** Index of this function. */
-	protected final int index;
+	private final NativeLibrary lib;
 	
-	public NativeFunction(String name, int index) {
+	/** Index of this function in invokeNative. */
+	private final int index;
+	
+	public NativeFunction(NativeLibrary lib, String name, int index) {
 		super(name);
 		this.index = index;
+		this.lib = lib;
 	}
-	
-	protected abstract String soname();
 	
 	public String toString() {
-		return soname()+':'+signature;
+		return lib.soname()+':'+signature;
 	}
 	
-	protected abstract Object invokeNative(Context c, Object[] args) throws Exception;
-
 	public final Object invoke(Context c, Object[] args) throws AlchemyException {
 		try {
-			return invokeNative(c, args);
+			return lib.invokeNative(this.index, c, args);
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
 			ae.addTraceElement(this, "native");
