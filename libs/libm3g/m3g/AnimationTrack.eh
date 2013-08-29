@@ -31,4 +31,4 @@ def AnimationTrack.new(seq: KeyframeSequence, property: Int);
 def AnimationTrack.setController(controller: AnimationController);
 def AnimationTrack.getController(): AnimationController;
 def AnimationTrack.getKeyframeSequence(): KeyframeSequence;
-def AnimationTrack.getTargetProperty();
+def AnimationTrack.getTargetProperty(): Int;

@@ -16,7 +16,7 @@ def KeyframeSequence.getComponentCount(): Int;
 def KeyframeSequence.getKeyframeCount(): Int;
 def KeyframeSequence.getInterpolationType(): Int;
 def KeyframeSequence.setKeyframe(index: Int, time: Int, value: [Float]);
-def KeyframeSequence.getKeyframe(index: Int, value: [Float]);
+def KeyframeSequence.getKeyframe(index: Int, value: [Float]): Int;
 def KeyframeSequence.setValidRange(first: Int, last: Int);
 def KeyframeSequence.getValidRangeFirst(): Int;
 def KeyframeSequence.getValidRangeLast(): Int;

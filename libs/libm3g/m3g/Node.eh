@@ -21,4 +21,4 @@ def Node.getTransformTo(target: Node, transform: Transform): Bool;
 def Node.align(reference: Node);
 def Node.setAlignment(zRef: Node, zTarget: Int, yRef: Node, yTarget: Int);
 def Node.getAlignmentTarget(axis: Int): Int;
-def Node.getAlignmentReference(axis: Int): Int;
+def Node.getAlignmentReference(axis: Int): Node;

@@ -11,6 +11,6 @@ def Object3D.getUserID(): Int;
 def Object3D.setUserObject(userObj: Any);
 def Object3D.getUserObject(): Any;
 def Object3D.addAnimationTrack(track: AnimationTrack);
-def Object3D.getAnimationTrack();
+def Object3D.getAnimationTrack(index: Int);
 def Object3D.removeAnimationTrack(track: AnimationTrack);
 def Object3D.getAnimationTrackCount(): Int;
