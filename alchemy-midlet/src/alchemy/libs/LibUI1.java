@@ -18,6 +18,7 @@
 
 package alchemy.libs;
 
+import alchemy.core.Cache;
 import alchemy.core.Context;
 import alchemy.core.Int;
 import alchemy.fs.FSManager;
@@ -388,11 +389,17 @@ public class LibUI1 extends NativeLibrary {
 			case 95: // Canvas.has_ptrdrag_event(): Bool
 				return Ival(((UICanvas)args[0]).hasPointerMotionEvents());
 			case 96: { // image_from_file(file: String): Image
-				InputStream in = FSManager.fs().read(c.toFile((String)args[0]));
-				c.addStream(in);
-				Image img = Image.createImage(in);
-				in.close();
-				c.removeStream(in);
+				String filename = c.toFile((String)args[0]);
+				long tstamp = FSManager.fs().lastModified(filename);
+				Image img = (Image) Cache.get(filename, tstamp);
+				if (img == null) {
+					InputStream in = FSManager.fs().read(filename);
+					c.addStream(in);
+					img = Image.createImage(in);
+					in.close();
+					Cache.put(filename, tstamp, img);
+					c.removeStream(in);
+				}
 				return img;
 			}
 			case 97: // MsgBox.get_image(): Image
