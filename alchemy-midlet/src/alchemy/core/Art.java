@@ -27,7 +27,6 @@ import alchemy.evm.ELibBuilder;
 public final class Art {
 
 	private Context root;
-	LibCache cache = new LibCache();
 
 	ELibBuilder etherbuilder = new ELibBuilder();
 

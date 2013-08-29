@@ -378,7 +378,7 @@ public class Context {
 			throw new InstantiationException("Permission denied: "+libfile);
 		//searching in cache
 		long tstamp = FSManager.fs().lastModified(libfile);
-		Library lib = art.cache.getLibrary(libfile, tstamp);
+		Library lib = (Library) Cache.get(libfile, tstamp);
 		if (lib != null) return lib;
 		//reading magic number and building
 		InputStream in = FSManager.fs().read(libfile);
@@ -392,7 +392,7 @@ public class Context {
 						fname = Filesystem.fparent(libfile)+'/'+fname;
 					}
 					lib = loadLibForPath(fname, pathlist);
-					art.cache.putLibrary(libfile, tstamp, lib);
+					Cache.put(libfile, tstamp, lib);
 					return lib;
 				}
 				case ('#' << 8) | '!': { // shebang
@@ -404,7 +404,7 @@ public class Context {
 					HashLibrary hl = new HashLibrary();
 					hl.putFunc(new ShebangFunction(progname, args));
 					hl.lock();
-					art.cache.putLibrary(libfile, tstamp, hl);
+					Cache.put(libfile, tstamp, hl);
 					return hl;
 				}
 				case ('#' << 8) | '@': { // native library
@@ -422,13 +422,13 @@ public class Context {
 						throw new InstantiationException("Unsupported API: " + ncdfe.getMessage());
 					}
 					in.close();
-					art.cache.putLibrary(libfile, tstamp, lib);
+					Cache.put(libfile, tstamp, lib);
 					return lib;
 				}
 				case 0xC0DE: { // Ether library
 					lib = art.etherbuilder.build(this, in);
 					in.close();
-					art.cache.putLibrary(libfile, tstamp, lib);
+					Cache.put(libfile, tstamp, lib);
 					return lib;
 				}
 				default:
