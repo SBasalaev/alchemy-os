@@ -69,17 +69,17 @@ Summary: simple image viewer
 File: imgview_0.2build2.pkg
 
 Package: libcore-dev
-Version: 3.1.3build2
+Version: 3.1.4
 Section: libdevel
 Depends: libcore3
 Summary: headers for standard library
-File: libcore-dev_3.1.3build2.pkg
+File: libcore-dev_3.1.4.pkg
 
 Package: libcore3
-Version: 3.1.3
+Version: 3.1.4
 Section: libs
 Summary: standard library which is used by all programs
-File: libcore3_3.1.3.pkg
+File: libcore3_3.1.4.pkg
 
 Package: libfiletype1
 Version: 1.1.3
