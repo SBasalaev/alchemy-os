@@ -53,22 +53,6 @@ clean:
  rm -f ${OBJECTS} ${LIB} ${LINKS}
 
 install:
- install native/libcore.3.1.so native/libcore.3.0.so native/libcore.3.so native/libcore.so /lib
- install ${LIB} ${LINKS} /lib
- install ${HEADERS} /inc
-
-package: all
- # libcore3
- mkdir -p lib
- install native/libcore.3.1.so native/libcore.3.0.so native/libcore.3.so lib
- install libcoree.3.1.so libcoree.3.0.so libcoree.3.so lib
- cat libcore3.package > PACKAGE
- arh c libcore3.pkg PACKAGE lib
- rm -r lib
- # libcore-dev
- mkdir -p lib inc
- install native/libcore.so libcoree.so lib
- install ${HEADERS} inc
- cat libcore-dev.package > PACKAGE
- arh c libcore-dev.pkg PACKAGE lib inc
- rm -r PACKAGE lib inc
+ install native/libcore.3.1.so native/libcore.3.0.so native/libcore.3.so native/libcore.so ${DESTDIR}/lib
+ install ${LIB} ${LINKS} ${DESTDIR}/lib
+ install ${HEADERS} ${DESTDIR}/inc
