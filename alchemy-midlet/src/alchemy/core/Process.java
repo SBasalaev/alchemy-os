@@ -33,28 +33,28 @@ import java.util.Vector;
 import javax.microedition.io.Connection;
 
 /**
- * Program execution context.
- * Context inherits program environment, input/output
+ * Executing process.
+ * Process inherits program environment, input/output
  * streams and program thread.
- * <h3><a name="ContextStates">Context states</a></h3>
+ * <h3><a name="ProcessStates">Process states</a></h3>
  * <ul>
  * <li>
  * <code>NEW</code><br/>
- * This is the state of newly created context. Context, created by
- * {@link #Context(Context) Context(parent)} constructor inherits
+ * This is the state of newly created process. Process created by
+ * {@link #Process(Process) Process(parent)} constructor inherits
  * environment from its parent, though it can be modified.
  * <li>
  * <code>RUNNING</code><br/>
- * This is the state of context which executes program in separate
- * thread. Context becomes <code>RUNNING</code> after executing one
+ * This is the state of process which executes program in separate
+ * thread. Process becomes <code>RUNNING</code> after executing one
  * of methods {@link #start(String, String[]) start()}
  * or {@link #startAndWait(String, String[]) startAndWait()}.
  * These methods can be invoked only in <code>NEW</code> state.
  * If program fails to be loaded then exception is thrown
- * and context remains in <code>NEW</code> state.
+ * and process remains in <code>NEW</code> state.
  * <li>
  * <code>ENDED</code><br/>
- * The <code>RUNNING</code> context becomes <code>ENDED</code>
+ * The <code>RUNNING</code> process becomes <code>ENDED</code>
  * when program thread dies. In this state program exit code
  * can be examined with {@link #getExitCode()} method and
  * if program has ended by throwing an exception that exception
@@ -63,7 +63,7 @@ import javax.microedition.io.Connection;
  * <h3><a name="LibraryLoading">Loading of programs and libraries</a></h3>
  * Methods that load libraries are <code>start</code>, <code>startAndWait</code>
  * and <code>loadLibrary</code>. The first two are used on <code>NEW</code>
- * context to start program while the latter can be called in any context state.
+ * process to start program while the latter can be called in any process state.
  * Loading of library consists of the following steps:
  * <ol>
  * <li>
@@ -98,23 +98,23 @@ import javax.microedition.io.Connection;
  *
  * @author Sergey Basalaev
  */
-public class Context {
+public class Process {
 
-	/* CONTEXT STATES */
+	/* PROCESS STATES */
 
 	/**
-	 * State of the newly created context.
-	 * @see <a href="#ContextStates">Context states</a>
+	 * State of the newly created process.
+	 * @see <a href="#ProcessStates">Process states</a>
 	 */
 	public static final int NEW = 0;
 	/**
-	 * State of the running context.
-	 * @see <a href="#ContextStates">Context states</a>
+	 * State of the running process.
+	 * @see <a href="#ProcessStates">Process states</a>
 	 */
 	public static final int RUNNING = 1;
 	/**
-	 * State of the context that has ended its execution.
-	 * @see <a href="#ContextStates">Context states</a>
+	 * State of the process that has ended its execution.
+	 * @see <a href="#ProcessStates">Process states</a>
 	 */
 	public static final int ENDED = 5;
 
@@ -122,35 +122,35 @@ public class Context {
 
 	/**
 	 * Standard input stream.
-	 * By default stream of parent context is used.
+	 * By default stream of parent process is used.
 	 */
 	public InputStream stdin;
 	/**
 	 * Standard output stream.
-	 * By default stream of parent context is used.
+	 * By default stream of parent process is used.
 	 */
 	public OutputStream stdout;
 	/**
 	 * Standard error stream.
-	 * By default stream of parent context is used.
+	 * By default stream of parent process is used.
 	 */
 	public OutputStream stderr;
 
 	/* PRIVATE FIELDS */
 
-	/** Context runtime. */
+	/** Process runtime. */
 	private Art art;
-	/** Context parent, null for root context. */
-	private Context parent;
-	/** Context environment, initialized on demand. */
+	/** Process parent, null for root process. */
+	private Process parent;
+	/** Process environment, initialized on demand. */
 	private Hashtable env;
-	/** Context storage, initialized on demand. */
+	/** Process storage, initialized on demand. */
 	private Hashtable objects;
 	/** Current directory. */
 	private String curdir;
-	/** The thread of this context. */
+	/** The thread of this process. */
 	private Thread thread;
-	/** State of the context. */
+	/** State of the process. */
 	private int state = NEW;
 	/** Result returned by a program. */
 	private int exitcode = AlchemyException.SUCCESS;
@@ -158,7 +158,7 @@ public class Context {
 	private Throwable error;
 	/** Streams opened by process. */
 	private Vector streams;
-	/** Listeners of this context. */
+	/** Listeners of this process. */
 	private Vector listeners;
 	/** Main function. */
 	private Function main;
@@ -170,9 +170,9 @@ public class Context {
 	/* CONSTRUCTORS */
 
 	/**
-	 * Creates root context with given runtime.
+	 * Creates root process with given runtime.
 	 */
-	Context(Art runtime) {
+	Process(Art runtime) {
 		stdin = new SinkInputStream(-1);
 		stderr = stdout = System.out;
 		curdir = "";
@@ -180,9 +180,9 @@ public class Context {
 	}
 
 	/**
-	 * Creates new context with given parent.
+	 * Creates new process with given parent.
 	 */
-	public Context(Context parent) {
+	public Process(Process parent) {
 		if (parent == null) throw new IllegalArgumentException();
 		this.parent = parent;
 		art = parent.art;
@@ -192,11 +192,11 @@ public class Context {
 		curdir = parent.curdir;
 	}
 
-	/* CONTEXT METHODS */
+	/* PROCESS METHODS */
 
 	/**
-	 * Returns name of the program this context executes.
-	 * If context is in NEW state this method return <code>null</code>.
+	 * Returns name of the program this process executes.
+	 * If process is in NEW state this method return <code>null</code>.
 	 */
 	public String getName() {
 		return (thread == null) ? null : thread.getName();
@@ -230,7 +230,7 @@ public class Context {
 	}
 
 	/**
-	 * Returns current working directory of context.
+	 * Returns current working directory of process.
 	 * @see #setCurDir(File)
 	 */
 	public String getCurDir() {
@@ -238,7 +238,7 @@ public class Context {
 	}
 
 	/**
-	 * Sets new current working directory to this context.
+	 * Sets new current working directory to this process.
 	 * @throws IOException
 	 *   if given file does not represent existing
 	 *   directory or if I/O error occurs
@@ -250,7 +250,7 @@ public class Context {
 	}
 
 	/**
-	 * Returns state of this context.
+	 * Returns state of this process.
 	 */
 	public int getState() {
 		return state;
@@ -263,8 +263,8 @@ public class Context {
 		this.state = state;
 		if (state == ENDED && listeners != null) {
 			for (Enumeration e = listeners.elements(); e.hasMoreElements(); ) {
-				ContextListener l = (ContextListener)e.nextElement();
-				l.contextEnded(this);
+				ProcessListener l = (ProcessListener)e.nextElement();
+				l.processEnded(this);
 			}
 		}
 	}
@@ -285,9 +285,9 @@ public class Context {
 	}
 
 	/**
-	 * Starts program in this context, blocks while
+	 * Starts program in this process, blocks while
 	 * it executes and returns program exit code.
-	 * This method should be called when context is
+	 * This method should be called when process is
 	 * in <code>NEW</code> state.
 	 *
 	 * @param progname  program name
@@ -299,7 +299,7 @@ public class Context {
 	 *   if no program can be loaded from the file resolved from
 	 *   given program name
 	 * @throws IllegalStateException
-	 *   if context is not in <code>NEW</code> state
+	 *   if process is not in <code>NEW</code> state
 	 *
 	 * @see <a href="#LibraryLoading">How programs are loaded</a>
 	 */
@@ -315,8 +315,8 @@ public class Context {
 	}
 
 	/**
-	 * Starts program in this context.
-	 * This method should be invoked when the context
+	 * Starts program in this process.
+	 * This method should be invoked when the process
 	 * is in <code>NEW</code> state. It resolves program
 	 * file by name, loads it as library and executes its
 	 * 'main' function.
@@ -330,7 +330,7 @@ public class Context {
 	 *   if program cannot be loaded from the file resolved from
 	 *   given program name
 	 * @throws IllegalStateException
-	 *   if context is not in <code>NEW</code> state
+	 *   if process is not in <code>NEW</code> state
 	 *
 	 * @see <a href="#LibraryLoading">How programs are loaded</a>
 	 */
@@ -341,7 +341,7 @@ public class Context {
 		this.main = prog.getFunction("main");
 		this.cmdArgs =  (args != null) ? args : new String[0];
 		if (main == null) throw new InstantiationException("No 'main' function");
-		thread = new ContextThread(progname);
+		thread = new ProcessThread(progname);
 		thread.start();
 	}
 
@@ -479,9 +479,9 @@ public class Context {
 	}
 
 	/**
-	 * Adds input or output stream to this context.
-	 * All streams owned by context are automatically flushed
-	 * and closed when context turns to <code>ENDED</code> state.
+	 * Adds input or output stream to this process.
+	 * All streams owned by process are automatically flushed
+	 * and closed when process turns to <code>ENDED</code> state.
 	 * @param stream  <code>InputStream</code> or <code>OutputStream</code>
 	 */
 	public void addStream(Object stream) {
@@ -490,7 +490,7 @@ public class Context {
 	}
 
 	/**
-	 * Removes stream from owning by this context.
+	 * Removes stream from owning by this process.
 	 *
 	 * @param stream  <code>InputStream</code> or <code>OutputStream</code>
 	 * @see #addStream(Object)
@@ -500,7 +500,7 @@ public class Context {
 	}
 	
 	/**
-	 * Returns object stored in context storage.
+	 * Returns object stored in process storage.
 	 * If there is no object for given name, returns <code>null</code>.
 	 */
 	public Object get(Object key) {
@@ -523,12 +523,12 @@ public class Context {
 		}
 	}
 	
-	public void addContextListener(ContextListener l) {
+	public void addProcessListener(ProcessListener l) {
 		if (listeners == null) listeners = new Vector();
 		if (!listeners.contains(l)) listeners.addElement(l);
 	}
 	
-	public void removeContextListener(ContextListener l) {
+	public void removeProcessListener(ProcessListener l) {
 		if (listeners != null) listeners.removeElement(l);
 	}
 	
@@ -550,20 +550,20 @@ public class Context {
 	}
 
 	/** A thread of running Alchemy program. */
-	public class ContextThread extends Thread {
+	public class ProcessThread extends Thread {
 
-		public ContextThread(String progname) {
+		public ProcessThread(String progname) {
 			super(progname);
 		}
 		
-		public Context context() {
-			return Context.this;
+		public Process process() {
+			return Process.this;
 		}
 
 		public void run() {
 			setState(RUNNING);
 			try {
-				Object r = main.invoke(Context.this, new Object[] {cmdArgs});
+				Object r = main.invoke(Process.this, new Object[] {cmdArgs});
 				if (r instanceof Int) {
 					exitcode = ((Int)r).value;
 				}
@@ -615,13 +615,13 @@ public class Context {
 			this.args = args;
 		}
 		
-		public Object invoke(Context c, Object[] params) throws AlchemyException {
+		public Object invoke(Process c, Object[] params) throws AlchemyException {
 			String[] givenargs = (String[])(params[0]);
 			String[] cmdargs = new String[args.length + givenargs.length];
 			System.arraycopy(args, 0, cmdargs, 0, args.length);
 			System.arraycopy(givenargs, 0, cmdargs, args.length, givenargs.length);
 			try {
-				return Ival(new Context(c).startAndWait(progname, cmdargs));
+				return Ival(new Process(c).startAndWait(progname, cmdargs));
 			} catch (Exception e) {
 				AlchemyException ae = new AlchemyException(e);
 				ae.addTraceElement(this, progname+":1");

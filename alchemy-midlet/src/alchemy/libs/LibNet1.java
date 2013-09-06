@@ -18,7 +18,7 @@
 
 package alchemy.libs;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
 import javax.microedition.io.Connection;
@@ -42,14 +42,14 @@ public class LibNet1 extends NativeLibrary {
 		load("/libnet1.symbols");
 	}
 
-	protected Object invokeNative(int index, Context c, Object[] args) throws Exception {
+	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			case 0: { // new_socket(host: String, port: Int): Socket
 				String host = ((String)args[0]).trim();
 				int port = ival(args[1]);
 				if (host.length() == 0) throw new IllegalArgumentException("No host");
 				Connection conn = Connector.open("socket://"+host+':'+port);
-				c.addStream(conn);
+				p.addStream(conn);
 				return conn;
 			}
 			case 1: // Socket.get_host(): String
@@ -90,7 +90,7 @@ public class LibNet1 extends NativeLibrary {
 				int port = ival(args[1]);
 				if (host.length() == 0) throw new IllegalArgumentException("No host");
 				Connection conn = Connector.open("ssl://"+host+':'+port);
-				c.addStream(conn);
+				p.addStream(conn);
 				return conn;
 			}
 			case 16: // SecureSocket.get_secinfo(): SecInfo
@@ -99,7 +99,7 @@ public class LibNet1 extends NativeLibrary {
 				int port = ival(args[0]);
 				String url = "socket://" + ((port >= 0) ? ":"+port : "");
 				Connection conn = Connector.open(url);
-				c.addStream(conn);
+				p.addStream(conn);
 				return conn;
 			}
 			case 18: // ServerSocket.get_localhost(): String
@@ -132,7 +132,7 @@ public class LibNet1 extends NativeLibrary {
 				return Lval(((Certificate)args[0]).getNotAfter());
 			case 32: { // new_http(host: String): Http
 				Connection conn = Connector.open("http://"+args[0]);
-				c.addStream(conn);
+				p.addStream(conn);
 				return conn;
 			}
 			case 33: // Http.get_req_method(): String
@@ -163,7 +163,7 @@ public class LibNet1 extends NativeLibrary {
 				return Lval(((HttpConnection)args[0]).getLastModified());
 			case 45: { // new_https(host: String): Https
 				Connection conn = Connector.open("https://"+args[0]);
-				c.addStream(conn);
+				p.addStream(conn);
 				return conn;
 			}
 			case 46: // Https.get_port(): Int

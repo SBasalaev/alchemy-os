@@ -19,7 +19,7 @@
 package alchemy.libs;
 
 import alchemy.core.Cache;
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Int;
 import alchemy.fs.FSManager;
 import alchemy.libs.ui.MsgBox;
@@ -75,7 +75,7 @@ public class LibUI1 extends NativeLibrary {
 		return false;
 	}
 	
-	protected Object invokeNative(int index, Context c, Object[] args) throws Exception {
+	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // new_image(w: Int, h: Int): Image
 				return Image.createImage(ival(args[0]), ival(args[1]));
@@ -145,7 +145,7 @@ public class LibUI1 extends NativeLibrary {
 				return null;
 			case 24: { // new_canvas(full: Bool): Canvas
 				UICanvas canvas = new UICanvas(bval(args[0]));
-				canvas.setTitle(UIServer.getDefaultTitle(c));
+				canvas.setTitle(UIServer.getDefaultTitle(p));
 				return canvas;
 			}
 			case 25: { // Canvas.graphics(): Graphics
@@ -153,7 +153,7 @@ public class LibUI1 extends NativeLibrary {
 			}
 			case 26: { // Canvas.read_key(): Int
 				// compatibility function with previous non-event canvas behavior
-				Object[] event = (Object[]) UIServer.readEvent(c, false);
+				Object[] event = (Object[]) UIServer.readEvent(p, false);
 				if (event != null && event[0] == UIServer.EVENT_KEY_PRESS && event[1] == args[0]) {
 					return event[2];
 				} else {
@@ -162,9 +162,9 @@ public class LibUI1 extends NativeLibrary {
 			}
 			case 27: { // ui_set_screen(scr: Screen)
 				if (args[0] != null) {
-					UIServer.setScreen(c, (Displayable)args[0]);
+					UIServer.setScreen(p, (Displayable)args[0]);
 				} else {
-					UIServer.removeScreen(c);
+					UIServer.removeScreen(p);
 				}
 				return null;
 			}
@@ -184,9 +184,9 @@ public class LibUI1 extends NativeLibrary {
 				((UICanvas)args[0]).repaint();
 				return null;
 			case 34: // ui_read_event(): UIEvent
-				return UIServer.readEvent(c, false);
+				return UIServer.readEvent(p, false);
 			case 35: // ui_wait_event(): UIEvent
-				return UIServer.readEvent(c, true);
+				return UIServer.readEvent(p, true);
 			case 36: // new_editbox(mode: Int): EditBox
 				return new TextBox(null, null, Short.MAX_VALUE, ival(args[0]));
 			case 37: // EditBox.get_text(): String
@@ -204,7 +204,7 @@ public class LibUI1 extends NativeLibrary {
 					images = new Image[img.length];
 					System.arraycopy(img, 0, images, 0, img.length);
 				}
-				List list = new List(UIServer.getDefaultTitle(c), Choice.IMPLICIT, strings, images);
+				List list = new List(UIServer.getDefaultTitle(p), Choice.IMPLICIT, strings, images);
 				list.setSelectCommand((Command)args[2]);
 				return list;
 			}
@@ -214,7 +214,7 @@ public class LibUI1 extends NativeLibrary {
 				((List)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
 			case 42: // ui_get_screen(): Screen
-				return UIServer.getScreen(c);
+				return UIServer.getScreen(p);
 			case 43: // new_menu(text: String, priority: Int, mtype: Int): Menu
 				// second argument with condition for compatibility with 2.0
 				return new Command((String)args[0],
@@ -231,7 +231,7 @@ public class LibUI1 extends NativeLibrary {
 				((Displayable)args[0]).removeCommand((Command)args[1]);
 				return null;
 			case 48: { // new_form(): Form
-				Form form = new Form(UIServer.getDefaultTitle(c));
+				Form form = new Form(UIServer.getDefaultTitle(p));
 				UIServer.registerForm(form);
 				return form;
 			}
@@ -357,7 +357,7 @@ public class LibUI1 extends NativeLibrary {
 				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
 				return null;
 			case 85: // new_msgbox(text: String, img: Image): MsgBox
-				return new MsgBox(UIServer.getDefaultTitle(c), (String)args[0], (Image)args[1]);
+				return new MsgBox(UIServer.getDefaultTitle(p), (String)args[0], (Image)args[1]);
 			case 86: // MsgBox.get_text(): String
 				return ((MsgBox)args[0]).getString();
 			case 87: // MsgBox.set_text(text: String)
@@ -389,16 +389,16 @@ public class LibUI1 extends NativeLibrary {
 			case 95: // Canvas.has_ptrdrag_event(): Bool
 				return Ival(((UICanvas)args[0]).hasPointerMotionEvents());
 			case 96: { // image_from_file(file: String): Image
-				String filename = c.toFile((String)args[0]);
+				String filename = p.toFile((String)args[0]);
 				long tstamp = FSManager.fs().lastModified(filename);
 				Image img = (Image) Cache.get(filename, tstamp);
 				if (img == null) {
 					InputStream in = FSManager.fs().read(filename);
-					c.addStream(in);
+					p.addStream(in);
 					img = Image.createImage(in);
 					in.close();
 					Cache.put(filename, tstamp, img);
-					c.removeStream(in);
+					p.removeStream(in);
 				}
 				return img;
 			}
@@ -484,10 +484,10 @@ public class LibUI1 extends NativeLibrary {
 				return new ChoiceGroup((String)args[0], Choice.POPUP, strings, null);
 			}
 			case 126: // ui_set_app_title(title: String)
-				UIServer.setDefaultTitle(c, (String)args[0]);
+				UIServer.setDefaultTitle(p, (String)args[0]);
 				return null;
 			case 127: // ui_set_app_icon(icon: Image)
-				UIServer.setDefaultIcon(c, (Image)args[0]);
+				UIServer.setDefaultIcon(p, (Image)args[0]);
 				return null;
 			case 128: // ui_vibrate(millis: Int): Bool
 				return Ival(UIServer.vibrate(ival(args[0])));

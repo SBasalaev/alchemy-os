@@ -17,7 +17,7 @@
  */
 package alchemy.libs;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
 import javax.microedition.m3g.AnimationController;
@@ -41,34 +41,34 @@ public class LibM3G_ext11 extends NativeLibrary {
 		load("/m3g-11.symbols");
 	}
 
-	protected Object invokeNative(int index, Context c, Object[] args) throws Exception {
+	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // AnimationController.getRefWorldTime(): Int
 				return Ival(((AnimationController)args[0]).getRefWorldTime());
 			case 1: // m3g_getTarget(): Any
-				return LibM3G.graphics3D(c).getTarget();
+				return LibM3G.graphics3D(p).getTarget();
 			case 2: // m3g_getHints(): Int
-				return Ival(LibM3G.graphics3D(c).getHints());
+				return Ival(LibM3G.graphics3D(p).getHints());
 			case 3: // m3g_isDepthBufferEnabled(): Bool
-				return Ival(LibM3G.graphics3D(c).isDepthBufferEnabled());
+				return Ival(LibM3G.graphics3D(p).isDepthBufferEnabled());
 			case 4: // m3g_getViewportX(): Int
-				return Ival(LibM3G.graphics3D(c).getViewportX());
+				return Ival(LibM3G.graphics3D(p).getViewportX());
 			case 5: // m3g_getViewportY(): Int
-				return Ival(LibM3G.graphics3D(c).getViewportY());
+				return Ival(LibM3G.graphics3D(p).getViewportY());
 			case 6: // m3g_getViewportWidth(): Int
-				return Ival(LibM3G.graphics3D(c).getViewportWidth());
+				return Ival(LibM3G.graphics3D(p).getViewportWidth());
 			case 7: // m3g_getViewportHeight(): Int
-				return Ival(LibM3G.graphics3D(c).getViewportHeight());
+				return Ival(LibM3G.graphics3D(p).getViewportHeight());
 			case 8: // m3g_getDepthRangeNear(): Float
-				return Fval(LibM3G.graphics3D(c).getDepthRangeNear());
+				return Fval(LibM3G.graphics3D(p).getDepthRangeNear());
 			case 9: // m3g_getDepthRangeFar(): Float
-				return Fval(LibM3G.graphics3D(c).getDepthRangeFar());
+				return Fval(LibM3G.graphics3D(p).getDepthRangeFar());
 			case 10: // m3g_getCamera(transform: Transform = null): Camera
-				return LibM3G.graphics3D(c).getCamera((Transform)args[0]);
+				return LibM3G.graphics3D(p).getCamera((Transform)args[0]);
 			case 11: // m3g_getLightCount(): Int
-				return Ival(LibM3G.graphics3D(c).getLightCount());
+				return Ival(LibM3G.graphics3D(p).getLightCount());
 			case 12: // m3g_getLight(index: Int, transform: Transform): Light
-				return LibM3G.graphics3D(c).getLight(ival(args[0]), (Transform)args[1]);
+				return LibM3G.graphics3D(p).getLight(ival(args[0]), (Transform)args[1]);
 			case 13: // IndexBuffer.getIndexCount(): Int
 				return Ival(((IndexBuffer)args[0]).getIndexCount());
 			case 14: // IndexBuffer.getIndices(indices: [Int])

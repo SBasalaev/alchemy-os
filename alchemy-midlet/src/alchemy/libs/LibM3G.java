@@ -17,8 +17,8 @@
  */
 package alchemy.libs;
 
-import alchemy.core.Context;
-import alchemy.core.ContextListener;
+import alchemy.core.Process;
+import alchemy.core.ProcessListener;
 import alchemy.fs.FSManager;
 import alchemy.nlib.NativeLibrary;
 import alchemy.util.IO;
@@ -68,22 +68,22 @@ public class LibM3G extends NativeLibrary {
 	}
 	
 	/** Owner of Graphics3D object. */
-	private static volatile Context owner;
+	private static volatile Process owner;
 
-	static Graphics3D graphics3D(Context c) {
+	static Graphics3D graphics3D(Process p) {
 		final Graphics3D instance = Graphics3D.getInstance();
 		synchronized (instance) {
 			if (owner == null) {
-				owner = c;
-				c.addContextListener(new M3GContextListener());
-			} else if (owner != c) {
+				owner = p;
+				p.addProcessListener(new M3GContextListener());
+			} else if (owner != p) {
 				throw new IllegalStateException("M3G is used by another process");
 			}
 		}
 		return instance;
 	}
 	
-	protected Object invokeNative(int index, Context c, Object[] args) throws Exception {
+	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // AnimationController.new()
 				return new AnimationController();
@@ -271,39 +271,39 @@ public class LibM3G extends NativeLibrary {
 			case 76: // m3g_isUsed(): Bool
 				return Ival(owner != null);
 			case 77: // m3g_bindTarget(target: Any, depthBuffer: Bool, hints: Int)
-				graphics3D(c).bindTarget(args[0], bval(args[1]), ival(args[2]));
+				graphics3D(p).bindTarget(args[0], bval(args[1]), ival(args[2]));
 				return null;
 			case 78: // m3g_releaseTarget()
-				graphics3D(c).releaseTarget();
+				graphics3D(p).releaseTarget();
 				return null;
 			case 79: // m3g_setViewport(x: Int, y: Int, w: Int, h: Int)
-				graphics3D(c).setViewport(ival(args[0]), ival(args[1]), ival(args[2]), ival(args[3]));
+				graphics3D(p).setViewport(ival(args[0]), ival(args[1]), ival(args[2]), ival(args[3]));
 				return null;
 			case 80: // m3g_setDepthRange(near: Float, far: Float)
-				graphics3D(c).setDepthRange(fval(args[0]), fval(args[1]));
+				graphics3D(p).setDepthRange(fval(args[0]), fval(args[1]));
 				return null;
 			case 81: // m3g_clear(background: Background)
-				graphics3D(c).clear((Background)args[0]);
+				graphics3D(p).clear((Background)args[0]);
 				return null;
 			case 82: // m3g_renderWorld(world: World)
-				graphics3D(c).render((World)args[0]);
+				graphics3D(p).render((World)args[0]);
 				return null;
 			case 83: // m3g_renderNode(node: Node, transform: Transform)
-				graphics3D(c).render((Node)args[0], (Transform)args[1]);
+				graphics3D(p).render((Node)args[0], (Transform)args[1]);
 				return null;
 			case 84: // m3g_render(vertices: VertexBuffer, triangles: IndexBuffer, appearance: Appearance, transform: Transform, scope: Int)
-				graphics3D(c).render((VertexBuffer)args[0], (IndexBuffer)args[1], (Appearance)args[2], (Transform)args[3], ival(args[4]));
+				graphics3D(p).render((VertexBuffer)args[0], (IndexBuffer)args[1], (Appearance)args[2], (Transform)args[3], ival(args[4]));
 				return null;
 			case 85: // m3g_setCamera(camera: Camera, transform: Transform)
-				graphics3D(c).setCamera((Camera)args[0], (Transform)args[1]);
+				graphics3D(p).setCamera((Camera)args[0], (Transform)args[1]);
 				return null;
 			case 86: // m3g_addLight(light: Light, transform: Transform): Int
-				return Ival(graphics3D(c).addLight((Light)args[0], (Transform)args[1]));
+				return Ival(graphics3D(p).addLight((Light)args[0], (Transform)args[1]));
 			case 87: // m3g_setLight(index: Int, light: Light, transform: Transform)
-				graphics3D(c).setLight(ival(args[0]), (Light)args[1], (Transform)args[2]);
+				graphics3D(p).setLight(ival(args[0]), (Light)args[1], (Transform)args[2]);
 				return null;
 			case 88: // m3g_resetLights()
-				graphics3D(c).resetLights();
+				graphics3D(p).resetLights();
 				return null;
 			case 89: // m3g_getProperties(): Dict
 				return Graphics3D.getProperties();
@@ -804,9 +804,9 @@ public class LibM3G extends NativeLibrary {
 		return "libm3g.1.so";
 	}
 	
-	private static class M3GContextListener implements ContextListener {
+	private static class M3GContextListener implements ProcessListener {
 
-		public void contextEnded(Context c) {
+		public void processEnded(Process c) {
 			final Graphics3D graphics = Graphics3D.getInstance();
 			synchronized (graphics) {
 				graphics.releaseTarget();

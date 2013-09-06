@@ -18,7 +18,7 @@
 
 package alchemy.nlib;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Function;
 import alchemy.core.Int;
 import alchemy.core.Library;
@@ -54,7 +54,7 @@ public abstract class NativeLibrary extends Library {
 	}
 	
 	/** Invokes native function. */
-	protected abstract Object invokeNative(int index, Context c, Object[] args) throws Exception;
+	protected abstract Object invokeNative(int index, Process p, Object[] args) throws Exception;
 	
 	/** Returns SONAME of this library. */
 	public abstract String soname();

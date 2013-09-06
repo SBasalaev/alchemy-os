@@ -74,12 +74,12 @@ public abstract class Function {
 
 	/**
 	 * Invokes this function.
-	 * @param c     execution context
+	 * @param p     process
 	 * @param args  function arguments
 	 * @return function result
 	 * @throws AlchemyException if an exception occurs
 	 */
-	public abstract Object invoke(Context c, Object[] args) throws AlchemyException;
+	public abstract Object invoke(Process p, Object[] args) throws AlchemyException;
 
 	/**
 	 * Returns string representation of this object.

@@ -18,7 +18,7 @@
 
 package alchemy.libs;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Int;
 import alchemy.nlib.NativeLibrary;
 import alchemy.util.IO;
@@ -38,7 +38,7 @@ public class LibComm1 extends NativeLibrary {
 		load("/libcomm1.symbols");
 	}
 	
-	protected Object invokeNative(int index, Context c, Object[] args) throws Exception {
+	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			case 0: { // list_commports(): [String]
 				String ports = System.getProperty("microedition.commports");
@@ -57,7 +57,7 @@ public class LibComm1 extends NativeLibrary {
 				if (params[5] != null) url.append(";autocts=").append(bval(params[5]) ? "on" : "off");
 				if (params[6] != null) url.append(";autorts=").append(bval(params[6]) ? "on" : "off");
 				Connection conn = Connector.open(url.toString());
-				c.addStream(conn);
+				p.addStream(conn);
 				return conn;
 			}
 			case 2: // Comm.get_baudrate(): Int

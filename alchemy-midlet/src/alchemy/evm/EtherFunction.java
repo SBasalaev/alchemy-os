@@ -19,7 +19,7 @@
 package alchemy.evm;
 
 import alchemy.core.AlchemyException;
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Function;
 import alchemy.core.Int;
 
@@ -48,7 +48,7 @@ class EtherFunction extends Function {
 		this.errtable = errtable;
 	}
 
-	public Object invoke(Context c, Object[] args) throws AlchemyException {
+	public Object invoke(Process p, Object[] args) throws AlchemyException {
 		//initializing
 		final Object[] stack = new Object[localsize+stacksize];
 		System.arraycopy(args, 0, stack, 0, args.length);
@@ -585,7 +585,7 @@ class EtherFunction extends Function {
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
-					stack[head] = ((Function)stack[head]).invoke(c, params);
+					stack[head] = ((Function)stack[head]).invoke(p, params);
 					if ((instr & 8) != 0) head--;
 					break;
 				}
@@ -595,7 +595,7 @@ class EtherFunction extends Function {
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
-					stack[head] = ((Function)stack[head]).invoke(c, params);
+					stack[head] = ((Function)stack[head]).invoke(p, params);
 					break;
 				}
 				case Opcodes.CALV: {//calv <ubyte>
@@ -604,7 +604,7 @@ class EtherFunction extends Function {
 					Object[] params = new Object[paramlen];
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
-					((Function)stack[head]).invoke(c, params);
+					((Function)stack[head]).invoke(p, params);
 					head--;
 					break;
 				}

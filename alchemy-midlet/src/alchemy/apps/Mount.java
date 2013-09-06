@@ -18,7 +18,7 @@
 
 package alchemy.apps;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.fs.FSManager;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -34,28 +34,28 @@ public class Mount extends NativeApp {
 	private static final String VERSION = "mount 1.0";
 	private static final String HELP = "Mounts file system to the given directory.\n\nUsage: mount dir type [options]";
 	
-	public int main(Context c, String[] args) throws IOException {
+	public int main(Process p, String[] args) throws IOException {
 		if (args.length == 0 || args[0].equals("-h")) {
-			IO.println(c.stdout, HELP);
+			IO.println(p.stdout, HELP);
 			return 0;
 		}
 		if (args[0].equals("-v")) {
-			IO.println(c.stdout, VERSION);
+			IO.println(p.stdout, VERSION);
 			return 0;
 		}
 		if (args.length < 2) {
-			IO.println(c.stderr, "mount: Insufficient arguments");
+			IO.println(p.stderr, "mount: Insufficient arguments");
 			return 1;
 		}
 		String type = args[1];
-		String dir = c.toFile(args[0]);
+		String dir = p.toFile(args[0]);
 		String options = (args.length < 3) ? "" : args[2];
 		if (!FSManager.fs().isDirectory(dir)) {
-			IO.println(c.stderr, "Directory does not exist: "+dir);
+			IO.println(p.stderr, "Directory does not exist: "+dir);
 			return 1;
 		}
 		if (FSManager.fs().list(dir).length > 0) {
-			IO.println(c.stderr, "Warning: directory not empty");
+			IO.println(p.stderr, "Warning: directory not empty");
 		}
 		FSManager.mount(dir, type, options);
 		return 0;

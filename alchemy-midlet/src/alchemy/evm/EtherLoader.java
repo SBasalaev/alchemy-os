@@ -18,7 +18,7 @@
 
 package alchemy.evm;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Function;
 import alchemy.core.HashLibrary;
 import alchemy.core.Int;
@@ -72,7 +72,7 @@ public class EtherLoader {
 	 *  Variable instructions: iinc
 	 */
 	
-	public static Library load(Context c, InputStream in) throws IOException, InstantiationException {
+	public static Library load(Process p, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
 		HashLibrary lib = new HashLibrary();
 		//reading format version
@@ -92,7 +92,7 @@ public class EtherLoader {
 			int depcount = data.readUnsignedShort();
 			libdeps = new Library[depcount];
 			for (int i=0; i<depcount; i++) {
-				libdeps[i] = c.loadLibrary(data.readUTF());
+				libdeps[i] = p.loadLibrary(data.readUTF());
 			}
 		}
 		//constructing constant pool

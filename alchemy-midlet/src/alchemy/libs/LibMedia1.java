@@ -18,7 +18,7 @@
 
 package alchemy.libs;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.nlib.NativeFunction;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class LibMedia1 extends NativeLibrary {
 		load("/libmedia1.symbols");
 	}
 
-	protected Object invokeNative(int index, Context c, Object[] args) throws Exception {
+	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // play_tone(note: Int, duration: Int, volume: Int)
 				Manager.playTone(ival(args[0]), ival(args[1]), ival(args[2]));

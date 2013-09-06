@@ -18,8 +18,8 @@
 
 package alchemy.libs.ui;
 
-import alchemy.core.Context;
-import alchemy.core.ContextListener;
+import alchemy.core.Process;
+import alchemy.core.ProcessListener;
 import alchemy.core.Int;
 import java.util.Vector;
 import javax.microedition.lcdui.Alert;
@@ -40,14 +40,14 @@ import javax.microedition.lcdui.List;
  * UI server for Alchemy.
  * <h3>UI layout</h3>
  * The UI of the MIDlet is a stack of screens.
- * Each context can be mapped to at most one screen.
+ * Each process can be mapped to at most one screen.
  * The screen that is on top of stack is presented to
  * the user and corresponding screen is able to generate
- * events. When top context dies its screen is removed
+ * events. When top process dies its screen is removed
  * from stack and the next screen is shown.
  * 
  * <h3>Event dispatching</h3>
- * <code>UIServer</code> holds queue of events for each mapped context.
+ * <code>UIServer</code> holds queue of events for each mapped process.
  * 
  * @author Sergey Basalaev
  */
@@ -78,7 +78,7 @@ public final class UIServer {
 	/** Display set by Alchemy MIDlet. */
 	private static Display display;
 
-	/** Holds all contexts which have associated screens. */
+	/** Holds all processes which have associated screens. */
 	private static final Vector frames = new Vector();
 	
 	private static final UIContextListener l = new UIContextListener();
@@ -112,23 +112,23 @@ public final class UIServer {
 	}
 
 	/**
-	 * Maps specified context to given screen.
-	 * If context is already mapped then its screen is replaced.
-	 * If context is not mapped then new mapping is added and
+	 * Maps specified process to given screen.
+	 * If process is already mapped then its screen is replaced.
+	 * If process is not mapped then new mapping is added and
 	 * corresponding screen is placed on top of the screen stack.
 	 */
-	public static synchronized void setScreen(Context c, Displayable d) {
+	public static synchronized void setScreen(Process p, Displayable d) {
 		if (d.getTitle() == null) {
-			d.setTitle(c.getName());
+			d.setTitle(p.getName());
 		}
-		int i = frameIndex(c);
+		int i = frameIndex(p);
 		if (i >= 0) {
 			((UIFrame)frames.elementAt(i)).d = d;
-			appList.set(i, d.getTitle(), getDefaultIcon(c));
+			appList.set(i, d.getTitle(), getDefaultIcon(p));
 		} else {
-			frames.addElement(new UIFrame(c, d));
-			c.addContextListener(l);
-			appList.append(d.getTitle(), getDefaultIcon(c));
+			frames.addElement(new UIFrame(p, d));
+			p.addProcessListener(l);
+			appList.append(d.getTitle(), getDefaultIcon(p));
 		}
 		d.addCommand(appCommand);
 		d.setCommandListener(cl);
@@ -136,14 +136,14 @@ public final class UIServer {
 	}
 	
 	/**
-	 * Unmaps context mapping and removes corresponding screen
+	 * Unmaps process mapping and removes corresponding screen
 	 * from the screen stack.
 	 */
-	public static synchronized void removeScreen(Context c) {
-		int index = frameIndex(c);
+	public static synchronized void removeScreen(Process p) {
+		int index = frameIndex(p);
 		if (index >= 0) {
 			UIFrame frame = (UIFrame)frames.elementAt(index);
-			frame.c.removeContextListener(l);
+			frame.c.removeProcessListener(l);
 			frame.d.setCommandListener(null);
 			frame.d.removeCommand(appCommand);
 			frames.removeElementAt(index);
@@ -153,10 +153,10 @@ public final class UIServer {
 	}
 	
 	/**
-	 * Returns screen this context mapped to or <code>null</code>.
+	 * Returns screen this process mapped to or <code>null</code>.
 	 */
-	public static synchronized Displayable getScreen(Context c) {
-		int index = frameIndex(c);
+	public static synchronized Displayable getScreen(Process p) {
+		int index = frameIndex(p);
 		if (index >= 0) {
 			UIFrame frame = (UIFrame)frames.elementAt(index);
 			return frame.d;
@@ -198,18 +198,18 @@ public final class UIServer {
 	}
 	
 	/**
-	 * Reads next event object for given context.
+	 * Reads next event object for given process.
 	 * If the event queue is empty and wait is <code>true</code>
 	 * this method blocks until an event is available, otherwise
 	 * it returns <code>null</code> on empty queue.
 	 *
-	 * @throws IllegalStateException  if context is not mapped to a screen
+	 * @throws IllegalStateException  if process is not mapped to a screen
 	 * @throws InterruptedException  if process was interrupted
 	 */
-	public static Object readEvent(Context c, boolean wait) throws IllegalStateException, InterruptedException {
+	public static Object readEvent(Process p, boolean wait) throws IllegalStateException, InterruptedException {
 		UIFrame frame = null;
 		synchronized (UIServer.class) {
-			int i = frameIndex(c);
+			int i = frameIndex(p);
 			if (i >= 0) frame = ((UIFrame)frames.elementAt(i));
 		}
 		if (frame == null) throw new IllegalStateException("Screen is not set.");
@@ -234,23 +234,23 @@ public final class UIServer {
 		form.setItemStateListener(new UIItemStateListener(form));
 	}
 
-	public static String getDefaultTitle(Context c) {
-		Object title = String.valueOf(c.get("ui.title"));
-		return (title != null) ? title.toString() : c.getName();
+	public static String getDefaultTitle(Process p) {
+		Object title = String.valueOf(p.get("ui.title"));
+		return (title != null) ? title.toString() : p.getName();
 	}
 	
-	public static void setDefaultTitle(Context c, String title) {
-		c.set("ui.title", title);
+	public static void setDefaultTitle(Process p, String title) {
+		p.set("ui.title", title);
 	}
 
-	public static Image getDefaultIcon(Context c) {
-		return (Image)c.get("ui.icon");
+	public static Image getDefaultIcon(Process p) {
+		return (Image)p.get("ui.icon");
 	}
 	
-	public static void setDefaultIcon(Context c, Image img) {
-		c.set("ui.icon", img);
+	public static void setDefaultIcon(Process p, Image img) {
+		p.set("ui.icon", img);
 		synchronized (UIServer.class) {
-			int index = frameIndex(c);
+			int index = frameIndex(p);
 			if (index >= 0) {
 				appList.set(index, appList.getString(index), img);
 			}
@@ -265,9 +265,9 @@ public final class UIServer {
 		return display.flashBacklight(millis);
 	}
 	
-	/** Removes screen mapping when context ends. */
-	private static class UIContextListener implements ContextListener {
-		public void contextEnded(Context c) {
+	/** Removes screen mapping when process ends. */
+	private static class UIContextListener implements ProcessListener {
+		public void processEnded(Process c) {
 			removeScreen(c);
 		}
 	}
@@ -375,11 +375,11 @@ public final class UIServer {
 	}
 
 	private static class UIFrame {
-		final Context c;
+		final Process c;
 		Displayable d;
 		final Queue queue;
 
-		public UIFrame(Context c, Displayable d) {
+		public UIFrame(Process c, Displayable d) {
 			this.c = c;
 			this.d = d;
 			queue = new Queue();

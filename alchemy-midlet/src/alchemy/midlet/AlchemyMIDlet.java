@@ -19,8 +19,8 @@
 package alchemy.midlet;
 
 import alchemy.core.Art;
-import alchemy.core.Context;
-import alchemy.core.ContextListener;
+import alchemy.core.Process;
+import alchemy.core.ProcessListener;
 import alchemy.fs.FSManager;
 import alchemy.libs.ui.UIServer;
 import alchemy.util.Properties;
@@ -32,7 +32,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
  * Alchemy MIDlet.
  * @author Sergey Basalaev
  */
-public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextListener {
+public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessListener {
 
 	private final Command cmdQuit = new Command("Quit", Command.EXIT, 1);
 	private Art runtime;
@@ -48,12 +48,12 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			FSManager.mount("", prop.get(InstallInfo.FS_TYPE), prop.get(InstallInfo.FS_INIT));
 			//setting up environment
 			runtime = new Art();
-			Context root = runtime.rootContext();
+			Process root = runtime.rootProcess();
 			root.setEnv("PATH", "/bin");
 			root.setEnv("LIBPATH", "/lib");
 			root.setEnv("INCPATH", "/inc");
 			root.setCurDir("/home");
-			root.addContextListener(this);
+			root.addProcessListener(this);
 			runApp();
 		} catch (Throwable t) {
 			kernelPanic(t.toString());
@@ -66,7 +66,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 			new Runnable() {
 				public void run() {
 					try {
-						runtime.rootContext().start("sh", new String[] {"/cfg/init"});
+						runtime.rootProcess().start("sh", new String[] {"/cfg/init"});
 					} catch (Throwable t) {
 						kernelPanic(t.toString());
 						t.printStackTrace();
@@ -98,7 +98,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ContextLis
 		}
 	}
 
-	public void contextEnded(Context c) {
+	public void processEnded(Process c) {
 			destroyApp(true);
 	}
 

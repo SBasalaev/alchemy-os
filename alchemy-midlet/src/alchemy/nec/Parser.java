@@ -18,7 +18,7 @@
 
 package alchemy.nec;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Int;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
@@ -70,7 +70,7 @@ public class Parser {
 
 	private int Xmask; /* Enabled experimental features. */
 
-	private final Context c;
+	private final Process p;
 	private final int target;
 	private Tokenizer t;
 	private Unit unit;
@@ -82,8 +82,8 @@ public class Parser {
 	
 	private final Optimizer constOptimizer = new Optimizer();
 	
-	public Parser(Context c, int target, int optlevel, int Wmask, int Xmask) {
-		this.c = c;
+	public Parser(Process p, int target, int optlevel, int Wmask, int Xmask) {
+		this.p = p;
 		this.target = target;
 		if (optlevel > 1) Xmask |= X_ARRAYOPT | X_IINC;
 		this.Wmask = Wmask;
@@ -116,7 +116,7 @@ public class Parser {
 			warn(W_ERROR, pe.getMessage());
 			return null;
 		} catch (IOException ioe) {
-			IO.println(c.stderr, "I/O error: "+ioe);
+			IO.println(p.stderr, "I/O error: "+ioe);
 			return null;
 		}
 		return unit;
@@ -132,16 +132,16 @@ public class Parser {
 	 */
 	private String resolveFile(String name) throws ParseException {
 		if (name.length() == 0) throw new ParseException("Empty string in 'use'");
-		String f = c.toFile(name);
+		String f = p.toFile(name);
 		if (FSManager.fs().exists(f) && !FSManager.fs().isDirectory(f)) return f;
-		f = c.toFile(name+".eh");
+		f = p.toFile(name+".eh");
 		if (FSManager.fs().exists(f)) return f;
 		if (name.charAt(0) != '/') {
-			String[] incpath = IO.split(c.getEnv("INCPATH"), ':');
+			String[] incpath = IO.split(p.getEnv("INCPATH"), ':');
 			for (int i=0; i<incpath.length; i++) {
-				f = c.toFile(incpath[i]+'/'+name);
+				f = p.toFile(incpath[i]+'/'+name);
 				if (FSManager.fs().exists(f) && !FSManager.fs().isDirectory(f)) return f;
-				f = c.toFile(incpath[i]+'/'+name+".eh");
+				f = p.toFile(incpath[i]+'/'+name+".eh");
 				if (FSManager.fs().exists(f)) return f;
 			}
 		}
@@ -161,11 +161,11 @@ public class Parser {
 		}
 		//push file in stack
 		Tokenizer oldt = t;
-		String olddir = c.getCurDir();
+		String olddir = p.getCurDir();
 		files.push(file);
-		c.setCurDir(Filesystem.fparent(file));
+		p.setCurDir(Filesystem.fparent(file));
 		InputStream in = FSManager.fs().read(file);
-		c.addStream(in);
+		p.addStream(in);
 		UTFReader fred = new UTFReader(in);
 		t = new Tokenizer(fred);
 		//parse
@@ -393,9 +393,9 @@ public class Parser {
 		}
 		//move file to parsed
 		in.close();
-		c.removeStream(in);
+		p.removeStream(in);
 		t = oldt;
-		c.setCurDir(olddir);
+		p.setCurDir(olddir);
 		parsed.addElement(files.pop());
 	}
 	
@@ -673,9 +673,9 @@ public class Parser {
 			int index = 0;
 			int priority = 0;
 			for (int i = 0; i < operators.size(); i++) {
-				int p = getPriority((Int)operators.elementAt(i));
-				if (p > priority) {
-					priority = p;
+				int pr = getPriority((Int)operators.elementAt(i));
+				if (pr > priority) {
+					priority = pr;
 					index = i;
 				}
 			}
@@ -1854,7 +1854,7 @@ public class Parser {
 			if (category == W_ERROR) output.append(": [Error]");
 			else output.append(": [Warning ").append(WARN_STRINGS[category]).append(']');
 			output.append("\n ").append(msg);
-			IO.println(c.stderr, output);
+			IO.println(p.stderr, output);
 		}
 	}
 }

@@ -19,7 +19,7 @@
 package alchemy.nlib;
 
 import alchemy.core.AlchemyException;
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Function;
 
 /**
@@ -63,9 +63,9 @@ public final class NativeFunction extends Function {
 		return lib.soname()+':'+signature;
 	}
 	
-	public final Object invoke(Context c, Object[] args) throws AlchemyException {
+	public final Object invoke(Process p, Object[] args) throws AlchemyException {
 		try {
-			return lib.invokeNative(this.index, c, args);
+			return lib.invokeNative(this.index, p, args);
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
 			ae.addTraceElement(this, "native");
