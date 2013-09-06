@@ -133,14 +133,14 @@ public class Parser {
 	private String resolveFile(String name) throws ParseException {
 		if (name.length() == 0) throw new ParseException("Empty string in 'use'");
 		String f = c.toFile(name);
-		if (FSManager.fs().exists(f)) return f;
+		if (FSManager.fs().exists(f) && !FSManager.fs().isDirectory(f)) return f;
 		f = c.toFile(name+".eh");
 		if (FSManager.fs().exists(f)) return f;
 		if (name.charAt(0) != '/') {
 			String[] incpath = IO.split(c.getEnv("INCPATH"), ':');
 			for (int i=0; i<incpath.length; i++) {
 				f = c.toFile(incpath[i]+'/'+name);
-				if (FSManager.fs().exists(f)) return f;
+				if (FSManager.fs().exists(f) && !FSManager.fs().isDirectory(f)) return f;
 				f = c.toFile(incpath[i]+'/'+name+".eh");
 				if (FSManager.fs().exists(f)) return f;
 			}
