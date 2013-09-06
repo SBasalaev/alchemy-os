@@ -1,0 +1,32 @@
+Source: libm3g
+Version: 1.0
+Section: libs
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+Copyright: (c) 2013 Sergey Basalaev
+License: GPL-3+exception
+
+Package: libm3g1
+Summary: mobile 3D graphics library (M3G 1.0)
+X-Required-Key: microedition.m3g.version 1.0
+X-Native-Class: alchemy.libs.LibM3G
+Depends: ${libdeps}
+Files:
+ native/libm3g.1.so lib
+
+Package: libm3g-ext1
+Summary: extensions to mobile 3D graphics library (M3G 1.1)
+X-Required-Key: microedition.m3g.version 1.1
+X-Native-Class: alchemy.libs.LibM3G_ext11
+Depends: ${libdeps}
+Files:
+ native/libm3g-ext.1.so lib
+
+Package: libm3g-dev
+Summary: development headers for mobile 3D graphics (M3G)
+Section: libdevel
+Depends: ${libdeps}, libm3g1, libm3g-ext1, libcore-dev, libui-dev
+Files:
+ m3g                  inc
+ m3g.eh               inc
+ native/libm3g.so     lib
+ native/libm3g-ext.so lib

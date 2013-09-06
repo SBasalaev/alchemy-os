@@ -1,0 +1,3 @@
+#@alchemy.libs.LibM3G
+soname=libm3g.1.so
+symbols=/m3g-10.symbols
