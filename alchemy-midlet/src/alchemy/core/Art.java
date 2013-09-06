@@ -18,8 +18,6 @@
 
 package alchemy.core;
 
-import alchemy.evm.ELibBuilder;
-
 /**
  * Alchemy runtime.
  * @author Sergey Basalaev
@@ -27,8 +25,6 @@ import alchemy.evm.ELibBuilder;
 public final class Art {
 
 	private Context root;
-
-	ELibBuilder etherbuilder = new ELibBuilder();
 
 	/**
 	 * Creates new Alchemy runtime.

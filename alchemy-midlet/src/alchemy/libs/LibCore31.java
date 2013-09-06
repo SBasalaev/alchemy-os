@@ -22,7 +22,7 @@ import alchemy.core.AlchemyException;
 import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.Library;
-import alchemy.evm.ELibBuilder;
+import alchemy.evm.EtherLoader;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.libs.core.PartiallyAppliedFunction;
@@ -899,7 +899,7 @@ public class LibCore31 extends NativeLibrary {
 				InputStream in = (InputStream) args[0];
 				if (in.read() != 0xC0 || in.read() != 0xDE)
 					throw new InstantiationException("Not an Ether library");
-				return new ELibBuilder().build(c, in);
+				return EtherLoader.load(c, in);
 			}
 			case 178: // StrBuf.chars(from: Int, to: Int, buf: [Char], ofs: Int)
 				((StringBuffer)args[0]).getChars(ival(args[1]), ival(args[2]), (char[])(args[3]), ival(args[4]));

@@ -22,17 +22,18 @@ import alchemy.core.Context;
 import alchemy.core.Function;
 import alchemy.core.HashLibrary;
 import alchemy.core.Int;
-import alchemy.core.LibBuilder;
 import alchemy.core.Library;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Library builder for Embedded Virtual Machine.
+ * Loads Ether libraries.
  * @author Sergey Basalaev
  */
-public class ELibBuilder implements LibBuilder {
+public class EtherLoader {
+
+	private EtherLoader() { }
 
 	/**
 	 * Version of library file format.
@@ -71,7 +72,7 @@ public class ELibBuilder implements LibBuilder {
 	 *  Variable instructions: iinc
 	 */
 	
-	public Library build(Context c, InputStream in) throws IOException, InstantiationException {
+	public static Library load(Context c, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
 		HashLibrary lib = new HashLibrary();
 		//reading format version

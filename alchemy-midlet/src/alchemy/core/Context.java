@@ -18,6 +18,7 @@
 
 package alchemy.core;
 
+import alchemy.evm.EtherLoader;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.fs.devfs.SinkInputStream;
@@ -413,20 +414,20 @@ public class Context {
 					try {
 						lib = (Library)Class.forName(classname).newInstance();
 					} catch (ClassNotFoundException cnfe) {
-						throw new InstantiationException("Class not found: "+classname);
+						throw new InstantiationException("Unsupported in this version of Alchemy OS: "+classname);
 					} catch (IllegalAccessException iae) {
-						throw new InstantiationException("Class not accessible: "+classname);
+						throw new InstantiationException("Not a library: "+classname);
 					} catch (ClassCastException cce) {
 						throw new InstantiationException("Not a library: "+classname);
 					} catch (NoClassDefFoundError ncdfe) {
-						throw new InstantiationException("Unsupported API: " + ncdfe.getMessage());
+						throw new InstantiationException("Unsupported on this device: " + ncdfe.getMessage());
 					}
 					in.close();
 					Cache.put(libfile, tstamp, lib);
 					return lib;
 				}
 				case 0xC0DE: { // Ether library
-					lib = art.etherbuilder.build(this, in);
+					lib = EtherLoader.load(this, in);
 					in.close();
 					Cache.put(libfile, tstamp, lib);
 					return lib;
