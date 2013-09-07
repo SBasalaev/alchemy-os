@@ -18,7 +18,7 @@
 
 package alchemy.apps;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
@@ -38,15 +38,15 @@ public class Shell extends NativeApp {
 
 	public Shell() { }
 
-	public int main(Context c, String[] args) {
+	public int main(Process p, String[] args) {
 		try {
 			int exitcode = 0;
 			InputStream scriptinput;
 			if (args.length == 0) {
-				scriptinput = c.stdin;
+				scriptinput = p.stdin;
 			} else if (args[0].equals("-c")) {
 				if (args.length < 2) {
-					IO.println(c.stderr, C_USAGE);
+					IO.println(p.stderr, C_USAGE);
 					return -1;
 				}
 				StringBuffer cmdline = new StringBuffer(args[1]);
@@ -54,18 +54,18 @@ public class Shell extends NativeApp {
 					cmdline.append(' ').append(args[i]);
 				}
 				scriptinput = new ByteArrayInputStream(IO.utfEncode(cmdline.toString()));
-				c.addStream(scriptinput);
+				p.addStream(scriptinput);
 			} else {
-				String file = c.toFile(args[0]);
+				String file = p.toFile(args[0]);
 				byte[] buf = new byte[(int)FSManager.fs().size(file)];
-				InputStream in = FSManager.fs().read(c.toFile(args[0]));
+				InputStream in = FSManager.fs().read(p.toFile(args[0]));
 				in.read(buf);
 				in.close();
 				scriptinput = new ByteArrayInputStream(buf);
-				c.addStream(scriptinput);
+				p.addStream(scriptinput);
 			}
-			if (c.stdin instanceof TerminalInputStream) {
-				((TerminalInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
+			if (p.stdin instanceof TerminalInputStream) {
+				((TerminalInputStream)p.stdin).setPrompt(p.getCurDir().toString()+'>');
 			}
 			UTFReader r = new UTFReader(scriptinput);
 			while (true) try {
@@ -77,7 +77,7 @@ public class Shell extends NativeApp {
 				ShellCommand cc = null;
 				try { cc = split(line); }
 				catch (IllegalArgumentException e) {
-					IO.println(c.stderr, r.lineNumber()+':'+e.getMessage());
+					IO.println(p.stderr, r.lineNumber()+':'+e.getMessage());
 					if (scriptinput instanceof TerminalInputStream) continue;
 					else return 1;
 				}
@@ -85,34 +85,34 @@ public class Shell extends NativeApp {
 					if (cc.args.length > 0) try {
 						exitcode = Integer.parseInt(cc.args[0]);
 					} catch (NumberFormatException e) {
-						IO.println(c.stderr, "exit: Not a number: "+cc.args[0]);
+						IO.println(p.stderr, "exit: Not a number: "+cc.args[0]);
 						exitcode = 1;
 					}
 					return exitcode;
 				} else if (cc.cmd.equals("cd")) {
 					if (cc.args.length > 0) {
-						String newdir = c.toFile(cc.args[0]);
-						c.setCurDir(newdir);
-						if (c.stdin instanceof TerminalInputStream) {
-							((TerminalInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
+						String newdir = p.toFile(cc.args[0]);
+						p.setCurDir(newdir);
+						if (p.stdin instanceof TerminalInputStream) {
+							((TerminalInputStream)p.stdin).setPrompt(p.getCurDir().toString()+'>');
 						}
 						exitcode = 0;
 					} else {
-						IO.println(c.stderr, "cd: no directory specified");
+						IO.println(p.stderr, "cd: no directory specified");
 						exitcode = 1;
 					}
 				} else if (cc.cmd.equals("cls")) {
-					if (c.stdin instanceof TerminalInputStream) {
-						((TerminalInputStream)c.stdin).clearScreen();
+					if (p.stdin instanceof TerminalInputStream) {
+						((TerminalInputStream)p.stdin).clearScreen();
 					}
 					exitcode = 0;
 				} else {
-					Context child = new Context(c);
+					Process child = new Process(p);
 					if (cc.in != null) {
-						child.stdin = FSManager.fs().read(c.toFile(cc.in));
+						child.stdin = FSManager.fs().read(p.toFile(cc.in));
 					}
 					if (cc.out != null) {
-						String outfile = c.toFile(cc.out);
+						String outfile = p.toFile(cc.out);
 						if (cc.appendout) {
 							child.stdout = FSManager.fs().append(outfile);
 						} else {
@@ -120,31 +120,31 @@ public class Shell extends NativeApp {
 						}
 					}
 					if (cc.err != null) {
-						String errfile = c.toFile(cc.err);
+						String errfile = p.toFile(cc.err);
 						if (cc.appenderr) {
 							child.stderr = FSManager.fs().append(errfile);
 						} else {
 							child.stderr = FSManager.fs().write(errfile);
 						}
 					}
-					if (c.stdin instanceof TerminalInputStream) {
-						((TerminalInputStream)c.stdin).setPrompt("");
+					if (p.stdin instanceof TerminalInputStream) {
+						((TerminalInputStream)p.stdin).setPrompt("");
 					}
 					exitcode = child.startAndWait(cc.cmd, cc.args);
 					if (cc.in != null) child.stdin.close();
 					if (cc.out != null) child.stdout.close();
 					if (cc.err != null) child.stderr.close();
-					if (c.stdin instanceof TerminalInputStream) {
-						((TerminalInputStream)c.stdin).setPrompt(c.getCurDir().toString()+'>');
+					if (p.stdin instanceof TerminalInputStream) {
+						((TerminalInputStream)p.stdin).setPrompt(p.getCurDir().toString()+'>');
 					}
 				}
 			} catch (Throwable t) {
-				IO.println(c.stderr, t);
+				IO.println(p.stderr, t);
 			}
 			return exitcode;
 		} catch (Exception e) {
 			//e.printStackTrace();
-			IO.println(c.stderr, e);
+			IO.println(p.stderr, e);
 			return 1;
 		}
 	}

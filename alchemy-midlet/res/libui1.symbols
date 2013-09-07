@@ -130,3 +130,5 @@ ui_vibrate
 ui_flash
 Canvas.has_hold_event
 new_hyperimageitem
+Image.get_height
+Image.get_width

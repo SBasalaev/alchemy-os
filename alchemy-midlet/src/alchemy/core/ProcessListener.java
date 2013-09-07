@@ -19,14 +19,13 @@
 package alchemy.core;
 
 /**
- * Listens for context events.
+ * Listens for process events.
  * @author Sergey Basalaev
  */
-public interface ContextListener {
+public interface ProcessListener {
 	
 	/**
-	 * Called when context execution ends.
-	 * @param  c  context
+	 * Called when process ends.
 	 */
-	void contextEnded(Context c);
+	void processEnded(Process p);
 }

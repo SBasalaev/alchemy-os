@@ -41,11 +41,11 @@ def loadtextdomain(name: String): TextDomain {
   if (locale == null || locale.len() == 0) {
     setlocale(null)
   }
-  var domain = new TextDomain(new_dict())
-  var domainpath = "/res/locale/" + locale + "/" + name
+  var domain = new TextDomain(new Dict())
+  var domainpath = "/res/locale/" + locale + '/' + name + ".lc"
   if (!exists(domainpath) && locale.indexof('_') > 0) {
     locale = locale[: locale.indexof('_')]
-    domainpath = "/res/locale/" + locale + "/" + name
+    domainpath = "/res/locale/" + locale + '/' + name + ".lc"
   }
   if (exists(domainpath)) {
     var in = fopen_r(domainpath)

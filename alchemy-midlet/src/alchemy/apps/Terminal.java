@@ -18,7 +18,7 @@
 
 package alchemy.apps;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -37,32 +37,32 @@ public class Terminal extends NativeApp {
 
 	public Terminal() { }
 
-	public int main(Context c, String[] args) {
+	public int main(Process p, String[] args) {
 		if (args.length == 0) {
 			args = new String[] {"sh"};
 		}
 		if (args[0].equals("-v")) {
-			IO.println(c.stdout, VERSION);
+			IO.println(p.stdout, VERSION);
 			return 0;
 		}
 		if (args[0].equals("-h")) {
-			IO.println(c.stdout, "terminal - run command in the new terminal");
-			IO.println(c.stdout, HELP);
+			IO.println(p.stdout, "terminal - run command in the new terminal");
+			IO.println(p.stdout, HELP);
 			return 0;
 		}
 		boolean keep = false;
 		if (args[0].equals("-k")) {
 			keep = true;
 			if (args.length == 1) {
-				IO.println(c.stderr, "terminal: no command given");
-				IO.println(c.stderr, HELP);
+				IO.println(p.stderr, "terminal: no command given");
+				IO.println(p.stderr, HELP);
 				return 1;
 			}
 		}
 		final Command cmdInput = new Command("Input", Command.OK, 1);
 		final TerminalForm form = new TerminalForm(cmdInput);
-		UIServer.setScreen(c, form);
-		Context child = new Context(c);
+		UIServer.setScreen(p, form);
+		Process child = new Process(p);
 		try {
 			String[] childArgs = null;
 			String childCmd;
@@ -84,8 +84,8 @@ public class Terminal extends NativeApp {
 			child.stdout = form.out;
 			child.stderr = form.out;
 			child.start(childCmd, childArgs);
-			while (child.getState() != Context.ENDED) {
-				Object[] event = (Object[])UIServer.readEvent(c, false);
+			while (child.getState() != Process.ENDED) {
+				Object[] event = (Object[])UIServer.readEvent(p, false);
 				if (event != null && event[2] == cmdInput) synchronized (form) {
 					form.notify();
 				}
@@ -95,7 +95,7 @@ public class Terminal extends NativeApp {
 				form.addCommand(cmdClose);
 				Object[] event;
 				do {
-					event = (Object[])UIServer.readEvent(c, true);
+					event = (Object[])UIServer.readEvent(p, true);
 				} while (event[2] != cmdClose);
 			}
 			return child.getExitCode();
@@ -103,7 +103,7 @@ public class Terminal extends NativeApp {
 			form.print(e.toString());
 			return 1;
 		} finally {
-			UIServer.removeScreen(c);
+			UIServer.removeScreen(p);
 		}
 	}
 }

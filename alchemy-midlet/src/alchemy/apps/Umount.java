@@ -18,7 +18,7 @@
 
 package alchemy.apps;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.fs.FSManager;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -33,18 +33,18 @@ public class Umount extends NativeApp {
 	private static final String HELP = "Unmounts file system at given path.\n\nUsage: umount <dir>";
 	private static final String VERSION = "umount 1.0";
 	
-	public int main(Context c, String[] args) {
+	public int main(Process p, String[] args) {
 		if (args.length == 0 || args[0].equals("-h")) {
-			IO.println(c.stdout, HELP);
+			IO.println(p.stdout, HELP);
 		} else if (args[0].equals("-v")) {
-			IO.println(c.stdout, VERSION);
+			IO.println(p.stdout, VERSION);
 		} else {
-			String dir = c.toFile(args[0]);
+			String dir = p.toFile(args[0]);
 			if (dir.length() == 0) {
-			IO.println(c.stderr, "umount: Cannot unmount root directory!");
+			IO.println(p.stderr, "umount: Cannot unmount root directory!");
 			return 1;
 			} else if (!FSManager.umount(dir)) {
-				IO.println(c.stderr, "umount: "+dir+" is not mounted");
+				IO.println(p.stderr, "umount: "+dir+" is not mounted");
 				return 1;
 			}
 		}

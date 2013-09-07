@@ -18,7 +18,7 @@
 
 package alchemy.fs.devfs;
 
-import alchemy.core.Context.ContextThread;
+import alchemy.core.Process.ProcessThread;
 import alchemy.fs.Filesystem;
 import alchemy.util.IO;
 import java.io.IOException;
@@ -66,8 +66,8 @@ public final class FS extends Filesystem {
 		String name = fname(file);
 		if ("stdin".equals(name)) {
 			Thread th = Thread.currentThread();
-			if (th instanceof ContextThread) {
-				return ((ContextThread)th).context().stdin;
+			if (th instanceof ProcessThread) {
+				return ((ProcessThread)th).process().stdin;
 			}
 		}
 		InputStream input = (InputStream) sharedinputs.get(name);
@@ -86,14 +86,14 @@ public final class FS extends Filesystem {
 		String name = fname(file);
 		if ("stdout".equals(name)) {
 			Thread th = Thread.currentThread();
-			if (th instanceof ContextThread) {
-				return ((ContextThread)th).context().stdout;
+			if (th instanceof ProcessThread) {
+				return ((ProcessThread)th).process().stdout;
 			}
 		}
 		if ("stderr".equals(name)) {
 			Thread th = Thread.currentThread();
-			if (th instanceof ContextThread) {
-				return ((ContextThread)th).context().stderr;
+			if (th instanceof ProcessThread) {
+				return ((ProcessThread)th).process().stderr;
 			}
 		}
 		OutputStream output = (OutputStream) sharedoutputs.get(name);

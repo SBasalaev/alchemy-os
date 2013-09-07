@@ -23,10 +23,10 @@ def printf(fmt: String, args: [Any]) = stdout().printf(fmt, args)
 
 def flistfilter(path: String, glob: String): [String] {
   var files = flist(path)
-  var list = new_list()
+  var list = new List()
   for (var i=0, i < files.len, i += 1) {
     var file = files[i]
-    if (matches_glob(file, glob)) list.add(file)
+    if (matches_glob(file, glob) || matches_glob(file, glob + '/')) list.add(file)
   }
   var strings = new [String](list.len())
   list.copyinto(0, strings, 0, strings.len)

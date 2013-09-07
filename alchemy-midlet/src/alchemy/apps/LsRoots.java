@@ -18,7 +18,7 @@
 
 package alchemy.apps;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.fs.NavigatorHelper;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
@@ -31,29 +31,29 @@ public class LsRoots extends NativeApp {
 	
 	public LsRoots() { }
 
-	public int main(Context c, String[] args) {
-		IO.println(c.stdout, "rms driver\n /");
-		IO.println(c.stdout, "jsr75 driver\n");
+	public int main(Process p, String[] args) {
+		IO.println(p.stdout, "rms driver\n /");
+		IO.println(p.stdout, "jsr75 driver\n");
 		try {
 			NavigatorHelper helper = (NavigatorHelper) Class.forName("alchemy.fs.jsr75.Helper").newInstance();
 			String[] roots = helper.listRoots();
 			for (int i=0; i < roots.length; i++) {
-				c.stdout.write(' ');
-				IO.println(c.stdout, roots[i]);
+				p.stdout.write(' ');
+				IO.println(p.stdout, roots[i]);
 			}
 		} catch (Throwable t) {
-			IO.println(c.stdout, "* not supported");
+			IO.println(p.stdout, "* not supported");
 		}
-		IO.println(c.stdout, "siemens driver\n");
+		IO.println(p.stdout, "siemens driver\n");
 		try {
 			NavigatorHelper helper = (NavigatorHelper) Class.forName("alchemy.fs.siemens.Helper").newInstance();
 			String[] roots = helper.listRoots();
 			for (int i=0; i < roots.length; i++) {
-				c.stdout.write(' ');
-				IO.println(c.stdout, roots[i]);
+				p.stdout.write(' ');
+				IO.println(p.stdout, roots[i]);
 			}
 		} catch (Throwable t) {
-			IO.println(c.stdout, "* not supported");
+			IO.println(p.stdout, "* not supported");
 		}
 		return 0;
 	}

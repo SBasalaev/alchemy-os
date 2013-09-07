@@ -1,7 +1,7 @@
 // builtin types and functions
 
 def Any.tostr(): String;
-def Bool.tostr(): String; 
+def Bool.tostr(): String;
 def Function.curry(a: Any): Function;
 
 def getstatic(name: String): Any;

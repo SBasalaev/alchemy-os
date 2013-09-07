@@ -18,7 +18,7 @@
 
 package alchemy.nec;
 
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.fs.FSManager;
 import alchemy.nec.tree.Unit;
 import alchemy.nlib.NativeApp;
@@ -53,7 +53,7 @@ public class NEC extends NativeApp {
 	 */
 	public NEC() { }
 
-	public int main(Context c, String[] args) {
+	public int main(Process p, String[] args) {
 		//parsing arguments
 		String outname = null;
 		String fname = null;
@@ -66,10 +66,10 @@ public class NEC extends NativeApp {
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
-				IO.println(c.stdout, HELP);
+				IO.println(p.stdout, HELP);
 				return 0;
 			} else if (arg.equals("-v")) {
-				IO.println(c.stdout, VERSION);
+				IO.println(p.stdout, VERSION);
 				return 0;
 			} else if (arg.equals("-o")) {
 				wait_outname = true;
@@ -78,7 +78,7 @@ public class NEC extends NativeApp {
 				if (arg.equals("-t2.1")) {
 					target = 0x0201;
 				} else {
-					IO.println(c.stderr, "Unsupported target: "+arg.substring(2));
+					IO.println(p.stderr, "Unsupported target: "+arg.substring(2));
 					return 1;
 				}
 			} else if (arg.startsWith("-O")) {
@@ -110,18 +110,18 @@ public class NEC extends NativeApp {
 						Wmask |= (1 << j);
 				}
 			} else if (arg.startsWith("-I") && arg.length() > 2) {
-				c.setEnv("INCPATH", c.getEnv("INCPATH")+':'+arg.substring(2));
+				p.setEnv("INCPATH", p.getEnv("INCPATH")+':'+arg.substring(2));
 			} else if (arg.charAt(0) == '-') {
-				IO.println(c.stderr, "Unknown argument: "+arg);
-				IO.println(c.stderr, HELP);
+				IO.println(p.stderr, "Unknown argument: "+arg);
+				IO.println(p.stderr, HELP);
 				return 1;
 			} else if (wait_outname) {
 				outname = arg;
 				wait_outname = false;
 			} else {
 				if (fname != null) {
-					IO.println(c.stderr, "Excess parameter: "+fname);
-					IO.println(c.stderr, HELP);
+					IO.println(p.stderr, "Excess parameter: "+fname);
+					IO.println(p.stderr, HELP);
 					return 1;
 				}
 				fname = arg;
@@ -131,12 +131,12 @@ public class NEC extends NativeApp {
 			outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(c, target, optlevel, Wmask, Xmask);
+		Parser parser = new Parser(p, target, optlevel, Wmask, Xmask);
 		Unit unit = null;
 		try {
-			unit = parser.parse(c.toFile(fname));
+			unit = parser.parse(p.toFile(fname));
 		} catch (Exception e) {
-			IO.println(c.stderr, "There is a bug in compiler. Please report it with your source code and the following error message: "+e);
+			IO.println(p.stderr, "There is a bug in compiler. Please report it with your source code and the following error message: "+e);
 		}
 		if (unit == null) return -1;
 		//optimizing
@@ -145,11 +145,11 @@ public class NEC extends NativeApp {
 		new VarIndexer().visitUnit(unit);
 		EAsmWriter wr = new EAsmWriter(dbginfo);
 		try {
-			OutputStream out = FSManager.fs().write(c.toFile(outname));
+			OutputStream out = FSManager.fs().write(p.toFile(outname));
 			wr.writeTo(unit, out);
 			out.close();
 		} catch (Exception e) {
-			IO.println(c.stderr, "Error: "+e);
+			IO.println(p.stderr, "Error: "+e);
 			//e.printStackTrace();
 			return -1;
 		}

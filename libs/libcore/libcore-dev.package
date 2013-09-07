@@ -1,9 +1,0 @@
-Package: libcore-dev
-Source: libcore
-Section: libdevel
-Version: 3.1.3
-Summary: headers for standard library
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (c) 2011-2013 Sergey Basalaev
-License: GPL-3+exception
-Depends: libcore3

@@ -19,7 +19,7 @@
 package alchemy.nlib;
 
 import alchemy.core.AlchemyException;
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Function;
 import alchemy.core.Library;
 
@@ -40,7 +40,7 @@ public abstract class NativeApp extends Library {
 		main = new MainFunction();
 	}
 
-	public abstract int main(Context c, String[] args) throws Exception;
+	public abstract int main(Process p, String[] args) throws Exception;
 
 	public final Function getFunction(String sig) {
 		return "main".equals(sig) ? main : null;
@@ -52,7 +52,7 @@ public abstract class NativeApp extends Library {
 			super("main");
 		}
 
-		public Object exec(Context c, Object[] args) throws AlchemyException {
+		public Object invoke(Process c, Object[] args) throws AlchemyException {
 			try {
 				return Ival(main(c, (String[])args[0]));
 			} catch (Exception e) {

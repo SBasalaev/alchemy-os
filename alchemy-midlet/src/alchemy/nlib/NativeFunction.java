@@ -19,39 +19,53 @@
 package alchemy.nlib;
 
 import alchemy.core.AlchemyException;
-import alchemy.core.Context;
+import alchemy.core.Process;
 import alchemy.core.Function;
 
 /**
  * Skeleton for functions loaded by native libraries.
  * For speed and compactness all functions of native
- * library are implemented in single class. exec()
- * function is a switch where requested function is
- * chosen by integer index.
+ * library are implemented in single class.
+ * 
+ * The invokeNative method should be implemented using switch on index:
+ * <pre>
+ * protected Object execNative(Context c, Object[] args) throws Exception {
+ *   switch (index) {
+ *     case 0: {
+ *       // implement function with index 0
+ *     }
+ *     case 1: {
+ *       // implement function with index 1
+ *     }
+ *     ...
+ *     default:
+ *       return null
+ *   }
+ * }
+ * </pre>
  * 
  * @author Sergey Basalaev
  */
-public abstract class NativeFunction extends Function {
+public final class NativeFunction extends Function {
 	
-	/** Index of this function. */
-	protected final int index;
+	private final NativeLibrary lib;
 	
-	public NativeFunction(String name, int index) {
+	/** Index of this function in invokeNative. */
+	private final int index;
+	
+	public NativeFunction(NativeLibrary lib, String name, int index) {
 		super(name);
 		this.index = index;
+		this.lib = lib;
 	}
-	
-	protected abstract String soname();
 	
 	public String toString() {
-		return soname()+':'+signature;
+		return lib.soname()+':'+signature;
 	}
 	
-	protected abstract Object execNative(Context c, Object[] args) throws Exception;
-
-	public final Object exec(Context c, Object[] args) throws AlchemyException {
+	public final Object invoke(Process p, Object[] args) throws AlchemyException {
 		try {
-			return execNative(c, args);
+			return lib.invokeNative(this.index, p, args);
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
 			ae.addTraceElement(this, "native");

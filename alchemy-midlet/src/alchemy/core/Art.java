@@ -18,30 +18,25 @@
 
 package alchemy.core;
 
-import alchemy.evm.ELibBuilder;
-
 /**
  * Alchemy runtime.
  * @author Sergey Basalaev
  */
 public final class Art {
 
-	private Context root;
-	LibCache cache = new LibCache();
-
-	ELibBuilder etherbuilder = new ELibBuilder();
+	private Process root;
 
 	/**
 	 * Creates new Alchemy runtime.
 	 */
 	public Art() {
-		root = new Context(this);
+		root = new Process(this);
 	}
 
 	/**
-	 * Returns root context for this runtime.
+	 * Returns root process for this runtime.
 	 */
-	public Context rootContext() {
+	public Process rootProcess() {
 		return root;
 	}
 }
