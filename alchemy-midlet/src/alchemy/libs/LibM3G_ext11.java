@@ -110,7 +110,7 @@ public class LibM3G_ext11 extends NativeLibrary {
 			case 31: // VertexArray.getComponentType(): Int
 				return Ival(((VertexArray)args[0]).getComponentType());
 			case 32: { // VertexArray.get(firstVertex: Int, numVertices: Int, values: Array)
-				Object array = args[2];
+				Object array = args[3];
 				if (array instanceof byte[])
 					((VertexArray)args[0]).get(ival(args[1]), ival(args[2]), (byte[])array);
 				else if (array instanceof short[])

@@ -745,7 +745,7 @@ public class LibM3G extends NativeLibrary {
 			case 243: // VertexArray.new(numVertices: Int, numComponents: Int, componentSize: Int)
 				return new VertexArray(ival(args[0]), ival(args[1]), ival(args[2]));
 			case 244: { // VertexArray.set(firstVertex: Int, numVertices: Int, values: Array)
-				Object array = args[2];
+				Object array = args[3];
 				if (array instanceof byte[])
 					((VertexArray)args[0]).set(ival(args[1]), ival(args[2]), (byte[])array);
 				else if (array instanceof short[])
