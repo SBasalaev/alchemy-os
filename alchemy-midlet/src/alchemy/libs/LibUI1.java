@@ -26,11 +26,11 @@ import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UICanvas;
 import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeLibrary;
+import alchemy.util.ArrayList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Date;
-import java.util.Vector;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
@@ -60,14 +60,14 @@ public class LibUI1 extends NativeLibrary {
 	}
 
 	
-	private static final Vector hyperitems = new Vector();
+	private static final ArrayList hyperitems = new ArrayList();
 
 	private static boolean isHyperItem(Item item) {
 		synchronized (hyperitems) {
 			for (int i=hyperitems.size()-1; i >= 0; i--) {
-				WeakReference ref = (WeakReference) hyperitems.elementAt(i);
+				WeakReference ref = (WeakReference) hyperitems.get(i);
 				if (ref.get() == null)
-					hyperitems.removeElementAt(i);
+					hyperitems.remove(i);
 				else if (ref.get() == item)
 					return true;
 			}
@@ -439,7 +439,7 @@ public class LibUI1 extends NativeLibrary {
 				return Ival(((List)args[0]).size());
 			case 111: { // new_hyperlinkitem(label: String, text: String)
 				StringItem item = new StringItem((String)args[0], (String)args[1], Item.HYPERLINK);
-				hyperitems.addElement(new WeakReference(item));
+				hyperitems.add(new WeakReference(item));
 				return item;
 			}
 			case 112: // ImageItem.get_alttext(): String
@@ -497,7 +497,7 @@ public class LibUI1 extends NativeLibrary {
 				return Ival(((UICanvas)args[0]).hasRepeatEvents());
 			case 131: { // new_hyperimageitem(label: String, img: Image)
 				ImageItem item = new ImageItem((String)args[0], (Image)args[1], Item.LAYOUT_NEWLINE_AFTER, "", Item.HYPERLINK);
-				hyperitems.addElement(new WeakReference(item));
+				hyperitems.add(new WeakReference(item));
 				return item;
 			}
 			case 132: // Image.get_height(): Int

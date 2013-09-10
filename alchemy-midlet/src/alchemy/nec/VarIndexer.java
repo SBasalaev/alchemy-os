@@ -20,7 +20,7 @@ package alchemy.nec;
 
 import alchemy.core.Int;
 import alchemy.nec.tree.*;
-import java.util.Vector;
+import alchemy.util.ArrayList;
 
 /**
  * Assigns indices to local variables.
@@ -33,12 +33,12 @@ public class VarIndexer implements ExprVisitor {
 	public VarIndexer() { }
 	
 	public void visitUnit(Unit u) {
-		Vector funcs = u.funcs;
+		ArrayList funcs = u.funcs;
 		for (int i=0; i<funcs.size(); i++) {
-			Func f = (Func)funcs.elementAt(i);
+			Func f = (Func)funcs.get(i);
 			if (f.body != null) {
 				for (int vi=0;  vi<f.locals.size(); vi++) {
-					Var v = (Var)f.locals.elementAt(vi);
+					Var v = (Var)f.locals.get(vi);
 					v.index = vi;
 				}
 				f.body.accept(this, Int.toInt(f.locals.size()));
@@ -86,11 +86,11 @@ public class VarIndexer implements ExprVisitor {
 		int start = ((Int)offset).value;
 		int size = block.locals.size();
 		for (int vi=0; vi<size; vi++) {
-			Var v = (Var)block.locals.elementAt(vi);
+			Var v = (Var)block.locals.get(vi);
 			v.index = start+vi;
 		}
 		for (int ei=0; ei<block.exprs.size(); ei++) {
-			((Expr)block.exprs.elementAt(ei)).accept(this, Int.toInt(start+size));
+			((Expr)block.exprs.get(ei)).accept(this, Int.toInt(start+size));
 		}
 		return null;
 	}
@@ -108,7 +108,7 @@ public class VarIndexer implements ExprVisitor {
 
 	public Object visitConcat(ConcatExpr concat, Object offset) {
 		for (int ei=0; ei<concat.exprs.size(); ei++) {
-			((Expr)concat.exprs.elementAt(ei)).accept(this, offset);
+			((Expr)concat.exprs.get(ei)).accept(this, offset);
 		}
 		return null;
 	}
@@ -167,7 +167,7 @@ public class VarIndexer implements ExprVisitor {
 	public Object visitSwitch(SwitchExpr swexpr, Object offset) {
 		swexpr.indexexpr.accept(this, offset);
 		for (int vi=0; vi<swexpr.exprs.size(); vi++) {
-			((Expr)swexpr.exprs.elementAt(vi)).accept(this, offset);
+			((Expr)swexpr.exprs.get(vi)).accept(this, offset);
 		}
 		if (swexpr.elseexpr != null) swexpr.elseexpr.accept(this, offset);
 		return null;

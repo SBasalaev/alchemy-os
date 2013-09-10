@@ -21,7 +21,7 @@ package alchemy.libs.ui;
 import alchemy.core.Process;
 import alchemy.core.ProcessListener;
 import alchemy.core.Int;
-import java.util.Vector;
+import alchemy.util.ArrayList;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
@@ -79,7 +79,7 @@ public final class UIServer {
 	private static Display display;
 
 	/** Holds all processes which have associated screens. */
-	private static final Vector frames = new Vector();
+	private static final ArrayList frames = new ArrayList();
 	
 	private static final UIContextListener l = new UIContextListener();
 	private static final UICommandListener cl = new UICommandListener();
@@ -105,7 +105,7 @@ public final class UIServer {
 	private static int frameIndex(Object obj) {
 		int index;
 		for (index=frames.size()-1; index>=0; index--) {
-			UIFrame frame = (UIFrame)frames.elementAt(index);
+			UIFrame frame = (UIFrame)frames.get(index);
 			if (frame.c == obj || frame.d == obj) break;
 		}
 		return index;
@@ -123,10 +123,10 @@ public final class UIServer {
 		}
 		int i = frameIndex(p);
 		if (i >= 0) {
-			((UIFrame)frames.elementAt(i)).d = d;
+			((UIFrame)frames.get(i)).d = d;
 			appList.set(i, d.getTitle(), getDefaultIcon(p));
 		} else {
-			frames.addElement(new UIFrame(p, d));
+			frames.add(new UIFrame(p, d));
 			p.addProcessListener(l);
 			appList.append(d.getTitle(), getDefaultIcon(p));
 		}
@@ -142,11 +142,11 @@ public final class UIServer {
 	public static synchronized void removeScreen(Process p) {
 		int index = frameIndex(p);
 		if (index >= 0) {
-			UIFrame frame = (UIFrame)frames.elementAt(index);
+			UIFrame frame = (UIFrame)frames.get(index);
 			frame.c.removeProcessListener(l);
 			frame.d.setCommandListener(null);
 			frame.d.removeCommand(appCommand);
-			frames.removeElementAt(index);
+			frames.remove(index);
 			appList.delete(index);
 			displayCurrent();
 		}
@@ -158,7 +158,7 @@ public final class UIServer {
 	public static synchronized Displayable getScreen(Process p) {
 		int index = frameIndex(p);
 		if (index >= 0) {
-			UIFrame frame = (UIFrame)frames.elementAt(index);
+			UIFrame frame = (UIFrame)frames.get(index);
 			return frame.d;
 		} else {
 			return null;
@@ -172,7 +172,7 @@ public final class UIServer {
 	
 	public static Displayable currentScreen() {
 		if (frames.isEmpty()) return null;
-		return ((UIFrame)frames.lastElement()).d;
+		return ((UIFrame)frames.last()).d;
 	}
 	
 	public static void displayCurrent() {
@@ -189,7 +189,7 @@ public final class UIServer {
 	public static synchronized void pushEvent(Displayable d, Int kind, Object value) {
 		int i = frameIndex(d);
 		if (i >= 0) {
-			final UIFrame frame = (UIFrame)frames.elementAt(i);
+			final UIFrame frame = (UIFrame)frames.get(i);
 			synchronized (frame) {
 				frame.queue.push(new Object[] {kind, d, value});
 				frame.notify();
@@ -210,7 +210,7 @@ public final class UIServer {
 		UIFrame frame = null;
 		synchronized (UIServer.class) {
 			int i = frameIndex(p);
-			if (i >= 0) frame = ((UIFrame)frames.elementAt(i));
+			if (i >= 0) frame = ((UIFrame)frames.get(i));
 		}
 		if (frame == null) throw new IllegalStateException("Screen is not set.");
 		synchronized (frame) {
@@ -317,9 +317,9 @@ public final class UIServer {
 				synchronized (UIServer.class) {
 					int index = appList.getSelectedIndex();
 					if (index != appList.size()-1) {
-						UIFrame frame = (UIFrame)frames.elementAt(index);
-						frames.removeElementAt(index);
-						frames.addElement(frame);
+						UIFrame frame = (UIFrame)frames.get(index);
+						frames.remove(index);
+						frames.add(frame);
 						appList.delete(index);
 						appList.append(frame.d.getTitle(), getDefaultIcon(frame.c));
 					}
@@ -328,7 +328,7 @@ public final class UIServer {
 				synchronized (UIServer.class) {
 					int index = appList.getSelectedIndex();
 					if (index >= 0) {
-						UIFrame frame = (UIFrame)frames.elementAt(index);
+						UIFrame frame = (UIFrame)frames.get(index);
 						frame.c.interrupt();
 					}
 				}

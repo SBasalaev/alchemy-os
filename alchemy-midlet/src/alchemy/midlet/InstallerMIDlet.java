@@ -21,6 +21,7 @@ package alchemy.midlet;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.fs.rms.FS;
+import alchemy.util.ArrayList;
 import alchemy.util.IO;
 import alchemy.util.Properties;
 import alchemy.util.UTFReader;
@@ -28,7 +29,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Vector;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -173,19 +173,19 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		Properties instCfg = InstallInfo.read();
 		instCfg.put(InstallInfo.RMS_NAME, "rsfiles");
 		//choosing filesystem
-		Vector filesystems = new Vector();
+		ArrayList filesystems = new ArrayList();
 		String[] fstypes = IO.split(setupCfg.get("install.fs"), ' ');
 		for (int i=0; i<fstypes.length; i++) {
 			try {
 				Class.forName(setupCfg.get("install.fs."+fstypes[i]+".test"));
-				filesystems.addElement(fstypes[i]);
+				filesystems.add(fstypes[i]);
 			} catch (ClassNotFoundException cnfe) {
 				// skip this file system
 			}
 		}
 		final List fschoice = new List("Choose filesystem", Choice.IMPLICIT);
 		for (int i=0; i<filesystems.size(); i++) {
-			fschoice.append(setupCfg.get("install.fs."+filesystems.elementAt(i)+".name"), null);
+			fschoice.append(setupCfg.get("install.fs."+filesystems.get(i)+".name"), null);
 		}
 		fschoice.addCommand(cmdChoose);
 		fschoice.setSelectCommand(cmdChoose);
@@ -194,7 +194,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		synchronized (fschoice) {
 			fschoice.wait();
 		}
-		String selectedfs = filesystems.elementAt(fschoice.getSelectedIndex()).toString();
+		String selectedfs = filesystems.get(fschoice.getSelectedIndex()).toString();
 		messages.append("Selected filesystem: "+fschoice.getString(fschoice.getSelectedIndex())+'\n');
 		//choosing root path if needed
 		String fsinit = setupCfg.get("install.fs."+selectedfs+".init");

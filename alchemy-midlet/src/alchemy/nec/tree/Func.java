@@ -19,7 +19,7 @@
 package alchemy.nec.tree;
 
 import alchemy.nec.ParseException;
-import java.util.Vector;
+import alchemy.util.ArrayList;
 
 /**
  *
@@ -37,7 +37,7 @@ public class Func implements Scope {
 	/** Holds implementation (if any). */
 	public Expr body;
 	/** Local variables. */
-	public Vector locals;
+	public ArrayList locals;
 	/** Number of times the function is used.
 	 * Public functions initially get 1.
 	 * Private and external functions initially get 0.
@@ -52,7 +52,7 @@ public class Func implements Scope {
 
 	public boolean isLocal(String id) {
 		for (int i=locals.size()-1; i>=0; i--) {
-			Var v = (Var)locals.elementAt(i);
+			Var v = (Var)locals.get(i);
 			if (v.name.equals(id)) return true;
 		}
 		return unit.isLocal(id);
@@ -60,7 +60,7 @@ public class Func implements Scope {
 
 	public Var getVar(String id) {
 		for (int i=locals.size()-1; i>=0; i--) {
-			Var v = (Var)locals.elementAt(i);
+			Var v = (Var)locals.get(i);
 			if (v.name.equals(id)) return v;
 		}
 		return unit.getVar(id);
@@ -68,11 +68,11 @@ public class Func implements Scope {
 
 	public boolean addVar(Var v) throws ParseException {
 		for (int i=locals.size()-1; i>=0; i--) {
-			Var var = (Var)locals.elementAt(i);
+			Var var = (Var)locals.get(i);
 			if (var.name.equals(v.name))
 				throw new ParseException("Variable "+v.name+" already exists in this scope");
 		}
-		locals.addElement(v);
+		locals.add(v);
 		return unit.getVar(v.name) != null;
 	}
 

@@ -19,7 +19,7 @@
 package alchemy.nec.tree;
 
 import alchemy.nec.ParseException;
-import java.util.Vector;
+import alchemy.util.ArrayList;
 
 /**
  * Block expression.
@@ -35,9 +35,9 @@ import java.util.Vector;
  */
 public class BlockExpr extends Expr implements Scope {
 	
-	public Vector exprs = new Vector();
+	public ArrayList exprs = new ArrayList();
 	/** Local variables. */
-	public Vector locals = new Vector();
+	public ArrayList locals = new ArrayList();
 
 	private final Scope parent;
 
@@ -46,13 +46,13 @@ public class BlockExpr extends Expr implements Scope {
 	}
 
 	public Type rettype() {
-		Expr last = (Expr)exprs.lastElement();
+		Expr last = (Expr)exprs.last();
 		return last.rettype();
 	}
 
 	public int lineNumber() {
 		if (exprs.isEmpty()) return -1;
-		return ((Expr)exprs.elementAt(0)).lineNumber();
+		return ((Expr)exprs.first()).lineNumber();
 	}
 
 	public NamedType getType(String alias) {
@@ -61,7 +61,7 @@ public class BlockExpr extends Expr implements Scope {
 
 	public Var getVar(String id) {
 		for (int i=locals.size()-1; i>=0; i--) {
-			Var v = (Var)locals.elementAt(i);
+			Var v = (Var)locals.get(i);
 			if (v.name.equals(id)) return v;
 		}
 		return parent.getVar(id);
@@ -69,7 +69,7 @@ public class BlockExpr extends Expr implements Scope {
 
 	public boolean isLocal(String id) {
 		for (int i=locals.size()-1; i>=0; i--) {
-			Var v = (Var)locals.elementAt(i);
+			Var v = (Var)locals.get(i);
 			if (v.name.equals(id)) return true;
 		}
 		return parent.isLocal(id);
@@ -77,11 +77,11 @@ public class BlockExpr extends Expr implements Scope {
 
 	public boolean addVar(Var v) throws ParseException {
 		for (int i=locals.size()-1; i>=0; i--) {
-			Var var = (Var)locals.elementAt(i);
+			Var var = (Var)locals.get(i);
 			if (var.name.equals(v.name))
 				throw new ParseException("Variable "+v.name+" already exists in this scope");
 		}
-		locals.addElement(v);
+		locals.add(v);
 		return parent.getVar(v.name) != null;
 	}
 

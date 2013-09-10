@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * Miscellaneous I/O utilities used in Alchemy OS.
@@ -299,17 +298,17 @@ public final class IO {
 	 *   around given character
 	 */
 	public static String[] split(String str, char ch) {
-		Vector strings = new Vector();
+		ArrayList strings = new ArrayList();
 		int index = str.indexOf(ch);
 		while (index >= 0) {
-			strings.addElement(str.substring(0, index));
+			strings.add(str.substring(0, index));
 			str = str.substring(index+1);
 			index = str.indexOf(ch);
 		}
-		strings.addElement(str);
+		strings.add(str);
 		String[] ret = new String[strings.size()];
 		for (int i=strings.size()-1; i>=0; i--) {
-			ret[i] = strings.elementAt(i).toString();
+			ret[i] = strings.get(i).toString();
 		}
 		return ret;
 	}

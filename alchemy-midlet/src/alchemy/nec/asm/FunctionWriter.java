@@ -21,10 +21,10 @@ package alchemy.nec.asm;
 import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.tree.Null;
+import alchemy.util.ArrayList;
 import java.io.ByteArrayOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  *
@@ -36,15 +36,15 @@ public class FunctionWriter implements Opcodes {
 	private StringBuffer relocdata = new StringBuffer();
 	private StringBuffer dbgtable = new StringBuffer();
 	/** Keeps sequence of labels (from, to, handle). */
-	private Vector errdata = new Vector();
+	private ArrayList errdata = new ArrayList();
 	private Hashtable labeldata = new Hashtable();
 	private int stackpos = 0;
 	private int stackmax = 0;
 	private int varcount;
-	private Vector objects;
+	private ArrayList objects;
 	private AsmFunc func;
 	
-	FunctionWriter(AsmFunc func, Vector objects, int arglen) {
+	FunctionWriter(AsmFunc func, ArrayList objects, int arglen) {
 		this.objects = objects;
 		this.varcount = arglen;
 		this.func = func;
@@ -62,7 +62,7 @@ public class FunctionWriter implements Opcodes {
 		int index = objects.indexOf(name);
 		if (index < 0) {
 			index = objects.size();
-			objects.addElement(name);
+			objects.add(name);
 		}
 		dbgtable.append((char)index);
 	}
@@ -295,7 +295,7 @@ public class FunctionWriter implements Opcodes {
 			int index = objects.indexOf(cnst);
 			if (index < 0) {
 				index = objects.size();
-				objects.addElement(cnst);
+				objects.add(cnst);
 			}
 			data.write(LDC);
 			relocdata.append((char)data.size());
@@ -406,9 +406,9 @@ public class FunctionWriter implements Opcodes {
 		Label handler = new Label();
 		handler.stackpos = from.stackpos + 1;
 		visitLabel(handler);
-		errdata.addElement(from);
-		errdata.addElement(to);
-		errdata.addElement(handler);
+		errdata.add(from);
+		errdata.add(to);
+		errdata.add(handler);
 	}
 	
 	public void visitEnd() {
@@ -435,11 +435,11 @@ public class FunctionWriter implements Opcodes {
 		if (errdata.size() > 0) {
 			StringBuffer sb = new StringBuffer();
 			for (int i=0; i<errdata.size(); i += 3) {
-				Label from = (Label)errdata.elementAt(i);
+				Label from = (Label)errdata.get(i);
 				if (from.addr < 0) throw new IllegalStateException("Label not visited");
-				Label to = (Label)errdata.elementAt(i+1);
+				Label to = (Label)errdata.get(i+1);
 				if (to.addr < 0) throw new IllegalStateException("Label not visited");
-				Label handle = (Label)errdata.elementAt(i+2);
+				Label handle = (Label)errdata.get(i+2);
 				if (handle.addr < 0) throw new IllegalStateException("Label not visited");
 				sb.append((char)from.addr).append((char)to.addr).append((char)handle.addr).append((char)from.stackpos);
 			}

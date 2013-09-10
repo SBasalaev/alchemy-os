@@ -20,7 +20,7 @@ package alchemy.nec;
 
 import alchemy.core.Int;
 import alchemy.nec.tree.*;
-import java.util.Vector;
+import alchemy.util.ArrayList;
 
 /**
  * Simple optimizer used with {@code -O1}.
@@ -46,14 +46,14 @@ public class Optimizer implements ExprVisitor {
 		do {
 			optimized = false;
 			for (int i=0; i<u.funcs.size(); i++) {
-				visitFunc((Func)u.funcs.elementAt(i));
+				visitFunc((Func)u.funcs.get(i));
 			}
 		} while (optimized);
 		//DCE: removing unused functions
 		for (int i=u.funcs.size()-1; i>=0; i--) {
-			Func f = (Func)u.funcs.elementAt(i);
+			Func f = (Func)u.funcs.get(i);
 			if (f.hits == 0) {
-				u.funcs.removeElementAt(i);
+				u.funcs.remove(i);
 			}
 		}
 	}
@@ -90,9 +90,9 @@ public class Optimizer implements ExprVisitor {
 			final BlockExpr block = new BlockExpr((Scope)scope);
 			for (int i=0; i < newarray.initializers.length; i++) {
 				Expr e = newarray.initializers[i];
-				if (e != null) block.exprs.addElement(new DiscardExpr(e));
+				if (e != null) block.exprs.add(new DiscardExpr(e));
 			}
-			block.exprs.addElement(new ConstExpr(newarray.lineNumber(), Int.toInt(newarray.initializers.length)));
+			block.exprs.add(new ConstExpr(newarray.lineNumber(), Int.toInt(newarray.initializers.length)));
 			return block;
 		}
 		return alen;
@@ -190,8 +190,8 @@ public class Optimizer implements ExprVisitor {
 						case '&': {
 							optimized = true;
 							BlockExpr block = new BlockExpr((Scope)scope);
-							block.exprs.addElement(new DiscardExpr(binary.lvalue));
-							block.exprs.addElement(binary.rvalue);
+							block.exprs.add(new DiscardExpr(binary.lvalue));
+							block.exprs.add(binary.rvalue);
 							return block;
 						}
 					}
@@ -234,8 +234,8 @@ public class Optimizer implements ExprVisitor {
 						case '&': {
 							optimized = true;
 							BlockExpr block = new BlockExpr((Scope)scope);
-							block.exprs.addElement(new DiscardExpr(binary.lvalue));
-							block.exprs.addElement(binary.rvalue);
+							block.exprs.add(new DiscardExpr(binary.lvalue));
+							block.exprs.add(binary.rvalue);
 							return block;
 						}
 					}
@@ -266,16 +266,16 @@ public class Optimizer implements ExprVisitor {
 						optimized = true;
 						if (cnst.equals(Boolean.TRUE)) return binary.lvalue;
 						BlockExpr block = new BlockExpr((Scope)scope);
-						block.exprs.addElement(new DiscardExpr(binary.lvalue));
-						block.exprs.addElement(binary.rvalue);
+						block.exprs.add(new DiscardExpr(binary.lvalue));
+						block.exprs.add(binary.rvalue);
 						return block;
 					}
 					case '|': {
 						optimized = true;
 						if (cnst.equals(Boolean.FALSE)) return binary.lvalue;
 						BlockExpr block = new BlockExpr((Scope)scope);
-						block.exprs.addElement(new DiscardExpr(binary.lvalue));
-						block.exprs.addElement(binary.rvalue);
+						block.exprs.add(new DiscardExpr(binary.lvalue));
+						block.exprs.add(binary.rvalue);
 						return block;
 					}
 					case '^': {
@@ -412,12 +412,12 @@ public class Optimizer implements ExprVisitor {
 	public Object visitBlock(BlockExpr block, Object scope) {
 		int i=0;
 		while (i < block.exprs.size()) {
-			Expr ex = (Expr)block.exprs.elementAt(i);
+			Expr ex = (Expr)block.exprs.get(i);
 			ex = (Expr)ex.accept(this, block);
 			if (ex instanceof NoneExpr) {
-				block.exprs.removeElementAt(i);
+				block.exprs.remove(i);
 			} else {
-				block.exprs.setElementAt(ex, i);
+				block.exprs.set(i, ex);
 				i++;
 			}
 		}
@@ -426,7 +426,7 @@ public class Optimizer implements ExprVisitor {
 				optimized = true;
 				return new NoneExpr();
 			case 1:
-				Expr e = (Expr)block.exprs.elementAt(0);
+				Expr e = (Expr)block.exprs.get(0);
 				if (block.locals.isEmpty()) {
 					optimized = true;
 					return e;
@@ -628,23 +628,23 @@ public class Optimizer implements ExprVisitor {
 	 * </pre>
 	 */
 	public Object visitConcat(ConcatExpr concat, Object scope) {
-		Vector exprs = concat.exprs;
+		ArrayList exprs = concat.exprs;
 		for (int i=0; i<exprs.size(); i++) {
-			Expr e = (Expr)((Expr)exprs.elementAt(i)).accept(this, scope);
-			exprs.setElementAt(e, i);
+			Expr e = (Expr)((Expr)exprs.get(i)).accept(this, scope);
+			exprs.set(i, e);
 		}
 		int i=0;
 		while (i < exprs.size()-1) {
-			Expr e1 = (Expr)exprs.elementAt(i);
-			Expr e2 = (Expr)exprs.elementAt(i+1);
+			Expr e1 = (Expr)exprs.get(i);
+			Expr e2 = (Expr)exprs.get(i+1);
 			if (e1 instanceof ConstExpr && e2 instanceof ConstExpr) {
 				Object o1 = ((ConstExpr)e1).value;
 				Object o2 = ((ConstExpr)e2).value;
 				if (e1 instanceof CharConstExpr) o1 = String.valueOf((char)((Int)o1).value);
 				if (e2 instanceof CharConstExpr) o2 = String.valueOf((char)((Int)o2).value);
 				if (!(o1 instanceof Func) && !(o2 instanceof Func)) {
-					exprs.setElementAt(new ConstExpr(e1.lineNumber(), String.valueOf(o1).concat(String.valueOf(o2))), i);
-					exprs.removeElementAt(i+1);
+					exprs.set(i, new ConstExpr(e1.lineNumber(), String.valueOf(o1).concat(String.valueOf(o2))));
+					exprs.remove(i+1);
 					optimized = true;
 				} else {
 					i++;
@@ -655,7 +655,7 @@ public class Optimizer implements ExprVisitor {
 		}
 		if (exprs.size() == 1) {
 			optimized = true;
-			return exprs.elementAt(0);
+			return exprs.get(0);
 		} else {
 			return concat;
 		}
@@ -694,21 +694,21 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			BinaryExpr binary = (BinaryExpr)disc.expr;
 			BlockExpr block = new BlockExpr((Scope)scope);
-			block.exprs.addElement(new DiscardExpr(binary.lvalue));
-			block.exprs.addElement(new DiscardExpr(binary.rvalue));
+			block.exprs.add(new DiscardExpr(binary.lvalue));
+			block.exprs.add(new DiscardExpr(binary.rvalue));
 			return block;
 		} else if (disc.expr instanceof ComparisonExpr) {
 			optimized = true;
 			ComparisonExpr cmp = (ComparisonExpr)disc.expr;
 			BlockExpr block = new BlockExpr((Scope)scope);
-			block.exprs.addElement(new DiscardExpr(cmp.lvalue));
-			block.exprs.addElement(new DiscardExpr(cmp.rvalue));
+			block.exprs.add(new DiscardExpr(cmp.lvalue));
+			block.exprs.add(new DiscardExpr(cmp.rvalue));
 			return block;
 		} else if (disc.expr instanceof BlockExpr) {
 			optimized = true;
 			BlockExpr block = (BlockExpr)disc.expr;
-			disc.expr = (Expr)block.exprs.lastElement();
-			block.exprs.setElementAt(disc, block.exprs.size()-1);
+			disc.expr = (Expr)block.exprs.last();
+			block.exprs.set(block.exprs.size()-1, disc);
 			return block;
 		} else if (disc.expr instanceof ALenExpr) {
 			optimized = true;
@@ -718,8 +718,8 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			ALoadExpr aload = (ALoadExpr)disc.expr;
 			BlockExpr block = new BlockExpr((Scope)scope);
-			block.exprs.addElement(new DiscardExpr(aload.arrayexpr));
-			block.exprs.addElement(new DiscardExpr(aload.indexexpr));
+			block.exprs.add(new DiscardExpr(aload.arrayexpr));
+			block.exprs.add(new DiscardExpr(aload.indexexpr));
 			return block;
 		} else if (disc.expr instanceof CastExpr) {
 			optimized = true;
@@ -727,10 +727,10 @@ public class Optimizer implements ExprVisitor {
 			return disc;
 		} else if (disc.expr instanceof ConcatExpr) {
 			optimized = true;
-			Vector exprs = ((ConcatExpr)disc.expr).exprs;
+			ArrayList exprs = ((ConcatExpr)disc.expr).exprs;
 			BlockExpr block = new BlockExpr((Scope)scope);
 			for (int i=0; i<exprs.size(); i++) {
-				block.exprs.addElement(new DiscardExpr((Expr)exprs.elementAt(i)));
+				block.exprs.add(new DiscardExpr((Expr)exprs.get(i)));
 			}
 			return block;
 		} else if (disc.expr instanceof NewArrayExpr) {
@@ -742,7 +742,7 @@ public class Optimizer implements ExprVisitor {
 			Expr[] exprs = ((NewArrayByEnumExpr)disc.expr).initializers;
 			BlockExpr block = new BlockExpr((Scope)scope);
 			for (int i=0; i<exprs.length; i++) {
-				if (exprs[i] != null) block.exprs.addElement(new DiscardExpr(exprs[i]));
+				if (exprs[i] != null) block.exprs.add(new DiscardExpr(exprs[i]));
 			}
 			return block;
 		}
@@ -897,8 +897,8 @@ public class Optimizer implements ExprVisitor {
 		// optimize subtrees
 		swexpr.indexexpr = (Expr)swexpr.indexexpr.accept(this, scope);
 		for (int i=0; i<swexpr.exprs.size(); i++) {
-			Expr e = (Expr)swexpr.exprs.elementAt(i);
-			swexpr.exprs.setElementAt(e.accept(this, scope), i);
+			Expr e = (Expr)swexpr.exprs.get(i);
+			swexpr.exprs.set(i, e.accept(this, scope));
 		}
 		if (swexpr.elseexpr != null) swexpr.elseexpr = (Expr)swexpr.elseexpr.accept(this, scope);
 		// optimize switch (const)
@@ -906,9 +906,9 @@ public class Optimizer implements ExprVisitor {
 			int choice = ((Int)((ConstExpr)swexpr.indexexpr).value).value;
 			optimized = true;
 			for (int br=0; br < swexpr.keys.size(); br++) {
-				final int[] indices = (int[])swexpr.keys.elementAt(br);
+				final int[] indices = (int[])swexpr.keys.get(br);
 				for (int i=0; i < indices.length; i++) {
-					if (indices[i] == choice) return swexpr.exprs.elementAt(br);
+					if (indices[i] == choice) return swexpr.exprs.get(br);
 				}
 			}
 			if (swexpr.elseexpr != null) return swexpr.elseexpr;

@@ -19,9 +19,9 @@
 package alchemy.fs.siemens;
 
 import alchemy.fs.NavigatorHelper;
+import alchemy.util.ArrayList;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Vector;
 import javax.microedition.io.Connector;
 import com.siemens.mp.io.file.FileSystemRegistry;
 import com.siemens.mp.io.file.FileConnection;
@@ -36,11 +36,11 @@ public class Helper implements NavigatorHelper {
 	
 	public String[] listRoots() {
 		Enumeration e = FileSystemRegistry.listRoots();
-		Vector rootv = new Vector();
-		while (e.hasMoreElements()) rootv.addElement(e.nextElement());
+		ArrayList rootv = new ArrayList();
+		while (e.hasMoreElements()) rootv.add(e.nextElement());
 		String[] roots = new String[rootv.size()];
 		for (int i=0; i<rootv.size(); i++) {
-			String str = String.valueOf(rootv.elementAt(i));
+			String str = String.valueOf(rootv.get(i));
 			if (!str.endsWith("/")) roots[i] = str+'/';
 			else roots[i] = str;
 		}
@@ -60,12 +60,12 @@ public class Helper implements NavigatorHelper {
 		FileConnection fc = (FileConnection)Connector.open("file://"+dir+'/', Connector.READ);
 		try {
 			Enumeration e = fc.list();
-			Vector v = new Vector();
-			while (e.hasMoreElements()) v.addElement(e.nextElement());
+			ArrayList v = new ArrayList();
+			while (e.hasMoreElements()) v.add(e.nextElement());
 			int size = v.size();
 			String[] files = new String[size];
 			for (int i=0; i<size; i++) {
-				files[i] = (String)v.elementAt(i);
+				files[i] = (String)v.get(i);
 			}
 			return files;
 		} finally {

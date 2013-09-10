@@ -24,9 +24,9 @@ import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Vector;
 import alchemy.apps.TerminalForm.TerminalInputStream;
 import alchemy.fs.FSManager;
+import alchemy.util.ArrayList;
 
 /**
  * Native shell.
@@ -160,7 +160,7 @@ public class Shell extends NativeApp {
 
 	private ShellCommand split(String line) throws IllegalArgumentException {
 		ShellCommand cc = new ShellCommand();
-		Vector argv = new Vector();
+		ArrayList argv = new ArrayList();
 		int mode = MODE_CMD;
 		while (line.length() > 0) {
 			int end;
@@ -221,16 +221,16 @@ public class Shell extends NativeApp {
 					else if (token.equals("2>")) mode = MODE_ERR_W;
 					else if (token.equals("2>>")) mode = MODE_ERR_A;
 					else if (token.equals("<")) mode = MODE_IN;
-					else argv.addElement(token);
+					else argv.add(token);
 					break;
 				case MODE_QARG:
-					argv.addElement(token);
+					argv.add(token);
 					mode = MODE_ARG;
 			}
 		}
 		String[] args = new String[argv.size()];
 		for (int i=0; i<argv.size(); i++) {
-			args[i] = argv.elementAt(i).toString();
+			args[i] = argv.get(i).toString();
 		}
 		cc.args = args;
 		return cc;

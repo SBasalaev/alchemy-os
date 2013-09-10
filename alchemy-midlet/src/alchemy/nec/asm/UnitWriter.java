@@ -20,10 +20,10 @@ package alchemy.nec.asm;
 
 import alchemy.core.Int;
 import alchemy.evm.Opcodes;
+import alchemy.util.ArrayList;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Vector;
 
 /**
  * Code writer for version 2.1
@@ -32,7 +32,7 @@ import java.util.Vector;
 public class UnitWriter {
 	
 	private int vmversion;
-	private Vector objects = new Vector();
+	private ArrayList objects = new ArrayList();
 	
 	public UnitWriter() { }
 	
@@ -43,7 +43,7 @@ public class UnitWriter {
 	public void visitSymbol(String symbol) {
 		FuncObject f = new FuncObject(symbol);
 		// if function is already in object, just skip it.
-		if (!objects.contains(f)) objects.addElement(f);
+		if (objects.indexOf(f) < 0) objects.add(f);
 	}
 	
 	public FunctionWriter visitFunction(String name, boolean shared, int arglen) {
@@ -51,12 +51,12 @@ public class UnitWriter {
 		AsmFunc func = new AsmFunc(name);
 		func.shared = shared;
 		if (index < 0) {
-			objects.addElement(func);
+			objects.add(func);
 		} else {
-			if (objects.elementAt(index) instanceof AsmFunc) {
+			if (objects.get(index) instanceof AsmFunc) {
 				throw new IllegalStateException("Function already visited: "+name);
 			}
-			objects.setElementAt(func, index);
+			objects.set(index, func);
 		}
 		return new FunctionWriter(func, objects, arglen);
 	}
@@ -68,7 +68,7 @@ public class UnitWriter {
 		out.writeByte(0);
 		out.writeShort(objects.size());
 		for (int i=0; i<objects.size(); i++) {
-			Object obj = objects.elementAt(i);
+			Object obj = objects.get(i);
 			if (obj.getClass() == Int.class) {
 				out.writeByte('i');
 				out.writeInt(((Int)obj).value);

@@ -20,12 +20,12 @@ package alchemy.fs.siemens;
 
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
+import alchemy.util.ArrayList;
 import alchemy.util.Initable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
-import java.util.Vector;
 import javax.microedition.io.Connector;
 import com.siemens.mp.io.file.FileConnection;
 
@@ -212,12 +212,12 @@ public class FS extends Filesystem implements Initable {
 		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ);
 		try {
 			Enumeration e = fc.list("*", true);
-			Vector v = new Vector();
-			while (e.hasMoreElements()) v.addElement(e.nextElement());
-			int size = v.size();
+			ArrayList list = new ArrayList();
+			while (e.hasMoreElements()) list.add(e.nextElement());
+			int size = list.size();
 			String[] files = new String[size];
 			for (int i=0; i<size; i++) {
-				files[i] = (String)v.elementAt(i);
+				files[i] = (String)list.get(i);
 			}
 			return files;
 		} finally {

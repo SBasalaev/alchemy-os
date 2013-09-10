@@ -23,13 +23,13 @@ import alchemy.core.Int;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.nec.tree.*;
+import alchemy.util.ArrayList;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Stack;
-import java.util.Vector;
 
 /**
  * Parses Ether language.
@@ -78,7 +78,7 @@ public class Parser {
 	/** Files in the process of parsing. */
 	private Stack files = new Stack();
 	/** Files that are already parsed. */
-	private Vector parsed = new Vector();
+	private ArrayList parsed = new ArrayList();
 	
 	private final Optimizer constOptimizer = new Optimizer();
 	
@@ -150,7 +150,7 @@ public class Parser {
 	
 	private void parseFile(String file) throws ParseException, IOException {
 		//do nothing if this file is already parsed
-		if (parsed.contains(file)) return;
+		if (parsed.indexOf(file) >= 0) return;
 		//if file is in stack we have cyclic inclusion
 		if (files.contains(file)) {
 			StringBuffer sb = new StringBuffer("Cyclic inclusion");
@@ -286,7 +286,7 @@ public class Parser {
 						throw new ParseException("Variable "+fdef.signature+" is already defined");
 				}
 				Func prev = unit.getFunc(fdef.signature);
-				if (prev == null) unit.funcs.addElement(fdef);
+				if (prev == null) unit.funcs.add(fdef);
 				switch (t.nextToken()) {
 					case ';':
 						break;
@@ -324,7 +324,7 @@ public class Parser {
 										throw new ParseException("Method " + stype +".new not defined");
 									supermethod = makeInitDef(supermethod);
 									superinit = parseFCall(init, new ConstExpr(lnum, supermethod),
-											new VarExpr(lnum, (Var) init.locals.firstElement()));
+											new VarExpr(lnum, (Var) init.locals.first()));
 								}
 							} else {
 								t.pushBack();
@@ -337,18 +337,18 @@ public class Parser {
 									if (supermethod.type.args.length > 1)
 										throw new ParseException("super() call expected");
 									superinit = new FCallExpr(new ConstExpr(lnum, supermethod),
-											new Expr[]{ new VarExpr(lnum, (Var) init.locals.firstElement()) });
+											new Expr[]{ new VarExpr(lnum, (Var) init.locals.first()) });
 								}
 							}
 							BlockExpr initblock = new BlockExpr(init);
-							initblock.exprs.addElement(superinit);
+							initblock.exprs.add(superinit);
 							if (isBlock) {
-								initblock.exprs.addElement(cast(parseBlock(initblock), BuiltinType.NONE));
+								initblock.exprs.add(cast(parseBlock(initblock), BuiltinType.NONE));
 							} else if (!supercalled) {
-								initblock.exprs.addElement(cast(parseExpr(initblock), BuiltinType.NONE));
+								initblock.exprs.add(cast(parseExpr(initblock), BuiltinType.NONE));
 							}
 							init.body = initblock;
-							unit.funcs.addElement(init);
+							unit.funcs.add(init);
 							// defining constructor body
 							//
 							// def Type.new(...): Type {
@@ -365,16 +365,16 @@ public class Parser {
 								if (rtype.fields[i].constValue != null)
 									implicit[i] = new ConstExpr(lnum, rtype.fields[i].constValue);
 							}
-							block.exprs.addElement(new AssignExpr(th, new NewArrayByEnumExpr(lnum, rtype, implicit)));
+							block.exprs.add(new AssignExpr(th, new NewArrayByEnumExpr(lnum, rtype, implicit)));
 
 							Expr[] explicit = new Expr[fdef.locals.size()+1];
 							explicit[0] = new VarExpr(lnum, th);
 							for (int i=1; i < explicit.length; i++) {
-								explicit[i] = new VarExpr(lnum, (Var)fdef.locals.elementAt(i-1));
+								explicit[i] = new VarExpr(lnum, (Var)fdef.locals.get(i-1));
 							}
-							block.exprs.addElement(new FCallExpr(new ConstExpr(lnum, init), explicit));
+							block.exprs.add(new FCallExpr(new ConstExpr(lnum, init), explicit));
 
-							block.exprs.addElement(new VarExpr(lnum, th));
+							block.exprs.add(new VarExpr(lnum, th));
 							fdef.body = block;
 							fdef.hits++;
 							fdef.source = Filesystem.fname((String)files.peek());
@@ -396,7 +396,7 @@ public class Parser {
 		p.removeStream(in);
 		t = oldt;
 		p.setCurDir(olddir);
-		parsed.addElement(files.pop());
+		parsed.add(files.pop());
 	}
 	
 	/** Creates Type.&lt;init&gt; from Type.new */
@@ -410,11 +410,11 @@ public class Parser {
 		initargs[0] = rtype;
 		System.arraycopy(constructor.type.args, 0, initargs, 1, initargs.length-1);
 		init.type = new FunctionType(BuiltinType.NONE, initargs);
-		init.locals = new Vector();
-		init.locals.addElement(new Var("this", rtype));
+		init.locals = new ArrayList();
+		init.locals.add(new Var("this", rtype));
 		for (int i=0; i < constructor.locals.size(); i++) {
-			Var var = (Var) constructor.locals.elementAt(i);
-			init.locals.addElement(var.clone());
+			Var var = (Var) constructor.locals.get(i);
+			init.locals.add(var.clone());
 		}
 		return init;
 	}
@@ -423,11 +423,11 @@ public class Parser {
 		if (parent instanceof NamedType && parent.superType() == null)
 			parent = unit.getType(parent.toString());
 		StructureType struct = new StructureType(name, parent);
-		Vector fields = new Vector();
+		ArrayList fields = new ArrayList();
 		if (parent instanceof StructureType) {
 			final Var[] pfields = ((StructureType)parent).fields;
 			for (int i=0; i < pfields.length; i++) {
-				fields.addElement(pfields[i]);
+				fields.add(pfields[i]);
 			}
 		} else if (parent != BuiltinType.STRUCTURE) {
 			throw new ParseException("Type " + name + " is not a structure");
@@ -444,7 +444,7 @@ public class Parser {
 			Type vartype = parseType(unit);
 			Var var = new Var(fieldname, vartype);
 			var.index = fields.size();
-			fields.addElement(var);
+			fields.add(var);
 			if (t.nextToken() == '=') {
 				Expr varvalue = (Expr) cast(parseExpr(unit), vartype).accept(constOptimizer, unit);
 				if (!(varvalue instanceof ConstExpr))
@@ -468,7 +468,7 @@ public class Parser {
 		}
 		struct.fields = new Var[fields.size()];
 		for (int i=fields.size()-1; i>=0; i--) {
-			struct.fields[i] = ((Var)fields.elementAt(i));
+			struct.fields[i] = ((Var)fields.get(i));
 		}
 		return struct;
 	}
@@ -494,11 +494,11 @@ public class Parser {
 				return type;
 			}
 			case '(': { //function type
-				Vector argtypes = new Vector();
+				ArrayList argtypes = new ArrayList();
 				while (t.nextToken() != ')') {
 					t.pushBack();
 					if (!argtypes.isEmpty()) expect(',');
-					argtypes.addElement(parseType(scope));
+					argtypes.add(parseType(scope));
 				}
 				Type rettype;
 				if (t.nextToken() == ':') {
@@ -509,7 +509,7 @@ public class Parser {
 				}
 				FunctionType type = new FunctionType(rettype, new Type[argtypes.size()]);
 				for (int i=argtypes.size()-1; i>=0; i--) {
-					type.args[i] = (Type)argtypes.elementAt(i);
+					type.args[i] = (Type)argtypes.get(i);
 				}
 				return type;
 			}
@@ -548,9 +548,9 @@ public class Parser {
 			fname = str;
 		}
 		expect('(');
-		Vector args = new Vector();
+		ArrayList args = new ArrayList();
 		if (!func.isConstructor && methodholder != null) {
-			args.addElement(new Var("this", methodholder));
+			args.add(new Var("this", methodholder));
 		}
 		boolean first = true;
 		boolean defaults = false;
@@ -564,7 +564,7 @@ public class Parser {
 			expect(':');
 			Type vartype = parseType(func);
 			Var var = new Var(varname, vartype);
-			args.addElement(var);
+			args.add(var);
 			if (t.nextToken() == '=') {
 				defaults = true;
 				Expr expr = (Expr) cast(parseExpr(unit), vartype).accept(constOptimizer, unit);
@@ -590,7 +590,7 @@ public class Parser {
 		func.locals = args;
 		FunctionType ftype = new FunctionType(rettype, new Type[args.size()]);
 		for (int i=args.size()-1; i>=0; i--) {
-			ftype.args[i] = ((Var)args.elementAt(i)).type;
+			ftype.args[i] = ((Var)args.get(i)).type;
 		}
 		func.signature = fname;
 		func.type = ftype;
@@ -601,7 +601,7 @@ public class Parser {
 			if (args.size() != 1) {
 				warn(W_MAIN, "Incorrect number of arguments in main(), should be ([String])");
 			} else {
-				Type argtype = ((Var)args.elementAt(0)).type;
+				Type argtype = ((Var)args.first()).type;
 				Type shouldbe = new ArrayType(BuiltinType.STRING);
 				if (!argtype.isSupertypeOf(shouldbe)) {
 					warn(W_MAIN, "Incompatible argument type in main()");
@@ -657,13 +657,13 @@ public class Parser {
 	 * Parses sequence of expressions delimitered with operators.
 	 */
 	private Expr parseExpr(Scope scope) throws IOException, ParseException {
-		Vector exprs = new Vector();
-		Vector operators = new Vector();
+		ArrayList exprs = new ArrayList();
+		ArrayList operators = new ArrayList();
 		while (true) {
-			exprs.addElement(parsePostfix(scope, parseExprNoop(scope)));
+			exprs.add(parsePostfix(scope, parseExprNoop(scope)));
 			int opchar = t.nextToken();
 			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || (opchar <= -20 && opchar >= -30)) {
-				operators.addElement(Int.toInt(opchar));
+				operators.add(Int.toInt(opchar));
 			} else {
 				t.pushBack();
 				break;
@@ -673,21 +673,21 @@ public class Parser {
 			int index = 0;
 			int priority = 0;
 			for (int i = 0; i < operators.size(); i++) {
-				int pr = getPriority((Int)operators.elementAt(i));
+				int pr = getPriority((Int)operators.get(i));
 				if (pr > priority) {
 					priority = pr;
 					index = i;
 				}
 			}
-			int op = ((Int)operators.elementAt(index)).value;
-			Expr left = (Expr)exprs.elementAt(index);
-			Expr right = (Expr)exprs.elementAt(index+1);
+			int op = ((Int)operators.get(index)).value;
+			Expr left = (Expr)exprs.get(index);
+			Expr right = (Expr)exprs.get(index+1);
 			Expr newexpr = makeBinaryExpr(left, op, right);
-			exprs.setElementAt(newexpr, index);
-			exprs.removeElementAt(index+1);
-			operators.removeElementAt(index);
+			exprs.set(index, newexpr);
+			exprs.remove(index+1);
+			operators.remove(index);
 		}
-		return (Expr)exprs.elementAt(0);
+		return (Expr)exprs.first();
 	}
 
 	private Expr parsePostfix(Scope scope, Expr expr) throws ParseException, IOException {
@@ -770,16 +770,16 @@ public class Parser {
 			}
 			case '[': {
 				// reading elements
-				Vector exprs = new Vector();
+				ArrayList exprs = new ArrayList();
 				while (t.nextToken() != ']') {
 					t.pushBack();
 					if (!exprs.isEmpty()) expect(',');
-					exprs.addElement(parseExpr(scope));
+					exprs.add(parseExpr(scope));
 				}
 				// calculating common type
 				Type eltype = BuiltinType.NULL;
 				for (int i=0; i<exprs.size(); i++) {
-					Expr e = (Expr)exprs.elementAt(i);
+					Expr e = (Expr)exprs.get(i);
 					eltype = binaryCastType(eltype, e.rettype());
 				}
 				if (eltype == BuiltinType.NULL)
@@ -789,7 +789,7 @@ public class Parser {
 				// building expression
 				Expr[] init = new Expr[exprs.size()];
 				for (int i=0; i<init.length; i++) {
-					init[i] = cast( (Expr)exprs.elementAt(i), eltype);
+					init[i] = cast( (Expr)exprs.get(i), eltype);
 				}
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
@@ -923,10 +923,10 @@ public class Parser {
 			Expr incr = cast(parseExpr(forbody), BuiltinType.NONE);
 			expect(')');
 			Expr body = cast(parseExpr(forbody), BuiltinType.NONE);
-			forbody.exprs.addElement(body);
-			forbody.exprs.addElement(incr);
-			forblock.exprs.addElement(init);
-			forblock.exprs.addElement(new WhileExpr(cond, forbody));
+			forbody.exprs.add(body);
+			forbody.exprs.add(incr);
+			forblock.exprs.add(init);
+			forblock.exprs.add(new WhileExpr(cond, forbody));
 			return forblock;
 		} else if (keyword.equals("if")) {
 			expect('(');
@@ -954,9 +954,9 @@ public class Parser {
 			expect('{');
 			// parsing switch body
 			Expr elseexpr = null;
-			Vector keys = new Vector(); // int[]
-			Vector keysunique = new Vector(); // Int
-			Vector exprs = new Vector(); // Expr
+			ArrayList keys = new ArrayList(); // of int[]
+			ArrayList keysunique = new ArrayList(); // of Int
+			ArrayList exprs = new ArrayList(); // of Expr
 			while (t.nextToken() != '}') {
 				if (t.ttype == ';') continue;
 				else if (t.ttype == Token.KEYWORD && t.svalue.equals("else")) {
@@ -965,7 +965,7 @@ public class Parser {
 					expect(':');
 					elseexpr = parseExpr(scope);
 				} else {
-					Vector branchkeyv = new Vector();
+					ArrayList branchkeyv = new ArrayList();
 					do {
 						t.pushBack();
 						if (!branchkeyv.isEmpty()) expect(',');
@@ -973,18 +973,18 @@ public class Parser {
 						if (!(branchindex instanceof ConstExpr))
 							throw new ParseException("Constant expression expected.");
 						Int idx = (Int)((ConstExpr)branchindex).value;
-						if (keysunique.contains(idx))
+						if (keysunique.indexOf(idx) >= 0)
 							throw new ParseException("branch for "+idx+" is already defined in this switch");
-						branchkeyv.addElement(idx);
-						keysunique.addElement(idx);
+						branchkeyv.add(idx);
+						keysunique.add(idx);
 					} while (t.nextToken() != ':');
 					int[] branchkeys = new int[branchkeyv.size()];
 					for (int i=0; i<branchkeys.length; i++) {
-						Int idx = (Int)branchkeyv.elementAt(i);
+						Int idx = (Int)branchkeyv.get(i);
 						branchkeys[i] = idx.value;
 					}
-					keys.addElement(branchkeys);
-					exprs.addElement(parseExpr(scope));
+					keys.add(branchkeys);
+					exprs.add(parseExpr(scope));
 				}
 			}
 			// obtaining common type
@@ -992,19 +992,19 @@ public class Parser {
 			if (elseexpr != null) {
 				type = elseexpr.rettype();
 			} else if (!exprs.isEmpty()) {
-				type = ((Expr)exprs.firstElement()).rettype();
+				type = ((Expr)exprs.first()).rettype();
 			} else {
 				throw new ParseException("switch body is empty");
 			}
 			for (int i=0; i<exprs.size(); i++) {
-				Expr e = (Expr)exprs.elementAt(i);
+				Expr e = (Expr)exprs.get(i);
 				type = binaryCastType(type, e.rettype());
 			}
 			// casting all to common type
 			if (elseexpr != null) elseexpr = cast(elseexpr, type);
 			for (int i=0; i<exprs.size(); i++) {
-				Expr e = (Expr)exprs.elementAt(i);
-				exprs.setElementAt(cast(e, type), i);
+				Expr e = (Expr)exprs.get(i);
+				exprs.set(i, cast(e, type));
 			}
 			SwitchExpr swexpr = new SwitchExpr();
 			swexpr.indexexpr = indexexpr;
@@ -1138,13 +1138,13 @@ public class Parser {
 					return new NewArrayExpr(lnum, type, lenexpr);
 				} else if (t.ttype == '{') {
 					// new array with given elements
-					Vector vinit = new Vector();
+					ArrayList vinit = new ArrayList();
 					Type eltype = ((ArrayType)type).elementType();
 					while (t.nextToken() != '}') {
 						t.pushBack();
 						if (!vinit.isEmpty()) expect(',');
 						Expr e = cast(parseExpr(scope), eltype);
-						vinit.addElement(e);
+						vinit.add(e);
 					}
 					Expr[] init = new Expr[vinit.size()];
 					vinit.copyInto(init);
@@ -1162,7 +1162,7 @@ public class Parser {
 			func.source = Filesystem.fname((String)files.peek());
 			// parsing args
 			expect('(');
-			Vector args = new Vector();
+			ArrayList args = new ArrayList();
 			boolean first = true;
 			while (t.nextToken() != ')') {
 				t.pushBack();
@@ -1173,7 +1173,7 @@ public class Parser {
 				String varname = t.svalue;
 				expect(':');
 				Type vartype = parseType(func);
-				args.addElement(new Var(varname, vartype));
+				args.add(new Var(varname, vartype));
 			}
 			Type rettype;
 			if (t.nextToken() == ':') {
@@ -1186,7 +1186,7 @@ public class Parser {
 			func.locals = args;
 			FunctionType ftype = new FunctionType(rettype, new Type[args.size()]);
 			for (int i=args.size()-1; i>=0; i--) {
-				ftype.args[i] = ((Var)args.elementAt(i)).type;
+				ftype.args[i] = ((Var)args.get(i)).type;
 			}
 			int lambdanum = 1;
 			while (unit.getFunc(scope.funcName()+'$'+lambdanum) != null) lambdanum++;
@@ -1203,7 +1203,7 @@ public class Parser {
 				default:
 					throw new ParseException("Function body expected, got "+t);
 			}
-			unit.funcs.addElement(func);
+			unit.funcs.add(func);
 			return new ConstExpr(lnum, func);
 		} else if (keyword.equals("try")) {
 			Expr tryexpr = parseExpr(scope);
@@ -1226,7 +1226,7 @@ public class Parser {
 			}
 			Expr catchexpr = parseExpr(catchblock);
 			Type commontype = binaryCastType(tryexpr.rettype(), catchexpr.rettype());
-			catchblock.exprs.addElement(cast(catchexpr, commontype));
+			catchblock.exprs.add(cast(catchexpr, commontype));
 			TryCatchExpr trycatch = new TryCatchExpr();
 			trycatch.tryexpr = cast(tryexpr, commontype);
 			trycatch.catchexpr = catchblock;
@@ -1275,21 +1275,21 @@ public class Parser {
 			throw new ParseException("Applying () to non-function expression");
 		FunctionType ftype = (FunctionType)fload.rettype();
 		// parse arguments
-		Vector vargs = new Vector();
-		if (firstarg != null) vargs.addElement(firstarg);
+		ArrayList vargs = new ArrayList();
+		if (firstarg != null) vargs.add(firstarg);
 		boolean first = true;
 		while (t.nextToken() != ')') {
 			t.pushBack();
 			if (first) first = false;
 			else expect(',');
-			vargs.addElement(parseExpr(scope));
+			vargs.add(parseExpr(scope));
 		}
 		// add default argument values
 		if (vargs.size() < ftype.args.length && fload instanceof ConstExpr) {
 			Func f = (Func) ((ConstExpr)fload).value;
 			for (int i=vargs.size(); i < ftype.args.length; i++) {
-				Var v = (Var) f.locals.elementAt(i);
-				if (v.constValue != null) vargs.addElement(new ConstExpr(-1, v.constValue));
+				Var v = (Var) f.locals.get(i);
+				if (v.constValue != null) vargs.add(new ConstExpr(-1, v.constValue));
 			}
 		}
 		if (ftype.args.length != vargs.size()) {
@@ -1303,7 +1303,7 @@ public class Parser {
 		// cast arguments to needed types
 		Expr[] args = new Expr[vargs.size()];
 		for (int i=0; i<args.length; i++) {
-			args[i] = cast((Expr)vargs.elementAt(i), ftype.args[i]);
+			args[i] = cast((Expr)vargs.get(i), ftype.args[i]);
 		}
 		// special processing for some functions
 		if (fload instanceof ConstExpr) {
@@ -1574,15 +1574,15 @@ public class Parser {
 			t.pushBack();
 			lastexpr = parseExpr(block);
 			if (lastexpr.rettype() == BuiltinType.NONE)
-				block.exprs.addElement(lastexpr);
+				block.exprs.add(lastexpr);
 			else
-				block.exprs.addElement(new DiscardExpr(lastexpr));
+				block.exprs.add(new DiscardExpr(lastexpr));
 		}
 		if (block.exprs.isEmpty()) {
 			return new NoneExpr();
 		} else {
 			//not to discard value of last expression
-			block.exprs.setElementAt(lastexpr, block.exprs.size()-1);
+			block.exprs.set(block.exprs.size()-1, lastexpr);
 			return block;
 		}
 	}
@@ -1679,12 +1679,12 @@ public class Parser {
 						}
 					}
 					if (left instanceof ConcatExpr) {
-						((ConcatExpr)left).exprs.addElement(right);
+						((ConcatExpr)left).exprs.add(right);
 						return left;
 					} else {
 						ConcatExpr cexpr = new ConcatExpr();
-						cexpr.exprs.addElement(left);
-						cexpr.exprs.addElement(right);
+						cexpr.exprs.add(left);
+						cexpr.exprs.add(right);
 						return cexpr;
 					}
 				} else if (btype.isSubtypeOf(BuiltinType.NUMBER)) {

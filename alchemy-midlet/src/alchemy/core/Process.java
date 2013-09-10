@@ -22,14 +22,13 @@ import alchemy.evm.EtherLoader;
 import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.fs.devfs.SinkInputStream;
+import alchemy.util.ArrayList;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 import javax.microedition.io.Connection;
 
 /**
@@ -157,9 +156,9 @@ public class Process {
 	/** Error thrown by a program. */
 	private Throwable error;
 	/** Streams opened by process. */
-	private Vector streams;
+	private ArrayList streams;
 	/** Listeners of this process. */
-	private Vector listeners;
+	private ArrayList listeners;
 	/** Main function. */
 	private Function main;
 	/** Command-line arguments. */
@@ -262,8 +261,8 @@ public class Process {
 	private void setState(int state) {
 		this.state = state;
 		if (state == ENDED && listeners != null) {
-			for (Enumeration e = listeners.elements(); e.hasMoreElements(); ) {
-				ProcessListener l = (ProcessListener)e.nextElement();
+			for (int i=0; i<listeners.size(); i++) {
+				ProcessListener l = (ProcessListener)listeners.get(i);
 				l.processEnded(this);
 			}
 		}
@@ -485,8 +484,8 @@ public class Process {
 	 * @param stream  <code>InputStream</code> or <code>OutputStream</code>
 	 */
 	public void addStream(Object stream) {
-		if (streams == null) streams = new Vector();
-		streams.addElement(stream);
+		if (streams == null) streams = new ArrayList();
+		streams.add(stream);
 	}
 
 	/**
@@ -496,7 +495,7 @@ public class Process {
 	 * @see #addStream(Object)
 	 */
 	public void removeStream(Object stream) {
-		if (streams != null) streams.removeElement(stream);
+		if (streams != null) streams.remove(stream);
 	}
 	
 	/**
@@ -524,12 +523,12 @@ public class Process {
 	}
 	
 	public void addProcessListener(ProcessListener l) {
-		if (listeners == null) listeners = new Vector();
-		if (!listeners.contains(l)) listeners.addElement(l);
+		if (listeners == null) listeners = new ArrayList();
+		if (listeners.indexOf(l) < 0) listeners.add(l);
 	}
 	
 	public void removeProcessListener(ProcessListener l) {
-		if (listeners != null) listeners.removeElement(l);
+		if (listeners != null) listeners.remove(l);
 	}
 	
 	public void interrupt() {
@@ -581,8 +580,8 @@ public class Process {
 			try { stderr.flush(); } catch (IOException e) { }
 			setState(ENDED);
 			if (streams != null) {
-				for (Enumeration e = streams.elements(); e.hasMoreElements(); ) {
-					Object stream = e.nextElement();
+				for (int i=0; i<streams.size(); i++) {
+					Object stream = streams.get(i);
 					if (stream instanceof InputStream) {
 						try {
 							((InputStream)stream).close();

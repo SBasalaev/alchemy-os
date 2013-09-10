@@ -19,9 +19,8 @@
 package alchemy.nec.tree;
 
 import alchemy.nec.ParseException;
-import java.util.Enumeration;
+import alchemy.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * Compilation unit.
@@ -38,20 +37,20 @@ public class Unit implements Scope {
 	/**
 	 * Functions defined in this unit.
 	 */
-	public Vector funcs = new Vector();
+	public ArrayList funcs = new ArrayList();
 	
 	/**
 	 * Global variables.
 	 */
-	private Vector vars = new Vector();
+	private ArrayList vars = new ArrayList();
 
 	public NamedType getType(String name) {
 		return (NamedType)types.get(name);
 	}
 
 	public Var getVar(String id) {
-		for (Enumeration e = vars.elements(); e.hasMoreElements(); ) {
-			Var v = (Var)e.nextElement();
+		for (int i=vars.size()-1; i>=0; i--) {
+			Var v = (Var)vars.get(i);
 			if (v.name.equals(id)) return v;
 		}
 		return null;
@@ -60,7 +59,7 @@ public class Unit implements Scope {
 	public boolean addVar(Var v) throws ParseException {
 		if (getVar(v.name) != null)
 			throw new ParseException("Variable "+v.name+" already exists at the outer scope");
-		vars.addElement(v);
+		vars.add(v);
 		return false;
 	}
 
@@ -75,8 +74,8 @@ public class Unit implements Scope {
 	}
 
 	public Func getFunc(String name) {
-		for (Enumeration e = funcs.elements(); e.hasMoreElements(); ) {
-			Func f = (Func)e.nextElement();
+		for (int i=funcs.size()-1; i>=0; i--) {
+			Func f = (Func)funcs.get(i);
 			if (f.signature.equals(name)) return f;
 		}
 		return null;

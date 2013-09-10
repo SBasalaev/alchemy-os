@@ -18,8 +18,8 @@
 
 package alchemy.core;
 
+import alchemy.util.ArrayList;
 import java.io.IOException;
-import java.util.Vector;
 import javax.microedition.media.MediaException;
 
 /**
@@ -29,8 +29,8 @@ import javax.microedition.media.MediaException;
  */
 public class AlchemyException extends Exception {
 	
-	private Vector functions = new Vector();
-	private Vector dbgInfo = new Vector();
+	private ArrayList functions = new ArrayList();
+	private ArrayList dbgInfo = new ArrayList();
 
 	public final int errcode;
 	
@@ -73,8 +73,8 @@ public class AlchemyException extends Exception {
 	}
 	
 	public void addTraceElement(Function f, String dbg) {
-		functions.addElement(f);
-		dbgInfo.addElement(dbg);
+		functions.add(f);
+		dbgInfo.add(dbg);
 	}
 
 	public String toString() {
@@ -105,9 +105,9 @@ public class AlchemyException extends Exception {
 		for (int i=0; i < size; i++) {
 			sb.append('\n')
 			.append('@')
-			.append(functions.elementAt(i))
+			.append(functions.get(i))
 			.append('(')
-			.append(dbgInfo.elementAt(i))
+			.append(dbgInfo.get(i))
 			.append(')');
 		}
 		return sb.toString();

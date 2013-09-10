@@ -18,7 +18,7 @@
 
 package alchemy.nec.tree;
 
-import java.util.Vector;
+import alchemy.util.ArrayList;
 
 /**
  * Switch expression.
@@ -40,9 +40,9 @@ public class SwitchExpr extends Expr {
 	public Expr elseexpr;
 	
 	/** int[] arrays. */
-	public Vector keys = new Vector();
+	public ArrayList keys = new ArrayList();
 	
-	public Vector exprs = new Vector();
+	public ArrayList exprs = new ArrayList();
 	
 	public Type rettype;
 	

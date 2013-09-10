@@ -25,9 +25,9 @@ import alchemy.nec.asm.FunctionWriter;
 import alchemy.nec.asm.Label;
 import alchemy.nec.asm.UnitWriter;
 import alchemy.nec.tree.*;
+import alchemy.util.ArrayList;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Vector;
 
 /**
  * Writes bytecode of the parsed unit.
@@ -47,9 +47,9 @@ public class EAsmWriter implements ExprVisitor {
 	public void writeTo(Unit unit, OutputStream out) throws IOException {
 		UnitWriter uw = new UnitWriter();
 		uw.visitVersion(0x0201);
-		Vector funcs = unit.funcs;
+		ArrayList funcs = unit.funcs;
 		for (int i=0; i<funcs.size(); i++) {
-			Func f = (Func)funcs.elementAt(i);
+			Func f = (Func)funcs.get(i);
 			if (f.body != null && f.hits > 0) {
 				writer = uw.visitFunction(f.signature, true, f.type.args.length);
 				if (debug) writer.visitSource(f.source);
@@ -445,7 +445,7 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitBlock(BlockExpr block, Object isReturn) {
 		for (int i=0; i<block.exprs.size(); i++) {
-			Expr expr = (Expr)block.exprs.elementAt(i);
+			Expr expr = (Expr)block.exprs.get(i);
 			expr.accept(this, (isReturn == Boolean.TRUE && i == block.exprs.size()-1) ? Boolean.TRUE : Boolean.FALSE);
 		}
 		return null;
@@ -570,14 +570,14 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitConcat(ConcatExpr concat, Object isReturn) {
 		if (concat.exprs.size() == 1) {
-			Expr str1 = (Expr)concat.exprs.elementAt(0);
+			Expr str1 = (Expr)concat.exprs.get(0);
 			str1.accept(this, Boolean.FALSE);
 		} else {
 			writer.visitLdcInsn(new FuncObject("Any.tostr"));
 			writer.visitLdcInsn(new FuncObject("new_strbuf"));
 			writer.visitCallInsn(Opcodes.CALL, 0);
 			for (int i=0; i<concat.exprs.size(); i++) {
-				Expr expr = (Expr)concat.exprs.elementAt(i);
+				Expr expr = (Expr)concat.exprs.get(i);
 				if (expr.rettype() == BuiltinType.CHAR) {
 					writer.visitLdcInsn(new FuncObject("StrBuf.addch"));
 				} else {
@@ -785,9 +785,9 @@ public class EAsmWriter implements ExprVisitor {
 		int count = 0;
 		int min = 0;
 		int max = 0;
-		Vector vkeys = swexpr.keys;
+		ArrayList vkeys = swexpr.keys;
 		for (int i=0; i<vkeys.size(); i++) {
-			int[] ik = (int[])vkeys.elementAt(i);
+			int[] ik = (int[])vkeys.get(i);
 			if (i==0) {
 				min = ik[0];
 				max = ik[0];
@@ -815,7 +815,7 @@ public class EAsmWriter implements ExprVisitor {
 				labels[i] = (swexpr.elseexpr != null) ? ldflt : lafter;
 			}
 			for (int ei=0; ei<labelsunique.length; ei++) {
-				int[] ik = (int[])vkeys.elementAt(ei);
+				int[] ik = (int[])vkeys.get(ei);
 				for (int i=0; i<ik.length; i++) {
 					labels[ik[i]-min] = labelsunique[ei];
 				}
@@ -837,7 +837,7 @@ public class EAsmWriter implements ExprVisitor {
 			Label[] labels = new Label[count];
 			int ofs = 0;
 			for (int ei=0; ei<labelsunique.length; ei++) {
-				int[] ik = (int[])vkeys.elementAt(ei);
+				int[] ik = (int[])vkeys.get(ei);
 				System.arraycopy(ik, 0, keys, ofs, ik.length);
 				for (int j=0; j<ik.length; j++) {
 					labels[ofs+j] = labelsunique[ei];
@@ -858,7 +858,7 @@ public class EAsmWriter implements ExprVisitor {
 		}
 		// write expressions
 		for (int i=0; i<labelsunique.length; i++) {
-			Expr e = (Expr)swexpr.exprs.elementAt(i);
+			Expr e = (Expr)swexpr.exprs.get(i);
 			writer.visitLabel(labelsunique[i]);
 			e.accept(this, isReturn);
 			if (isReturn != Boolean.TRUE && i != labelsunique.length-1) {

@@ -28,6 +28,7 @@ import alchemy.fs.Filesystem;
 import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.libs.core.Pipe;
 import alchemy.nlib.NativeLibrary;
+import alchemy.util.ArrayList;
 import alchemy.util.IO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,7 +40,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
-import java.util.Vector;
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
@@ -736,13 +736,13 @@ public class LibCore31 extends NativeLibrary {
 			case 122: // String.format(args: [Any]): String
 				return IO.sprintf((String)args[0], (Object[])args[1]);
 			case 123: { // Dict.keys(): [Any]
-				Vector keyv = new Vector();
+				ArrayList keyv = new ArrayList();
 				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
-					keyv.addElement(e.nextElement());
+					keyv.add(e.nextElement());
 				}
 				Object[] keys = new Object[keyv.size()];
 				for (int i=keys.length-1; i>=0; i--) {
-					keys[i] = keyv.elementAt(i);
+					keys[i] = keyv.get(i);
 				}
 				return keys;
 			}

@@ -18,7 +18,7 @@
 
 package alchemy.nec.tree;
 
-import java.util.Vector;
+import alchemy.util.ArrayList;
 
 /**
  * String concatenation expression.
@@ -27,7 +27,7 @@ import java.util.Vector;
  */
 public class ConcatExpr extends Expr {
 	
-	public Vector exprs = new Vector();
+	public ArrayList exprs = new ArrayList();
 	
 	public ConcatExpr() { }
 
@@ -36,7 +36,7 @@ public class ConcatExpr extends Expr {
 	}
 
 	public int lineNumber() {
-		return ((Expr)exprs.elementAt(0)).lineNumber();
+		return ((Expr)exprs.first()).lineNumber();
 	}
 
 	public Object accept(ExprVisitor v, Object data) {
