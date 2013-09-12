@@ -1,1 +1,1 @@
-javadoc -source 1.3 -sourcepath src/ -packages alchemy.fs -d javadoc/
+javadoc -source 1.3 -sourcepath src/ -d javadoc/ alchemy.fs

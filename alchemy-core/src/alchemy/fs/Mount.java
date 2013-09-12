@@ -23,11 +23,13 @@ package alchemy.fs;
  * @author Sergey Basalaev
  */
 final class Mount {
-	public final String path;
-	public final Filesystem fs;
+	/** Length of the path to which this file system is mounted.*/
+	public final int pathlen;
+	/** Driver of this file system. */
+	public final FSDriver driver;
 
-	public Mount(String path, Filesystem fs) {
-		this.path = path;
-		this.fs = fs;
+	public Mount(String path, FSDriver fs) {
+		this.pathlen = path.length();
+		this.driver = fs;
 	}
 }
