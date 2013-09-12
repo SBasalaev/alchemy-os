@@ -19,7 +19,7 @@
 package alchemy.apps;
 
 import alchemy.core.Process;
-import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 import java.io.IOException;
@@ -50,14 +50,14 @@ public class Mount extends NativeApp {
 		String type = args[1];
 		String dir = p.toFile(args[0]);
 		String options = (args.length < 3) ? "" : args[2];
-		if (!FSManager.fs().isDirectory(dir)) {
+		if (!Filesystem.isDirectory(dir)) {
 			IO.println(p.stderr, "Directory does not exist: "+dir);
 			return 1;
 		}
-		if (FSManager.fs().list(dir).length > 0) {
+		if (Filesystem.list(dir).length > 0) {
 			IO.println(p.stderr, "Warning: directory not empty");
 		}
-		FSManager.mount(dir, type, options);
+		Filesystem.mount(dir, type, options);
 		return 0;
 	}
 }

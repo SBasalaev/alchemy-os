@@ -18,9 +18,9 @@
 
 package alchemy.fs.rms;
 
+import alchemy.fs.FSDriver;
 import alchemy.fs.Filesystem;
 import alchemy.midlet.InstallInfo;
-import alchemy.util.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -38,7 +38,7 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  * rather slow.
  * @author Sergey Basalaev
  */
-public final class FS extends Filesystem implements Closeable {
+public final class Driver extends FSDriver {
 	
 	// file attributes
 	static private int A_DIR = 16;
@@ -63,7 +63,7 @@ public final class FS extends Filesystem implements Closeable {
 	 * <code>init()</code> should be called before
 	 * filesystem can be used.
 	 */
-	public FS() {
+	public Driver() {
 		// initializing root file descriptor
 		FD fd = new FD();
 		fd.name = "/";
@@ -92,15 +92,15 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	public synchronized void create(String file) throws IOException {
-		String parent = fparent(file);
+		String parent = Filesystem.fileParent(file);
 		if (parent == null) throw new IOException("File already exists: /");
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
 		Directory dir = new Directory(parentfd);
-		int index = dir.getIndex(fname(file));
+		int index = dir.getIndex(Filesystem.fileName(file));
 		if (index >= 0) throw new IOException("File already exists: "+file);
 		FD fd = new FD();
-		fd.name = fname(file);
+		fd.name = Filesystem.fileName(file);
 		fd.attrs = A_READ | A_WRITE;
 		fd.record = createFileNode(false);
 		dir.nodes[dir.count] = fd;
@@ -110,15 +110,15 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	public synchronized void mkdir(String file) throws IOException {
-		String parent = fparent(file);
+		String parent = Filesystem.fileParent(file);
 		if (parent == null) throw new IOException("File already exists: /");
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
 		Directory dir = new Directory(parentfd);
-		int index = dir.getIndex(fname(file));
+		int index = dir.getIndex(Filesystem.fileName(file));
 		if (index >= 0) throw new IOException("File already exists: "+file);
 		FD fd = new FD();
-		fd.name = fname(file);
+		fd.name = Filesystem.fileName(file);
 		fd.attrs = A_READ | A_WRITE | A_DIR;
 		fd.record = createFileNode(true);
 		dir.nodes[dir.count] = fd;
@@ -148,12 +148,12 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	public synchronized void remove(String file) throws IOException {
-		String parent = fparent(file);
+		String parent = Filesystem.fileParent(file);
 		if (parent == null) throw new IOException("Cannot remove /");
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
 		Directory dir = new Directory(parentfd);
-		int index = dir.getIndex(fname(file));
+		int index = dir.getIndex(Filesystem.fileName(file));
 		if (index < 0) return;
 		if ((dir.nodes[index].attrs & A_DIR) != 0) {
 			Directory toRemove = new Directory(dir.nodes[index]);
@@ -229,12 +229,12 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	public synchronized void setRead(String file, boolean on) throws IOException {
-		String parent = fparent(file);
+		String parent = Filesystem.fileParent(file);
 		if (parent == null) throw new IOException("Cannot change attrubutes of /");
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
 		Directory dir = new Directory(parentfd);
-		int index = dir.getIndex(fname(file));
+		int index = dir.getIndex(Filesystem.fileName(file));
 		if (index < 0) throw new IOException("File not found: "+file);
 		FD fd = dir.nodes[index];
 		if (on) {
@@ -253,12 +253,12 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	public synchronized void setWrite(String file, boolean on) throws IOException {
-		String parent = fparent(file);
+		String parent = Filesystem.fileParent(file);
 		if (parent == null) throw new IOException("Cannot change attrubutes of /");
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
 		Directory dir = new Directory(parentfd);
-		int index = dir.getIndex(fname(file));
+		int index = dir.getIndex(Filesystem.fileName(file));
 		if (index < 0) throw new IOException("File not found: "+file);
 		FD fd = dir.nodes[index];
 		if (on) {
@@ -277,12 +277,12 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	public synchronized void setExec(String file, boolean on) throws IOException {
-		String parent = fparent(file);
+		String parent = Filesystem.fileParent(file);
 		if (parent == null) throw new IOException("Cannot change attrubutes of /");
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
 		Directory dir = new Directory(parentfd);
-		int index = dir.getIndex(fname(file));
+		int index = dir.getIndex(Filesystem.fileName(file));
 		if (index < 0) throw new IOException("File not found: "+file);
 		FD fd = dir.nodes[index];
 		if (on) {
@@ -301,32 +301,32 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	public synchronized void move(String source, String dest) throws IOException {
-		String srcparent = fparent(source);
+		String srcparent = Filesystem.fileParent(source);
 		if (srcparent == null) throw new IOException("Cannot move /");
 		if (exists(dest)) throw new IOException("Cannot move "+source+" to "+dest+", destination exists.");
-		if (srcparent.equals(fparent(dest))) {
+		if (srcparent.equals(Filesystem.fileParent(dest))) {
 			// rename within one directory
 			FD parentfd = getFD(srcparent);
 			Directory parentdir = new Directory(parentfd);
-			int index = parentdir.getIndex(fname(source));
+			int index = parentdir.getIndex(Filesystem.fileName(source));
 			if (index < 0) throw new IOException("File not found: "+source);
 			FD destfd = parentdir.nodes[index];
-			destfd.name = fname(dest);
+			destfd.name = Filesystem.fileName(dest);
 			parentdir.flush();
 			// apply changes to cache
 			fdCache.remove(source);
 			fdCache.put(dest, destfd);
 		} else {
 			// read both dirs
-			FD destdirfd = getFD(fparent(dest));
+			FD destdirfd = getFD(Filesystem.fileParent(dest));
 			Directory destdir = new Directory(destdirfd);
-			FD srcdirfd = getFD(fparent(source));
+			FD srcdirfd = getFD(Filesystem.fileParent(source));
 			Directory srcdir = new Directory(srcdirfd);
-			int index = srcdir.getIndex(fname(source));
+			int index = srcdir.getIndex(Filesystem.fileName(source));
 			if (index < 0) throw new IOException("File not found: "+source);
 			// move / rename
 			FD destfd = srcdir.nodes[index];
-			destfd.name = fname(dest);
+			destfd.name = Filesystem.fileName(dest);
 			destdir.nodes[destdir.count] = destfd;
 			destdir.count++;
 			srcdir.count--;
@@ -356,7 +356,7 @@ public final class FS extends Filesystem implements Closeable {
 		return stamp;
 	}
 
-	public long spaceFree(String unused) {
+	public long spaceFree() {
 		try {
 			return store.getSizeAvailable();
 		} catch (RecordStoreException rse) {
@@ -364,14 +364,14 @@ public final class FS extends Filesystem implements Closeable {
 		}
 	}
 
-	public long spaceTotal(String unused) {
-		long free = spaceFree(null);
-		long used = spaceUsed(null);
+	public long spaceTotal() {
+		long free = spaceFree();
+		long used = spaceUsed();
 		if (free < 0 || used < 0) return -1;
 		else return free + used;
 	}
 
-	public long spaceUsed(String unused) {
+	public long spaceUsed() {
 		try {
 			return store.getSize();
 		} catch (RecordStoreException rse) {
@@ -380,7 +380,7 @@ public final class FS extends Filesystem implements Closeable {
 	}
 
 	private FD getFD(String file) throws IOException {
-		String parent = fparent(file);
+		String parent = Filesystem.fileParent(file);
 		if (parent == null) return rootFD;
 		FD parentfd = getFD(parent);
 		if ((parentfd.attrs & A_DIR) == 0) throw new IOException("Not a directory: "+parent);
@@ -390,7 +390,7 @@ public final class FS extends Filesystem implements Closeable {
 			return fd;
 		} else {
 			Directory dir = new Directory(parentfd);
-			int index = dir.getIndex(fname(file));
+			int index = dir.getIndex(Filesystem.fileName(file));
 			if (index < 0) throw new IOException("File not found: "+file);
 			fd = dir.nodes[index];
 			fdCache.put(file, fd);
@@ -433,11 +433,11 @@ public final class FS extends Filesystem implements Closeable {
 			count = stream.readUnsignedShort();
 			nodes = new FD[count+1];
 			for (int i=0; i<count; i++) {
-				nodes[i] = new FD();
-				nodes[i].record = stream.readInt();
-				nodes[i].attrs = stream.readUnsignedByte();
-				nodes[i].name = stream.readUTF();
-				//TODO: optimize here
+				FD node = new FD();
+				node.record = stream.readInt();
+				node.attrs = stream.readUnsignedByte();
+				node.name = stream.readUTF();
+				nodes[i] = node;
 			}
 			stream.close();
 		}
@@ -453,10 +453,10 @@ public final class FS extends Filesystem implements Closeable {
 			DataOutputStream stream = new DataOutputStream(new FileOutputStream(fd, false));
 			stream.writeShort(count);
 			for (int i=0; i<count; i++) {
-				stream.writeInt(nodes[i].record);
-				stream.writeByte(nodes[i].attrs);
-				stream.writeUTF(nodes[i].name);
-				// TODO: optimize here
+				FD node = nodes[i];
+				stream.writeInt(node.record);
+				stream.writeByte(node.attrs);
+				stream.writeUTF(node.name);
 			}
 			stream.close();
 		}
@@ -588,7 +588,7 @@ public final class FS extends Filesystem implements Closeable {
 					stamp >>>= 8;
 				}
 				try {
-					synchronized (FS.this) {
+					synchronized (Driver.this) {
 						store.setRecord(fd.record, buf, 0, count);
 					}
 				} catch (RecordStoreException rse) {

@@ -20,8 +20,8 @@ package alchemy.nec;
 
 import alchemy.core.Process;
 import alchemy.core.Int;
-import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
+import alchemy.fs.FSDriver;
 import alchemy.nec.tree.*;
 import alchemy.util.ArrayList;
 import alchemy.util.IO;
@@ -133,16 +133,16 @@ public class Parser {
 	private String resolveFile(String name) throws ParseException {
 		if (name.length() == 0) throw new ParseException("Empty string in 'use'");
 		String f = p.toFile(name);
-		if (FSManager.fs().exists(f) && !FSManager.fs().isDirectory(f)) return f;
+		if (Filesystem.exists(f) && !Filesystem.isDirectory(f)) return f;
 		f = p.toFile(name+".eh");
-		if (FSManager.fs().exists(f)) return f;
+		if (Filesystem.exists(f)) return f;
 		if (name.charAt(0) != '/') {
 			String[] incpath = IO.split(p.getEnv("INCPATH"), ':');
 			for (int i=0; i<incpath.length; i++) {
 				f = p.toFile(incpath[i]+'/'+name);
-				if (FSManager.fs().exists(f) && !FSManager.fs().isDirectory(f)) return f;
+				if (Filesystem.exists(f) && !Filesystem.isDirectory(f)) return f;
 				f = p.toFile(incpath[i]+'/'+name+".eh");
-				if (FSManager.fs().exists(f)) return f;
+				if (Filesystem.exists(f)) return f;
 			}
 		}
 		throw new ParseException("File not found: "+name);
@@ -163,8 +163,8 @@ public class Parser {
 		Tokenizer oldt = t;
 		String olddir = p.getCurDir();
 		files.push(file);
-		p.setCurDir(Filesystem.fparent(file));
-		InputStream in = FSManager.fs().read(file);
+		p.setCurDir(Filesystem.fileParent(file));
+		InputStream in = Filesystem.read(file);
 		p.addStream(in);
 		UTFReader fred = new UTFReader(in);
 		t = new Tokenizer(fred);
@@ -377,11 +377,11 @@ public class Parser {
 							block.exprs.add(new VarExpr(lnum, th));
 							fdef.body = block;
 							fdef.hits++;
-							fdef.source = Filesystem.fname((String)files.peek());
+							fdef.source = Filesystem.fileName((String)files.peek());
 						} else {
 							fdef.body = cast(parseExpr(fdef), fdef.type.rettype);
 							fdef.hits++;
-							fdef.source = Filesystem.fname((String)files.peek());
+							fdef.source = Filesystem.fileName((String)files.peek());
 						}
 						if (files.size() > 1)
 							warn(W_INCLUDED, "Function " + fdef.signature + " is implemented in included file");
@@ -405,7 +405,7 @@ public class Parser {
 		Func init = new Func(unit);
 		init.hits++;
 		init.signature = rtype.toString() + ".<init>";
-		init.source = Filesystem.fname((String)files.peek());
+		init.source = Filesystem.fileName((String)files.peek());
 		Type[] initargs = new Type[constructor.type.args.length + 1];
 		initargs[0] = rtype;
 		System.arraycopy(constructor.type.args, 0, initargs, 1, initargs.length-1);
@@ -1159,7 +1159,7 @@ public class Parser {
 			// anonymous function
 			// TODO: I probably need to use scope here instead
 			Func func = new Func(unit);
-			func.source = Filesystem.fname((String)files.peek());
+			func.source = Filesystem.fileName((String)files.peek());
 			// parsing args
 			expect('(');
 			ArrayList args = new ArrayList();

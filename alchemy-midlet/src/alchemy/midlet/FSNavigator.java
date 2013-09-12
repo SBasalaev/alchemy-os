@@ -18,7 +18,7 @@
 
 package alchemy.midlet;
 
-import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.fs.NavigatorHelper;
 import java.io.IOException;
 import javax.microedition.lcdui.Alert;
@@ -87,7 +87,7 @@ final class FSNavigator extends List implements CommandListener {
 	
 	public void setCurrentDir(String dir) throws IOException {
 		deleteAll();
-		String path = FSManager.normalize(dir);
+		String path = Filesystem.normalize(dir);
 		if (path.length() == 0) {
 			String[] roots = helper.listRoots();
 			for (int i=0; i<roots.length; i++) {

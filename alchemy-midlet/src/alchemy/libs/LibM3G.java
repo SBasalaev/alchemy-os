@@ -19,7 +19,7 @@ package alchemy.libs;
 
 import alchemy.core.Process;
 import alchemy.core.ProcessListener;
-import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeLibrary;
 import alchemy.util.IO;
 import java.io.IOException;
@@ -312,7 +312,7 @@ public class LibM3G extends NativeLibrary {
 			case 91: { // m3g_loadFile(name: String): [Object3D]
 				InputStream in = null;
 				try {
-					in = FSManager.fs().read((String)args[0]);
+					in = Filesystem.read((String)args[0]);
 					return Loader.load(IO.readFully(in), 0);
 				} finally {
 					if (in != null) try {

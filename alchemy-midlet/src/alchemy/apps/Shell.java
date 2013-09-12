@@ -25,7 +25,7 @@ import alchemy.util.UTFReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import alchemy.apps.TerminalForm.TerminalInputStream;
-import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.util.ArrayList;
 
 /**
@@ -57,8 +57,8 @@ public class Shell extends NativeApp {
 				p.addStream(scriptinput);
 			} else {
 				String file = p.toFile(args[0]);
-				byte[] buf = new byte[(int)FSManager.fs().size(file)];
-				InputStream in = FSManager.fs().read(p.toFile(args[0]));
+				byte[] buf = new byte[(int)Filesystem.size(file)];
+				InputStream in = Filesystem.read(p.toFile(args[0]));
 				in.read(buf);
 				in.close();
 				scriptinput = new ByteArrayInputStream(buf);
@@ -109,22 +109,22 @@ public class Shell extends NativeApp {
 				} else {
 					Process child = new Process(p);
 					if (cc.in != null) {
-						child.stdin = FSManager.fs().read(p.toFile(cc.in));
+						child.stdin = Filesystem.read(p.toFile(cc.in));
 					}
 					if (cc.out != null) {
 						String outfile = p.toFile(cc.out);
 						if (cc.appendout) {
-							child.stdout = FSManager.fs().append(outfile);
+							child.stdout = Filesystem.append(outfile);
 						} else {
-							child.stdout = FSManager.fs().write(outfile);
+							child.stdout = Filesystem.write(outfile);
 						}
 					}
 					if (cc.err != null) {
 						String errfile = p.toFile(cc.err);
 						if (cc.appenderr) {
-							child.stderr = FSManager.fs().append(errfile);
+							child.stderr = Filesystem.append(errfile);
 						} else {
-							child.stderr = FSManager.fs().write(errfile);
+							child.stderr = Filesystem.write(errfile);
 						}
 					}
 					if (p.stdin instanceof TerminalInputStream) {

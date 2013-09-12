@@ -19,6 +19,7 @@
 package alchemy.fs.devfs;
 
 import alchemy.core.Process.ProcessThread;
+import alchemy.fs.FSDriver;
 import alchemy.fs.Filesystem;
 import alchemy.util.IO;
 import java.io.IOException;
@@ -34,22 +35,25 @@ import javax.microedition.io.Connector;
  * Implemented nodes:
  * <ul>
  * <li>{@code /null}</li>
+ * <li>{@code /zero}</li>
+ * <li>{@code /random}</li>
  * <li>{@code /stdin}</li>
  * <li>{@code /stdout}</li>
  * <li>{@code /stderr}</li>
+ * <li>COMM ports</li>
  * </ul>
  * </p>
  * 
  * @author Sergey Basalaev
  */
-public final class FS extends Filesystem {
+public final class Driver extends FSDriver {
 	
 	private final Hashtable sharedinputs = new Hashtable();
 	private final  Hashtable sharedoutputs = new Hashtable();
 	private final String[] stddevs = {"stdin", "stdout", "stderr", "null", "zero", "random"};
 	private final String[] commdevs;
 	
-	public FS() {
+	public Driver() {
 		SinkOutputStream sink = new SinkOutputStream();
 		sharedoutputs.put("zero", sink);
 		sharedoutputs.put("null", sink);
@@ -63,7 +67,7 @@ public final class FS extends Filesystem {
 	}
 
 	public InputStream read(String file) throws IOException {
-		String name = fname(file);
+		String name = Filesystem.fileName(file);
 		if ("stdin".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ProcessThread) {
@@ -83,7 +87,7 @@ public final class FS extends Filesystem {
 	}
 
 	public OutputStream write(String file) throws IOException {
-		String name = fname(file);
+		String name = Filesystem.fileName(file);
 		if ("stdout".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ProcessThread) {
@@ -120,7 +124,7 @@ public final class FS extends Filesystem {
 	}
 
 	public boolean exists(String file) {
-		String name = fname(file);
+		String name = Filesystem.fileName(file);
 		if (name.length() == 0) return true;
 		for (int i=0; i<stddevs.length; i++) {
 			if (name.equals(stddevs[i])) return true;
@@ -152,7 +156,7 @@ public final class FS extends Filesystem {
 	}
 
 	public boolean canRead(String file) {
-		String name = fname(file);
+		String name = Filesystem.fileName(file);
 		if (name.length() == 0 || name.equals("stdin")) return true;
 		if (sharedinputs.contains(name)) return true;
 		for (int i=0; i<commdevs.length; i++) {
@@ -162,7 +166,7 @@ public final class FS extends Filesystem {
 	}
 
 	public boolean canWrite(String file) {
-		String name = fname(file);
+		String name = Filesystem.fileName(file);
 		if (name.equals("stdout") || name.equals("stderr")) return true;
 		if (sharedinputs.contains(name)) return true;
 		for (int i=0; i<commdevs.length; i++) {
@@ -191,15 +195,15 @@ public final class FS extends Filesystem {
 		return 0l;
 	}
 	
-	public long spaceTotal(String root) {
+	public long spaceTotal() {
 		return 0l;
 	}
 	
-	public long spaceFree(String root) {
+	public long spaceFree() {
 		return 0l;
 	}
 	
-	public long spaceUsed(String root) {
+	public long spaceUsed() {
 		return 0l;
 	}
 }

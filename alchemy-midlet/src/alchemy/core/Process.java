@@ -19,8 +19,8 @@
 package alchemy.core;
 
 import alchemy.evm.EtherLoader;
-import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
+import alchemy.fs.FSDriver;
 import alchemy.fs.devfs.SinkInputStream;
 import alchemy.util.ArrayList;
 import alchemy.util.IO;
@@ -244,7 +244,7 @@ public class Process {
 	 * @see #getCurDir() 
 	 */
 	public void setCurDir(String newdir) throws IOException {
-		if (!FSManager.fs().isDirectory(newdir)) throw new IOException("Not a directory: "+newdir);
+		if (!Filesystem.isDirectory(newdir)) throw new IOException("Not a directory: "+newdir);
 		curdir = newdir;
 	}
 
@@ -374,14 +374,14 @@ public class Process {
 		//resolving file
 		String libfile = resolveFile(libname, pathlist);
 		//checking permissions
-		if (!FSManager.fs().canExec(libfile))
+		if (!Filesystem.canExec(libfile))
 			throw new InstantiationException("Permission denied: "+libfile);
 		//searching in cache
-		long tstamp = FSManager.fs().lastModified(libfile);
+		long tstamp = Filesystem.lastModified(libfile);
 		Library lib = (Library) Cache.get(libfile, tstamp);
 		if (lib != null) return lib;
 		//reading magic number and building
-		InputStream in = FSManager.fs().read(libfile);
+		InputStream in = Filesystem.read(libfile);
 		try {
 			int magic = (in.read() << 8) | in.read();
 			switch (magic) {
@@ -389,7 +389,7 @@ public class Process {
 					String fname = new UTFReader(in).readLine();
 					in.close();
 					if (fname.charAt(0) != '/') {
-						fname = Filesystem.fparent(libfile)+'/'+fname;
+						fname = Filesystem.fileParent(libfile)+'/'+fname;
 					}
 					lib = loadLibForPath(fname, pathlist);
 					Cache.put(libfile, tstamp, lib);
@@ -451,14 +451,14 @@ public class Process {
 		String f;
 		if (name.indexOf('/') >= 0) {
 			f = toFile(name);
-			if (FSManager.fs().exists(f)) return f;
+			if (Filesystem.exists(f)) return f;
 		} else {
 			String[] paths = IO.split(pathlist, ':');
 			for (int i=0; i<paths.length; i++) {
 				String path =paths[i];
 				if (path.length() == 0) continue;
 				f = toFile(path+'/'+name);
-				if (FSManager.fs().exists(f)) return f;				
+				if (Filesystem.exists(f)) return f;
 			}
 		}
 		throw new IOException("File not found: "+name);
@@ -473,8 +473,8 @@ public class Process {
 	 * @return file for given path
 	 */
 	public String toFile(String path) {
-		if (path.length() == 0 || path.charAt(0) == '/') return FSManager.normalize(path);
-		else return FSManager.normalize(curdir + '/' + path);
+		if (path.length() == 0 || path.charAt(0) == '/') return Filesystem.normalize(path);
+		else return Filesystem.normalize(curdir + '/' + path);
 	}
 
 	/**

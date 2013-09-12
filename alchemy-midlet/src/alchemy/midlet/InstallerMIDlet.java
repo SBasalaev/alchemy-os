@@ -18,9 +18,9 @@
 
 package alchemy.midlet;
 
-import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
-import alchemy.fs.rms.FS;
+import alchemy.fs.FSDriver;
+import alchemy.fs.rms.Driver;
 import alchemy.util.ArrayList;
 import alchemy.util.IO;
 import alchemy.util.Properties;
@@ -97,7 +97,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	}
 
 	protected void destroyApp(boolean unconditional) {
-		FSManager.umountAll();
+		Filesystem.unmountAll();
 		notifyDestroyed();
 	}
 
@@ -265,8 +265,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	private void installFiles() throws Exception {
 		// open file system
 		Properties instCfg = InstallInfo.read();
-		FSManager.mount("", instCfg.get(InstallInfo.FS_TYPE), instCfg.get(InstallInfo.FS_INIT));
-		Filesystem fs = FSManager.fs();
+		Filesystem.mount("", instCfg.get(InstallInfo.FS_TYPE), instCfg.get(InstallInfo.FS_INIT));
 		// unpack base file archives
 		String[] archives = IO.split(setupCfg.get("install.archives"), ' ');
 		for (int i=0; i<archives.length; i++) {
@@ -279,39 +278,39 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 				datastream.skip(8); //timestamp
 				int attrs = datastream.readUnsignedByte();
 				if ((attrs & 16) != 0) { //directory
-					if (!fs.exists(f)) fs.mkdir(f);
+					if (!Filesystem.exists(f)) Filesystem.mkdir(f);
 				} else {
-					if (!fs.exists(f)) fs.create(f);
+					if (!Filesystem.exists(f)) Filesystem.create(f);
 					byte[] data = new byte[datastream.readInt()];
 					datastream.readFully(data);
-					OutputStream out = fs.write(f);
+					OutputStream out = Filesystem.write(f);
 					out.write(data);
 					out.flush();
 					out.close();
 				}
-				fs.setRead(f, (attrs & 4) != 0);
-				fs.setWrite(f, (attrs & 2) != 0);
-				fs.setExec(f, (attrs & 1) != 0);
+				Filesystem.setRead(f, (attrs & 4) != 0);
+				Filesystem.setWrite(f, (attrs & 2) != 0);
+				Filesystem.setExec(f, (attrs & 1) != 0);
 			}
 			datastream.close();
 		}
-		fs.remove("/PACKAGE");
+		Filesystem.remove("/PACKAGE");
 		// install /cfg/locale
-		if (!fs.exists("/cfg/locale") || fs.size("/cfg/locale") < 2) {
+		if (!Filesystem.exists("/cfg/locale") || Filesystem.size("/cfg/locale") < 2) {
 			String property = System.getProperty("microedition.locale");
 			if (property == null) property = "en_US";
 			property = property.replace('-', '_');
-			OutputStream out = fs.write("/cfg/locale");
+			OutputStream out = Filesystem.write("/cfg/locale");
 			out.write(IO.utfEncode(property));
 			out.close();
 		}
 		// install /cfg/platform
-		OutputStream out = fs.write("/cfg/platform");
+		OutputStream out = Filesystem.write("/cfg/platform");
 		out.write(IO.utfEncode("Profiles: " + System.getProperty("microedition.profiles") + '\n'));
 		out.write(IO.utfEncode("Configuration: " + System.getProperty("microedition.configuration") + '\n'));
 		out.close();
 		// close file system
-		FSManager.umount("");
+		Filesystem.unmount("");
 	}
 	
 	/** Should be only available when RMS file system is in use. */
@@ -321,15 +320,15 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		// opening old FS
 		Properties cfg = InstallInfo.read();
 		String oldname = cfg.get(InstallInfo.RMS_NAME);
-		alchemy.fs.rms.FS oldfs = new FS();
-		long oldlen = oldfs.spaceUsed(null);
+		Driver oldfs = new Driver();
+		long oldlen = oldfs.spaceUsed();
 		// creating new FS
 		String newname = (oldname.equals("rsfiles")) ? "rsfiles2" : "rsfiles";
 		cfg.put(InstallInfo.RMS_NAME, newname);
 		try {
 			RecordStore.deleteRecordStore(newname);
 		} catch (RecordStoreException rse) { }
-		alchemy.fs.rms.FS newfs = new FS();
+		Driver newfs = new Driver();
 		// copying all files from the old FS to the new
 		String[] list = oldfs.list("");
 		for (int i=0; i<list.length; i++) {
@@ -338,8 +337,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		oldfs.close();
 		// computing new len
 		newfs.close();
-		newfs = new FS();
-		long newlen = newfs.spaceUsed(null);
+		newfs = new Driver();
+		long newlen = newfs.spaceUsed();
 		newfs.close();
 		// writing configuration
 		messages.append("Saving configuration...\n");
@@ -351,8 +350,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.append("" + (oldlen - newlen) + " bytes saved.\n");
 	}
 	
-	private void copyTree(Filesystem from, Filesystem to, String file) throws IOException {
-		file = FSManager.normalize(file);
+	private void copyTree(FSDriver from, FSDriver to, String file) throws IOException {
+		file = Filesystem.normalize(file);
 		boolean fRead = from.canRead(file);
 		boolean fWrite = from.canWrite(file);
 		if (!fRead) from.setRead(file, true);

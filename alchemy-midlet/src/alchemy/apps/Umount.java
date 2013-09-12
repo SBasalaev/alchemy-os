@@ -19,7 +19,7 @@
 package alchemy.apps;
 
 import alchemy.core.Process;
-import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
 
@@ -43,7 +43,7 @@ public class Umount extends NativeApp {
 			if (dir.length() == 0) {
 			IO.println(p.stderr, "umount: Cannot unmount root directory!");
 			return 1;
-			} else if (!FSManager.umount(dir)) {
+			} else if (!Filesystem.unmount(dir)) {
 				IO.println(p.stderr, "umount: "+dir+" is not mounted");
 				return 1;
 			}

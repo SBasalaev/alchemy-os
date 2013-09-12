@@ -23,7 +23,6 @@ import alchemy.core.Process;
 import alchemy.core.Function;
 import alchemy.core.Library;
 import alchemy.evm.EtherLoader;
-import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.libs.core.Pipe;
@@ -376,66 +375,66 @@ public class LibCore31 extends NativeLibrary {
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			case 0: // pathfile(f: String): String
-				return Filesystem.fname(p.toFile((String)args[0]));
+				return Filesystem.fileName(p.toFile((String)args[0]));
 			case 1: // pathdir(f: String): String
-				return Filesystem.fparent(p.toFile((String)args[0]));
+				return Filesystem.fileParent(p.toFile((String)args[0]));
 			case 2: // abspath(f: String): String
 				return p.toFile((String)args[0]);
 			case 3: // fcreate(f: String)
-				FSManager.fs().create(p.toFile((String)args[0]));
+				Filesystem.create(p.toFile((String)args[0]));
 				return null;
 			case 4: // fremove(f: String)
-				FSManager.fs().remove(p.toFile((String)args[0]));
+				Filesystem.remove(p.toFile((String)args[0]));
 				return null;
 			case 5: // mkdir(f: String)
-				FSManager.fs().mkdir(p.toFile((String)args[0]));
+				Filesystem.mkdir(p.toFile((String)args[0]));
 				return null;
 			case 6: // fcopy(src: String, dest: String)
-				FSManager.fs().copy(p.toFile((String)args[0]), p.toFile((String)args[1]));
+				Filesystem.copy(p.toFile((String)args[0]), p.toFile((String)args[1]));
 				return null;
 			case 7: // fmove(src: String, dest: String)
-				FSManager.fs().move(p.toFile((String)args[0]), p.toFile((String)args[1]));
+				Filesystem.move(p.toFile((String)args[0]), p.toFile((String)args[1]));
 				return null;
 			case 8: // set_read(f: String, on: Bool)
-				FSManager.fs().setRead(p.toFile((String)args[0]), bval(args[1]));
+				Filesystem.setRead(p.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 9: // set_write(f: String, on: Bool)
-				FSManager.fs().setWrite(p.toFile((String)args[0]), bval(args[1]));
+				Filesystem.setWrite(p.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 10: // set_exec(f: String, on: Bool)
-				FSManager.fs().setExec(p.toFile((String)args[0]), bval(args[1]));
+				Filesystem.setExec(p.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 11: // can_read(f: String): Bool
-				return Ival(FSManager.fs().canRead(p.toFile((String)args[0])));
+				return Ival(Filesystem.canRead(p.toFile((String)args[0])));
 			case 12: // can_write(f: String): Bool
-				return Ival(FSManager.fs().canWrite(p.toFile((String)args[0])));
+				return Ival(Filesystem.canWrite(p.toFile((String)args[0])));
 			case 13: // can_exec(f: String): Bool
-				return Ival(FSManager.fs().canExec(p.toFile((String)args[0])));
+				return Ival(Filesystem.canExec(p.toFile((String)args[0])));
 			case 14: // exists(f: String): Bool
-				return Ival(FSManager.fs().exists(p.toFile((String)args[0])));
+				return Ival(Filesystem.exists(p.toFile((String)args[0])));
 			case 15: // is_dir(f: String): Bool
-				return Ival(FSManager.fs().isDirectory(p.toFile((String)args[0])));
+				return Ival(Filesystem.isDirectory(p.toFile((String)args[0])));
 			case 16: { // fopen_r(f: String): IStream
-				InputStream stream = FSManager.fs().read(p.toFile((String)args[0]));
+				InputStream stream = Filesystem.read(p.toFile((String)args[0]));
 				p.addStream(stream);
 				return stream;
 			}
 			case 17: { // fopen_w(f: String): OStream
-				OutputStream stream = FSManager.fs().write(p.toFile((String)args[0]));
+				OutputStream stream = Filesystem.write(p.toFile((String)args[0]));
 				p.addStream(stream);
 				return stream;
 			}
 			case 18: { // fopen_a(f: String): OStream
-				OutputStream stream = FSManager.fs().append(p.toFile((String)args[0]));
+				OutputStream stream = Filesystem.append(p.toFile((String)args[0]));
 				p.addStream(stream);
 				return stream;
 			}
 			case 19: // flist(f: String): [String]
-				return FSManager.fs().list(p.toFile((String)args[0]));
+				return Filesystem.list(p.toFile((String)args[0]));
 			case 20: // fmodified(f: String): Long
-				return Lval(FSManager.fs().lastModified(p.toFile((String)args[0])));
+				return Lval(Filesystem.lastModified(p.toFile((String)args[0])));
 			case 21: // fsize(f: String): Long
-				return Lval(FSManager.fs().size(p.toFile((String)args[0])));
+				return Lval(Filesystem.size(p.toFile((String)args[0])));
 			case 22: // set_cwd(f: String)
 				p.setCurDir(p.toFile((String)args[0]));
 				return null;
@@ -533,11 +532,11 @@ public class LibCore31 extends NativeLibrary {
 			case 57: // get_cwd(): String
 				return p.getCurDir();
 			case 58: // space_total(root: String): Long
-				return Lval(FSManager.fs().spaceTotal(p.toFile((String)args[0])));
+				return Lval(Filesystem.spaceTotal(p.toFile((String)args[0])));
 			case 59: // space_free(root: String): Long
-				return Lval(FSManager.fs().spaceFree(p.toFile((String)args[0])));
+				return Lval(Filesystem.spaceFree(p.toFile((String)args[0])));
 			case 60: // space_used(root: String): Long
-				return Lval(FSManager.fs().spaceUsed(p.toFile((String)args[0])));
+				return Lval(Filesystem.spaceUsed(p.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
 				return IO.stringValue(args[0]);
 			case 62: // new_strbuf(): StrBuf
@@ -674,7 +673,7 @@ public class LibCore31 extends NativeLibrary {
 				String addr = url.substring(cl+1);
 				InputStream in;
 				if (protocol.equals("file")) {
-					in = FSManager.fs().read(FSManager.normalize(addr));
+					in = Filesystem.read(Filesystem.normalize(addr));
 				} else if (protocol.equals("res")) {
 					in = this.getClass().getResourceAsStream(addr);
 					if (in == null) throw new IOException("Resource not found: "+addr);

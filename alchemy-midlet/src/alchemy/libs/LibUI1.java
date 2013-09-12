@@ -21,7 +21,7 @@ package alchemy.libs;
 import alchemy.core.Cache;
 import alchemy.core.Process;
 import alchemy.core.Int;
-import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UICanvas;
 import alchemy.libs.ui.UIServer;
@@ -390,10 +390,10 @@ public class LibUI1 extends NativeLibrary {
 				return Ival(((UICanvas)args[0]).hasPointerMotionEvents());
 			case 96: { // image_from_file(file: String): Image
 				String filename = p.toFile((String)args[0]);
-				long tstamp = FSManager.fs().lastModified(filename);
+				long tstamp = Filesystem.lastModified(filename);
 				Image img = (Image) Cache.get(filename, tstamp);
 				if (img == null) {
-					InputStream in = FSManager.fs().read(filename);
+					InputStream in = Filesystem.read(filename);
 					p.addStream(in);
 					img = Image.createImage(in);
 					in.close();

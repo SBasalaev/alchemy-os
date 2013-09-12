@@ -21,7 +21,7 @@ package alchemy.midlet;
 import alchemy.core.Art;
 import alchemy.core.Process;
 import alchemy.core.ProcessListener;
-import alchemy.fs.FSManager;
+import alchemy.fs.Filesystem;
 import alchemy.libs.ui.UIServer;
 import alchemy.util.Properties;
 import javax.microedition.lcdui.*;
@@ -45,7 +45,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 				return;
 			}
 			Properties prop = InstallInfo.read();
-			FSManager.mount("", prop.get(InstallInfo.FS_TYPE), prop.get(InstallInfo.FS_INIT));
+			Filesystem.mount("", prop.get(InstallInfo.FS_TYPE), prop.get(InstallInfo.FS_INIT));
 			//setting up environment
 			runtime = new Art();
 			Process root = runtime.rootProcess();
@@ -87,7 +87,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 
 	protected void destroyApp(boolean unconditional) {
 		try {
-			FSManager.umountAll();
+			Filesystem.unmountAll();
 		} catch (Exception e) { }
 		notifyDestroyed();
 	}
