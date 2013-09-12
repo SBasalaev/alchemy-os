@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!-- *** GENERATED FROM project.xml - DO NOT EDIT *** --><project name="alchemy-midlet-impl" default="jar" basedir="..">
+<?xml version="1.0" encoding="UTF-8"?><!-- *** GENERATED FROM project.xml - DO NOT EDIT *** --><project name="alchemy-core-impl" default="jar" basedir="..">
     <!--load-properties-->
     <target name="pre-load-properties">
         <property file="nbproject/private/private.properties"/>
@@ -361,14 +361,7 @@
         <antcall target="do-clean" inheritall="true" inheritrefs="true"/>
     </target>
     <!--deps-jar-->
-    <target name="deps-jar" depends="conditional-clean" unless="no.deps">
-        <ant target="jar" inheritall="false" antfile="${project.alchemy-core}/build.xml">
-            <property name="config.active" value=""/>
-        </ant>
-        <ant target="jar" inheritall="false" antfile="${project.stubs-for-3rd-party-api}/build.xml">
-            <property name="config.active" value=""/>
-        </ant>
-    </target>
+    <target name="deps-jar" depends="conditional-clean" unless="no.deps"/>
     <!--preprocess-->
     <target name="pre-preprocess"/>
     <target name="do-preprocess" unless="no.preprocess">
