@@ -272,7 +272,7 @@ public class Driver extends FSDriver {
 				fc.close();
 			}
 		} catch (IOException e) {
-			return -1l;
+			return 0l;
 		}
 	}
 
@@ -285,7 +285,7 @@ public class Driver extends FSDriver {
 				fc.close();
 			}
 		} catch (IOException e) {
-			return -1l;
+			return 0l;
 		}
 	}
 
@@ -298,7 +298,7 @@ public class Driver extends FSDriver {
 				fc.close();
 			}
 		} catch (IOException e) {
-			return -1l;
+			return 0l;
 		}
 	}
 }

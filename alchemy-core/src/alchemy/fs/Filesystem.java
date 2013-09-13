@@ -522,7 +522,7 @@ public final class Filesystem {
 	/**
 	 * Returns the size of the file.
 	 * If file is accessible but the size cannot be computed
-	 * this method returns <code>-1</code>.
+	 * this method returns <code>0L</code>.
 	 * 
 	 * @param file the file
 	 * @return file size, in bytes
@@ -544,7 +544,7 @@ public final class Filesystem {
 	 *
 	 * @return
 	 *   the total size of the file system in bytes, or
-	 *   <code>-1</code> if this value cannot be estimated
+	 *   <code>0L</code> if this value cannot be estimated
 	 * @throws SecurityException
 	 *   if system denies reading this attribute
 	 */
@@ -560,7 +560,7 @@ public final class Filesystem {
 	 *
 	 * @return
 	 *  the available size in bytes on a file system, or
-	 *   <code>-1</code> if this value cannot be estimated
+	 *   <code>0L</code> if this value cannot be estimated
 	 * @throws SecurityException
 	 *   if system denies reading this attribute
 	 */
@@ -575,7 +575,7 @@ public final class Filesystem {
 	 *
 	 * @return
 	 *  the used size in bytes on a file system, or
-	 *   <code>-1</code> if this value cannot be estimated
+	 *   <code>0L</code> if this value cannot be estimated
 	 * @throws SecurityException
 	 *   if system denies reading this attribute
 	 */

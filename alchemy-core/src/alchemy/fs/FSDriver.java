@@ -333,7 +333,7 @@ public abstract class FSDriver {
 	 *
 	 * @return
 	 *   the total size of the file system in bytes, or
-	 *   <code>-1</code> if this value cannot be estimated
+	 *   <code>0L</code> if this value cannot be estimated
 	 * @throws SecurityException
 	 *   if system denies reading this attribute
 	 */
@@ -345,7 +345,7 @@ public abstract class FSDriver {
 	 *
 	 * @return
 	 *  the available size in bytes on a file system, or
-	 *   <code>-1</code> if this value cannot be estimated
+	 *   <code>0L</code> if this value cannot be estimated
 	 * @throws SecurityException
 	 *   if system denies reading this attribute
 	 */
@@ -356,7 +356,7 @@ public abstract class FSDriver {
 	 *
 	 * @return
 	 *  the used size in bytes on a file system, or
-	 *   <code>-1</code> if this value cannot be estimated
+	 *   <code>0L</code> if this value cannot be estimated
 	 * @throws SecurityException
 	 *   if system denies reading this attribute
 	 */

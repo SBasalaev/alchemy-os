@@ -360,22 +360,19 @@ public final class Driver extends FSDriver {
 		try {
 			return store.getSizeAvailable();
 		} catch (RecordStoreException rse) {
-			return -1;
+			return 0L;
 		}
 	}
 
 	public long spaceTotal() {
-		long free = spaceFree();
-		long used = spaceUsed();
-		if (free < 0 || used < 0) return -1;
-		else return free + used;
+		return spaceFree() + spaceUsed();
 	}
 
 	public long spaceUsed() {
 		try {
 			return store.getSize();
 		} catch (RecordStoreException rse) {
-			return -1;
+			return 0L;
 		}
 	}
 
