@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.core;
+package alchemy.system;
 
+import alchemy.util.HashMap;
 import java.lang.ref.WeakReference;
-import java.util.Hashtable;
 
 /**
  * Cache of reusable objects loaded from files.
@@ -29,10 +29,10 @@ import java.util.Hashtable;
  *
  * @author Sergey Basalaev
  */
-public class Cache {
+public final class Cache {
 
 	/** Maps file names to CacheEntries. */
-	private static final Hashtable cache = new Hashtable();
+	private static final HashMap cache = new HashMap();
 
 	private Cache() { }
 
@@ -53,7 +53,7 @@ public class Cache {
 
 	/** Puts object in the cache. */
 	public static synchronized void put(String file, long tstamp, Object obj) {
-		cache.put(file, new CacheEntry(obj, tstamp));
+		cache.set(file, new CacheEntry(obj, tstamp));
 	}
 
 	/** Holds cached object and a timestamp. */

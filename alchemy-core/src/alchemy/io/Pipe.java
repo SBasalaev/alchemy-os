@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.libs.core;
+package alchemy.io;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -27,6 +27,11 @@ import java.io.OutputStream;
 import javax.microedition.io.StreamConnection;
 
 /**
+ * Pipe is a one-direction data channel.
+ * Data sent to the output can then be read from the input.
+ * <p>
+ * Warning: using input and output from the same
+ * thread can result in a deadlock.
  *
  * @author Sergey Basalaev
  */
@@ -34,11 +39,11 @@ public final class Pipe implements StreamConnection {
 	
 	private static final int BUFFER_SIZE = 1024;
 	
-	/** Circular pipe buffer. */
+	/** Circular pipe buffer. If null the pipe is closed. */
 	private byte[] buf = new byte[BUFFER_SIZE];
-	/** Index of next byte to be written. */
+	/** Index of the next byte to be written. */
 	private int next = 0;
-	/** Count of bytes in buffer. */
+	/** Number of bytes in this buffer. */
 	private int count = 0;
 	
 	private DataInputStream in;
