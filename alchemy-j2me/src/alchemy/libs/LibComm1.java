@@ -21,7 +21,7 @@ package alchemy.libs;
 import alchemy.core.Process;
 import alchemy.core.Int;
 import alchemy.nlib.NativeLibrary;
-import alchemy.util.IO;
+import alchemy.util.Strings;
 import java.io.IOException;
 import javax.microedition.io.CommConnection;
 import javax.microedition.io.Connection;
@@ -43,7 +43,7 @@ public class LibComm1 extends NativeLibrary {
 			case 0: { // list_commports(): [String]
 				String ports = System.getProperty("microedition.commports");
 				if (ports == null) ports = "";
-				return IO.split(ports, ',');
+				return Strings.split(ports, ',');
 			}
 			case 1: { // new_comm(port: String, cfg: CommCfg): Comm
 				StringBuffer url = new StringBuffer("comm://");

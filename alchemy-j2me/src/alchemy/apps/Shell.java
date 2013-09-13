@@ -19,14 +19,15 @@
 package alchemy.apps;
 
 import alchemy.core.Process;
+import alchemy.io.IO;
+import alchemy.io.UTFReader;
 import alchemy.nlib.NativeApp;
-import alchemy.util.IO;
-import alchemy.util.UTFReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import alchemy.apps.TerminalForm.TerminalInputStream;
 import alchemy.fs.Filesystem;
 import alchemy.util.ArrayList;
+import alchemy.util.Strings;
 
 /**
  * Native shell.
@@ -53,7 +54,7 @@ public class Shell extends NativeApp {
 				for (int i=2; i<args.length; i++) {
 					cmdline.append(' ').append(args[i]);
 				}
-				scriptinput = new ByteArrayInputStream(IO.utfEncode(cmdline.toString()));
+				scriptinput = new ByteArrayInputStream(Strings.utfEncode(cmdline.toString()));
 				p.addStream(scriptinput);
 			} else {
 				String file = p.toFile(args[0]);

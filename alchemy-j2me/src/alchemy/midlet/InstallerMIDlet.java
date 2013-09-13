@@ -21,10 +21,11 @@ package alchemy.midlet;
 import alchemy.fs.Filesystem;
 import alchemy.fs.FSDriver;
 import alchemy.fs.rms.Driver;
+import alchemy.io.IO;
+import alchemy.io.UTFReader;
 import alchemy.util.ArrayList;
-import alchemy.util.IO;
 import alchemy.util.Properties;
-import alchemy.util.UTFReader;
+import alchemy.util.Strings;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -150,8 +151,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	}
 	
 	private int compareVersions(String v1, String v2) {
-		String[] v1parts = IO.split(v1, '.');
-		String[] v2parts = IO.split(v2, '.');
+		String[] v1parts = Strings.split(v1, '.');
+		String[] v2parts = Strings.split(v2, '.');
 		int index = 0;
 		while (true) {
 			if (index < v1parts.length) {
@@ -174,7 +175,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		instCfg.put(InstallInfo.RMS_NAME, "rsfiles");
 		//choosing filesystem
 		ArrayList filesystems = new ArrayList();
-		String[] fstypes = IO.split(setupCfg.get("install.fs"), ' ');
+		String[] fstypes = Strings.split(setupCfg.get("install.fs"), ' ');
 		for (int i=0; i<fstypes.length; i++) {
 			try {
 				Class.forName(setupCfg.get("install.fs."+fstypes[i]+".test"));
@@ -267,7 +268,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		Properties instCfg = InstallInfo.read();
 		Filesystem.mount("", instCfg.get(InstallInfo.FS_TYPE), instCfg.get(InstallInfo.FS_INIT));
 		// unpack base file archives
-		String[] archives = IO.split(setupCfg.get("install.archives"), ' ');
+		String[] archives = Strings.split(setupCfg.get("install.archives"), ' ');
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
@@ -301,13 +302,13 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			if (property == null) property = "en_US";
 			property = property.replace('-', '_');
 			OutputStream out = Filesystem.write("/cfg/locale");
-			out.write(IO.utfEncode(property));
+			out.write(Strings.utfEncode(property));
 			out.close();
 		}
 		// install /cfg/platform
 		OutputStream out = Filesystem.write("/cfg/platform");
-		out.write(IO.utfEncode("Profiles: " + System.getProperty("microedition.profiles") + '\n'));
-		out.write(IO.utfEncode("Configuration: " + System.getProperty("microedition.configuration") + '\n'));
+		out.write(Strings.utfEncode("Profiles: " + System.getProperty("microedition.profiles") + '\n'));
+		out.write(Strings.utfEncode("Configuration: " + System.getProperty("microedition.configuration") + '\n'));
 		out.close();
 		// close file system
 		Filesystem.unmount("");

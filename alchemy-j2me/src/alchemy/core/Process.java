@@ -20,11 +20,11 @@ package alchemy.core;
 
 import alchemy.evm.EtherLoader;
 import alchemy.fs.Filesystem;
-import alchemy.fs.FSDriver;
-import alchemy.fs.devfs.SinkInputStream;
+import alchemy.io.IO;
+import alchemy.io.NullInputStream;
+import alchemy.io.UTFReader;
 import alchemy.util.ArrayList;
-import alchemy.util.IO;
-import alchemy.util.UTFReader;
+import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -172,7 +172,7 @@ public class Process {
 	 * Creates root process with given runtime.
 	 */
 	Process(Art runtime) {
-		stdin = new SinkInputStream(-1);
+		stdin = new NullInputStream(-1);
 		stderr = stdout = System.out;
 		curdir = "";
 		art = runtime;
@@ -396,7 +396,7 @@ public class Process {
 					return lib;
 				}
 				case ('#' << 8) | '!': { // shebang
-					String[] args = IO.split(new UTFReader(in).readLine(), ' ');
+					String[] args = Strings.split(new UTFReader(in).readLine(), ' ');
 					in.close();
 					String progname = args[0];
 					System.arraycopy(args, 1, args, 0, args.length-1);
@@ -453,7 +453,7 @@ public class Process {
 			f = toFile(name);
 			if (Filesystem.exists(f)) return f;
 		} else {
-			String[] paths = IO.split(pathlist, ':');
+			String[] paths = Strings.split(pathlist, ':');
 			for (int i=0; i<paths.length; i++) {
 				String path =paths[i];
 				if (path.length() == 0) continue;

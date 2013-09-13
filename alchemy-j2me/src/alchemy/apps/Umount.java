@@ -21,7 +21,7 @@ package alchemy.apps;
 import alchemy.core.Process;
 import alchemy.fs.Filesystem;
 import alchemy.nlib.NativeApp;
-import alchemy.util.IO;
+import alchemy.io.IO;
 
 /**
  * Native program 'umount'.

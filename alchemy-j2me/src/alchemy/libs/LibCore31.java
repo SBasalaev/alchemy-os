@@ -24,11 +24,12 @@ import alchemy.core.Function;
 import alchemy.core.Library;
 import alchemy.evm.EtherLoader;
 import alchemy.fs.Filesystem;
+import alchemy.io.IO;
 import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.libs.core.Pipe;
 import alchemy.nlib.NativeLibrary;
 import alchemy.util.ArrayList;
-import alchemy.util.IO;
+import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -457,7 +458,7 @@ public class LibCore31 extends NativeLibrary {
 			case 31: // String.lcase(): String
 				return ((String)args[0]).toLowerCase();
 			case 32: // String.concat(str: String): String
-				return ((String)args[0]).concat(IO.stringValue(args[1]));
+				return ((String)args[0]).concat(Strings.stringValue(args[1]));
 			case 33: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
 			case 34: // String.chars(): [Char]
@@ -470,7 +471,7 @@ public class LibCore31 extends NativeLibrary {
 				p.setEnv(((String)args[0]), (String)args[1]);
 				return null;
 			case 38: // utfbytes(str: String): [Byte]
-				return IO.utfEncode((String)args[0]);
+				return Strings.utfEncode((String)args[0]);
 			case 39: // datestr(date: Long): String
 				return new Date(lval(args[0])).toString();
 			case 40: { // year(date: Long): Int
@@ -509,7 +510,7 @@ public class LibCore31 extends NativeLibrary {
 				return Ival(cal.get(Calendar.SECOND));
 			}
 			case 47: // StrBuf.append(a: Any): StrBuf
-				return ((StringBuffer)args[0]).append(IO.stringValue(args[1]));
+				return ((StringBuffer)args[0]).append(Strings.stringValue(args[1]));
 			case 48: // StrBuf.addch(ch: Char): StrBuf
 				return ((StringBuffer)args[0]).append((char)ival(args[1]));
 			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
@@ -517,7 +518,7 @@ public class LibCore31 extends NativeLibrary {
 			case 50: // StrBuf.delch(at: Int): StrBuf
 				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
 			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), IO.stringValue(args[2]));
+				return ((StringBuffer)args[0]).insert(ival(args[1]), Strings.stringValue(args[2]));
 			case 52: // StrBuf.insch(at: Int, ch: Char): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), (char) ival(args[2]));
 			case 53: // StrBuf.setch(at: Int, ch: Char): StrBuf
@@ -538,7 +539,7 @@ public class LibCore31 extends NativeLibrary {
 			case 60: // space_used(root: String): Long
 				return Lval(Filesystem.spaceUsed(p.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
-				return IO.stringValue(args[0]);
+				return Strings.stringValue(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
 			case 63: // IStream.close()
@@ -547,14 +548,14 @@ public class LibCore31 extends NativeLibrary {
 			case 64: // IStream.read(): Int
 				return Ival(((InputStream)args[0]).read());
 			case 65: // IStream.readarray(buf: [Byte], ofs: Int, len: Int): Int
-				return Ival(IO.readarray((InputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3])));
+				return Ival(IO.readArray((InputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3])));
 			case 66: // IStream.skip(n: Long): Long
 				return Lval(IO.skip((InputStream)args[0], lval(args[1])));
 			case 67: // OStream.write(b: Int)
 				((OutputStream)args[0]).write(ival(args[1]));
 				return null;
 			case 68: // OStream.writearray(buf: [Byte], ofs: Int, len: Int)
-				IO.writearray((OutputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3]));
+				IO.writeArray((OutputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3]));
 				return null;
 			case 69: // OStream.flush(out: OStream)
 				((OutputStream)args[0]).flush();
@@ -588,10 +589,10 @@ public class LibCore31 extends NativeLibrary {
 				arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
 			case 75: // fprint(out: OStream, a: Any): OStream
-				IO.print((OutputStream)args[0], IO.stringValue(args[1]));
+				IO.print((OutputStream)args[0], Strings.stringValue(args[1]));
 				return args[0];
 			case 76: // fprintln(out: OStream, a: Any): OStream
-				IO.println((OutputStream)args[0], IO.stringValue(args[1]));
+				IO.println((OutputStream)args[0], Strings.stringValue(args[1]));
 				return args[0];
 			case 77: // stdin(): IStream
 				return p.stdin;
@@ -633,7 +634,7 @@ public class LibCore31 extends NativeLibrary {
 			case 94: // ca2str(chars: [Char]): String
 				return new String((char[])args[0]);
 			case 95: // ba2utf(bytes: [Byte]): String
-				return IO.utfDecode((byte[])args[0]);
+				return Strings.utfDecode((byte[])args[0]);
 			case 96: // ibits2f(bits: Int): Float
 				return Fval(Float.intBitsToFloat(ival(args[0])));
 			case 97: // f2ibits(f: Float): Int
@@ -702,7 +703,7 @@ public class LibCore31 extends NativeLibrary {
 				return clone;
 			}
 			case 115: // String.split(ch: Char): [String]
-				return IO.split((String)args[0], (char) ival(args[1]));
+				return Strings.split((String)args[0], (char) ival(args[1]));
 			case 116: // String.toint(): Int
 				try {
 					return Ival(Integer.parseInt((String)args[0]));
@@ -733,7 +734,7 @@ public class LibCore31 extends NativeLibrary {
 				p.set(args[0], args[1]);
 				return null;
 			case 122: // String.format(args: [Any]): String
-				return IO.sprintf((String)args[0], (Object[])args[1]);
+				return Strings.format((String)args[0], (Object[])args[1]);
 			case 123: { // Dict.keys(): [Any]
 				ArrayList keyv = new ArrayList();
 				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {

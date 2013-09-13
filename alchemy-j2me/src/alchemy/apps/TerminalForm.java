@@ -18,7 +18,8 @@
 
 package alchemy.apps;
 
-import alchemy.util.IO;
+import alchemy.io.IO;
+import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -110,7 +111,7 @@ class TerminalForm extends Form {
 		public synchronized void flush() throws IOException {
 			byte[] data = buf.toByteArray();
 			buf.reset();
-			print(IO.utfDecode(data));
+			print(Strings.utfDecode(data));
 		}
 	}
 
@@ -137,7 +138,7 @@ class TerminalForm extends Form {
 			int b = buf.read();
 			if (b == -1) {
 				String data = waitForInput();
-				buf = new ByteArrayInputStream(IO.utfEncode(data));
+				buf = new ByteArrayInputStream(Strings.utfEncode(data));
 				b = buf.read();
 			}
 			return b;

@@ -21,7 +21,7 @@ package alchemy.apps;
 import alchemy.core.Process;
 import alchemy.libs.ui.UIServer;
 import alchemy.nlib.NativeApp;
-import alchemy.util.IO;
+import alchemy.io.IO;
 import javax.microedition.lcdui.Command;
 
 /**

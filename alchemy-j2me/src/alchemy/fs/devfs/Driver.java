@@ -21,7 +21,11 @@ package alchemy.fs.devfs;
 import alchemy.core.Process.ProcessThread;
 import alchemy.fs.FSDriver;
 import alchemy.fs.Filesystem;
-import alchemy.util.IO;
+import alchemy.io.IO;
+import alchemy.io.NullInputStream;
+import alchemy.io.NullOutputStream;
+import alchemy.io.RandomInputStream;
+import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -54,16 +58,16 @@ public final class Driver extends FSDriver {
 	private final String[] commdevs;
 	
 	public Driver() {
-		SinkOutputStream sink = new SinkOutputStream();
+		NullOutputStream sink = new NullOutputStream();
 		sharedoutputs.put("zero", sink);
 		sharedoutputs.put("null", sink);
 
-		sharedinputs.put("zero", new SinkInputStream(0));
-		sharedinputs.put("null", new SinkInputStream(-1));
+		sharedinputs.put("zero", new NullInputStream(0));
+		sharedinputs.put("null", new NullInputStream(-1));
 		sharedinputs.put("random", new RandomInputStream());
 
 		String comm = System.getProperty("microedition.commports");
-		commdevs = (comm == null) ? new String[0] : IO.split(comm, ',');
+		commdevs = (comm == null) ? new String[0] : Strings.split(comm, ',');
 	}
 
 	public InputStream read(String file) throws IOException {

@@ -18,6 +18,7 @@
 
 package alchemy.util;
 
+import alchemy.io.UTFReader;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;

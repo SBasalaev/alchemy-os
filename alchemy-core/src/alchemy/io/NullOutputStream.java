@@ -16,28 +16,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.fs.devfs;
+package alchemy.io;
 
-import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * The input stream that always returns the same number.
- * Used to implement /dev/zero and /dev/null
- *
+ * An output stream that just ignores the data.
  * @author Sergey Basalaev
  */
-public class SinkInputStream extends InputStream {
-	
-	private final int b;
-	
-	public SinkInputStream(int b) {
-		this.b = b;
-	}
-
-	public int read() {
-		return b;
-	}
-
-	public void reset() { }
-	public boolean markSupported() { return true; }
+public class NullOutputStream extends OutputStream {
+	public NullOutputStream() { }
+	public void write(int b) { }
 }

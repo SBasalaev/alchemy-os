@@ -18,7 +18,7 @@
 
 package alchemy.nec;
 
-import alchemy.util.UTFReader;
+import alchemy.io.UTFReader;
 import java.io.IOException;
 
 /**

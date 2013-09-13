@@ -22,7 +22,7 @@ import alchemy.core.Process;
 import alchemy.core.Function;
 import alchemy.core.Int;
 import alchemy.core.Library;
-import alchemy.util.UTFReader;
+import alchemy.io.UTFReader;
 import java.io.IOException;
 import java.util.Hashtable;
 

@@ -21,7 +21,7 @@ package alchemy.apps;
 import alchemy.core.Process;
 import alchemy.fs.NavigatorHelper;
 import alchemy.nlib.NativeApp;
-import alchemy.util.IO;
+import alchemy.io.IO;
 
 /**
  * Prints lists of roots in all supported file systems.

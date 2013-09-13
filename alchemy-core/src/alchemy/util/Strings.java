@@ -18,24 +18,22 @@
 
 package alchemy.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
- * Miscellaneous I/O utilities used in Alchemy OS.
+ * Various utility functions to operate on strings.
+ *
  * @author Sergey Basalaev
  */
-public final class IO {
+public final class Strings {
 
+	private Strings() { }
+	
 	private static final String ERR_END = "Incomplete character at the end";
 	private static final String ERR_WRONG = "Wrong code at byte ";
 	private static final String ERR_LONG = "Encoded string is too long";
-
-	private IO() { }
 
 	/**
 	 * Decodes bytes to String using modified UTF-8 format.
@@ -51,26 +49,33 @@ public final class IO {
 		int b1, b2, b3;                //bytes to compound symbols from
 
 		while (ofs < len) {
-			b1 = b[ofs++] & 0xff;
+			b1 = b[ofs] & 0xff;
+			ofs++;
 			if (b1 < 0x80) {  // 0xxx xxxx
-				chars[count++]=(char)b1;
+				chars[count]=(char)b1;
+				count++;
 				continue;
 			}
 			switch (b1 & 0xf0) {
 				case 0xc0:    // 1100 xxxx   10xx xxxx
 				case 0xd0:    // 1101 xxxx   10xx xxxx
 					if (ofs + 1 > len) throw new UTFDataFormatException(ERR_END);
-					b2 = b[ofs++];
+					b2 = b[ofs];
+					ofs++;
 					if ((b2 & 0xc0) != 0x80) throw new UTFDataFormatException(ERR_WRONG+(ofs-1));
-					chars[count++] = (char)( ((b1 & 0x1f) << 6) | (b2 & 0x3f) );
+					chars[count] = (char)( ((b1 & 0x1f) << 6) | (b2 & 0x3f) );
+					count++;
 					break;
 				case 0xe0:    // 1110 xxxx   10xx xxxx   10xx xxxx
 					if (ofs + 2 > len) throw new UTFDataFormatException(ERR_END);
-					b2 = b[ofs++];
-					b3 = b[ofs++];
+					b2 = b[ofs];
+					ofs++;
+					b3 = b[ofs];
+					ofs++;
 					if (((b2 & 0xc0) != 0x80)) throw new UTFDataFormatException(ERR_WRONG+(ofs-2));
 					if (((b3 & 0xc0) != 0x80)) throw new UTFDataFormatException(ERR_WRONG+(ofs-1));
-					chars[count++] = (char)( ((b1 & 0x0f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f) );
+					chars[count] = (char)( ((b1 & 0x0f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f) );
+					count++;
 					break;
 				default:
 					throw new UTFDataFormatException(ERR_WRONG+(ofs-1));
@@ -111,144 +116,31 @@ public final class IO {
 		for (int i=0; i<len; i++) {
 			ch = str.charAt(i);
 			if (ch == 0) {
-				bytes[ofs++] = (byte)0xc0;
-				bytes[ofs++] = (byte)0x80;
+				bytes[ofs] = (byte)0xc0;
+				ofs++;
+				bytes[ofs] = (byte)0x80;
+				ofs++;
 			} else if (ch < 0x80) {
-				bytes[ofs++] = (byte)(ch);
+				bytes[ofs] = (byte)(ch);
+				ofs++;
 			} else if (ch < 0x800) {
-				bytes[ofs++] = (byte)((ch >> 6) | 0xc0);
-				bytes[ofs++] = (byte)(ch&0x3f | 0x80);
+				bytes[ofs] = (byte)((ch >> 6) | 0xc0);
+				ofs++;
+				bytes[ofs] = (byte)(ch&0x3f | 0x80);
+				ofs++;
 			} else {
-				bytes[ofs++] = (byte)((ch >> 12) | 0xe0);
-				bytes[ofs++] = (byte)((ch >> 6)&0x3f | 0x80);
-				bytes[ofs++] = (byte)(ch&0x3f | 0x80);
+				bytes[ofs] = (byte)((ch >> 12) | 0xe0);
+				ofs++;
+				bytes[ofs] = (byte)((ch >> 6)&0x3f | 0x80);
+				ofs++;
+				bytes[ofs] = (byte)(ch&0x3f | 0x80);
+				ofs++;
 			}
 		}
 
 		return bytes;
 	}
 
-	/**
-	 * Reads until the end of the stream and returns result as a byte array.
-	 * @param s input stream
-	 * @return byte array containing all bytes read
-	 * @throws IOException if an I/O error occurs
-	 */
-	public static byte[] readFully(InputStream s) throws IOException {
-		int count = 0;
-		byte[] buf = new byte[32];
-		while (true) {
-			if (count == buf.length) {
-				byte[] newbuf = new byte[count << 1];
-				System.arraycopy(buf, 0, newbuf, 0, count);
-				buf = newbuf;
-			}
-			int len = s.read(buf, count, buf.length-count);
-			if (len <= 0) break;
-			count += len;
-		}
-		byte[] ret = new byte[count];
-		System.arraycopy(buf, 0, ret, 0, count);
-		return ret;
-	}
-	
-	/**
-	 * Reads data from input stream.
-	 * Reading from native streams should be done through
-	 * this function because some phones do not follow the contract of
-	 * {@link InputStream#read(byte[], int, int) InputStream.read}
-	 * accurately.
-	 * 
-	 * Known bugs:
-	 * <ul>
-	 *   <li>Nokia phones fail to read zero bytes</li>
-	 * </ul>
-	 * 
-	 * @throws IOException if an I/O error occurs.
-	 */
-	public static int readarray(InputStream in, byte[] buf, int ofs, int len) throws IOException {
-		if (buf == null)
-			throw new NullPointerException();
-		if (ofs < 0 || len < 0 || ofs+len > buf.length)
-			throw new IndexOutOfBoundsException();
-		if (len == 0)
-			return 0;
-		return in.read(buf, ofs, len);
-	}
-	
-	public static int readarray(InputStream in, byte[] buf) throws IOException {
-		return readarray(in, buf, 0, buf.length);
-	}
-	
-	/**
-	 * Writes data into output stream.
-	 * Writing to native streams should be done through
-	 * this function because some phones do not follow the contract of
-	 * {@link OutputStream#write(byte[], int, int) OutputStream.write}
-	 * accurately.
-	 * 
-	 * Known bugs:
-	 * <ul>
-	 *   <li>Nokia phones fail to write zero bytes</li>
-	 * </ul>
-	 * 
-	 * @throws IOException if an I/O error occurs.
-	 */
-	public static void writearray(OutputStream out, byte[] buf, int ofs, int len) throws IOException {
-		if (buf == null)
-			throw new NullPointerException();
-		if (ofs < 0 || len < 0 || ofs+len > buf.length)
-			throw new IndexOutOfBoundsException();
-		if (len == 0)
-			return;
-		out.write(buf, ofs, len);
-	}
-	
-	public static void writearray(OutputStream out, byte[] buf) throws IOException {
-		writearray(out, buf, 0, buf.length);
-	}
-	
-	/**
-	 * Skips over and discards data from input stream.
-	 * Skipping in native streams should be done through
-	 * this function because some phones do not follow the contract of
-	 * {@link InputStream#skip(long) InputStream.skip}
-	 * accurately.
-	 * 
-	 * Known bugs:
-	 * <ul>
-	 *   <li>Siemens phones implement skip as seek</li>
-	 * </ul>
-	 * 
-	 * @throws IOException 
-	 */
-	public static long skip(InputStream in, long n) throws IOException {
-		if (n <= 0L) return 0L;
-		
-		long remains = n;
-		byte[] buf = new byte[Math.min((int)remains, 1024)];
-		while (remains > 0L) {
-			int skipped = readarray(in, buf, 0, Math.min((int)remains, buf.length));
-			if (skipped <= 0) break;
-			remains -= skipped;
-		}
-		return n - remains;
-	}
-	
-	public static void print(OutputStream s, Object obj) {
-		try {
-			writearray(s, utfEncode(stringValue(obj)));
-		} catch (IOException ioe) { }
-	}
-	
-	public static void println(OutputStream s, Object obj) {
-		try {
-			writearray(s, utfEncode(stringValue(obj)));
-			s.write('\n');
-			s.flush();
-		} catch (IOException ioe) { }
-	}
-	
 	/**
 	 * Returns formatted string using specified format string and arguments.
 	 * Format specifiers are substrings of form <code>%n</code> where
@@ -260,7 +152,7 @@ public final class IO {
 	 * @param args  arguments referenced by the format specifiers
 	 * @return  a formatted string
 	 */
-	public static String sprintf(String fmt, Object[] args) {
+	public static String format(String fmt, Object[] args) {
 		StringBuffer buf = new StringBuffer();
 		while (true) {
 			int index = fmt.indexOf('%');
@@ -280,16 +172,7 @@ public final class IO {
 		}
 		return buf.toString();
 	}
-	
-	public static void writeAll(InputStream from, OutputStream to) throws IOException {
-		byte[] buf = new byte[1024];
-		int len = readarray(from, buf);
-		while (len > 0) {
-			to.write(buf, 0, len);
-			len = readarray(from, buf);
-		}
-	}
-	
+
 	/**
 	 * Splits specified string around given characters.
 	 * @param str  string to split
@@ -312,68 +195,6 @@ public final class IO {
 		}
 		return ret;
 	}
-
-	/**
-	 * Checks if given filename matches glob pattern.
-	 * Supported wildcards are <code>*</code> and <code>?</code>.
-	 * These characters can be escaped using backslash.
-	 */
-    public static boolean matchesPattern(String name, String pattern) {
-        int nameofs = 0;
-        int pofs = 0;
-        int namelen = name.length();
-        int plen = pattern.length();
-        while (pofs < plen) {
-            char ch = pattern.charAt(pofs);
-            pofs++;
-            switch (ch) {
-                case '*': { // any sequence of characters
-                    /* skip subsequent stars */
-                    while (pofs < plen && pattern.charAt(pofs) == '*')
-                        pofs++;
-                    /* ending star matches everything */
-                    if (pofs == plen) return true;
-                    /* match tails */
-                    String tailpattern = pattern.substring(pofs, plen);
-                    ch = tailpattern.charAt(0);
-                    if (ch == '?') { //unoptimized cycle
-                        for (int i = nameofs; i < namelen; i++) {
-                            if (matchesPattern(name.substring(i,namelen), tailpattern))
-                                return true;
-                        }
-                    } else {
-                        if (ch == '\\' && tailpattern.length() > 1) ch = tailpattern.charAt(1);
-                        for (int i = name.indexOf(ch, nameofs); i >= 0; i = name.indexOf(ch, i+1)) {
-                            if (matchesPattern(name.substring(i,namelen), tailpattern))
-                                return true;
-                        }
-                    }
-                    return false;
-                }
-                case '\\': { // escaped character, exact match
-                    if (pofs < plen) ch = pattern.charAt(pofs);
-                    if (nameofs == namelen) return false;
-                    if (name.charAt(nameofs) != ch) return false;
-                    nameofs++;
-                    pofs++;
-                    break;
-                }
-                case '?': { // any character
-                    if (nameofs == namelen) return false;
-                    nameofs++;
-                    break;
-                }
-                default: { // exact character match
-                    if (nameofs == namelen) return false;
-                    if (name.charAt(nameofs) != ch) return false;
-                    nameofs++;
-                }
-            }
-        }
-        /* empty pattern matches empty string */
-        return nameofs == namelen;
-    }
-
 
 	public static String stringValue(Object a) {
 		if (a instanceof Object[]) {

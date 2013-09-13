@@ -21,11 +21,11 @@ package alchemy.nec;
 import alchemy.core.Process;
 import alchemy.core.Int;
 import alchemy.fs.Filesystem;
-import alchemy.fs.FSDriver;
+import alchemy.io.IO;
+import alchemy.io.UTFReader;
 import alchemy.nec.tree.*;
 import alchemy.util.ArrayList;
-import alchemy.util.IO;
-import alchemy.util.UTFReader;
+import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -137,7 +137,7 @@ public class Parser {
 		f = p.toFile(name+".eh");
 		if (Filesystem.exists(f)) return f;
 		if (name.charAt(0) != '/') {
-			String[] incpath = IO.split(p.getEnv("INCPATH"), ':');
+			String[] incpath = Strings.split(p.getEnv("INCPATH"), ':');
 			for (int i=0; i<incpath.length; i++) {
 				f = p.toFile(incpath[i]+'/'+name);
 				if (Filesystem.exists(f) && !Filesystem.isDirectory(f)) return f;
