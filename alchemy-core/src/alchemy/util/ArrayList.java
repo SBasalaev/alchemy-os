@@ -18,10 +18,10 @@
 
 package alchemy.util;
 
-import java.util.NoSuchElementException;
-
 /**
  * List of elements backed by array.
+ * <p>
+ * Unlike <code>Vector</code> this class is not synchronized.
  *
  * @author Sergey Basalaev
  */
@@ -63,12 +63,12 @@ public class ArrayList {
 	}
 	
 	public Object first() {
-		if (size == 0) throw new NoSuchElementException();
+		if (size == 0) throw new IndexOutOfBoundsException();
 		return elements[0];
 	}
 	
 	public Object last() {
-		if (size == 0) throw new NoSuchElementException();
+		if (size == 0) throw new IndexOutOfBoundsException();
 		return elements[size-1];
 	}
 	
@@ -136,5 +136,26 @@ public class ArrayList {
 	
 	public void copyInto(Object[] array) {
 		copyInto(0, array, 0, size);
+	}
+
+	void buildString(ArrayList dejaVu, StringBuffer buf) {
+		if (dejaVu.indexOf(this) >= 0) {
+			buf.append("[...]");
+		} else {
+			dejaVu.add(this);
+			buf.append('[');
+			for (int i=0; i<size; i++) {
+				if (i != 0) buf.append(", ");
+				Strings.buildString(elements[i], dejaVu, buf);
+			}
+			buf.append(']');
+			dejaVu.remove(this);
+		}
+	}
+
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		buildString(new ArrayList(), buf);
+		return buf.toString();
 	}
 }

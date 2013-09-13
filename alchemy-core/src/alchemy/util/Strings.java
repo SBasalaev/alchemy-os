@@ -18,9 +18,11 @@
 
 package alchemy.util;
 
+import alchemy.types.Float32;
+import alchemy.types.Float64;
+import alchemy.types.Int32;
+import alchemy.types.Int64;
 import java.io.UTFDataFormatException;
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * Various utility functions to operate on strings.
@@ -163,7 +165,7 @@ public final class Strings {
 				buf.append(fmt.substring(0, index));
 				char param = fmt.charAt(index+1);
 				if (param >= '0' && param <= '9') {
-					buf.append(stringValue(args[param-'0']));
+					buf.append(toString(args[param-'0']));
 				} else {
 					buf.append(param);
 				}
@@ -196,92 +198,152 @@ public final class Strings {
 		return ret;
 	}
 
-	public static String stringValue(Object a) {
-		if (a instanceof Object[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final Object[] ar = (Object[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(stringValue(ar[i]));
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof char[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final char[] ar = (char[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append((int)ar[i]);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof byte[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final byte[] ar = (byte[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof short[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final short[] ar = (short[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof boolean[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final boolean[] ar = (boolean[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i] ? 1 : 0);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof int[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final int[] ar = (int[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof long[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final long[] ar = (long[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof float[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final float[] ar = (float[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof double[]) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final double[] ar = (double[]) a;
-			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
-			}
-			return sb.append(']').toString();
-		} else if (a instanceof Hashtable) {
-			StringBuffer sb = new StringBuffer().append('[');
-			final Hashtable h = (Hashtable)a;
-			boolean first = true;
-			for (Enumeration e = h.keys(); e.hasMoreElements(); ) {
-				Object key = e.nextElement();
-				if (first) first = false;
-				else sb.append(", ");
-				sb.append(stringValue(key)).append('=').append(stringValue(h.get(key)));
-			}
-			return sb.append(']').toString();
-		} else {
-			return String.valueOf(a);
+	/** Returns hexadecimal character that represents the number. */
+	private static char hexchar(int i) {
+		return (char) (i <= 9 ? '0'+i : 'A'-10 + i);
+	}
+
+	/**
+	 * Writes character to the buffer.
+	 * If character is non-ASCII then it is escaped.
+	 */
+	private static void writeChar(char ch, StringBuffer buf) {
+		switch (ch) {
+			case '\n': buf.append("\\n"); break;
+			case '\r': buf.append("\\r"); break;
+			case '\t': buf.append("\\t"); break;
+			case '\0': buf.append("\\0"); break;
+			default:
+				if (ch >= ' ' && ch < 127) {
+					buf.append(ch);
+				} else {
+					buf.append("\\u")
+					   .append(hexchar((ch >> 12) & 0xF))
+					   .append(hexchar((ch >> 8) & 0xF))
+					   .append(hexchar((ch >> 4) & 0xF))
+					   .append(hexchar(ch & 0xF));
+				}
 		}
+	}
+
+	/** Converts array to a string and writes it to the buffer. */
+	static void arrayToString(Object a, ArrayList dejaVu, StringBuffer buf) {
+		buf.append('[');
+		if (a instanceof Object[]) {
+			if (dejaVu.indexOf(a) >= 0) {
+				buf.append("[...]");
+			} else {
+				dejaVu.add(a);
+				Object[] aarray = (Object[])a;
+				int len = aarray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buildString(aarray[i], dejaVu, buf);
+				}
+				dejaVu.remove(a);
+			}
+		} else if (a instanceof boolean[]) {
+			boolean[] zarray = (boolean[])a;
+			int len = zarray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append(zarray[i] ? "true" : "false");
+			}
+		} else if (a instanceof byte[]) {
+			byte[] barray = (byte[])a;
+			int len = barray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append(barray[i]);
+			}
+		} else if (a instanceof char[]) {
+			char[] carray = (char[])a;
+			int len = carray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append('\'');
+				writeChar(carray[i], buf);
+				buf.append('\'');
+			}
+		} else if (a instanceof short[]) {
+			short[] sarray = (short[])a;
+			int len = sarray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append(sarray[i]);
+			}
+		} else if (a instanceof int[]) {
+			int[] iarray = (int[])a;
+			int len = iarray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append(iarray[i]);
+			}
+		} else if (a instanceof long[]) {
+			long[] larray = (long[])a;
+			int len = larray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append(larray[i]).append('l');
+			}
+		} else if (a instanceof float[]) {
+			float[] farray = (float[])a;
+			int len = farray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append(farray[i]).append('f');
+			}
+		} else if (a instanceof double[]) {
+			double[] darray = (double[])a;
+			int len = darray.length;
+			for (int i=0; i<len; i++) {
+				if (i != 0) buf.append(", ");
+				buf.append(darray[i]).append('d');
+			}
+		}
+		buf.append(']');
+	}
+
+	static void buildString(Object a, ArrayList dejaVu, StringBuffer buf) {
+		if (a == null) buf.append("null");
+		Class clz = a.getClass();
+		if (clz == ArrayList.class) {
+			((ArrayList)a).buildString(dejaVu, buf);
+		} else if (clz == String.class) {
+			buf.append('"');
+			String str = (String)a;
+			int len = str.length();
+			for (int i=0; i<len; i++) {
+				writeChar(str.charAt(i), buf);
+			}
+			buf.append('"');
+		} else if (clz.isArray()) {
+			arrayToString(a, dejaVu, buf);
+		} else if (clz == Int32.class) {
+			buf.append(a);
+		} else if (clz == Int64.class) {
+			buf.append(a).append('l');
+		} else if (clz == Float32.class) {
+			buf.append(a).append('f');
+		} else if (clz == Float64.class) {
+			buf.append(a).append('d');
+		} else {
+			buf.append(clz.getName());
+		}
+	}
+
+	/**
+	 * Converts Alchemy object to a string.
+	 */
+	public static String toString(Object a) {
+		if (a == null) return "null";
+		Class clz = a.getClass();
+		if (clz == String.class || clz == Int32.class || clz == Int64.class
+		 || clz == Float32.class || clz == Float64.class) {
+			return a.toString();
+		}
+		StringBuffer buf = new StringBuffer();
+		buildString(a, new ArrayList(), buf);
+		return buf.toString();
 	}
 }

@@ -129,6 +129,31 @@ public class HashMap {
 		entries = newTable;
 	}
 	
+	void buildString(ArrayList dejaVu, StringBuffer buf) {
+		if (dejaVu.indexOf(this) >= 0) {
+			buf.append("{...}");
+		} else {
+			dejaVu.add(this);
+			buf.append('{');
+			HashMapEntry[] table = entries;
+			for (int index = table.length-1; index >= 0; index--) {
+				for (HashMapEntry e = table[index]; e != null; e = e.next) {
+					Strings.buildString(e.key, dejaVu, buf);
+					buf.append('=');
+					Strings.buildString(e.value, dejaVu, buf);
+				}
+			}
+			buf.append('}');
+			dejaVu.remove(this);
+		}
+	}
+
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		buildString(new ArrayList(), buf);
+		return buf.toString();
+	}
+
 	private static class HashMapEntry {
 		int hash;
 		Object key;
