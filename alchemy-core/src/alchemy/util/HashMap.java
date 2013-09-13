@@ -25,7 +25,7 @@ package alchemy.util;
  *
  * @author Sergey Basalaev
  */
-public class HashMap {
+public final class HashMap {
 	
 	private HashMapEntry[] entries;
 	private int size;

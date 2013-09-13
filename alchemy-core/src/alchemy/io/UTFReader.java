@@ -30,7 +30,7 @@ import java.io.UTFDataFormatException;
  *
  * @author Sergey Basalaev
  */
-public class UTFReader extends Reader {
+public final class UTFReader extends Reader {
 
 	private InputStream input;
 	private int linenum;

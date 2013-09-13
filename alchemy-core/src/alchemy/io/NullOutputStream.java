@@ -24,7 +24,7 @@ import java.io.OutputStream;
  * An output stream that just ignores the data.
  * @author Sergey Basalaev
  */
-public class NullOutputStream extends OutputStream {
+public final class NullOutputStream extends OutputStream {
 	public NullOutputStream() { }
 	public void write(int b) { }
 }

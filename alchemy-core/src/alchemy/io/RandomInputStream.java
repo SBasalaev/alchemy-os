@@ -27,7 +27,7 @@ import java.util.Random;
  *
  * @author Sergey Basalaev
  */
-public class RandomInputStream extends InputStream {
+public final class RandomInputStream extends InputStream {
 	private final Random rnd = new Random();
 
 	public RandomInputStream() { }

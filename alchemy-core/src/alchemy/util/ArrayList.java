@@ -25,7 +25,7 @@ package alchemy.util;
  *
  * @author Sergey Basalaev
  */
-public class ArrayList {
+public final class ArrayList {
 	
 	private Object[] elements;
 	private int size;

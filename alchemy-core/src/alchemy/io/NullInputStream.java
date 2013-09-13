@@ -26,7 +26,7 @@ import java.io.InputStream;
  *
  * @author Sergey Basalaev
  */
-public class NullInputStream extends InputStream {
+public final class NullInputStream extends InputStream {
 	
 	private final int b;
 	
