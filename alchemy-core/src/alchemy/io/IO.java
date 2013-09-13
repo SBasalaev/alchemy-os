@@ -145,14 +145,14 @@ public final class IO {
 	/** Converts object to a string and writes it as UTF-8. */
 	public static void print(OutputStream s, Object obj) {
 		try {
-			writeArray(s, Strings.utfEncode(Strings.stringValue(obj)));
+			writeArray(s, Strings.utfEncode(Strings.toString(obj)));
 		} catch (IOException ioe) { }
 	}
 	
 	/** Converts object to a string, writes it as UTF-8 and terminates a line. */
 	public static void println(OutputStream s, Object obj) {
 		try {
-			writeArray(s, Strings.utfEncode(Strings.stringValue(obj)));
+			writeArray(s, Strings.utfEncode(Strings.toString(obj)));
 			s.write('\n');
 			s.flush();
 		} catch (IOException ioe) { }
