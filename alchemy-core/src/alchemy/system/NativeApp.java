@@ -16,35 +16,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
+package alchemy.system;
 
-import alchemy.core.AlchemyException;
-import alchemy.core.Process;
-import alchemy.core.Function;
-import alchemy.core.Library;
+import alchemy.types.Int32;
 
 /**
  * Skeleton for native application.
  * <p/>
- * NOTE: To be loaded through the native interface
- * subclass must define public constructor without
- * parameters.
+ * To be loaded through the native interface subclass
+ * must define public constructor without parameters.
+ *
  * @author Sergey Basalaev
  */
 public abstract class NativeApp extends Library {
 
-	private Function main;
-
 	/** Constructor for subclasses. */
 	public NativeApp() {
-		main = new MainFunction();
+		putFunction(new MainFunction());
 	}
 
 	public abstract int main(Process p, String[] args) throws Exception;
-
-	public final Function getFunction(String sig) {
-		return "main".equals(sig) ? main : null;
-	}
 
 	private class MainFunction extends Function {
 
@@ -54,10 +45,10 @@ public abstract class NativeApp extends Library {
 
 		public Object invoke(Process c, Object[] args) throws AlchemyException {
 			try {
-				return Ival(main(c, (String[])args[0]));
-			} catch (Exception e) {
-				AlchemyException ae = new AlchemyException(e);
-				ae.addTraceElement(this, "native");
+				return Int32.toInt32(main(c, (String[])args[0]));
+			} catch (Throwable t) {
+				AlchemyException ae = new AlchemyException(t);
+				ae.addTraceElement("main", "native");
 				throw ae;
 			}
 		}

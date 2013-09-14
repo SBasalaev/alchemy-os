@@ -55,7 +55,7 @@ public final class Int32 {
 	/**
 	 * Converts integer number into Int instance.
 	 */
-	public static Int32 toInt(int i) {
+	public static Int32 toInt32(int i) {
 		if (i >= -128 && i < 256) return cache[i+128];
 		else return new Int32(i);
 	}

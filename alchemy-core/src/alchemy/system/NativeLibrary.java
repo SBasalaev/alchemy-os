@@ -16,43 +16,60 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
+package alchemy.system;
 
-import alchemy.core.Process;
-import alchemy.core.Function;
-import alchemy.core.Int;
-import alchemy.core.Library;
 import alchemy.io.UTFReader;
+import alchemy.types.Float32;
+import alchemy.types.Float64;
+import alchemy.types.Int32;
+import alchemy.types.Int64;
 import java.io.IOException;
-import java.util.Hashtable;
 
 /**
- * Native library.
- * Native function signatures and indices are determined
- * from the resource file which contains function names
- * in implementation order.
- * 
+ * Library implemented as Java code.
+ * Function names for native library should be provided
+ * in a resource file available on classpath. These names
+ * are loaded using {@link #load(String) load} method.
+ * The order of names implies indexation of functions starting
+ * with zero. The invokeNative method should be implemented using
+ * switch on index:
+ * <pre>
+ * protected Object invokeNative(int index, Context c, Object[] args) throws Exception {
+ *   switch (index) {
+ *     case 0: {
+ *       // implement function with index 0
+ *     }
+ *     case 1: {
+ *       // implement function with index 1
+ *     }
+ *     ...
+ *     default:
+ *       return null
+ *   }
+ * }
+ * </pre>
+ * Native libraries are loaded through the reflection
+ * (using Class.forName()) so they must have public
+ * constructor with no arguments.
+ *
  * @author Sergey Basalaev
  */
 public abstract class NativeLibrary extends Library {
-
-	/** Maps function name to function object. */
-	private Hashtable functions = new Hashtable();
 	
 	protected NativeLibrary() { }
 	
-	/** Loads native functions using specified symbols file. */
+	/** Loads native function names from named resource. */
 	public final void load(String symbols) throws IOException {
 		UTFReader r = new UTFReader(getClass().getResourceAsStream(symbols));
 		int index = functions.size();
 		String name;
 		while ((name = r.readLine()) != null) {
-			functions.put(name, new NativeFunction(this, name, index));
+			functions.set(name, new NativeFunction(this, name, index));
 			index++;
 		}
 		r.close();
 	}
-	
+
 	/** Invokes native function. */
 	protected abstract Object invokeNative(int index, Process p, Object[] args) throws Exception;
 	
@@ -64,36 +81,36 @@ public abstract class NativeLibrary extends Library {
 	}
 
 	/** Boxing method for integer values. */
-	protected static Int Ival(int value) {
-		return Int.toInt(value);
+	protected static Int32 Ival(int value) {
+		return Int32.toInt32(value);
 	}
 
 	/** Boxing method for boolean values.
 	 * Method converts <code>true</code> to <code>Int(1)</code>
 	 * and <code>false</code> to <code>Int(0)</code>.
 	 */
-	protected static Int Ival(boolean value) {
-		return value ? Int.ONE : Int.ZERO;
+	protected static Int32 Ival(boolean value) {
+		return value ? Int32.ONE : Int32.ZERO;
 	}
 
 	/** Boxing method for long values. */
-	protected static Long Lval(long value) {
-		return new Long(value);
+	protected static Int64 Lval(long value) {
+		return new Int64(value);
 	}
 
 	/** Boxing method for float values. */
-	protected static Float Fval(float value) {
-		return new Float(value);
+	protected static Float32 Fval(float value) {
+		return new Float32(value);
 	}
 
 	/** Boxing method for double values. */
-	protected static Double Dval(double value) {
-		return new Double(value);
+	protected static Float64 Dval(double value) {
+		return new Float64(value);
 	}
 
 	/** Unboxing method for Int values. */
 	protected static int ival(Object obj) {
-		return ((Int)obj).value;
+		return ((Int32)obj).value;
 	}
 
 	/** Unboxing method for Int values.
@@ -101,21 +118,21 @@ public abstract class NativeLibrary extends Library {
 	 * is <code>Int(0)</code>.
 	 */
 	protected static boolean bval(Object obj) {
-		return ((Int)obj).value != 0;
+		return ((Int32)obj).value != 0;
 	}
 
 	/** Unboxing method for Long values. */
 	protected static long lval(Object obj) {
-		return ((Long)obj).longValue();
+		return ((Int64)obj).value;
 	}
 
 	/** Unboxing method for Float values. */
 	protected static float fval(Object obj) {
-		return ((Float)obj).floatValue();
+		return ((Float32)obj).value;
 	}
 
 	/** Unboxing method for Double values. */
 	protected static double dval(Object obj) {
-		return ((Double)obj).doubleValue();
+		return ((Float64)obj).value;
 	}
 }

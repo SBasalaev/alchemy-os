@@ -16,37 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nlib;
-
-import alchemy.core.AlchemyException;
-import alchemy.core.Process;
-import alchemy.core.Function;
+package alchemy.system;
 
 /**
- * Skeleton for functions loaded by native libraries.
- * For speed and compactness all functions of native
- * library are implemented in single class.
- * 
- * The invokeNative method should be implemented using switch on index:
- * <pre>
- * protected Object execNative(Context c, Object[] args) throws Exception {
- *   switch (index) {
- *     case 0: {
- *       // implement function with index 0
- *     }
- *     case 1: {
- *       // implement function with index 1
- *     }
- *     ...
- *     default:
- *       return null
- *   }
- * }
- * </pre>
- * 
+ * Function loaded by native library.
+ *
  * @author Sergey Basalaev
  */
-public final class NativeFunction extends Function {
+final class NativeFunction extends Function {
 	
 	private final NativeLibrary lib;
 	
@@ -60,7 +37,7 @@ public final class NativeFunction extends Function {
 	}
 	
 	public String toString() {
-		return lib.soname()+':'+signature;
+		return lib.soname()+':'+name;
 	}
 	
 	public final Object invoke(Process p, Object[] args) throws AlchemyException {
@@ -68,7 +45,7 @@ public final class NativeFunction extends Function {
 			return lib.invokeNative(this.index, p, args);
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
-			ae.addTraceElement(this, "native");
+			ae.addTraceElement(name, "native");
 			throw ae;
 		}
 	}

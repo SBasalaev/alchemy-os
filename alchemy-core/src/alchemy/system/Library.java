@@ -16,26 +16,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.core;
+package alchemy.system;
+
+import alchemy.util.HashMap;
 
 /**
- * A library is a function factory.
+ * A library is a container for function objects.
  *
  * @author Sergey Basalaev
  */
 public abstract class Library {
 
-	/**
-	 * Constructor for subclasses.
-	 */
-	protected Library() { }
+	/** Maps names to functions. */
+	protected final HashMap functions;
+
+	/** Constructor for subclasses. */
+	protected Library() {
+		functions = new HashMap();
+	}
 
 	/**
-	 * Returns function for given signature.
-	 * @param sig function signature
+	 * Returns function for given name.
+	 * @param name function name
 	 * @return
 	 *   <code>Function</code> instance or <code>null</code>
-	 *   if library does not contain function with given signature
+	 *   if library does not contain function with given name
 	 */
-	public abstract Function getFunction(String sig);
+	public Function getFunction(String name) {
+		return (Function) functions.get(name);
+	}
+	
+	protected void putFunction(Function f) {
+		functions.set(f.name, f);
+	}
 }
