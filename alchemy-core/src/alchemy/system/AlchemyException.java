@@ -28,7 +28,7 @@ import javax.microedition.media.MediaException;
  *
  * @author Sergey Basalaev
  */
-public class AlchemyException extends Exception {
+public final class AlchemyException extends Exception {
 	
 	private ArrayList names = new ArrayList();
 	private ArrayList infos = new ArrayList();
