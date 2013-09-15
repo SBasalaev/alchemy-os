@@ -161,10 +161,10 @@ public final class IO {
 	/** Channels all data from the input to the output. */
 	public static void writeAll(InputStream from, OutputStream to) throws IOException {
 		byte[] buf = new byte[1024];
-		int len = readArray(from, buf);
+		int len = readArray(from, buf, 0, buf.length);
 		while (len > 0) {
-			to.write(buf, 0, len);
-			len = readArray(from, buf);
+			writeArray(to, buf, 0, len);
+			len = readArray(from, buf, 0, buf.length);
 		}
 	}
 	

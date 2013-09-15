@@ -18,6 +18,7 @@
 
 package alchemy.fs;
 
+import alchemy.io.IO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -600,12 +601,7 @@ public final class Filesystem {
 		InputStream in = from.read(source);
 		OutputStream out = to.write(dest);
 		try {
-			byte[] buf = new byte[1024];
-			int count = in.read(buf);
-			while (count >= 0) {
-				out.write(buf, 0, count);
-				count = in.read(buf);
-			}
+			IO.writeAll(in, out);
 			out.flush();
 		} finally {
 			try {
