@@ -143,7 +143,8 @@ public final class UIServer {
 		int index = frameIndex(p);
 		if (index >= 0) {
 			UIFrame frame = (UIFrame)frames.elementAt(index);
-			frame.c.removeProcessListener(l);
+			// TODO: this should not be called if we are on processEnded
+			// frame.c.removeProcessListener(l);
 			frame.d.setCommandListener(null);
 			frame.d.removeCommand(appCommand);
 			frames.removeElementAt(index);
