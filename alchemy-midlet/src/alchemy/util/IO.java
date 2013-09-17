@@ -375,93 +375,133 @@ public final class IO {
         return nameofs == namelen;
     }
 
+	/** Returns hexadecimal character that represents the number. */
+	private static char hexchar(int i) {
+		return (char) (i <= 9 ? '0'+i : 'A'-10 + i);
+	}
 
-	public static String stringValue(Object a) {
+	/**
+	 * Writes character to the buffer.
+	 * If character is non-ASCII then it is escaped.
+	 */
+	private static void writeChar(char ch, StringBuffer buf) {
+		switch (ch) {
+			case '\n': buf.append("\\n"); break;
+			case '\r': buf.append("\\r"); break;
+			case '\t': buf.append("\\t"); break;
+			case '\0': buf.append("\\0"); break;
+			default:
+				if (ch >= ' ' && ch < 127) {
+					buf.append(ch);
+				} else {
+					buf.append("\\u")
+					   .append(hexchar((ch >> 12) & 0xF))
+					   .append(hexchar((ch >> 8) & 0xF))
+					   .append(hexchar((ch >> 4) & 0xF))
+					   .append(hexchar(ch & 0xF));
+				}
+		}
+	}
+
+	private static void writeString(Object a, StringBuffer buf) {
 		if (a instanceof Object[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final Object[] ar = (Object[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(stringValue(ar[i]));
+				if (i != 0) buf.append(", ");
+				writeString(ar[i], buf);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof char[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final char[] ar = (char[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append((int)ar[i]);
+				if (i != 0) buf.append(", ");
+				buf.append('\'');
+				writeChar(ar[i], buf);
+				buf.append('\'');
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof byte[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final byte[] ar = (byte[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
+				if (i != 0) buf.append(", ");
+				buf.append(ar[i]);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof short[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final short[] ar = (short[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
+				if (i != 0) buf.append(", ");
+				buf.append(ar[i]);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof boolean[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final boolean[] ar = (boolean[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i] ? 1 : 0);
+				if (i != 0) buf.append(", ");
+				buf.append(ar[i]);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof int[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final int[] ar = (int[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
+				if (i != 0) buf.append(", ");
+				buf.append(ar[i]);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof long[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final long[] ar = (long[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
+				if (i != 0) buf.append(", ");
+				buf.append(ar[i]);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof float[]) {
-			StringBuffer sb = new StringBuffer().append('[');
 			final float[] ar = (float[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
+				if (i != 0) buf.append(", ");
+				buf.append(ar[i]);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof double[]) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('[');
 			final double[] ar = (double[]) a;
 			for (int i=0; i < ar.length; i++) {
-				if (i != 0) sb.append(", ");
-				sb.append(ar[i]);
+				if (i != 0) buf.append(", ");
+				buf.append(ar[i]);
 			}
-			return sb.append(']').toString();
+			buf.append(']');
 		} else if (a instanceof Hashtable) {
-			StringBuffer sb = new StringBuffer().append('[');
+			buf.append('{');
 			final Hashtable h = (Hashtable)a;
 			boolean first = true;
 			for (Enumeration e = h.keys(); e.hasMoreElements(); ) {
 				Object key = e.nextElement();
 				if (first) first = false;
-				else sb.append(", ");
-				sb.append(stringValue(key)).append('=').append(stringValue(h.get(key)));
+				else buf.append(", ");
+				writeString(key, buf);
+				buf.append('=');
+				writeString(h.get(key), buf);
 			}
-			return sb.append(']').toString();
+			buf.append('}');
+		}
+	}
+
+	public static String stringValue(Object a) {
+		if (a == null) {
+			return "null";
+		} else if (a instanceof Hashtable || a.getClass().isArray()) {
+			StringBuffer buf = new StringBuffer();
+			writeString(a, buf);
+			return buf.toString();
 		} else {
-			return String.valueOf(a);
+			return a.toString();
 		}
 	}
 }
