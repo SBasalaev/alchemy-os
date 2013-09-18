@@ -490,6 +490,15 @@ public final class IO {
 				writeString(h.get(key), buf);
 			}
 			buf.append('}');
+		} else if (a instanceof String) {
+			String str = (String)a;
+			buf.append('"');
+			for (int i=0; i<str.length(); i++) {
+				writeChar(str.charAt(i), buf);
+			}
+			buf.append('"');
+		} else {
+		  buf.append(a);
 		}
 	}
 
