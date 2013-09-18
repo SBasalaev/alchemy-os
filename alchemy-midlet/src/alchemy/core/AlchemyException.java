@@ -80,6 +80,7 @@ public class AlchemyException extends Exception {
 	public String toString() {
 		String msg = getMessage();
 		StringBuffer sb = new StringBuffer();
+		// add descriptive message for system errors
 		switch (errcode) {
 			case ERR_SYSTEM: sb.append("System error"); break;
 			case ERR_NULL: sb.append("null value"); break;
@@ -92,15 +93,18 @@ public class AlchemyException extends Exception {
 			case ERR_CLASSCAST: sb.append("Type mismatch"); break;
 			case ERR_DIVBYZERO: sb.append("Divizion by zero"); break;
 			case ERR_INTERRUPT: sb.append("Process interrupted"); break;
+			case ERR_MEDIA: sb.append("Media playback error"); break;
 			default:
 				if (msg == null || msg.length() == 0) {
 					sb.append("Unknown or user defined error");
 				}
 		}
+		// add detail message
 		if (msg != null && msg.length() != 0) {
 			if (sb.length() != 0) sb.append(": ");
 			sb.append(msg);
 		}
+		// print stack trace
 		int size = functions.size();
 		for (int i=0; i < size; i++) {
 			sb.append('\n')
