@@ -18,10 +18,6 @@
 
 package alchemy.util;
 
-import alchemy.types.Float32;
-import alchemy.types.Float64;
-import alchemy.types.Int32;
-import alchemy.types.Int64;
 import java.io.UTFDataFormatException;
 
 /**
@@ -229,76 +225,96 @@ public final class Strings {
 	/** Converts array to a string and writes it to the buffer. */
 	static void arrayToString(Object a, ArrayList dejaVu, StringBuffer buf) {
 		buf.append('[');
-		if (a instanceof Object[]) {
-			if (dejaVu.indexOf(a) >= 0) {
-				buf.append("[...]");
-			} else {
-				dejaVu.add(a);
-				Object[] aarray = (Object[])a;
-				int len = aarray.length;
+		// hack to not invoke 9 instanceof's
+		switch (a.getClass().getName().charAt(1)) {
+			case Arrays.AR_OBJECT: {
+				if (dejaVu.indexOf(a) >= 0) {
+					buf.append("[...]");
+				} else {
+					dejaVu.add(a);
+					Object[] aarray = (Object[])a;
+					int len = aarray.length;
+					for (int i=0; i<len; i++) {
+						if (i != 0) buf.append(", ");
+						buildString(aarray[i], dejaVu, buf);
+					}
+					dejaVu.remove(a);
+				}
+				break;
+			}
+			case Arrays.AR_BOOLEAN: {
+				boolean[] zarray = (boolean[])a;
+				int len = zarray.length;
 				for (int i=0; i<len; i++) {
 					if (i != 0) buf.append(", ");
-					buildString(aarray[i], dejaVu, buf);
+					buf.append(zarray[i] ? "true" : "false");
 				}
-				dejaVu.remove(a);
+				break;
 			}
-		} else if (a instanceof boolean[]) {
-			boolean[] zarray = (boolean[])a;
-			int len = zarray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append(zarray[i] ? "true" : "false");
+			case Arrays.AR_BYTE: {
+				byte[] barray = (byte[])a;
+				int len = barray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buf.append(barray[i]);
+				}
+				break;
 			}
-		} else if (a instanceof byte[]) {
-			byte[] barray = (byte[])a;
-			int len = barray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append(barray[i]);
+			case Arrays.AR_CHAR: {
+				char[] carray = (char[])a;
+				int len = carray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buf.append('\'');
+					writeChar(carray[i], buf);
+					buf.append('\'');
+				}
+				break;
 			}
-		} else if (a instanceof char[]) {
-			char[] carray = (char[])a;
-			int len = carray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append('\'');
-				writeChar(carray[i], buf);
-				buf.append('\'');
+			case Arrays.AR_SHORT: {
+				short[] sarray = (short[])a;
+				int len = sarray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buf.append(sarray[i]);
+				}
+				break;
 			}
-		} else if (a instanceof short[]) {
-			short[] sarray = (short[])a;
-			int len = sarray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append(sarray[i]);
+			case Arrays.AR_INT: {
+				int[] iarray = (int[])a;
+				int len = iarray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buf.append(iarray[i]);
+				}
+				break;
 			}
-		} else if (a instanceof int[]) {
-			int[] iarray = (int[])a;
-			int len = iarray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append(iarray[i]);
+			case Arrays.AR_LONG: {
+				long[] larray = (long[])a;
+				int len = larray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buf.append(larray[i]);
+				}
+				break;
 			}
-		} else if (a instanceof long[]) {
-			long[] larray = (long[])a;
-			int len = larray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append(larray[i]);
+			case Arrays.AR_FLOAT: {
+				float[] farray = (float[])a;
+				int len = farray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buf.append(farray[i]);
+				}
+				break;
 			}
-		} else if (a instanceof float[]) {
-			float[] farray = (float[])a;
-			int len = farray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append(farray[i]);
-			}
-		} else if (a instanceof double[]) {
-			double[] darray = (double[])a;
-			int len = darray.length;
-			for (int i=0; i<len; i++) {
-				if (i != 0) buf.append(", ");
-				buf.append(darray[i]);
+			case Arrays.AR_DOUBLE: {
+				double[] darray = (double[])a;
+				int len = darray.length;
+				for (int i=0; i<len; i++) {
+					if (i != 0) buf.append(", ");
+					buf.append(darray[i]);
+				}
+				break;
 			}
 		}
 		buf.append(']');
