@@ -284,31 +284,36 @@ public final class Strings {
 			int len = larray.length;
 			for (int i=0; i<len; i++) {
 				if (i != 0) buf.append(", ");
-				buf.append(larray[i]).append('l');
+				buf.append(larray[i]);
 			}
 		} else if (a instanceof float[]) {
 			float[] farray = (float[])a;
 			int len = farray.length;
 			for (int i=0; i<len; i++) {
 				if (i != 0) buf.append(", ");
-				buf.append(farray[i]).append('f');
+				buf.append(farray[i]);
 			}
 		} else if (a instanceof double[]) {
 			double[] darray = (double[])a;
 			int len = darray.length;
 			for (int i=0; i<len; i++) {
 				if (i != 0) buf.append(", ");
-				buf.append(darray[i]).append('d');
+				buf.append(darray[i]);
 			}
 		}
 		buf.append(']');
 	}
 
 	static void buildString(Object a, ArrayList dejaVu, StringBuffer buf) {
-		if (a == null) buf.append("null");
+		if (a == null) {
+			buf.append("null");
+			return;
+		}
 		Class clz = a.getClass();
 		if (clz == ArrayList.class) {
 			((ArrayList)a).buildString(dejaVu, buf);
+		} else if (clz == HashMap.class) {
+			((HashMap)a).buildString(dejaVu, buf);
 		} else if (clz == String.class) {
 			buf.append('"');
 			String str = (String)a;
@@ -319,16 +324,8 @@ public final class Strings {
 			buf.append('"');
 		} else if (clz.isArray()) {
 			arrayToString(a, dejaVu, buf);
-		} else if (clz == Int32.class) {
-			buf.append(a);
-		} else if (clz == Int64.class) {
-			buf.append(a).append('l');
-		} else if (clz == Float32.class) {
-			buf.append(a).append('f');
-		} else if (clz == Float64.class) {
-			buf.append(a).append('d');
 		} else {
-			buf.append(clz.getName());
+			buf.append(a);
 		}
 	}
 
@@ -336,14 +333,14 @@ public final class Strings {
 	 * Converts Alchemy object to a string.
 	 */
 	public static String toString(Object a) {
-		if (a == null) return "null";
-		Class clz = a.getClass();
-		if (clz == String.class || clz == Int32.class || clz == Int64.class
-		 || clz == Float32.class || clz == Float64.class) {
+		if (a == null) {
+			return "null";
+		} else if (a.getClass().isArray()) {
+			StringBuffer buf = new StringBuffer();
+			arrayToString(a, new ArrayList(), buf);
+			return buf.toString();
+		} else {
 			return a.toString();
 		}
-		StringBuffer buf = new StringBuffer();
-		buildString(a, new ArrayList(), buf);
-		return buf.toString();
 	}
 }
