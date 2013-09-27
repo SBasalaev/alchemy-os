@@ -150,7 +150,7 @@ public class Parser {
 	
 	private void parseFile(String file) throws ParseException, IOException {
 		//do nothing if this file is already parsed
-		if (parsed.indexOf(file) >= 0) return;
+		if (parsed.contains(file)) return;
 		//if file is in stack we have cyclic inclusion
 		if (files.contains(file)) {
 			StringBuffer sb = new StringBuffer("Cyclic inclusion");
@@ -973,7 +973,7 @@ public class Parser {
 						if (!(branchindex instanceof ConstExpr))
 							throw new ParseException("Constant expression expected.");
 						Int idx = (Int)((ConstExpr)branchindex).value;
-						if (keysunique.indexOf(idx) >= 0)
+						if (keysunique.contains(idx))
 							throw new ParseException("branch for "+idx+" is already defined in this switch");
 						branchkeyv.add(idx);
 						keysunique.add(idx);

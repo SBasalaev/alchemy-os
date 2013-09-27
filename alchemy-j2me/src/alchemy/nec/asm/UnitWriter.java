@@ -43,7 +43,7 @@ public class UnitWriter {
 	public void visitSymbol(String symbol) {
 		FuncObject f = new FuncObject(symbol);
 		// if function is already in object, just skip it.
-		if (objects.indexOf(f) < 0) objects.add(f);
+		if (!objects.contains(f)) objects.add(f);
 	}
 	
 	public FunctionWriter visitFunction(String name, boolean shared, int arglen) {

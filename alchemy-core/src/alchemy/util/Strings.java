@@ -228,7 +228,7 @@ public final class Strings {
 		// hack to not invoke 9 instanceof's
 		switch (a.getClass().getName().charAt(1)) {
 			case Arrays.AR_OBJECT: {
-				if (dejaVu.indexOf(a) >= 0) {
+				if (dejaVu.contains(a)) {
 					buf.append("[...]");
 				} else {
 					dejaVu.add(a);

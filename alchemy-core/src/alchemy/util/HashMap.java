@@ -130,7 +130,7 @@ public final class HashMap {
 	}
 	
 	void buildString(ArrayList dejaVu, StringBuffer buf) {
-		if (dejaVu.indexOf(this) >= 0) {
+		if (dejaVu.indexOf(this, 0) >= 0) {
 			buf.append("{...}");
 		} else {
 			dejaVu.add(this);
