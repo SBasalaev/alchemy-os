@@ -29,16 +29,18 @@ public final class ArrayList {
 	
 	private Object[] elements;
 	private int size;
-	
+
+	/** Creates new empty ArrayList with default capacity. */
 	public ArrayList() {
 		this(16);
 	}
-	
+
+	/** Creates new empty ArrayList with given capacity. */
 	public ArrayList(int capacity) {
 		elements = new Object[capacity];
 		size = 0;
 	}
-	
+
 	private void growBy(int count) {
 		int minCapacity = elements.length + count;
 		int newCapacity = (elements.length * 3) / 2 + 1;
@@ -47,37 +49,52 @@ public final class ArrayList {
 		System.arraycopy(elements, 0, data, 0, size);
 		elements = data;
 	}
-	
+
+	/** Returns number of elements in this list. */
 	public int size() {
 		return size;
 	}
-	
+
+	/** Returns true if this list contains no elements. */
 	public boolean isEmpty() {
 		return size == 0;
 	}
-	
+
+	/** Removes all elements from this list. */
+	public void clear() {
+		for (int i=size-1; i>=0; i--) {
+			elements[i] = null;
+		}
+		size = 0;
+	}
+
+	/** Returns element at given index. */
 	public Object get(int index) {
 		if (index < 0 || index >= size)
 			throw new IndexOutOfBoundsException();
 		return elements[index];
 	}
-	
+
+	/** Returns first element of this list. */
 	public Object first() {
 		if (size == 0) throw new IndexOutOfBoundsException();
 		return elements[0];
 	}
-	
+
+	/** Returns last element of this list. */
 	public Object last() {
 		if (size == 0) throw new IndexOutOfBoundsException();
 		return elements[size-1];
 	}
-	
+
+	/** Sets new value to the elements of this list. */
 	public void set(int index, Object e) {
 		if (index < 0 || index >= size)
 			throw new IndexOutOfBoundsException();
 		elements[index] = e;
 	}
-	
+
+	/** Inserts element in given position of the list. */
 	public void insert(int index, Object e) {
 		if (index < 0 || index > size)
 			throw new IndexOutOfBoundsException();
@@ -88,14 +105,16 @@ public final class ArrayList {
 		elements[index] = e;
 		size++;
 	}
-	
+
+	/** Adds element to the end of the list. */
 	public void add(Object e) {
 		if (elements.length == size)
 			growBy(1);
 		elements[size] = e;
 		size++;
 	}
-	
+
+	/** Removes element from given position of the list. */
 	public void remove(int index) {
 		if (index < 0 || index >= size)
 			throw new IndexOutOfBoundsException();
@@ -104,14 +123,26 @@ public final class ArrayList {
 			System.arraycopy(elements, index+1, elements, index, size-index);
 		elements[size] = null;
 	}
-	
-	public void remove(Object e) {
-		int idx = indexOf(e);
+
+	/** Finds and removes given element. */
+	public boolean remove(Object e) {
+		int idx = indexOf(e, 0);
 		if (idx >= 0) remove(idx);
+		return idx >= 0;
 	}
-	
-	public int indexOf(Object e) {
-		for (int index = 0; index < size; index++) {
+
+	/** Tests whether list contains given element. */
+	public boolean contains(Object e) {
+		return indexOf(e, 0) >= 0;
+	}
+
+	/**
+	 * Returns index of the first occurence of given object
+	 * after given index.
+	 * Returns -1 if the list does not contain it.
+	 */
+	public int indexOf(Object e, int from) {
+		for (int index = from; index < size; index++) {
 			if (e == null ? elements[index] == null : e.equals(elements[index])) {
 				return index;
 			}
@@ -119,6 +150,18 @@ public final class ArrayList {
 		return -1;
 	}
 
+	/**
+	 * Returns index of the first occurence of given object.
+	 * Returns -1 if the list does not contain it.
+	 */
+	public int indexOf(Object e) {
+		return indexOf(e, 0);
+	}
+
+	/**
+	 * Returns index of the last occurence of given object.
+	 * Returns -1 if the list does not contain it.
+	 */
 	public int lastIndexOf(Object e) {
 		for (int index = size-1; index >= 0; index--) {
 			if (e == null ? elements[index] == null : e.equals(elements[index])) {
@@ -127,19 +170,28 @@ public final class ArrayList {
 		}
 		return -1;
 	}
-	
-	public void copyInto(int from, Object[] array, int offset, int len) {
-		if (from < 0 || from >= size || len > size || offset < 0 || offset + len > array.length)
+
+	/**
+	 * Copies portion of this list into given array.
+	 * 
+	 * @param from    index of the first element to copy
+	 * @param array   object or promitive array to copy into
+	 * @param offset  offset in array to place first elemet
+	 * @param len     number of elements to copy
+	 */
+	public void copyInto(int from, Object array, int offset, int len) {
+		if (from < 0 || from >= size || len > size || offset < 0 || offset + len > Arrays.arrayLength(array))
 			throw new IndexOutOfBoundsException();
-		System.arraycopy(elements, from, array, offset, len);
+		Arrays.arrayCopy(elements, from, array, offset, len);
 	}
-	
-	public void copyInto(Object[] array) {
+
+	/** Copies contents of this list into given array. */
+	public void copyInto(Object array) {
 		copyInto(0, array, 0, size);
 	}
 
 	void buildString(ArrayList dejaVu, StringBuffer buf) {
-		if (dejaVu.indexOf(this) >= 0) {
+		if (dejaVu.indexOf(this, 0) >= 0) {
 			buf.append("[...]");
 		} else {
 			dejaVu.add(this);
@@ -153,6 +205,7 @@ public final class ArrayList {
 		}
 	}
 
+	/** Returns string representation of this list. */
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		buildString(new ArrayList(), buf);

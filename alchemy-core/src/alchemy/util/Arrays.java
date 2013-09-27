@@ -64,6 +64,7 @@ public final class Arrays {
 		if (srctype == desttype) {
 			try {
 				System.arraycopy(src, srcofs, dest, dstofs, len);
+				return;
 			} catch (ArrayStoreException ase) {
 				throw new ClassCastException("Arrays of different types");
 			}
@@ -75,56 +76,56 @@ public final class Arrays {
 					for (int i=0; i<len; i++) {
 						za[dstofs+i] = array[srcofs+i] == Int32.ONE;
 					}
-					break;
+					return;
 				}
 				case AR_BYTE: {
 					byte[] ba = (byte[]) dest;
 					for (int i=0; i<len; i++) {
 						ba[dstofs+i] = (byte) ((Int32)array[srcofs+i]).value;
 					}
-					break;
+					return;
 				}
 				case AR_CHAR: {
 					char[] ca = (char[]) dest;
 					for (int i=0; i<len; i++) {
 						ca[dstofs+i] = (char) ((Int32)array[srcofs+i]).value;
 					}
-					break;
+					return;
 				}
 				case AR_SHORT: {
 					short[] sa = (short[]) dest;
 					for (int i=0; i<len; i++) {
 						sa[dstofs+i] = (short) ((Int32)array[srcofs+i]).value;
 					}
-					break;
+					return;
 				}
 				case AR_INT: {
 					int[] ia = (int[]) dest;
 					for (int i=0; i<len; i++) {
 						ia[dstofs+i] = ((Int32)array[srcofs+i]).value;
 					}
-					break;
+					return;
 				}
 				case AR_LONG: {
 					long[] la = (long[]) dest;
 					for (int i=0; i<len; i++) {
 						la[dstofs+i] = ((Int64)array[srcofs+i]).value;
 					}
-					break;
+					return;
 				}
 				case AR_FLOAT: {
 					float[] fa = (float[]) dest;
 					for (int i=0; i<len; i++) {
 						fa[dstofs+i] = ((Float32)array[srcofs+i]).value;
 					}
-					break;
+					return;
 				}
 				case AR_DOUBLE: {
 					double[] da = (double[]) dest;
 					for (int i=0; i<len; i++) {
 						da[dstofs+i] = ((Float64)array[srcofs+i]).value;
 					}
-					break;
+					return;
 				}
 			}
 		} else if (desttype == AR_OBJECT) {
@@ -135,60 +136,75 @@ public final class Arrays {
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = za[i] ? Int32.ONE : Int32.ZERO;
 					}
-					break;
+					return;
 				}
 				case AR_BYTE: {
 					byte[] ba = (byte[]) src;
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = Int32.toInt32(ba[i]);
 					}
-					break;
+					return;
 				}
 				case AR_CHAR: {
 					char[] ca = (char[]) src;
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = Int32.toInt32(ca[i]);
 					}
-					break;
+					return;
 				}
 				case AR_SHORT: {
 					short[] sa = (short[]) src;
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = Int32.toInt32(sa[i]);
 					}
-					break;
+					return;
 				}
 				case AR_INT: {
 					int[] ia = (int[]) src;
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = Int32.toInt32(ia[i]);
 					}
-					break;
+					return;
 				}
 				case AR_LONG: {
 					long[] la = (long[]) src;
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = new Int64(la[i]);
 					}
-					break;
+					return;
 				}
 				case AR_FLOAT: {
 					float[] fa = (float[]) src;
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = new Float32(fa[i]);
 					}
-					break;
+					return;
 				}
 				case AR_DOUBLE: {
 					double[] da = (double[]) src;
 					for (int i=0; i<len; i++) {
 						array[dstofs+i] = new Float64(da[i]);
 					}
-					break;
+					return;
 				}
 			}
-		} else {
-			throw new ClassCastException("Not an array");
+		}
+		throw new ClassCastException("Not an array");
+	}
+
+	/** Returns length of array object. */
+	public static int arrayLength(Object array) {
+		switch (array.getClass().getName().charAt(1)) {
+			case AR_OBJECT:  return ((Object[])array).length;
+			case AR_BOOLEAN: return ((boolean[])array).length;
+			case AR_BYTE:    return ((byte[])array).length;
+			case AR_CHAR:    return ((char[])array).length;
+			case AR_SHORT:   return ((short[])array).length;
+			case AR_INT:     return ((int[])array).length;
+			case AR_LONG:    return ((long[])array).length;
+			case AR_FLOAT:   return ((float[])array).length;
+			case AR_DOUBLE:  return ((double[])array).length;
+			default: throw new ClassCastException("Not an array");
 		}
 	}
 }
