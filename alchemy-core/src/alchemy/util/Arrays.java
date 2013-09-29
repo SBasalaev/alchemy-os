@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2013, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,9 @@ import alchemy.types.Int64;
 
 /**
  * Array-related functions.
+ * This class provides functions to work with object arrays
+ * and primitive arrays alike.
+ *
  * @author Sergey Basalaev
  */
 public final class Arrays {
@@ -195,16 +198,85 @@ public final class Arrays {
 	/** Returns length of array object. */
 	public static int arrayLength(Object array) {
 		switch (array.getClass().getName().charAt(1)) {
-			case AR_OBJECT:  return ((Object[])array).length;
-			case AR_BOOLEAN: return ((boolean[])array).length;
-			case AR_BYTE:    return ((byte[])array).length;
-			case AR_CHAR:    return ((char[])array).length;
-			case AR_SHORT:   return ((short[])array).length;
-			case AR_INT:     return ((int[])array).length;
-			case AR_LONG:    return ((long[])array).length;
-			case AR_FLOAT:   return ((float[])array).length;
-			case AR_DOUBLE:  return ((double[])array).length;
-			default: throw new ClassCastException("Not an array");
+			case AR_OBJECT:
+				return ((Object[])array).length;
+			case AR_BOOLEAN:
+				return ((boolean[])array).length;
+			case AR_BYTE:
+				return ((byte[])array).length;
+			case AR_CHAR:
+				return ((char[])array).length;
+			case AR_SHORT:
+				return ((short[])array).length;
+			case AR_INT:
+				return ((int[])array).length;
+			case AR_LONG:
+				return ((long[])array).length;
+			case AR_FLOAT:
+				return ((float[])array).length;
+			case AR_DOUBLE:
+				return ((double[])array).length;
+			default:
+				throw new ClassCastException("Not an array");
+		}
+	}
+
+	public static void arraySet(Object array, int index, Object obj) {
+		switch (array.getClass().getName().charAt(1)) {
+			case AR_OBJECT:
+				((Object[])array)[index] = obj;
+				return;
+			case AR_BOOLEAN:
+				((boolean[])array)[index] = obj != Int32.ZERO;
+				return;
+			case AR_BYTE:
+				((byte[])array)[index] = (byte)((Int32)obj).value;
+				return;
+			case AR_CHAR:
+				((char[])array)[index] = (char)((Int32)obj).value;
+				return;
+			case AR_SHORT:
+				((short[])array)[index] = (short)((Int32)obj).value;
+				return;
+			case AR_INT:
+				((int[])array)[index] = ((Int32)obj).value;
+				return;
+			case AR_LONG:
+				((long[])array)[index] = ((Int64)obj).value;
+				return;
+			case AR_FLOAT:
+				((float[])array)[index] = ((Float32)obj).value;
+				return;
+			case AR_DOUBLE:
+				((double[])array)[index] = ((Float64)obj).value;
+				return;
+			default:
+				throw new ClassCastException("Not an array");
+		}
+	}
+
+	public static Object arrayGet(Object array, int index) {
+		switch (array.getClass().getName().charAt(1)) {
+			case AR_OBJECT:
+				return ((Object[])array)[index];
+			case AR_BOOLEAN:
+				return ((boolean[])array)[index] ? Int32.ONE : Int32.ZERO;
+			case AR_BYTE:
+				return Int32.toInt32(((byte[])array)[index]);
+			case AR_CHAR:
+				return Int32.toInt32(((char[])array)[index]);
+			case AR_SHORT:
+				return Int32.toInt32(((short[])array)[index]);
+			case AR_INT:
+				return Int32.toInt32(((int[])array)[index]);
+			case AR_LONG:
+				return new Int64(((long[])array)[index]);
+			case AR_FLOAT:
+				return new Float32(((float[])array)[index]);
+			case AR_DOUBLE:
+				return new Float64(((double[])array)[index]);
+			default:
+				throw new ClassCastException("Not an array");
 		}
 	}
 }
