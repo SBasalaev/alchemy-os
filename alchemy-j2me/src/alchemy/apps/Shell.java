@@ -18,14 +18,15 @@
 
 package alchemy.apps;
 
-import alchemy.core.Process;
 import alchemy.io.IO;
 import alchemy.io.UTFReader;
-import alchemy.nlib.NativeApp;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import alchemy.apps.TerminalForm.TerminalInputStream;
 import alchemy.fs.Filesystem;
+import alchemy.io.ConnectionBridge;
+import alchemy.system.NativeApp;
+import alchemy.system.Process;
 import alchemy.util.ArrayList;
 import alchemy.util.Strings;
 
@@ -55,7 +56,7 @@ public class Shell extends NativeApp {
 					cmdline.append(' ').append(args[i]);
 				}
 				scriptinput = new ByteArrayInputStream(Strings.utfEncode(cmdline.toString()));
-				p.addStream(scriptinput);
+				p.addConnection(new ConnectionBridge(scriptinput));
 			} else {
 				String file = p.toFile(args[0]);
 				byte[] buf = new byte[(int)Filesystem.size(file)];
@@ -63,10 +64,10 @@ public class Shell extends NativeApp {
 				in.read(buf);
 				in.close();
 				scriptinput = new ByteArrayInputStream(buf);
-				p.addStream(scriptinput);
+				p.addConnection(new ConnectionBridge(scriptinput));
 			}
 			if (p.stdin instanceof TerminalInputStream) {
-				((TerminalInputStream)p.stdin).setPrompt(p.getCurDir().toString()+'>');
+				((TerminalInputStream)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
 			}
 			UTFReader r = new UTFReader(scriptinput);
 			while (true) try {
@@ -93,9 +94,9 @@ public class Shell extends NativeApp {
 				} else if (cc.cmd.equals("cd")) {
 					if (cc.args.length > 0) {
 						String newdir = p.toFile(cc.args[0]);
-						p.setCurDir(newdir);
+						p.setCurrentDirectory(newdir);
 						if (p.stdin instanceof TerminalInputStream) {
-							((TerminalInputStream)p.stdin).setPrompt(p.getCurDir().toString()+'>');
+							((TerminalInputStream)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
 						}
 						exitcode = 0;
 					} else {
@@ -136,7 +137,7 @@ public class Shell extends NativeApp {
 					if (cc.out != null) child.stdout.close();
 					if (cc.err != null) child.stderr.close();
 					if (p.stdin instanceof TerminalInputStream) {
-						((TerminalInputStream)p.stdin).setPrompt(p.getCurDir().toString()+'>');
+						((TerminalInputStream)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
 					}
 				}
 			} catch (Throwable t) {

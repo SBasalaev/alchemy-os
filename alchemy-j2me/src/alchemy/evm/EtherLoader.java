@@ -18,11 +18,13 @@
 
 package alchemy.evm;
 
-import alchemy.core.Process;
-import alchemy.core.Function;
-import alchemy.core.HashLibrary;
-import alchemy.core.Int;
-import alchemy.core.Library;
+import alchemy.system.Function;
+import alchemy.system.Library;
+import alchemy.system.Process;
+import alchemy.types.Float32;
+import alchemy.types.Float64;
+import alchemy.types.Int32;
+import alchemy.types.Int64;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +76,7 @@ public class EtherLoader {
 	
 	public static Library load(Process p, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
-		HashLibrary lib = new HashLibrary();
+		EtherLibrary lib = new EtherLibrary();
 		//reading format version
 		int ver = data.readUnsignedShort();
 		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
@@ -104,16 +106,16 @@ public class EtherLoader {
 				case '0': //null, aligning object
 					break;
 				case 'i': //integer
-					cpool[cindex] = Int.toInt(data.readInt());
+					cpool[cindex] = Int32.toInt32(data.readInt());
 					break;
 				case 'l': //long
-					cpool[cindex] = new Long(data.readLong());
+					cpool[cindex] = new Int64(data.readLong());
 					break;
 				case 'f': //float
-					cpool[cindex] = new Float(data.readFloat());
+					cpool[cindex] = new Float32(data.readFloat());
 					break;
 				case 'd': //double
-					cpool[cindex] = new Double(data.readDouble());
+					cpool[cindex] = new Float64(data.readDouble());
 					break;
 				case 'S': //string
 					cpool[cindex] = data.readUTF();
@@ -158,7 +160,6 @@ public class EtherLoader {
 					throw new InstantiationException("Unknown data type: "+ctype);
 			}
 		}
-		lib.lock();
 		return lib;
 	}
 

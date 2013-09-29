@@ -18,7 +18,6 @@
 
 package alchemy.apps;
 
-import alchemy.io.IO;
 import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

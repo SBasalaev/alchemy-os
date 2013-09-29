@@ -18,10 +18,13 @@
 
 package alchemy.evm;
 
-import alchemy.core.AlchemyException;
-import alchemy.core.Process;
-import alchemy.core.Function;
-import alchemy.core.Int;
+import alchemy.system.AlchemyException;
+import alchemy.system.Function;
+import alchemy.system.Process;
+import alchemy.types.Float32;
+import alchemy.types.Float64;
+import alchemy.types.Int32;
+import alchemy.types.Int64;
 
 /**
  * Ether Virtual Machine.
@@ -68,342 +71,342 @@ class EtherFunction extends Function {
 				}
 				case Opcodes.ICONST_M1: {
 					head++;
-					stack[head] = Int.M_ONE;
+					stack[head] = Int32.M_ONE;
 					break;
 				}
 				case Opcodes.ICONST_0: {
 					head++;
-					stack[head] = Int.ZERO;
+					stack[head] = Int32.ZERO;
 					break;
 				}
 				case Opcodes.ICONST_1: {
 					head++;
-					stack[head] = Int.ONE;
+					stack[head] = Int32.ONE;
 					break;
 				}
 				case Opcodes.ICONST_2: {
 					head++;
-					stack[head] = Int.toInt(2);
+					stack[head] = Int32.toInt32(2);
 					break;
 				}
 				case Opcodes.ICONST_3: {
 					head++;
-					stack[head] = Int.toInt(3);
+					stack[head] = Int32.toInt32(3);
 					break;
 				}
 				case Opcodes.ICONST_4: {
 					head++;
-					stack[head] = Int.toInt(4);
+					stack[head] = Int32.toInt32(4);
 					break;
 				}
 				case Opcodes.ICONST_5: {
 					head++;
-					stack[head] = Int.toInt(5);
+					stack[head] = Int32.toInt32(5);
 					break;
 				}
 				case Opcodes.LCONST_0: {
 					head++;
-					stack[head] = Lval(0l);
+					stack[head] = new Int64(0L);
 					break;
 				}
 				case Opcodes.LCONST_1: {
 					head++;
-					stack[head] = Lval(1l);
+					stack[head] = new Int64(1L);
 					break;
 				}
 				case Opcodes.FCONST_0: {
 					head++;
-					stack[head] = Fval(0f);
+					stack[head] = new Float32(0f);
 					break;
 				}
 				case Opcodes.FCONST_1: {
 					head++;
-					stack[head] = Fval(1f);
+					stack[head] = new Float32(1f);
 					break;
 				}
 				case Opcodes.FCONST_2: {
 					head++;
-					stack[head] = Fval(2f);
+					stack[head] = new Float32(2f);
 					break;
 				}
 				case Opcodes.DCONST_0: {
 					head++;
-					stack[head] = Dval(0d);
+					stack[head] = new Float64(0d);
 					break;
 				}
 				case Opcodes.DCONST_1: {
 					head++;
-					stack[head] = Dval(1d);
+					stack[head] = new Float64(1d);
 					break;
 				}
 				
 			//CONVERSIONS
 				case Opcodes.I2L: {
-					stack[head] = Lval(ival(stack[head]));
+					stack[head] = new Int64(((Int32)(stack[head])).value);
 					break;
 				}
 				case Opcodes.I2F: {
-					stack[head] = Fval(ival(stack[head]));
+					stack[head] = new Float32(((Int32)stack[head]).value);
 					break;
 				}
 				case Opcodes.I2D: {
-					stack[head] = Dval(ival(stack[head]));
+					stack[head] = new Float64(((Int32)stack[head]).value);
 					break;
 				}
 				case Opcodes.L2F: {
-					stack[head] = Fval(lval(stack[head]));
+					stack[head] = new Float32(((Int64)stack[head]).value);
 					break;
 				}
 				case Opcodes.L2D: {
-					stack[head] = Dval(lval(stack[head]));
+					stack[head] = new Float64(((Int64)stack[head]).value);
 					break;
 				}
 				case Opcodes.L2I: {
-					stack[head] = Ival((int)lval(stack[head]));
+					stack[head] = Int32.toInt32((int)((Int64)stack[head]).value);
 					break;
 				}
 				case Opcodes.F2D: {
-					stack[head] = Dval(fval(stack[head]));
+					stack[head] = new Float64(((Float32)stack[head]).value);
 					break;
 				}
 				case Opcodes.F2I: {
-					stack[head] = Ival((int)fval(stack[head]));
+					stack[head] = Int32.toInt32((int)((Float32)stack[head]).value);
 					break;
 				}
 				case Opcodes.F2L: {
-					stack[head] = Lval((long)fval(stack[head]));
+					stack[head] = new Int64((long)((Float32)stack[head]).value);
 					break;
 				}
 				case Opcodes.D2I: {
-					stack[head] = Ival((int)dval(stack[head]));
+					stack[head] = Int32.toInt32((int)((Float64)stack[head]).value);
 					break;
 				}
 				case Opcodes.D2L: {
-					stack[head] = Lval((long)dval(stack[head]));
+					stack[head] = new Int64((long)((Float64)stack[head]).value);
 					break;
 				}
 				case Opcodes.D2F: {
-					stack[head] = Fval((float)dval(stack[head]));
+					stack[head] = new Float32((float)((Float64)stack[head]).value);
 					break;
 				}
 				case Opcodes.I2C: {
-					stack[head] = Int.toInt((char)ival(stack[head]));
+					stack[head] = Int32.toInt32((char)((Int32)stack[head]).value);
 					break;
 				}
 				case Opcodes.I2B: {
-					stack[head] = Int.toInt((byte)ival(stack[head]));
+					stack[head] = Int32.toInt32((byte)((Int32)stack[head]).value);
 					break;
 				}
 				case Opcodes.I2S: {
-					stack[head] = Int.toInt((short)ival(stack[head]));
+					stack[head] = Int32.toInt32((short)((Int32)stack[head]).value);
 					break;
 				}
 
 			//INTEGER ARITHMETICS
 				case Opcodes.IADD: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) + ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value + ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.ISUB: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) - ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value - ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.IMUL: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) * ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value * ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.IDIV: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) / ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value / ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.IMOD: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) % ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value % ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.INEG: {
-					stack[head] = Ival(-ival(stack[head]));
+					stack[head] = Int32.toInt32(-((Int32)stack[head]).value);
 					break;
 				}
 				case Opcodes.ICMP: {
 					head--;
-					int itmp = ival(stack[head]) - ival(stack[head+1]);
-					stack[head] = (itmp > 0) ? Int.ONE : (itmp == 0 ? Int.ZERO : Int.M_ONE);
+					int itmp = ((Int32)stack[head]).value - ((Int32)stack[head+1]).value;
+					stack[head] = (itmp > 0) ? Int32.ONE : (itmp == 0 ? Int32.ZERO : Int32.M_ONE);
 					break;
 				}
 				case Opcodes.ISHL: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) << ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value << ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.ISHR: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) >> ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value >> ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.IUSHR: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) >>> ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value >>> ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.IAND: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) & ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value & ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.IOR: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) | ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value | ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.IXOR: {
 					head--;
-					stack[head] = Ival(ival(stack[head]) ^ ival(stack[head+1]));
+					stack[head] = Int32.toInt32(((Int32)stack[head]).value ^ ((Int32)stack[head+1]).value);
 					break;
 				}
 
 			//LONG ARITHMETICS
 				case Opcodes.LADD: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) + lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value + ((Int64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LSUB: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) - lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value - ((Int64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LMUL: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) * lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value * ((Int64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LDIV: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) / lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value / ((Int64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LMOD:  {
 					head--;
-					stack[head] = Lval(lval(stack[head]) % lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value % ((Int64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LNEG: {
-					stack[head] = Lval(-lval(stack[head]));
+					stack[head] = new Int64(-((Int64)stack[head]).value);
 					break;
 				}
 				case Opcodes.LCMP: {
 					head--;
-					long ltmp = lval(stack[head]) - lval(stack[head+1]);
-					stack[head] = (ltmp > 0L) ? Int.ONE : (ltmp == 0L ? Int.ZERO : Int.M_ONE);
+					long ltmp = ((Int64)stack[head]).value - ((Int64)stack[head+1]).value;
+					stack[head] = (ltmp > 0L) ? Int32.ONE : (ltmp == 0L ? Int32.ZERO : Int32.M_ONE);
 					break;
 				}
 				case Opcodes.LSHL: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) << ival(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value << ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LSHR: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) >> ival(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value >> ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LUSHR: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) >>> ival(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value >>> ((Int32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LAND: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) & lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value & ((Int64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LOR: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) | lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value | ((Int64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.LXOR: {
 					head--;
-					stack[head] = Lval(lval(stack[head]) ^ lval(stack[head+1]));
+					stack[head] = new Int64(((Int64)stack[head]).value ^ ((Int64)stack[head+1]).value);
 					break;
 				}
 
 			//FLOAT ARITHMETICS
 				case Opcodes.FADD: {
 					head--;
-					stack[head] = Fval(fval(stack[head]) + fval(stack[head+1]));
+					stack[head] = new Float32(((Float32)stack[head]).value + ((Float32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.FSUB: {
 					head--;
-					stack[head] = Fval(fval(stack[head]) - fval(stack[head+1]));
+					stack[head] = new Float32(((Float32)stack[head]).value - ((Float32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.FMUL: {
 					head--;
-					stack[head] = Fval(fval(stack[head]) * fval(stack[head+1]));
+					stack[head] = new Float32(((Float32)stack[head]).value * ((Float32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.FDIV: {
 					head--;
-					stack[head] = Fval(fval(stack[head]) / fval(stack[head+1]));
+					stack[head] = new Float32(((Float32)stack[head]).value / ((Float32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.FMOD: {
 					head--;
-					stack[head] = Fval(fval(stack[head]) % fval(stack[head+1]));
+					stack[head] = new Float32(((Float32)stack[head]).value % ((Float32)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.FNEG: {
-					stack[head] = Fval(-fval(stack[head]));
+					stack[head] = new Float32(-((Float32)stack[head]).value);
 					break;
 				}
 				case Opcodes.FCMP: {
 					head--;
-					float ftmp = fval(stack[head]) - fval(stack[head+1]);
-					stack[head] = (ftmp > 0) ? Int.ONE : (ftmp == 0 ? Int.ZERO : Int.M_ONE);
+					float ftmp = ((Float32)stack[head]).value - ((Float32)stack[head+1]).value;
+					stack[head] = (ftmp > 0) ? Int32.ONE : (ftmp == 0 ? Int32.ZERO : Int32.M_ONE);
 					break;
 				}
 
 			//DOUBLE ARITHMETICS
 				case Opcodes.DADD: {
 					head--;
-					stack[head] = Dval(dval(stack[head]) + dval(stack[head+1]));
+					stack[head] = new Float64(((Float64)stack[head]).value + ((Float64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.DSUB: {
 					head--;
-					stack[head] = Dval(dval(stack[head]) - dval(stack[head+1]));
+					stack[head] = new Float64(((Float64)stack[head]).value - ((Float64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.DMUL: {
 					head--;
-					stack[head] = Dval(dval(stack[head]) * dval(stack[head+1]));
+					stack[head] = new Float64(((Float64)stack[head]).value * ((Float64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.DDIV: {
 					head--;
-					stack[head] = Dval(dval(stack[head]) / dval(stack[head+1]));
+					stack[head] = new Float64(((Float64)stack[head]).value / ((Float64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.DMOD: {
 					head--;
-					stack[head] = Dval(dval(stack[head]) % dval(stack[head+1]));
+					stack[head] = new Float64(((Float64)stack[head]).value % ((Float64)stack[head+1]).value);
 					break;
 				}
 				case Opcodes.DNEG: {
-					stack[head] = Dval(-dval(stack[head]));
+					stack[head] = new Float64(-((Float64)stack[head]).value);
 					break;
 				}
 				case Opcodes.DCMP: {
 					head--;
-					double dtmp = dval(stack[head]) - dval(stack[head+1]);
-					stack[head] = (dtmp > 0) ? Int.ONE : (dtmp == 0 ? Int.ZERO : Int.M_ONE);
+					double dtmp = ((Float64)stack[head]).value - ((Float64)(stack[head+1])).value;
+					stack[head] = (dtmp > 0) ? Int32.ONE : (dtmp == 0 ? Int32.ZERO : Int32.M_ONE);
 					break;
 				}
 
@@ -450,42 +453,42 @@ class EtherFunction extends Function {
 				case Opcodes.IFEQ: { //ifeq <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head]) == 0) ct = itmp;
+					if (((Int32)stack[head]).value == 0) ct = itmp;
 					head--;
 					break;
 				}
 				case Opcodes.IFNE: { //ifne <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head]) != 0) ct = itmp;
+					if (((Int32)stack[head]).value != 0) ct = itmp;
 					head--;
 					break;
 				}
 				case Opcodes.IFLT: { //iflt <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head]) < 0) ct = itmp;
+					if (((Int32)stack[head]).value < 0) ct = itmp;
 					head--;
 					break;
 				}
 				case Opcodes.IFGE: { //ifge <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head]) >= 0) ct = itmp;
+					if (((Int32)stack[head]).value >= 0) ct = itmp;
 					head--;
 					break;
 				}
 				case Opcodes.IFGT: { //ifgt <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head]) > 0) ct = itmp;
+					if (((Int32)stack[head]).value > 0) ct = itmp;
 					head--;
 					break;
 				}
 				case Opcodes.IFLE: { //ifle <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head]) <= 0) ct = itmp;
+					if (((Int32)stack[head]).value <= 0) ct = itmp;
 					head--;
 					break;
 				}
@@ -510,28 +513,28 @@ class EtherFunction extends Function {
 				case Opcodes.IF_ICMPLT: { //if_icmplt <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head-1]) < ival(stack[head])) ct = itmp;
+					if (((Int32)stack[head-1]).value < ((Int32)stack[head]).value) ct = itmp;
 					head -= 2;
 					break;
 				}
 				case Opcodes.IF_ICMPGE: { //if_icmpge <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head-1]) >= ival(stack[head])) ct = itmp;
+					if (((Int32)stack[head-1]).value >= ((Int32)stack[head]).value) ct = itmp;
 					head -= 2;
 					break;
 				}
 				case Opcodes.IF_ICMPGT: { //if_icmpgt <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head-1]) > ival(stack[head])) ct = itmp;
+					if (((Int32)stack[head-1]).value > ((Int32)stack[head]).value) ct = itmp;
 					head -= 2;
 					break;
 				}
 				case Opcodes.IF_ICMPLE: { //if_icmple <ushort>
 					int itmp = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					ct += 2;
-					if (ival(stack[head-1]) <= ival(stack[head])) ct = itmp;
+					if (((Int32)stack[head-1]).value <= ((Int32)stack[head]).value) ct = itmp;
 					head -= 2;
 					break;
 				}
@@ -555,12 +558,12 @@ class EtherFunction extends Function {
 				}
 				case Opcodes.JSR: { //jsr <ushort>
 					head++;
-					stack[head] = Ival(ct+2);
+					stack[head] = Int32.toInt32(ct+2);
 					ct = (code[ct] & 0xff) << 8 | (code[ct+1] & 0xff);
 					break;					
 				}
 				case Opcodes.RET: { //ret
-					ct = ival(stack[head]);
+					ct = ((Int32)stack[head]).value;
 					head--;
 					break;
 				}
@@ -611,193 +614,193 @@ class EtherFunction extends Function {
 
 			//ARRAY INSTRUCTIONS
 				case Opcodes.NEWAA: {
-					stack[head] = new Object[ival(stack[head])];
+					stack[head] = new Object[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWBA: {
-					stack[head] = new byte[ival(stack[head])];
+					stack[head] = new byte[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWCA: {
-					stack[head] = new char[ival(stack[head])];
+					stack[head] = new char[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWZA: {
-					stack[head] = new boolean[ival(stack[head])];
+					stack[head] = new boolean[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWSA: {
-					stack[head] = new short[ival(stack[head])];
+					stack[head] = new short[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWIA: {
-					stack[head] = new int[ival(stack[head])];
+					stack[head] = new int[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWLA: {
-					stack[head] = new long[ival(stack[head])];
+					stack[head] = new long[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWFA: {
-					stack[head] = new float[ival(stack[head])];
+					stack[head] = new float[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.NEWDA: {
-					stack[head] = new double[ival(stack[head])];
+					stack[head] = new double[((Int32)stack[head]).value];
 					break;
 				}
 				case Opcodes.AALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
 					stack[head] = ((Object[])stack[head])[at];
 					break;
 				}
 				case Opcodes.BALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Ival( ((byte[])stack[head])[at] );
+					stack[head] = Int32.toInt32( ((byte[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.CALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Ival( ((char[])stack[head])[at] );
+					stack[head] = Int32.toInt32( ((char[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.ZALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Ival( ((boolean[])stack[head])[at] );
+					stack[head] = ((boolean[])stack[head])[at] ? Int32.ONE : Int32.ZERO;
 					break;
 				}
 				case Opcodes.SALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Ival( ((short[])stack[head])[at] );
+					stack[head] = Int32.toInt32( ((short[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.IALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Ival( ((int[])stack[head])[at] );
+					stack[head] = Int32.toInt32( ((int[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.LALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Lval( ((long[])stack[head])[at] );
+					stack[head] = new Int64( ((long[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.FALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Fval( ((float[])stack[head])[at] );
+					stack[head] = new Float32( ((float[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.DALOAD: {
-					int at = ival(stack[head]);
+					int at = ((Int32)stack[head]).value;
 					head--;
-					stack[head] = Dval( ((double[])stack[head])[at] );
+					stack[head] = new Float64( ((double[])stack[head])[at] );
 					break;
 				}
 				case Opcodes.AASTORE: {
 					Object val = stack[head];
-					int at = ival(stack[head-1]);
+					int at = ((Int32)stack[head-1]).value;
 					Object[] array = (Object[])stack[head-2];
 					array[at] = val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.BASTORE: {
-					int val = ival(stack[head]);
-					int at = ival(stack[head-1]);
+					int val = ((Int32)stack[head]).value;
+					int at = ((Int32)stack[head-1]).value;
 					byte[] array = (byte[])stack[head-2];
 					array[at] = (byte)val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.CASTORE: {
-					char val = (char) ival(stack[head]);
-					int at = ival(stack[head-1]);
+					char val = (char) ((Int32)stack[head]).value;
+					int at = ((Int32)stack[head-1]).value;
 					char[] array = (char[])stack[head-2];
 					array[at] = val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.ZASTORE: {
-					boolean val = bval(stack[head]);
-					int at = ival(stack[head-1]);
+					boolean val = stack[head] != Int32.ZERO;
+					int at = ((Int32)stack[head-1]).value;
 					boolean[] array = (boolean[])stack[head-2];
 					array[at] = val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.SASTORE: {
-					short val = (short)ival(stack[head]);
-					int at = ival(stack[head-1]);
+					short val = (short)((Int32)stack[head]).value;
+					int at = ((Int32)stack[head-1]).value;
 					short[] array = (short[])stack[head-2];
 					array[at] = val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.IASTORE: {
-					int val = ival(stack[head]);
-					int at = ival(stack[head-1]);
+					int val = ((Int32)stack[head]).value;
+					int at = ((Int32)stack[head-1]).value;
 					int[] array = (int[])stack[head-2];
 					array[at] = val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.FASTORE: {
-					float val = fval(stack[head]);
-					int at = ival(stack[head-1]);
+					float val = ((Float32)stack[head]).value;
+					int at = ((Int32)stack[head-1]).value;
 					float[] array = (float[])stack[head-2];
 					array[at] = val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.DASTORE: {
-					double val = dval(stack[head]);
-					int at = ival(stack[head-1]);
+					double val = ((Float64)stack[head]).value;
+					int at = ((Int32)stack[head-1]).value;
 					double[] array = (double[])stack[head-2];
 					array[at] = val;
 					head -= 3;
 					break;
 				}
 				case Opcodes.AALEN: {
-					stack[head] = Ival(((Object[])stack[head]).length);
+					stack[head] = Int32.toInt32(((Object[])stack[head]).length);
 					break;
 				}
 				case Opcodes.BALEN: {
-					stack[head] = Ival(((byte[])stack[head]).length);
+					stack[head] = Int32.toInt32(((byte[])stack[head]).length);
 					break;
 				}
 				case Opcodes.CALEN: {
-					stack[head] = Ival(((char[])stack[head]).length);
+					stack[head] = Int32.toInt32(((char[])stack[head]).length);
 					break;
 				}
 				case Opcodes.ZALEN: {
-					stack[head] = Ival(((boolean[])stack[head]).length);
+					stack[head] = Int32.toInt32(((boolean[])stack[head]).length);
 					break;
 				}
 				case Opcodes.SALEN: {
-					stack[head] = Ival(((short[])stack[head]).length);
+					stack[head] = Int32.toInt32(((short[])stack[head]).length);
 					break;
 				}
 				case Opcodes.IALEN: {
-					stack[head] = Ival(((int[])stack[head]).length);
+					stack[head] = Int32.toInt32(((int[])stack[head]).length);
 					break;
 				}
 				case Opcodes.LALEN: {
-					stack[head] = Ival(((long[])stack[head]).length);
+					stack[head] = Int32.toInt32(((long[])stack[head]).length);
 					break;
 				}
 				case Opcodes.FALEN: {
-					stack[head] = Ival(((float[])stack[head]).length);
+					stack[head] = Int32.toInt32(((float[])stack[head]).length);
 					break;
 				}
 				case Opcodes.DALEN: {
-					stack[head] = Ival(((double[])stack[head]).length);
+					stack[head] = Int32.toInt32(((double[])stack[head]).length);
 					break;
 				}
 
@@ -815,7 +818,7 @@ class EtherFunction extends Function {
 					        | ((code[ct+2] & 0xff) << 8)
 					        | (code[ct+3] & 0xff);
 					ct += 4;
-					int val = ival(stack[head]);
+					int val = ((Int32)stack[head]).value;
 					head--;
 					if (val >= min && val <= max) {
 						ct += (val-min)*2;
@@ -830,7 +833,7 @@ class EtherFunction extends Function {
 					ct += 2;
 					int count = ((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff);
 					ct += 2;
-					int val = ival(stack[head]);
+					int val = ((Int32)stack[head]).value;
 					head--;
 					boolean matched = false;
 					for (int i=0; i<count && !matched; i++) {
@@ -853,7 +856,7 @@ class EtherFunction extends Function {
 				case Opcodes.ACMP: {
 					head--;
 					boolean eq = (stack[head] == null) ? stack[head+1] == null : stack[head].equals(stack[head+1]);
-					stack[head] = Ival(!eq);
+					stack[head] = eq ? Int32.ZERO : Int32.ONE;
 					break;
 				}
 				case Opcodes.RET_NULL:
@@ -889,13 +892,13 @@ class EtherFunction extends Function {
 				}
 				case Opcodes.BIPUSH: { //bipush <byte>
 					head++;
-					stack[head] = Ival(code[ct]);
+					stack[head] = Int32.toInt32(code[ct]);
 					ct++;
 					break;
 				}
 				case Opcodes.SIPUSH: { //sipush <short>
 					head++;
-					stack[head] = Ival((code[ct] << 8) | (code[ct+1]& 0xff));
+					stack[head] = Int32.toInt32((code[ct] << 8) | (code[ct+1]& 0xff));
 					ct += 2;
 					break;
 				}
@@ -904,7 +907,7 @@ class EtherFunction extends Function {
 					ct++;
 					int inc = code[ct];
 					ct++;
-					stack[idx] = Int.toInt(((Int)stack[idx]).value + inc);
+					stack[idx] = Int32.toInt32(((Int32)stack[idx]).value + inc);
 				}
 			} /* the big switch */
 		} catch (Throwable e) {
@@ -917,9 +920,9 @@ class EtherFunction extends Function {
 				for (int i=1; i<dbgtable.length; i += 2) {
 					if (dbgtable[i+1] <= ct) srcline = dbgtable[i];
 				}
-				ae.addTraceElement(this, cpool[dbgtable[0]]+":"+srcline);
+				ae.addTraceElement(this.toString(), cpool[dbgtable[0]]+":"+srcline);
 			} else {
-				ae.addTraceElement(this, "+"+ct);
+				ae.addTraceElement(this.toString(), "+"+ct);
 			}
 			// catching or rethrowing
 			int jumpto = -1;
@@ -941,7 +944,7 @@ class EtherFunction extends Function {
 	}
 
 	public String toString() {
-		if (libname != null) return libname+':'+signature;
-		else return signature;
+		if (libname != null) return libname+':'+name;
+		else return name;
 	}
 }

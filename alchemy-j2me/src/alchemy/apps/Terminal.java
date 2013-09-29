@@ -18,10 +18,10 @@
 
 package alchemy.apps;
 
-import alchemy.core.Process;
 import alchemy.libs.ui.UIServer;
-import alchemy.nlib.NativeApp;
 import alchemy.io.IO;
+import alchemy.system.NativeApp;
+import alchemy.system.Process;
 import javax.microedition.lcdui.Command;
 
 /**

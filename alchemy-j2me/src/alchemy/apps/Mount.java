@@ -18,10 +18,10 @@
 
 package alchemy.apps;
 
-import alchemy.core.Process;
 import alchemy.fs.Filesystem;
-import alchemy.nlib.NativeApp;
 import alchemy.io.IO;
+import alchemy.system.NativeApp;
+import alchemy.system.Process;
 import java.io.IOException;
 
 /**

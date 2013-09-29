@@ -96,6 +96,7 @@ import javax.microedition.io.Connection;
  * </ol>
  *
  * @author Sergey Basalaev
+ * @deprecated Use alchemy.system.Process instead
  */
 public class Process {
 
