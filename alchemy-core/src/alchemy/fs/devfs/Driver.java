@@ -18,18 +18,17 @@
 
 package alchemy.fs.devfs;
 
-import alchemy.core.Process.ProcessThread;
 import alchemy.fs.FSDriver;
 import alchemy.fs.Filesystem;
-import alchemy.io.IO;
 import alchemy.io.NullInputStream;
 import alchemy.io.NullOutputStream;
 import alchemy.io.RandomInputStream;
+import alchemy.system.ProcessThread;
+import alchemy.util.HashMap;
 import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Hashtable;
 import javax.microedition.io.Connector;
 
 /**
@@ -44,7 +43,7 @@ import javax.microedition.io.Connector;
  * <li>{@code /stdin}</li>
  * <li>{@code /stdout}</li>
  * <li>{@code /stderr}</li>
- * <li>COMM ports</li>
+ * <li>COMM ports on mobile platforms</li>
  * </ul>
  * </p>
  * 
@@ -52,19 +51,19 @@ import javax.microedition.io.Connector;
  */
 public final class Driver extends FSDriver {
 	
-	private final Hashtable sharedinputs = new Hashtable();
-	private final  Hashtable sharedoutputs = new Hashtable();
+	private final HashMap sharedinputs = new HashMap();
+	private final HashMap sharedoutputs = new HashMap();
 	private final String[] stddevs = {"stdin", "stdout", "stderr", "null", "zero", "random"};
 	private final String[] commdevs;
 	
 	public Driver() {
 		NullOutputStream sink = new NullOutputStream();
-		sharedoutputs.put("zero", sink);
-		sharedoutputs.put("null", sink);
+		sharedoutputs.set("zero", sink);
+		sharedoutputs.set("null", sink);
 
-		sharedinputs.put("zero", new NullInputStream(0));
-		sharedinputs.put("null", new NullInputStream(-1));
-		sharedinputs.put("random", new RandomInputStream());
+		sharedinputs.set("zero", new NullInputStream(0));
+		sharedinputs.set("null", new NullInputStream(-1));
+		sharedinputs.set("random", new RandomInputStream());
 
 		String comm = System.getProperty("microedition.commports");
 		commdevs = (comm == null) ? new String[0] : Strings.split(comm, ',');
@@ -75,7 +74,7 @@ public final class Driver extends FSDriver {
 		if ("stdin".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ProcessThread) {
-				return ((ProcessThread)th).process().stdin;
+				return ((ProcessThread)th).getProcess().stdin;
 			}
 		}
 		InputStream input = (InputStream) sharedinputs.get(name);
@@ -95,13 +94,13 @@ public final class Driver extends FSDriver {
 		if ("stdout".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ProcessThread) {
-				return ((ProcessThread)th).process().stdout;
+				return ((ProcessThread)th).getProcess().stdout;
 			}
 		}
 		if ("stderr".equals(name)) {
 			Thread th = Thread.currentThread();
 			if (th instanceof ProcessThread) {
-				return ((ProcessThread)th).process().stderr;
+				return ((ProcessThread)th).getProcess().stderr;
 			}
 		}
 		OutputStream output = (OutputStream) sharedoutputs.get(name);
@@ -162,7 +161,7 @@ public final class Driver extends FSDriver {
 	public boolean canRead(String file) {
 		String name = Filesystem.fileName(file);
 		if (name.length() == 0 || name.equals("stdin")) return true;
-		if (sharedinputs.contains(name)) return true;
+		if (sharedinputs.get(name) != null) return true;
 		for (int i=0; i<commdevs.length; i++) {
 			if (name.equals(commdevs[i])) return true;
 		}
@@ -172,7 +171,7 @@ public final class Driver extends FSDriver {
 	public boolean canWrite(String file) {
 		String name = Filesystem.fileName(file);
 		if (name.equals("stdout") || name.equals("stderr")) return true;
-		if (sharedinputs.contains(name)) return true;
+		if (sharedoutputs.get(name) != null) return true;
 		for (int i=0; i<commdevs.length; i++) {
 			if (name.equals(commdevs[i])) return true;
 		}
@@ -196,18 +195,18 @@ public final class Driver extends FSDriver {
 	}
 
 	public long size(String file) {
-		return 0l;
+		return 0L;
 	}
 	
 	public long spaceTotal() {
-		return 0l;
+		return 0L;
 	}
 	
 	public long spaceFree() {
-		return 0l;
+		return 0L;
 	}
 	
 	public long spaceUsed() {
-		return 0l;
+		return 0L;
 	}
 }

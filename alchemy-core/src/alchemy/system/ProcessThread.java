@@ -81,4 +81,9 @@ public final class ProcessThread extends Thread {
 	public boolean isDaemon() {
 		return daemon;
 	}
+
+	/** Returns process that owns this thread. */
+	public Process getProcess() {
+		return process;
+	}
 }
