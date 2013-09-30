@@ -18,9 +18,9 @@
 
 package alchemy.libs.core;
 
-import alchemy.core.AlchemyException;
-import alchemy.core.Process;
-import alchemy.core.Function;
+import alchemy.system.AlchemyException;
+import alchemy.system.Function;
+import alchemy.system.Process;
 
 /**
  * Function with first argument already applied.
@@ -34,7 +34,7 @@ public class PartiallyAppliedFunction extends Function {
 	private final Function f;
 	
 	public PartiallyAppliedFunction(Function f, Object argument) {
-		super(f.signature+"#curry");
+		super(f.name+"#curry");
 		this.argument = argument;
 		this.f = f;
 	}
@@ -46,11 +46,11 @@ public class PartiallyAppliedFunction extends Function {
 			newargs[0] = argument;
 			return f.invoke(p, newargs);
 		} catch (AlchemyException ae) {
-			ae.addTraceElement(this, "generated");
+			ae.addTraceElement("<dynamic>:" + this.name, "native");
 			throw ae;
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
-			ae.addTraceElement(this, "generated");
+			ae.addTraceElement("<dynamic>:" + this.name, "native");
 			throw ae;
 		}
 	}

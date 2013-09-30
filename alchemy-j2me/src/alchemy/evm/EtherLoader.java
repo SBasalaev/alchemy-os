@@ -76,7 +76,7 @@ public class EtherLoader {
 	
 	public static Library load(Process p, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
-		EtherLibrary lib = new EtherLibrary();
+		Library lib = new Library();
 		//reading format version
 		int ver = data.readUnsignedShort();
 		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
@@ -154,7 +154,7 @@ public class EtherLoader {
 					//constructing function
 					Function func = new EtherFunction(libname, fname, cpool, stacksize, localsize, code, lnumtable, errtable);
 					cpool[cindex] = func;
-					if ((fflags & Opcodes.FFLAG_SHARED) != 0) lib.putFunc(func);
+					if ((fflags & Opcodes.FFLAG_SHARED) != 0) lib.putFunction(func);
 				} break;
 				default:
 					throw new InstantiationException("Unknown data type: "+ctype);

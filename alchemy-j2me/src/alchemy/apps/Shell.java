@@ -109,7 +109,7 @@ public class Shell extends NativeApp {
 					}
 					exitcode = 0;
 				} else {
-					Process child = new Process(p);
+					Process child = new Process(p, null, cc.cmd, cc.args);
 					if (cc.in != null) {
 						child.stdin = Filesystem.read(p.toFile(cc.in));
 					}
@@ -132,7 +132,7 @@ public class Shell extends NativeApp {
 					if (p.stdin instanceof TerminalInputStream) {
 						((TerminalInputStream)p.stdin).setPrompt("");
 					}
-					exitcode = child.startAndWait(cc.cmd, cc.args);
+					exitcode = child.start().waitFor();
 					if (cc.in != null) child.stdin.close();
 					if (cc.out != null) child.stdout.close();
 					if (cc.err != null) child.stderr.close();

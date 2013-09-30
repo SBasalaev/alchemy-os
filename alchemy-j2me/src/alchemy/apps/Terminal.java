@@ -62,7 +62,6 @@ public class Terminal extends NativeApp {
 		final Command cmdInput = new Command("Input", Command.OK, 1);
 		final TerminalForm form = new TerminalForm(cmdInput);
 		UIServer.setScreen(p, form);
-		Process child = new Process(p);
 		try {
 			String[] childArgs = null;
 			String childCmd;
@@ -80,10 +79,11 @@ public class Terminal extends NativeApp {
 				}
 			}
 			form.setTitle(childCmd+" - Terminal");
+			Process child = new Process(p, null, childCmd, childArgs);
 			child.stdin = form.in;
 			child.stdout = form.out;
 			child.stderr = form.out;
-			child.start(childCmd, childArgs);
+			child.start();
 			while (child.getState() != Process.ENDED) {
 				Object[] event = (Object[])UIServer.readEvent(p, false);
 				if (event != null && event[2] == cmdInput) synchronized (form) {

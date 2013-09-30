@@ -942,9 +942,4 @@ class EtherFunction extends Function {
 		}
 		} /* the great while */
 	}
-
-	public String toString() {
-		if (libname != null) return libname+':'+name;
-		else return name;
-	}
 }
