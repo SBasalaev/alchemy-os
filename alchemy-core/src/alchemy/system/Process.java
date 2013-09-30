@@ -21,18 +21,93 @@ package alchemy.system;
 import alchemy.fs.Filesystem;
 import alchemy.io.NullInputStream;
 import alchemy.io.NullOutputStream;
+import alchemy.io.UTFReader;
+import alchemy.types.Int32;
 import alchemy.util.ArrayList;
+import alchemy.util.Arrays;
 import alchemy.util.HashMap;
+import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.microedition.io.Connection;
 
 /**
- * Executing process.
+ * Single process in Alchemy OS.
+ * Process represents an instance of a program
+ * executing in Alchemy environment.
+ *
+ * <h3>Process lifecycle</h3>
+ * Process lifecycle consists of three steps:
+ * <ol>
+ * <li>
+ * <code>NEW</code><br/>
+ * This is the state of new process. In this state process
+ * environment can be modified using methods
+ * <ul>
+ * <li><code>setEnv</code>
+ * <li><code>setCurrentDirectory</code>
+ * <li><code>setPriority</code>
+ * </ul>
+ * <li>
+ * <code>RUNNING</code><br/>
+ * This is the state of process which executes program in separate
+ * thread. Process becomes <code>RUNNING</code> after executing
+ * {@link #start()} method. If the program fails to be loaded then
+ * exception is thrown and process remains in <code>NEW</code> state.
+ * <li>
+ * <code>ENDED</code><br/>
+ * The <code>RUNNING</code> process becomes <code>ENDED</code>
+ * when the main thread dies. In this state program exit code
+ * can be examined with {@link #getExitCode()} method and
+ * if program has ended by throwing an exception that exception
+ * can be obtained with {@link #getError()} method.
+ * </ol>
+ *
+ * <h3><a name="LibraryLoading"></a>Loading of programs and libraries</h3>
+ * Methods that load libraries are <code>start</code>
+ * and <code>loadLibrary</code>.
+ * Loading of library consists of the following steps:
+ * <ol>
+ * <li>
+ * Library file is resolved from given string argument and
+ * searched in a set of paths. If file can not be found then
+ * <code>IOException</code> is thrown.
+ *   <ul>
+ *   <li>
+ *   If argument starts with <code>'/'</code> character, then it is regarded
+ *   as absolute path.
+ *   <li>
+ *   If argument contains </code>'/'</code> but not starts with it then it
+ *   is regarded as path relative to the {@link #getCurrentDirectory() current directory}.
+ *   <li>
+ *   If argument does not contain any slashes then search is performed in a
+ *   set of paths defined in an environment variables. Method <code>start</code>
+ *   reads paths from <code>PATH</code> variable and <code>readLibrary</code>
+ *   method reads them from <code>LIBPATH</code>.
+ *   These variables should contain colon-separated list of paths.
+ *   </ul>
+ * <li>
+ * If library is already stored in {@link Cache} then it is returned.
+ * Caching is based on file name and timestamp. So the cached version is
+ * used if file was not changed since the last caching.
+ * <li>
+ * If cache has no library or has older version of library then file is
+ * used to construct new library instance.
+ * </ol>
+ *
  * @author Sergey Basalaev
  */
 public final class Process {
+
+	/** Magic number for Ether libraries. */
+	private static final int MAGIC_ETHER = 0xC0DE;
+	/** Magic number for native libraries. */
+	private static final int MAGIC_NATIVE = ('#' << 8) | '@';
+	/** Magic number for interpreter scripts. */
+	private static final int MAGIC_INTERPRETER = ('#' << 8) | '!';
+	/** Magic number for symbolic links. */
+	private static final int MAGIC_LINK = ('#' << 8) | '=';
 
 	/** Returned by getState() for new process. */
 	public static final int NEW = 0;
@@ -50,36 +125,232 @@ public final class Process {
 
 	/** Parent of this process. */
 	private final Process parent;
+	/** Command that invoked this process. */
+	private final String command;
+	/** Command-line arguments passed to this process. */
+	private final String[] cmdArgs;
 	/** Environment variables. */
 	private HashMap env;
 	/** Listeners of this process. */
 	private final ArrayList listeners = new ArrayList();
-	/** State of this process. */
-	private int state = NEW;
 	/** Connections owned by this process. */
 	private final ArrayList connections = new ArrayList();
 	/** Current directory. */
 	private String curdir;
-	/** Threads of this process. */
+	/** Main thread of this process. */
+	private ProcessThread mainThread;
+	/** Additional threads of this process. */
 	private final ArrayList threads = new ArrayList();
-	/** Nondaemon thread count. */
-	private int threadcount;
+	/** Priority of this process. */
+	private int priority;
 
-	/** Creates new parentless process. */
-	public Process() {
+	/**
+	 * Creates new parentless process.
+	 */
+	public Process(HashMap env, String command, String[] args) {
 		this.parent = null;
 		this.curdir = "";
 		this.stdin = new NullInputStream(-1);
 		this.stdout = this.stderr = new NullOutputStream();
+		this.env = env;
+		this.command = command;
+		this.cmdArgs = args;
 	}
 
 	/** Creates new process that inherits environment from its parent. */
-	public Process(Process parent) {
+	public Process(Process parent, HashMap env, String command, String[] args) {
 		this.parent = parent;
 		this.curdir = parent.curdir;
 		this.stdin = parent.stdin;
 		this.stdout = parent.stdout;
 		this.stderr = parent.stderr;
+		this.env = env;
+		this.command = command;
+		this.cmdArgs = args;
+	}
+
+	public static Process currentProcess() {
+		Thread thread = Thread.currentThread();
+		if (thread instanceof ProcessThread) {
+			return ((ProcessThread)thread).getProcess();
+		} else {
+			return null;
+		}
+	}
+
+	/** Returns program name. */
+	public String getName() {
+		return Filesystem.fileName(command);
+	}
+
+	/** Returns command-line arguments. */
+	public String[] getArgs() {
+		String[] newargs = new String[cmdArgs.length];
+		System.arraycopy(cmdArgs, 0, newargs, 0, newargs.length);
+		return newargs;
+	}
+
+	/** Returns string representation of this process. */
+	public String toString() {
+		return "Process(" + getName() + ')';
+	}
+
+	/**
+	 * Returns exit code of this process.
+	 * Can be called only in ENDED state.
+	 */
+	public int getExitCode() {
+		if (mainThread == null || mainThread.isAlive()) throw new IllegalStateException();
+		return mainThread.getExitCode();
+	}
+
+	/**
+	 * Returns exception that caused this process to crash.
+	 * Returns null if process ended normally.
+	 * Can be called only in ENDED state.
+	 */
+	public AlchemyException getError() {
+		if (mainThread == null || mainThread.isAlive()) throw new IllegalStateException();
+		return mainThread.getError();
+	}
+
+	/**
+	 * Starts execution of this process.
+	 * Can be called only in NEW state.
+	 * If program is successfully instantiated and started,
+	 * turns into RUNNING state.
+	 */
+	public Process start() throws IOException, InstantiationException {
+		synchronized (threads) {
+			if (mainThread != null) throw new IllegalStateException();
+			Library program = loadBinary(command, getEnv("PATH"));
+			Function main = program.getFunction("main");
+			if (main == null)
+				throw new InstantiationException("No main function in " + command);
+			mainThread = new ProcessThread(this, main, cmdArgs);
+			mainThread.start();
+		}
+		return this;
+	}
+
+	/**
+	 * Waits for this process to end and returns its exit code.
+	 * Can be called only in RUNNING or ENDED state.
+	 */
+	public int waitFor() throws InterruptedException {
+		if (mainThread == null) throw new IllegalStateException();
+		mainThread.join();
+		return mainThread.getExitCode();
+	}
+
+	/** Searches program or library in given path list and loads it. */
+	private Library loadBinary(String libname, String pathlist) throws IOException, InstantiationException {
+		// resolve file name and check permissions
+		String libfile = resolveFile(libname, pathlist);
+		if (libfile == null)
+			throw new IOException("File not found: " + libname);
+		if (!Filesystem.canExec(libfile))
+			throw new SecurityException("Permission denied: " + libfile);
+
+		// search library in cache
+		long tstamp = Filesystem.lastModified(libfile);
+		Object cachedlib = Cache.get(libfile, tstamp);
+		if (cachedlib != null) {
+			if (cachedlib instanceof Library)
+				return (Library) cachedlib;
+			else
+				throw new ClassCastException("Unknown library format: " + libfile);
+		}
+
+		// read library from file
+		InputStream libin = Filesystem.read(libfile);
+		Library lib;
+		try {
+			int magic = (libin.read() << 8) | libin.read();
+			switch (magic) {
+				case MAGIC_NATIVE: {
+					String classname = new UTFReader(libin).readLine();
+					libin.close();
+					try {
+						lib = (Library)Class.forName(classname).newInstance();
+						break;
+					} catch (ClassNotFoundException cnfe) {
+						throw new InstantiationException("Not supported in this build of Alchemy OS: " + classname);
+					} catch (NoClassDefFoundError cndfe) {
+						throw new InstantiationException("Not supported by this device: " + classname);
+					} catch (Throwable t) {
+						throw new InstantiationException("Not a library class: " + classname);
+					}
+				}
+				case MAGIC_LINK: {
+					String filename = new UTFReader(libin).readLine();
+					libin.close();
+					if (filename.charAt(0) != '/') {
+						filename = Filesystem.fileParent(libfile) + '/' + filename;
+					}
+					lib = loadBinary(filename, pathlist);
+					break;
+				}
+				case MAGIC_INTERPRETER: {
+					String intcmd = new UTFReader(libin).readLine();
+					String[] intargs = Strings.split(intcmd, ' ');
+					intcmd = intargs[0];
+					System.arraycopy(intargs, 1, intargs, 0, intargs.length-1);
+					intargs[intargs.length-1] = libfile;
+					lib = new Library();
+					lib.putFunction(new InterpreterMain(intcmd, intargs));
+					break;
+				}
+				case MAGIC_ETHER:
+					throw new RuntimeException("Not implemented");
+				default:
+					throw new InstantiationException("Unknown library format: " + libfile);
+			}
+		} finally {
+			try { libin.close(); } catch (IOException ioe) { }
+		}
+
+		// assign name to the library and put it into the cache
+		if (lib != null) {
+			if (lib.name != null) lib.name = Filesystem.fileName(libfile);
+			Cache.put(libfile, tstamp, lib);
+		}
+		return lib;
+	}
+
+	/**
+	 * Loads library with given name.
+	 * If library name contains slashes then it is regarded as
+	 * absolute or relative path. Otherwise it is searched in
+	 * paths specified by LIBPATH environment variable.
+	 */
+	public Library loadLibrary(String name) throws IOException, InstantiationException {
+		return loadBinary(name, getEnv("LIBPATH"));
+	}
+
+	/**
+	 * Searches file in given list of paths.
+	 * If file does not exist then null is returned.
+	 *
+	 * @param name      file name
+	 * @param pathlist  colon separated list of paths
+	 */
+	public String resolveFile(String name, String pathlist) {
+		if (name.length() == 0)
+			throw new IllegalArgumentException();
+		if (name.indexOf('/') >= 0) {
+			name = toFile(name);
+			if (Filesystem.exists(name)) return name;
+		} else {
+			String[] paths = Strings.split(pathlist, ':');
+			for (int i=0; i<paths.length; i++) {
+				String path = paths[i];
+				if (path.length() == 0) continue;
+				String testname = toFile(path + '/' + name);
+				if (Filesystem.exists(testname)) return testname;
+			}
+		}
+		return null;
 	}
 
 	/** Attaches process listener to this process. */
@@ -98,7 +369,9 @@ public final class Process {
 
 	/** Returns state of this process. */
 	public int getState() {
-		return state;
+		if (mainThread == null) return NEW;
+		if (mainThread.isAlive()) return RUNNING;
+		return ENDED;
 	}
 
 	/**
@@ -128,6 +401,23 @@ public final class Process {
 			// set variable
 			if (env == null) env = new HashMap();
 			env.set(key, value);
+		}
+	}
+
+	/** Returns current priority of the process. */
+	public int getPriority() {
+		return priority;
+	}
+
+	/** Sets new priority to the process. */
+	public void setPriority(int newPriority) {
+		if (newPriority < Thread.MIN_PRIORITY || newPriority > Thread.MAX_PRIORITY)
+			throw new IllegalArgumentException();
+		synchronized (threads) {
+			mainThread.setPriority(newPriority);
+			for (int i=threads.size()-1; i>=0; i--) {
+				((ProcessThread)threads.get(i)).setPriority(newPriority);
+			}
 		}
 	}
 
@@ -171,6 +461,12 @@ public final class Process {
 		}
 	}
 
+	/** Creates new thread in this process. */
+	public ProcessThread createThread(Function func) {
+		return new ProcessThread(this, func, Arrays.EMPTY);
+	}
+
+	/** Stops all threads and finalizes process. */
 	public void kill() {
 		synchronized (threads) {
 			for (int idx = threads.size()-1; idx >= 0; idx--) {
@@ -185,7 +481,6 @@ public final class Process {
 	void threadStarted(ProcessThread thread) {
 		synchronized (threads) {
 			threads.add(thread);
-			if (!thread.isDaemon()) threadcount++;
 		}
 	}
 
@@ -193,14 +488,11 @@ public final class Process {
 	void threadEnded(ProcessThread thread) {
 		synchronized (threads) {
 			threads.remove(thread);
-			if (!thread.isDaemon()) threadcount--;
-			if (threadcount == 0) {
+			if (thread == mainThread) {
 				for (int idx = threads.size()-1; idx >= 0; idx--) {
 					((ProcessThread)threads.get(idx)).interrupt();
 				}
 				threads.clear();
-			}
-			if (threads.isEmpty()) {
 				finalizeProcess();
 			}
 		}
@@ -216,6 +508,29 @@ public final class Process {
 			try {
 				((Connection)connections.get(i)).close();
 			} catch (IOException ioe) { }
+		}
+	}
+
+	/** Main function of the interpreter script. */
+	private static class InterpreterMain extends Function {
+		private final String intcmd;
+		private final String[] intargs;
+
+		public InterpreterMain(String command, String[] args) {
+			super("main");
+			this.intcmd = command;
+			this.intargs = args;
+		}
+
+		public Object invoke(Process p, Object[] args) throws AlchemyException {
+			String[] params = new String[intargs.length + args.length];
+			System.arraycopy(intargs, 0, params, 0, intargs.length);
+			System.arraycopy(args, 0, params, intargs.length, args.length);
+			try {
+				return Int32.toInt32(new Process(p, null, intcmd, params).start().waitFor());
+			} catch (Throwable t) {
+				throw new AlchemyException(t);
+			}
 		}
 	}
 }

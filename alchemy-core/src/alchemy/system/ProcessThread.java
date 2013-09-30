@@ -18,6 +18,8 @@
 
 package alchemy.system;
 
+import alchemy.types.Int32;
+
 /**
  * Single thread in a process.
  * @author Sergey Basalaev
@@ -30,32 +32,41 @@ public final class ProcessThread extends Thread {
 	private final Function func;
 	/** Arguments to be passed to the function. */
 	private final Object[] args;
-	/** Daemon status of the thread. */
-	private final boolean daemon;
 
+	/** Exit code returned by thread function. */
+	private int exitcode;
 	/** Set if thread crashes. */
 	private AlchemyException error;
 	/** Interrupted status. */
 	private boolean interrupted;
 
-	ProcessThread(Process process, Function func, Object[] args, boolean isDaemon) {
+	ProcessThread(Process process, Function func, Object[] args) {
 		this.process = process;
 		this.func = func;
 		this.args = args;
-		this.daemon = isDaemon;
 	}
 
 	public void run() {
 		process.threadStarted(this);
 		try {
-			func.invoke(process, args);
+			Object ret = func.invoke(process, args);
+			if (ret instanceof Int32) {
+				exitcode = ((Int32)ret).value;
+			}
 		} catch (AlchemyException ae) {
 			error = ae;
+			exitcode = ae.errcode;
 		} catch (Throwable t) {
 			error = new AlchemyException(t);
+			exitcode = error.errcode;
 			error.addTraceElement(func.name, "uncaught");
 		}
 		process.threadEnded(this);
+	}
+
+	/** Returns exit code of this thread. */
+	public int getExitCode() {
+		return exitcode;
 	}
 
 	/**
@@ -75,11 +86,6 @@ public final class ProcessThread extends Thread {
 	/** Returns interrupted status of this thread. */
 	public boolean isInterrupted() {
 		return interrupted;
-	}
-
-	/** Returns daemon status of this thread. */
-	public boolean isDaemon() {
-		return daemon;
 	}
 
 	/** Returns process that owns this thread. */
