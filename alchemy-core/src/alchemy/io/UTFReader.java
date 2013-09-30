@@ -39,7 +39,7 @@ public final class UTFReader extends Reader {
 		input = s;
 	}
 
-	public synchronized int read() throws IOException {
+	public int read() throws IOException {
 		if (input == null) throw new IOException("Stream is closed");
 		int b1 = input.read();
 		if (b1 < 0) return -1;
@@ -60,7 +60,7 @@ public final class UTFReader extends Reader {
 		return ((b1 & 0x0f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f);
 	}
 
-	public synchronized int read(char[] cbuf, int off, int len) throws IOException {
+	public int read(char[] cbuf, int off, int len) throws IOException {
 		if (off+len > cbuf.length || off < 0)
 			throw new IndexOutOfBoundsException();
 		if (len == 0) return 0;
@@ -88,7 +88,7 @@ public final class UTFReader extends Reader {
 	 *   as a string; <code>null</code> if stream is at end
 	 * @throws IOException if an I/O error occurs
 	 */
-	public synchronized String readLine() throws IOException {
+	public String readLine() throws IOException {
 		int ch = read();
 		if (ch < 0) return null;
 		StringBuffer sb = new StringBuffer();
