@@ -59,7 +59,7 @@ public final class ProcessThread extends Thread {
 		} catch (Throwable t) {
 			error = new AlchemyException(t);
 			exitcode = error.errcode;
-			error.addTraceElement(func.name, "uncaught");
+			error.addTraceElement(func, "uncaught");
 		}
 		process.threadEnded(this);
 	}

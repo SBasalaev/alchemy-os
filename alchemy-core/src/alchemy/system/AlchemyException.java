@@ -102,11 +102,11 @@ public final class AlchemyException extends Exception {
 	/**
 	 * Adds element to the stack trace.
 	 * 
-	 * @param name  function name
+	 * @param func  function
 	 * @param info  debugging info
 	 */
-	public void addTraceElement(String name, String info) {
-		names.add(name);
+	public void addTraceElement(Function func, String info) {
+		names.add(func.toString());
 		infos.add(info);
 	}
 	

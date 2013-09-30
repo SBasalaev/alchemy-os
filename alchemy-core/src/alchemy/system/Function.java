@@ -21,7 +21,7 @@ package alchemy.system;
 /**
  * Function is an atomic piece of program execution.
  * Subclasses should provide implementation of
- * the {@link #invoke(Context, Object[]) invoke()} method.
+ * the {@link #invoke(Process, Object[]) invoke()} method.
  * <p>
  * Primitive types must be wrapped to the following classes:
  * </p>
@@ -108,6 +108,6 @@ public abstract class Function {
 	 * </pre>
 	 */
 	public final String toString() {
-		return String.valueOf(library) + ':' + name;
+		return ((library != null) ? library.name : "<dynamic>") + ':' + name;
 	}
 }

@@ -46,11 +46,11 @@ public class PartiallyAppliedFunction extends Function {
 			newargs[0] = argument;
 			return f.invoke(p, newargs);
 		} catch (AlchemyException ae) {
-			ae.addTraceElement("<dynamic>:" + this.name, "native");
+			ae.addTraceElement(this, "native");
 			throw ae;
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
-			ae.addTraceElement("<dynamic>:" + this.name, "native");
+			ae.addTraceElement(this, "native");
 			throw ae;
 		}
 	}

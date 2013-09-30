@@ -41,7 +41,7 @@ final class NativeFunction extends Function {
 			return lib.invokeNative(this.index, p, args);
 		} catch (Exception e) {
 			AlchemyException ae = new AlchemyException(e);
-			ae.addTraceElement(name, "native");
+			ae.addTraceElement(this, "native");
 			throw ae;
 		}
 	}

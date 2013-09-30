@@ -69,6 +69,6 @@ public class Library {
 	}
 
 	public String toString() {
-		return (name != null) ? name : "<noname>";
+		return name;
 	}
 }

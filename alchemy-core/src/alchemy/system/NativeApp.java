@@ -48,7 +48,7 @@ public abstract class NativeApp extends Library {
 				return Int32.toInt32(main(c, (String[])args[0]));
 			} catch (Throwable t) {
 				AlchemyException ae = new AlchemyException(t);
-				ae.addTraceElement("main", "native");
+				ae.addTraceElement(this, "native");
 				throw ae;
 			}
 		}

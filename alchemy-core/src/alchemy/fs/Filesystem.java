@@ -134,8 +134,9 @@ public final class Filesystem {
 	}
 
 	/**
-	 * Unmounts specified file system.
-	 * 
+	 * Unmounts and finalizes file system mounted to the specified directory.
+	 * If specified directory is not a mounting point, simply returns false.
+	 *
 	 * @return
 	 *   <code>true</code> if file system was successfully
 	 *   unmounted, <code>false</code> if it was not attached

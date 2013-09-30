@@ -27,7 +27,7 @@ import java.io.OutputStream;
 import javax.microedition.io.StreamConnection;
 
 /**
- * Pipe is a one-direction data channel.
+ * Pipe is an one-direction data channel.
  * Data sent to the output can then be read from the input.
  * <p>
  * Warning: using input and output from the same
