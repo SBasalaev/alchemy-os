@@ -36,10 +36,6 @@ final class NativeFunction extends Function {
 		this.lib = lib;
 	}
 	
-	public String toString() {
-		return lib.soname()+':'+name;
-	}
-	
 	public final Object invoke(Process p, Object[] args) throws AlchemyException {
 		try {
 			return lib.invokeNative(this.index, p, args);

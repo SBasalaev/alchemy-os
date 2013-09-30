@@ -61,10 +61,10 @@ public abstract class NativeLibrary extends Library {
 	/** Loads native function names from named resource. */
 	public final void load(String symbols) throws IOException {
 		UTFReader r = new UTFReader(getClass().getResourceAsStream(symbols));
-		int index = functions.size();
-		String name;
-		while ((name = r.readLine()) != null) {
-			functions.set(name, new NativeFunction(this, name, index));
+		int index = size();
+		String funcname;
+		while ((funcname = r.readLine()) != null) {
+			putFunction(new NativeFunction(this, funcname, index));
 			index++;
 		}
 		r.close();
@@ -72,13 +72,6 @@ public abstract class NativeLibrary extends Library {
 
 	/** Invokes native function. */
 	protected abstract Object invokeNative(int index, Process p, Object[] args) throws Exception;
-	
-	/** Returns SONAME of this library. */
-	public abstract String soname();
-	
-	public Function getFunction(String sig) {
-		return (Function)functions.get(sig);
-	}
 
 	/** Boxing method for integer values. */
 	protected static Int32 Ival(int value) {
@@ -118,7 +111,7 @@ public abstract class NativeLibrary extends Library {
 	 * is <code>Int(0)</code>.
 	 */
 	protected static boolean bval(Object obj) {
-		return ((Int32)obj).value != 0;
+		return obj != Int32.ZERO;
 	}
 
 	/** Unboxing method for Long values. */

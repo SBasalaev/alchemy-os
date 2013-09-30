@@ -21,17 +21,27 @@ package alchemy.system;
 import alchemy.util.HashMap;
 
 /**
- * A library is a container for function objects.
+ * Library is a container for function objects.
+ * The name of a library is a debugging information
+ * that will appear in stack traces. If library itself
+ * does not supply a name, it will be assigned by the system.
  *
  * @author Sergey Basalaev
  */
-public abstract class Library {
+public class Library {
 
 	/** Maps names to functions. */
-	protected final HashMap functions;
+	private final HashMap functions;
+	/** Name assigned to this library. */
+	protected String name;
 
 	/** Constructor for subclasses. */
-	protected Library() {
+	public Library() {
+		this(null);
+	}
+
+	/** Constructor for subclasses. */
+	public Library(String name) {
 		functions = new HashMap();
 	}
 
@@ -45,8 +55,20 @@ public abstract class Library {
 	public Function getFunction(String name) {
 		return (Function) functions.get(name);
 	}
-	
-	protected void putFunction(Function f) {
+
+	/** Puts public function in this library. */
+	public void putFunction(Function f) {
+		if (f.library != null) throw new IllegalArgumentException();
+		f.library = this;
 		functions.set(f.name, f);
+	}
+
+	/** Returns number of functions in this library. */
+	public int size() {
+		return functions.size();
+	}
+
+	public String toString() {
+		return (name != null) ? name : "<noname>";
 	}
 }

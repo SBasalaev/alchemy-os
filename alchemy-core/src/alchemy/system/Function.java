@@ -79,6 +79,8 @@ public abstract class Function {
 
 	/** Function signature. */
 	public final String name;
+	/** Owner of this function. */
+	Library library;
 
 	/**
 	 * Constructor for subclasses
@@ -100,11 +102,12 @@ public abstract class Function {
 
 	/**
 	 * Returns string representation of this object.
-	 * By default this method returns function {@link #name}
-	 * though subclasses may provide additional
-	 * information such as library name.
+	 * This method returns string in form
+	 * <pre>
+	 * libraryname:functionname
+	 * </pre>
 	 */
-	public String toString() {
-		return name;
+	public final String toString() {
+		return String.valueOf(library) + ':' + name;
 	}
 }
