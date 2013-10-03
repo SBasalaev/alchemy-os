@@ -19,9 +19,12 @@
 package javax.microedition.io;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
+import javax.microedition.io.impl.HttpConnectionImpl;
 
 /**
  * This is implementation of the generic connection
@@ -36,11 +39,60 @@ public class Connector {
 	public static final int WRITE = 2;
 	public static final int READ_WRITE = READ | WRITE;
 
+	public static Connection open(String name) throws IOException {
+		URL url = new URL(name);
+		if (url.getProtocol().equals("http")) {
+			return new HttpConnectionImpl(url.openConnection());
+		} else {
+			throw new ConnectionNotFoundException("Unsupported protocol: " + url.getProtocol());
+		}
+	}
+
 	public static DataInputStream openDataInputStream(String name) throws IOException {
-		return new DataInputStream(openInputStream(name));
+		StreamConnection conn = null;
+		try {
+			conn = (StreamConnection) open(name);
+			return conn.openDataInputStream();
+		} finally {
+			try {
+				if (conn != null) conn.close();
+			} catch (IOException ioe) { }
+		}
 	}
 
 	public static InputStream openInputStream(String name) throws IOException {
-		return new URL(name).openStream();
+		StreamConnection conn = null;
+		try {
+			conn = (StreamConnection) open(name);
+			return conn.openInputStream();
+		} finally {
+			try {
+				if (conn != null) conn.close();
+			} catch (IOException ioe) { }
+		}
+	}
+
+	public static DataOutputStream openDataOutputStream(String name) throws IOException {
+		StreamConnection conn = null;
+		try {
+			conn = (StreamConnection) open(name);
+			return conn.openDataOutputStream();
+		} finally {
+			try {
+				if (conn != null) conn.close();
+			} catch (IOException ioe) { }
+		}
+	}
+
+	public static OutputStream openOutputStream(String name) throws IOException {
+		StreamConnection conn = null;
+		try {
+			conn = (StreamConnection) open(name);
+			return conn.openOutputStream();
+		} finally {
+			try {
+				if (conn != null) conn.close();
+			} catch (IOException ioe) { }
+		}
 	}
 }
