@@ -1,0 +1,29 @@
+Source: corelibs
+Section: libs
+Version: 2.2
+Copyright: (c) 2011-2013 Sergey Basalaev
+Author: Sergey Basalaev <sbasalaev@gmail.com>
+License: GPL-3+exception
+Build-Depends: make
+
+Package: corelibs-dev
+Section: libdevel
+Summary: headers for standard libraries
+Depends: ${libdeps}, corelibs4
+Files:
+ /lib/libcore.so
+ /lib/libcoree.so
+ /lib/libui.so
+ /lib/libnet.so
+ /lib/libmedia.so
+ /inc
+
+Package: corelibs4
+Summary: system libraries which are used by all programs
+Depends: ${libdeps}
+Files:
+ /lib/libcore.4.*
+ /lib/libcoree.4.*
+ /lib/libui.2.*
+ /lib/libnet.2.*
+ /lib/libmedia.2.*

@@ -1,9 +1,0 @@
-Package: libcomm-dev
-Source: libcomm
-Version: 1.0.1
-Section: libdevel
-Summary: library to access COMM, IrDA and USB ports - development headers
-Depends: libcore-dev, libcomm1
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-Copyright: (C) 2012-2013 Sergey Basalaev
-License: GPL-3+exception

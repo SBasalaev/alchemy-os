@@ -1,8 +1,0 @@
-Package: libnet1
-Source: libnet
-Version: 1.0.3
-Section: libs
-Summary: network library
-Copyright: (c) 2012-2013 Sergey Basalaev
-Maintainer: Sergey Basalaev <sbasalaev@gmail.com>
-License: GPL-3+exception
