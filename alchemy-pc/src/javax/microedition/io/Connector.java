@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import javax.microedition.io.impl.HttpConnectionImpl;
+import javax.microedition.io.impl.HttpsConnectionImpl;
 
 /**
  * This is implementation of the generic connection
@@ -43,6 +44,8 @@ public class Connector {
 		URL url = new URL(name);
 		if (url.getProtocol().equals("http")) {
 			return new HttpConnectionImpl(url.openConnection());
+		} else if (url.getProtocol().equals("https")) {
+			return new HttpsConnectionImpl(url.openConnection());
 		} else {
 			throw new ConnectionNotFoundException("Unsupported protocol: " + url.getProtocol());
 		}
