@@ -18,17 +18,16 @@
 
 package alchemy.libs;
 
-import alchemy.core.AlchemyException;
-import alchemy.core.Process;
-import alchemy.core.Function;
-import alchemy.core.Library;
-import alchemy.evm.EtherLoader;
 import alchemy.fs.Filesystem;
+import alchemy.io.ConnectionBridge;
 import alchemy.io.IO;
-import alchemy.libs.core.PartiallyAppliedFunction;
-import alchemy.libs.core.Pipe;
-import alchemy.nlib.NativeLibrary;
+import alchemy.io.Pipe;
+import alchemy.system.AlchemyException;
+import alchemy.system.Library;
+import alchemy.system.NativeLibrary;
+import alchemy.system.Process;
 import alchemy.util.ArrayList;
+import alchemy.util.Arrays;
 import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,9 +47,9 @@ import javax.microedition.io.StreamConnection;
  * Alchemy core runtime library.
  * 
  * @author Sergey Basalaev
- * @version 3.1
+ * @version 4.0
  */
-public class LibCore31 extends NativeLibrary {
+public class LibCore4 extends NativeLibrary {
 
 	private static Random rnd = new Random();
 	
@@ -60,8 +59,9 @@ public class LibCore31 extends NativeLibrary {
 	 * @throws IOException if I/O error occured while reading
 	 *         function definitions file
 	 */
-	public LibCore31() throws IOException {
-		load("/libcore31.symbols");
+	public LibCore4() throws IOException {
+		load("/symbols/core4");
+		name = "libcore.4.so";
 	}
 
 	/**
@@ -71,9 +71,9 @@ public class LibCore31 extends NativeLibrary {
 	 * @return string with relative path
 	 */
 	public static String relPath(Process c, String f) {
-		if (c.getCurDir().equals(f)) return ".";
+		if (c.getCurrentDirectory().equals(f)) return ".";
 		//initializing cpath and fpath
-		String tmp = c.getCurDir();
+		String tmp = c.getCurrentDirectory();
 		if (tmp.length() == 0) return f.substring(1);
 		char[] cpath = new char[tmp.length()+1];
 		tmp.getChars(0, tmp.length(), cpath, 0);
@@ -282,95 +282,10 @@ public class LibCore31 extends NativeLibrary {
 			n += 2;
 			rest = -rest*val;
 		}
-		//undoing our focuses with domain
+		// reverting our transformations
 		result += Math.PI/6 * offsteps;
 		if (big) result = Math.PI/2.0d - result;
 		return neg ? -result : result;
-	}
-
-
-	public String soname() {
-		return "libcore.3.so";
-	}
-	
-	public static void arraycopy(Object src, int sofs, Object dest, int dofs, int len) {
-		if (dest.getClass().isInstance(src)) {
-			System.arraycopy(src, sofs, dest, dofs, len);
-			return;
-		}
-		if (src instanceof Object[]) {
-			final Object[] from = (Object[])src;
-			if (dest instanceof byte[]) {
-				final byte[] to = (byte[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = (byte)ival(from[sofs+i]);
-				return;
-			} else if (dest instanceof short[]) {
-				final short[] to = (short[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = (short)ival(from[sofs+i]);
-				return;
-			} else if (dest instanceof char[]) {
-				final char[] to = (char[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = (char) ival(from[sofs+i]);
-				return;
-			} else if (dest instanceof boolean[]) {
-				final boolean[] to = (boolean[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = bval(from[sofs+i]);
-				return;
-			} else if (dest instanceof int[]) {
-				final int[] to = (int[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = ival(from[sofs+i]);
-				return;
-			} else if (dest instanceof long[]) {
-				final long[] to = (long[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = lval(from[sofs+i]);
-				return;
-			} else if (dest instanceof float[]) {
-				final float[] to = (float[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = fval(from[sofs+i]);
-				return;
-			} else if (dest instanceof double[]) {
-				final double[] to = (double[])dest;
-				for (int i=0; i<len; i++) to[dofs+i] = dval(from[sofs+i]);
-				return;
-			}
-		}
-		if (dest instanceof Object[]) {
-			final Object[] to = (Object[])dest;
-			if (src instanceof byte[]) {
-				final byte[] from = (byte[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
-				return;
-			} else if (src instanceof short[]) {
-				final short[] from = (short[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
-				return;
-			} else if (src instanceof char[]) {
-				final char[] from = (char[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
-				return;
-			} else if (src instanceof boolean[]) {
-				final boolean[] from = (boolean[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
-				return;
-			} else if (src instanceof int[]) {
-				final int[] from = (int[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Ival(from[sofs+i]);
-				return;
-			} else if (src instanceof long[]) {
-				final long[] from = (long[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Lval(from[sofs+i]);
-				return;
-			} else if (src instanceof float[]) {
-				final float[] from = (float[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Fval(from[sofs+i]);
-				return;
-			} else if (src instanceof double[]) {
-				final double[] from = (double[])src;
-				for (int i=0; i<len; i++) to[dofs+i] = Dval(from[sofs+i]);
-				return;
-			}
-		}
-		throw new ClassCastException();
 	}
 
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
@@ -417,17 +332,17 @@ public class LibCore31 extends NativeLibrary {
 				return Ival(Filesystem.isDirectory(p.toFile((String)args[0])));
 			case 16: { // fopen_r(f: String): IStream
 				InputStream stream = Filesystem.read(p.toFile((String)args[0]));
-				p.addStream(stream);
+				p.addConnection(new ConnectionBridge(stream));
 				return stream;
 			}
 			case 17: { // fopen_w(f: String): OStream
 				OutputStream stream = Filesystem.write(p.toFile((String)args[0]));
-				p.addStream(stream);
+				p.addConnection(new ConnectionBridge(stream));
 				return stream;
 			}
 			case 18: { // fopen_a(f: String): OStream
 				OutputStream stream = Filesystem.append(p.toFile((String)args[0]));
-				p.addStream(stream);
+				p.addConnection(new ConnectionBridge(stream));
 				return stream;
 			}
 			case 19: // flist(f: String): [String]
@@ -437,10 +352,10 @@ public class LibCore31 extends NativeLibrary {
 			case 21: // fsize(f: String): Long
 				return Lval(Filesystem.size(p.toFile((String)args[0])));
 			case 22: // set_cwd(f: String)
-				p.setCurDir(p.toFile((String)args[0]));
+				p.setCurrentDirectory(p.toFile((String)args[0]));
 				return null;
 			case 23: // relpath(f: String): String
-				return LibCore31.relPath(p, p.toFile((String)args[0]));
+				return relPath(p, p.toFile((String)args[0]));
 			case 24: // String.len(): Int
 				return Ival(((String)args[0]).length());
 			case 25: // String.ch(at: Int): Char
@@ -458,7 +373,7 @@ public class LibCore31 extends NativeLibrary {
 			case 31: // String.lcase(): String
 				return ((String)args[0]).toLowerCase();
 			case 32: // String.concat(str: String): String
-				return ((String)args[0]).concat(Strings.stringValue(args[1]));
+				return ((String)args[0]).concat(Strings.toString(args[1]));
 			case 33: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
 			case 34: // String.chars(): [Char]
@@ -510,7 +425,7 @@ public class LibCore31 extends NativeLibrary {
 				return Ival(cal.get(Calendar.SECOND));
 			}
 			case 47: // StrBuf.append(a: Any): StrBuf
-				return ((StringBuffer)args[0]).append(Strings.stringValue(args[1]));
+				return ((StringBuffer)args[0]).append(Strings.toString(args[1]));
 			case 48: // StrBuf.addch(ch: Char): StrBuf
 				return ((StringBuffer)args[0]).append((char)ival(args[1]));
 			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
@@ -518,7 +433,7 @@ public class LibCore31 extends NativeLibrary {
 			case 50: // StrBuf.delch(at: Int): StrBuf
 				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
 			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), Strings.stringValue(args[2]));
+				return ((StringBuffer)args[0]).insert(ival(args[1]), Strings.toString(args[2]));
 			case 52: // StrBuf.insch(at: Int, ch: Char): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), (char) ival(args[2]));
 			case 53: // StrBuf.setch(at: Int, ch: Char): StrBuf
@@ -531,7 +446,7 @@ public class LibCore31 extends NativeLibrary {
 			case 56: // systime(): Long
 				return Lval(System.currentTimeMillis());
 			case 57: // get_cwd(): String
-				return p.getCurDir();
+				return p.getCurrentDirectory();
 			case 58: // space_total(root: String): Long
 				return Lval(Filesystem.spaceTotal(p.toFile((String)args[0])));
 			case 59: // space_free(root: String): Long
@@ -539,7 +454,7 @@ public class LibCore31 extends NativeLibrary {
 			case 60: // space_used(root: String): Long
 				return Lval(Filesystem.spaceUsed(p.toFile((String)args[0])));
 			case 61: // Any.tostr(): String
-				return Strings.stringValue(args[0]);
+				return Strings.toString(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
 			case 63: // IStream.close()
@@ -586,13 +501,13 @@ public class LibCore31 extends NativeLibrary {
 			case 73: // cacopy(src: [Char], sofs: Int, dest: [Char], dofs: Int, len: Int)
 				// DEPRECATED: remove in 2.2
 			case 74: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
-				arraycopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
+				Arrays.arrayCopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
 			case 75: // fprint(out: OStream, a: Any): OStream
-				IO.print((OutputStream)args[0], Strings.stringValue(args[1]));
+				IO.print((OutputStream)args[0], Strings.toString(args[1]));
 				return args[0];
 			case 76: // fprintln(out: OStream, a: Any): OStream
-				IO.println((OutputStream)args[0], Strings.stringValue(args[1]));
+				IO.println((OutputStream)args[0], Strings.toString(args[1]));
 				return args[0];
 			case 77: // stdin(): IStream
 				return p.stdin;
@@ -620,17 +535,17 @@ public class LibCore31 extends NativeLibrary {
 			case 87: // sqrt(a: Double): Double
 				return Dval(Math.sqrt(dval(args[0])));
 			case 88: // ipow(a: Double, n: Int): Double
-				return Dval(LibCore31.ipow(dval(args[0]), ival(args[1])));
+				return Dval(ipow(dval(args[0]), ival(args[1])));
 			case 89: // exp(a: Double): Double
-				return Dval(LibCore31.exp(dval(args[0])));
+				return Dval(exp(dval(args[0])));
 			case 90: // log(a: Double): Double
-				return Dval(LibCore31.log(dval(args[0])));
+				return Dval(log(dval(args[0])));
 			case 91: // asin(a: Double): Double
-				return Dval(LibCore31.asin(dval(args[0])));
+				return Dval(asin(dval(args[0])));
 			case 92: // acos(a: Double): Double
-				return Dval(LibCore31.acos(dval(args[0])));
+				return Dval(acos(dval(args[0])));
 			case 93: // atan(a: Double): Double
-				return Dval(LibCore31.atan(dval(args[0])));
+				return Dval(atan(dval(args[0])));
 			case 94: // ca2str(chars: [Char]): String
 				return new String((char[])args[0]);
 			case 95: // ba2utf(bytes: [Byte]): String
@@ -683,7 +598,7 @@ public class LibCore31 extends NativeLibrary {
 				} else {
 					throw new IllegalArgumentException("Unsupported protocol: "+protocol);
 				}
-				p.addStream(in);
+				p.addConnection(new ConnectionBridge(in));
 				return in;
 			}
 			case 111: // Function.curry(arg: Any): Function
@@ -751,16 +666,16 @@ public class LibCore31 extends NativeLibrary {
 				return null;
 			case 125: // Connection.close()
 				((Connection)args[0]).close();
-				p.removeStream(args[0]);
+				p.removeConnection(args[0]);
 				return null;
 			case 126: { // StreamConnection.open_input(): IStream
 				InputStream in = ((StreamConnection)args[0]).openInputStream();
-				p.addStream(in);
+				p.addConnection(new ConnectionBridge(in));
 				return in;
 			}
 			case 127: { // StreamConnection.open_output(): OStream
 				OutputStream out = ((StreamConnection)args[0]).openOutputStream();
-				p.addStream(out);
+				p.addConnection(new ConnectionBridge(out));
 				return out;
 			}
 			case 128: // Dict.size(): Int
@@ -827,9 +742,9 @@ public class LibCore31 extends NativeLibrary {
 				((Process)args[0]).stderr = (OutputStream)args[1];
 				return null;
 			case 153: // Process.get_cwd(): String
-				return ((Process)args[0]).getCurDir();
+				return ((Process)args[0]).getCurrentDirectory();
 			case 154: // Process.set_cwd(dir: String)
-				((Process)args[0]).setCurDir((String)args[1]);
+				((Process)args[0]).setCurrentDirectory((String)args[1]);
 				return null;
 			case 155: // Process.get_priority(): Int
 				return Ival(((Process)args[0]).getPriority());
