@@ -14,10 +14,8 @@ type CommCfg {
  autorts: Bool = true
 }
 
-def list_commports(): [String];
+def listCommPorts(): [String];
 
-def new_comm(port: String, cfg: CommCfg): Comm;
-const `Comm.new` = new_comm;
-
-def Comm.get_baudrate(): Int;
-def Comm.set_baudrate(baudrate: Int);
+def Comm.new(port: String, cfg: CommCfg): Comm;
+def Comm.getBaudRate(): Int;
+def Comm.setBaudRate(baudrate: Int);

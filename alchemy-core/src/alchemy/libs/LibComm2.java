@@ -18,9 +18,9 @@
 
 package alchemy.libs;
 
-import alchemy.core.Process;
-import alchemy.core.Int;
-import alchemy.nlib.NativeLibrary;
+import alchemy.system.NativeLibrary;
+import alchemy.system.Process;
+import alchemy.types.Int32;
 import alchemy.util.Strings;
 import java.io.IOException;
 import javax.microedition.io.CommConnection;
@@ -30,26 +30,27 @@ import javax.microedition.io.Connector;
 /**
  * Serial port library for Alchemy OS.
  * @author Sergey Basalaev
- * @version 1.0
+ * @version 2.0
  */
-public class LibComm1 extends NativeLibrary {
+public class LibComm2 extends NativeLibrary {
 
-	public LibComm1() throws IOException {
-		load("/libcomm1.symbols");
+	public LibComm2() throws IOException {
+		load("/symbols/comm2");
+		name = "libcomm.2.so";
 	}
 	
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
-			case 0: { // list_commports(): [String]
+			case 0: { // listCommPorts(): [String]
 				String ports = System.getProperty("microedition.commports");
 				if (ports == null) ports = "";
 				return Strings.split(ports, ',');
 			}
-			case 1: { // new_comm(port: String, cfg: CommCfg): Comm
+			case 1: { // Comm.new(port: String, cfg: CommCfg): Comm
 				StringBuffer url = new StringBuffer("comm://");
 				url.append((String)args[0]);
 				Object[] params = (Object[])args[1];
-				if (params[0] != Int.ZERO) url.append(";baudrate=").append(ival(params[0]));
+				if (params[0] != Int32.ZERO) url.append(";baudrate=").append(ival(params[0]));
 				if (params[1] != null) url.append(";bitsperchar=").append(ival(params[1]));
 				if (params[2] != null) url.append(";stopbits=").append(ival(params[2]));
 				if (params[3] != null) url.append(";parity=").append((String)params[3]);
@@ -57,20 +58,16 @@ public class LibComm1 extends NativeLibrary {
 				if (params[5] != null) url.append(";autocts=").append(bval(params[5]) ? "on" : "off");
 				if (params[6] != null) url.append(";autorts=").append(bval(params[6]) ? "on" : "off");
 				Connection conn = Connector.open(url.toString());
-				p.addStream(conn);
+				p.addConnection(conn);
 				return conn;
 			}
-			case 2: // Comm.get_baudrate(): Int
+			case 2: // Comm.getBaudRate(): Int
 				return Ival(((CommConnection)args[0]).getBaudRate());
-			case 3: // Comm.set_baudrate(baudrate: Int)
+			case 3: // Comm.setBaudRate(baudrate: Int)
 				((CommConnection)args[0]).setBaudRate(ival(args[1]));
 				return null;
 			default:
 				return null;
 		}
-	}
-
-	public String soname() {
-		return "libcomm.1.so";
 	}
 }

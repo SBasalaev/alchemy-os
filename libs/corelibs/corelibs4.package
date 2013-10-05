@@ -1,4 +1,4 @@
-Source: corelibs
+Source: corelibs4
 Section: libs
 Version: 2.2
 Copyright: (c) 2011-2013 Sergey Basalaev
@@ -6,7 +6,7 @@ Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3+exception
 Build-Depends: make
 
-Package: corelibs-dev
+Package: corelibs4-dev
 Section: libdevel
 Summary: headers for standard libraries
 Depends: ${libdeps}, corelibs4
@@ -16,9 +16,10 @@ Files:
  /lib/libui.so
  /lib/libnet.so
  /lib/libmedia.so
+ /lib/libcomm.so
  /inc
 
-Package: corelibs-compat-dev
+Package: corelibs4-compat-dev
 Section: libdevel
 Summary: compatibility headers to port from previous releases
 Depends: ${libdeps}, corelibs-dev
@@ -34,3 +35,4 @@ Files:
  /lib/libui.2.*
  /lib/libnet.2.*
  /lib/libmedia.2.*
+ /lib/libcomm.2.*
