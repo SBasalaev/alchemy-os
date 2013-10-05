@@ -18,6 +18,13 @@ Files:
  /lib/libmedia.so
  /inc
 
+Package: corelibs-compat-dev
+Section: libdevel
+Summary: compatibility headers to port from previous releases
+Depends: ${libdeps}, corelibs-dev
+Files:
+ compat /inc
+
 Package: corelibs4
 Summary: system libraries which are used by all programs
 Depends: ${libdeps}

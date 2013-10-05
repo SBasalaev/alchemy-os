@@ -64,8 +64,10 @@ public abstract class NativeLibrary extends Library {
 		int index = size();
 		String funcname;
 		while ((funcname = r.readLine()) != null) {
-			putFunction(new NativeFunction(this, funcname, index));
-			index++;
+			if (funcname.length() > 0) {
+				putFunction(new NativeFunction(this, funcname, index));
+				index++;
+			}
 		}
 		r.close();
 	}

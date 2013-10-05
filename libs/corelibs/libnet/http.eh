@@ -4,18 +4,17 @@ use "connection.eh"
 
 type Http < StreamConnection;
 
-def new_http(host: String): Http;
-const `Http.new` = new_http;
+def Http.new(host: String): Http;
 
 const HEAD = "HEAD"
 const GET = "GET"
 const POST = "POST"
 
-def Http.get_req_method(): String;
-def Http.set_req_method(method: String);
+def Http.getReqMethod(): String;
+def Http.setReqMethod(method: String);
 
-def Http.get_req_property(key: String): String;
-def Http.set_req_property(key: String, value: String);
+def Http.getReqProperty(key: String): String;
+def Http.setReqProperty(key: String, value: String);
 
 const HTTP_OK = 200
 const HTTP_CREATED = 201
@@ -56,21 +55,20 @@ const HTTP_UNAVAILABLE = 503
 const HTTP_GATEWAY_TIMEOUT = 504
 const HTTP_VERSION = 505
 
-def Http.get_type(): String;
-def Http.get_encoding(): String;
-def Http.get_length(): Long;
-def Http.get_resp_code(): Int;
-def Http.get_resp_msg(): String;
-def Http.get_expires(): Long;
-def Http.get_date(): Long;
-def Http.get_modified(): Long;
+def Http.getType(): String;
+def Http.getEncoding(): String;
+def Http.getLength(): Long;
+def Http.getRespCode(): Int;
+def Http.getRespMsg(): String;
+def Http.getExpires(): Long;
+def Http.getDate(): Long;
+def Http.getModified(): Long;
 
 type Https < Http;
 
-def new_https(host: String): Https;
-const `Https.new` = new_https;
+def Https.new(host: String): Https;
 
-def Https.get_port(): Int;
+def Https.getPort(): Int;
 
 type SecInfo;
-def Https.get_secinfo(): SecInfo;
+def Https.getSecInfo(): SecInfo;

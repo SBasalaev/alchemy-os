@@ -1,3 +1,0 @@
-#@alchemy.libs.LibNet1
-soname=libnet.1.so
-symbols=/libnet1.symbols

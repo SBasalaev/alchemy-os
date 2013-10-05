@@ -4,28 +4,26 @@ use "connection.eh"
 
 type Socket < StreamConnection;
 
-def new_socket(host: String, port: Int): Socket;
-const `Socket.new` = new_socket;
+def Socket.new(host: String, port: Int): Socket;
 
-def Socket.get_host(): String;
-def Socket.get_port(): Int;
-def Socket.get_localhost(): String;
-def Socket.get_localport(): Int;
-def Socket.get_delay(): Bool;
-def Socket.set_delay(on: Bool);
-def Socket.get_keepalive(): Bool;
-def Socket.set_keepalive(on: Bool);
-def Socket.get_linger(): Int;
-def Socket.set_linger(linger: Int);
-def Socket.get_sndbuf(): Int;
-def Socket.set_sndbuf(size: Int);
-def Socket.get_rcvbuf(): Int;
-def Socket.set_rcvbuf(size: Int);
+def Socket.getHost(): String;
+def Socket.getPort(): Int;
+def Socket.getLocalHost(): String;
+def Socket.getLocalPort(): Int;
+def Socket.getDelay(): Bool;
+def Socket.setDelay(on: Bool);
+def Socket.getKeepAlive(): Bool;
+def Socket.setKeepAlive(on: Bool);
+def Socket.getLinger(): Int;
+def Socket.setLinger(linger: Int);
+def Socket.getSndBuf(): Int;
+def Socket.setSndBuf(size: Int);
+def Socket.getRcvBuf(): Int;
+def Socket.setRcvBuf(size: Int);
 
 type SecureSocket < Socket;
 
-def new_securesocket(host: String, port: Int): SecureSocket;
-const `SecureSocket.new` = new_securesocket;
+def SecureSocket.new(host: String, port: Int): SecureSocket;
 
 type SecInfo;
-def SecureSocket.get_secinfo(): SecInfo;
+def SecureSocket.getSecInfo(): SecInfo;
