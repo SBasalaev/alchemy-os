@@ -1,3 +1,0 @@
-#@alchemy.libs.LibComm1
-soname=libcomm.1.so
-symbols=/libcomm1.symbols

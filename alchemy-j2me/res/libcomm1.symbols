@@ -1,4 +1,0 @@
-list_commports
-new_comm
-Comm.get_baudrate
-Comm.set_baudrate
