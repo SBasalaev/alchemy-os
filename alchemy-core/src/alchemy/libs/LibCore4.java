@@ -20,6 +20,8 @@ package alchemy.libs;
 
 import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionBridge;
+import alchemy.io.ConnectionInputStream;
+import alchemy.io.ConnectionOutputStream;
 import alchemy.io.IO;
 import alchemy.io.Pipe;
 import alchemy.system.AlchemyException;
@@ -332,18 +334,21 @@ public class LibCore4 extends NativeLibrary {
 				return Ival(Filesystem.isDirectory(p.toFile((String)args[0])));
 			case 16: { // fopen_r(f: String): IStream
 				InputStream stream = Filesystem.read(p.toFile((String)args[0]));
-				p.addConnection(new ConnectionBridge(stream));
-				return stream;
+				ConnectionInputStream in = new ConnectionInputStream(stream);
+				p.addConnection(in);
+				return in;
 			}
 			case 17: { // fopen_w(f: String): OStream
 				OutputStream stream = Filesystem.write(p.toFile((String)args[0]));
-				p.addConnection(new ConnectionBridge(stream));
-				return stream;
+				ConnectionOutputStream out = new ConnectionOutputStream(stream);
+				p.addConnection(out);
+				return out;
 			}
 			case 18: { // fopen_a(f: String): OStream
 				OutputStream stream = Filesystem.append(p.toFile((String)args[0]));
-				p.addConnection(new ConnectionBridge(stream));
-				return stream;
+				ConnectionOutputStream out = new ConnectionOutputStream(stream);
+				p.addConnection(out);
+				return out;
 			}
 			case 19: // flist(f: String): [String]
 				return Filesystem.list(p.toFile((String)args[0]));
@@ -463,14 +468,14 @@ public class LibCore4 extends NativeLibrary {
 			case 64: // IStream.read(): Int
 				return Ival(((InputStream)args[0]).read());
 			case 65: // IStream.readarray(buf: [Byte], ofs: Int, len: Int): Int
-				return Ival(IO.readArray((InputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3])));
+				return Ival(((InputStream)args[0]).read((byte[])args[1], ival(args[2]), ival(args[3])));
 			case 66: // IStream.skip(n: Long): Long
-				return Lval(IO.skip((InputStream)args[0], lval(args[1])));
+				return Lval(((InputStream)args[0]).skip(lval(args[1])));
 			case 67: // OStream.write(b: Int)
 				((OutputStream)args[0]).write(ival(args[1]));
 				return null;
 			case 68: // OStream.writearray(buf: [Byte], ofs: Int, len: Int)
-				IO.writeArray((OutputStream)args[0], (byte[])args[1], ival(args[2]), ival(args[3]));
+				((OutputStream)args[0]).write((byte[])args[1], ival(args[2]), ival(args[3]));
 				return null;
 			case 69: // OStream.flush(out: OStream)
 				((OutputStream)args[0]).flush();
@@ -584,7 +589,7 @@ public class LibCore4 extends NativeLibrary {
 			case 110: { // readurl(url: String): IStream
 				String url = (String)args[0];
 				int cl = url.indexOf(':');
-				if (cl < 0) throw new IllegalArgumentException("No protocol in given URL");
+				if (cl < 0) throw new IllegalArgumentException("Protocol missing");
 				String protocol = url.substring(0, cl);
 				String addr = url.substring(cl+1);
 				InputStream in;
@@ -598,8 +603,9 @@ public class LibCore4 extends NativeLibrary {
 				} else {
 					throw new IllegalArgumentException("Unsupported protocol: "+protocol);
 				}
-				p.addConnection(new ConnectionBridge(in));
-				return in;
+				ConnectionInputStream connin = new ConnectionInputStream(in);
+				p.addConnection(connin);
+				return connin;
 			}
 			case 111: // Function.curry(arg: Any): Function
 				return new PartiallyAppliedFunction((Function)args[0], args[1]);
@@ -664,18 +670,20 @@ public class LibCore4 extends NativeLibrary {
 			case 124: // sleep(millis: Int)
 				Thread.sleep(ival(args[0]));
 				return null;
-			case 125: // Connection.close()
-				((Connection)args[0]).close();
-				p.removeConnection(args[0]);
+			case 125: { // Connection.close()
+				Connection conn = ((Connection)args[0]);
+				conn.close();
+				p.removeConnection(conn);
 				return null;
+			}
 			case 126: { // StreamConnection.open_input(): IStream
-				InputStream in = ((StreamConnection)args[0]).openInputStream();
-				p.addConnection(new ConnectionBridge(in));
+				ConnectionInputStream in = new ConnectionInputStream(((StreamConnection)args[0]).openInputStream());
+				p.addConnection(in);
 				return in;
 			}
 			case 127: { // StreamConnection.open_output(): OStream
-				OutputStream out = ((StreamConnection)args[0]).openOutputStream();
-				p.addConnection(new ConnectionBridge(out));
+				ConnectionOutputStream out = new ConnectionOutputStream(((StreamConnection)args[0]).openOutputStream());
+				p.addConnection(out);
 				return out;
 			}
 			case 128: // Dict.size(): Int

@@ -55,125 +55,32 @@ public final class IO {
 		return ret;
 	}
 	
-	/**
-	 * Reads data from input stream.
-	 * Reading from native streams should be done through
-	 * this function because some phones do not follow the contract of
-	 * {@link InputStream#read(byte[], int, int) InputStream.read}
-	 * accurately.
-	 * 
-	 * Known bugs:
-	 * <ul>
-	 *   <li>Nokia phones fail to read zero bytes</li>
-	 * </ul>
-	 * 
-	 * @throws IOException if an I/O error occurs.
-	 * @deprecated Use {@link ConnectionInputStream#read(byte[], int, int) } instead
-	 */
-	public static int readArray(InputStream in, byte[] buf, int ofs, int len) throws IOException {
-		if (buf == null)
-			throw new NullPointerException();
-		if (ofs < 0 || len < 0 || ofs+len > buf.length)
-			throw new IndexOutOfBoundsException();
-		if (len == 0)
-			return 0;
-		return in.read(buf, ofs, len);
-	}
-	
-	/**
-	 * This is a shortcut for readArray(in, buf, 0, buf.length).
-	 * @deprecated Use {@link ConnectionInputStream#read(byte[]) } instead
-	 */
-	public static int readArray(InputStream in, byte[] buf) throws IOException {
-		return readArray(in, buf, 0, buf.length);
-	}
-	
-	/**
-	 * Writes data into output stream.
-	 * Writing to native streams should be done through
-	 * this function because some phones do not follow the contract of
-	 * {@link OutputStream#write(byte[], int, int) OutputStream.write}
-	 * accurately.
-	 * 
-	 * Known bugs:
-	 * <ul>
-	 *   <li>Nokia phones fail to write zero bytes</li>
-	 * </ul>
-	 * 
-	 * @throws IOException if an I/O error occurs.
-	 * @deprecated Use {@link ConnectionOutputStream#write(byte[], int, int)} instead
-	 */
-	public static void writeArray(OutputStream out, byte[] buf, int ofs, int len) throws IOException {
-		if (buf == null)
-			throw new NullPointerException();
-		if (ofs < 0 || len < 0 || ofs+len > buf.length)
-			throw new IndexOutOfBoundsException();
-		if (len == 0)
-			return;
-		out.write(buf, ofs, len);
-	}
-	
-	/** This is a shortcut for writeArray(out, buf, 0, buf.length).
-	 * @deprecated Use {@link ConnectionOutputStream#write(byte[])} instead
-	 */
-	public static void writeArray(OutputStream out, byte[] buf) throws IOException {
-		writeArray(out, buf, 0, buf.length);
-	}
-	
-	/**
-	 * Skips over and discards data from input stream.
-	 * Skipping in native streams should be done through
-	 * this function because some phones do not follow the contract of
-	 * {@link InputStream#skip(long) InputStream.skip}
-	 * accurately.
-	 * 
-	 * Known bugs:
-	 * <ul>
-	 *   <li>Siemens phones implement skip as seek</li>
-	 * </ul>
-	 * 
-	 * @throws IOException 
-	 * @deprecated Use {@link ConnectionInputStream#skip(long) } instead
-	 */
-	public static long skip(InputStream in, long n) throws IOException {
-		if (n <= 0L) return 0L;
-		
-		long remains = n;
-		byte[] buf = new byte[Math.min((int)remains, 1024)];
-		while (remains > 0L) {
-			int skipped = readArray(in, buf, 0, Math.min((int)remains, buf.length));
-			if (skipped <= 0) break;
-			remains -= skipped;
-		}
-		return n - remains;
-	}
-	
 	/** Converts object to a string and writes it as UTF-8. */
 	public static void print(OutputStream s, Object obj) {
 		try {
-			writeArray(s, Strings.utfEncode(Strings.toString(obj)));
+			s.write(Strings.utfEncode(Strings.toString(obj)));
 		} catch (IOException ioe) { }
 	}
-	
+
 	/** Converts object to a string, writes it as UTF-8 and terminates a line. */
 	public static void println(OutputStream s, Object obj) {
 		try {
-			writeArray(s, Strings.utfEncode(Strings.toString(obj)));
+			s.write(Strings.utfEncode(Strings.toString(obj)));
 			s.write('\n');
 			s.flush();
 		} catch (IOException ioe) { }
 	}
-	
+
 	/** Channels all data from the input to the output. */
 	public static void writeAll(InputStream from, OutputStream to) throws IOException {
 		byte[] buf = new byte[1024];
-		int len = readArray(from, buf, 0, buf.length);
+		int len = from.read(buf);
 		while (len > 0) {
-			writeArray(to, buf, 0, len);
-			len = readArray(from, buf, 0, buf.length);
+			to.write(buf, 0, len);
+			len = from.read(buf);
 		}
 	}
-	
+
 	/**
 	 * Checks if given filename matches glob pattern.
 	 * Supported wildcards are <code>*</code> and <code>?</code>.
