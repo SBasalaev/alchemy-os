@@ -19,7 +19,6 @@
 package alchemy.libs;
 
 import alchemy.fs.Filesystem;
-import alchemy.io.ConnectionBridge;
 import alchemy.io.ConnectionInputStream;
 import alchemy.io.ConnectionOutputStream;
 import alchemy.io.IO;
