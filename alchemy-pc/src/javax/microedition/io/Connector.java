@@ -18,6 +18,8 @@
 
 package javax.microedition.io;
 
+import alchemy.io.ConnectionInputStream;
+import alchemy.io.ConnectionOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -101,26 +103,10 @@ public class Connector {
 	}
 
 	public static InputStream openInputStream(String name) throws IOException {
-		StreamConnection conn = null;
-		try {
-			conn = (StreamConnection) open(name);
-			return conn.openInputStream();
-		} finally {
-			try {
-				if (conn != null) conn.close();
-			} catch (IOException ioe) { }
-		}
+		return new ConnectionInputStream((InputConnection)open(name));
 	}
 
 	public static OutputStream openOutputStream(String name) throws IOException {
-		StreamConnection conn = null;
-		try {
-			conn = (StreamConnection) open(name);
-			return conn.openOutputStream();
-		} finally {
-			try {
-				if (conn != null) conn.close();
-			} catch (IOException ioe) { }
-		}
+		return new ConnectionOutputStream((OutputConnection)open(name));
 	}
 }
