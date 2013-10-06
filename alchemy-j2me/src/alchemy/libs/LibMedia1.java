@@ -18,9 +18,8 @@
 
 package alchemy.libs;
 
-import alchemy.core.Process;
-import alchemy.nlib.NativeFunction;
-import alchemy.nlib.NativeLibrary;
+import alchemy.system.NativeLibrary;
+import alchemy.system.Process;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.microedition.media.Manager;
@@ -35,7 +34,8 @@ import javax.microedition.media.Player;
 public class LibMedia1 extends NativeLibrary {
 
 	public LibMedia1() throws IOException {
-		load("/libmedia1.symbols");
+		load("/symbols/media1");
+		name = "libmedia.1.so";
 	}
 
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
@@ -71,9 +71,5 @@ public class LibMedia1 extends NativeLibrary {
 			default:
 				return null;
 		}
-	}
-
-	public String soname() {
-		return "libmedia.1.so";
 	}
 }

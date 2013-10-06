@@ -17,11 +17,11 @@
  */
 package alchemy.libs;
 
-import alchemy.core.Process;
-import alchemy.core.ProcessListener;
 import alchemy.fs.Filesystem;
 import alchemy.io.IO;
-import alchemy.nlib.NativeLibrary;
+import alchemy.system.NativeLibrary;
+import alchemy.system.Process;
+import alchemy.system.ProcessListener;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.microedition.m3g.AnimationController;
@@ -64,7 +64,8 @@ import javax.microedition.m3g.World;
 public class LibM3G extends NativeLibrary {
 	
 	public LibM3G() throws IOException {
-		load("/m3g-10.symbols");
+		load("/symbols/m3g-10");
+		name = "libm3g.1.so";
 	}
 	
 	/** Owner of Graphics3D object. */
@@ -798,10 +799,6 @@ public class LibM3G extends NativeLibrary {
 			default:
 				throw new RuntimeException("Invalid function");
 		}
-	}
-
-	public String soname() {
-		return "libm3g.1.so";
 	}
 	
 	private static class M3GContextListener implements ProcessListener {

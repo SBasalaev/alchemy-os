@@ -17,8 +17,8 @@
  */
 package alchemy.libs;
 
-import alchemy.core.Process;
-import alchemy.nlib.NativeLibrary;
+import alchemy.system.NativeLibrary;
+import alchemy.system.Process;
 import java.io.IOException;
 import javax.microedition.m3g.AnimationController;
 import javax.microedition.m3g.IndexBuffer;
@@ -38,7 +38,8 @@ import javax.microedition.m3g.VertexArray;
 public class LibM3G_ext11 extends NativeLibrary {
 
 	public LibM3G_ext11() throws IOException {
-		load("/m3g-11.symbols");
+		load("/symbols/m3g-11");
+		name = "libm3g_ext.1.so";
 	}
 
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
@@ -122,9 +123,5 @@ public class LibM3G_ext11 extends NativeLibrary {
 			default:
 				throw new IllegalArgumentException("Invalid function");
 		}
-	}
-
-	public String soname() {
-		return "libm3g_ext.1.so";
 	}
 }

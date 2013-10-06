@@ -18,14 +18,15 @@
 
 package alchemy.libs;
 
-import alchemy.core.Cache;
-import alchemy.core.Process;
-import alchemy.core.Int;
 import alchemy.fs.Filesystem;
+import alchemy.io.ConnectionInputStream;
 import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UICanvas;
 import alchemy.libs.ui.UIServer;
-import alchemy.nlib.NativeLibrary;
+import alchemy.system.Cache;
+import alchemy.system.NativeLibrary;
+import alchemy.system.Process;
+import alchemy.types.Int32;
 import alchemy.util.ArrayList;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,9 +57,9 @@ import javax.microedition.lcdui.TextField;
 public class LibUI1 extends NativeLibrary {
 	
 	public LibUI1() throws IOException {
-		load("/libui1.symbols");
+		load("/symbols/ui1");
+		name = "libui.1.so";
 	}
-
 	
 	private static final ArrayList hyperitems = new ArrayList();
 
@@ -157,7 +158,7 @@ public class LibUI1 extends NativeLibrary {
 				if (event != null && event[0] == UIServer.EVENT_KEY_PRESS && event[1] == args[0]) {
 					return event[2];
 				} else {
-					return Int.ZERO;
+					return Int32.ZERO;
 				}
 			}
 			case 27: { // ui_set_screen(scr: Screen)
@@ -393,12 +394,12 @@ public class LibUI1 extends NativeLibrary {
 				long tstamp = Filesystem.lastModified(filename);
 				Image img = (Image) Cache.get(filename, tstamp);
 				if (img == null) {
-					InputStream in = Filesystem.read(filename);
-					p.addStream(in);
+					ConnectionInputStream in = new ConnectionInputStream(Filesystem.read(filename));
+					p.addConnection(in);
 					img = Image.createImage(in);
 					in.close();
 					Cache.put(filename, tstamp, img);
-					p.removeStream(in);
+					p.removeConnection(in);
 				}
 				return img;
 			}

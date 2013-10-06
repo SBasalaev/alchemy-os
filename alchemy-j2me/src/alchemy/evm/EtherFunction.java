@@ -920,9 +920,9 @@ class EtherFunction extends Function {
 				for (int i=1; i<dbgtable.length; i += 2) {
 					if (dbgtable[i+1] <= ct) srcline = dbgtable[i];
 				}
-				ae.addTraceElement(this.toString(), cpool[dbgtable[0]]+":"+srcline);
+				ae.addTraceElement(this, cpool[dbgtable[0]]+":"+srcline);
 			} else {
-				ae.addTraceElement(this.toString(), "+"+ct);
+				ae.addTraceElement(this, "+"+ct);
 			}
 			// catching or rethrowing
 			int jumpto = -1;

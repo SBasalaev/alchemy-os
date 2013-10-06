@@ -18,11 +18,10 @@
 
 package alchemy.midlet;
 
-import alchemy.core.Art;
-import alchemy.core.Process;
-import alchemy.core.ProcessListener;
 import alchemy.fs.Filesystem;
 import alchemy.libs.ui.UIServer;
+import alchemy.system.Process;
+import alchemy.system.ProcessListener;
 import alchemy.util.Properties;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
@@ -35,7 +34,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessListener {
 
 	private final Command cmdQuit = new Command("Quit", Command.EXIT, 1);
-	private Art runtime;
+	private Process root;
 
 	public AlchemyMIDlet() {
 		UIServer.setDisplay(Display.getDisplay(this));
@@ -47,12 +46,11 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 			Properties prop = InstallInfo.read();
 			Filesystem.mount("", prop.get(InstallInfo.FS_TYPE), prop.get(InstallInfo.FS_INIT));
 			//setting up environment
-			runtime = new Art();
-			Process root = runtime.rootProcess();
+			root = new Process(null, "sh", new String[] {"/cfg/init"});
 			root.setEnv("PATH", "/bin");
 			root.setEnv("LIBPATH", "/lib");
 			root.setEnv("INCPATH", "/inc");
-			root.setCurDir("/home");
+			root.setCurrentDirectory("/home");
 			root.addProcessListener(this);
 			runApp();
 		} catch (Throwable t) {
@@ -66,7 +64,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 			new Runnable() {
 				public void run() {
 					try {
-						runtime.rootProcess().start("sh", new String[] {"/cfg/init"});
+						root.start();
 					} catch (Throwable t) {
 						kernelPanic(t.toString());
 						t.printStackTrace();

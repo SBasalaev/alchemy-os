@@ -18,9 +18,9 @@
 
 package alchemy.libs.ui;
 
-import alchemy.core.Process;
-import alchemy.core.ProcessListener;
-import alchemy.core.Int;
+import alchemy.system.Process;
+import alchemy.system.ProcessListener;
+import alchemy.types.Int32;
 import alchemy.util.ArrayList;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
@@ -53,27 +53,27 @@ import javax.microedition.lcdui.List;
  */
 public final class UIServer {
 	/** Event type for gaining focus. */
-	public static final Int EVENT_SHOW = Int.M_ONE;
+	public static final Int32 EVENT_SHOW = Int32.M_ONE;
 	/** Event type for losing focus. */
-	public static final Int EVENT_HIDE = Int.toInt(-2);
+	public static final Int32 EVENT_HIDE = Int32.toInt32(-2);
 	/** Event type for on-screen menu. */
-	public static final Int EVENT_MENU = Int.ONE;
+	public static final Int32 EVENT_MENU = Int32.ONE;
 	/** Event type for on-item menu. */
-	public static final Int EVENT_ITEM_MENU = Int.toInt(2);
+	public static final Int32 EVENT_ITEM_MENU = Int32.toInt32(2);
 	/** Event type for canvas key press. */
-	public static final Int EVENT_KEY_PRESS = Int.toInt(3);
+	public static final Int32 EVENT_KEY_PRESS = Int32.toInt32(3);
 	/** Event type for canvas key hold. */
-	public static final Int EVENT_KEY_HOLD = Int.toInt(4);
+	public static final Int32 EVENT_KEY_HOLD = Int32.toInt32(4);
 	/** Event type for canvas key release. */
-	public static final Int EVENT_KEY_RELEASE = Int.toInt(5);
+	public static final Int32 EVENT_KEY_RELEASE = Int32.toInt32(5);
 	/** Event type for canvas pointer press. */
-	public static final Int EVENT_PTR_PRESS = Int.toInt(6);
+	public static final Int32 EVENT_PTR_PRESS = Int32.toInt32(6);
 	/** Event type for canvas pointer release. */
-	public static final Int EVENT_PTR_RELEASE = Int.toInt(7);
+	public static final Int32 EVENT_PTR_RELEASE = Int32.toInt32(7);
 	/** Event type for canvas pointer drag. */
-	public static final Int EVENT_PTR_DRAG = Int.toInt(8);
+	public static final Int32 EVENT_PTR_DRAG = Int32.toInt32(8);
 	/** Event type for changed state of item. */
-	public static final Int EVENT_ITEM_STATE = Int.toInt(9);
+	public static final Int32 EVENT_ITEM_STATE = Int32.toInt32(9);
 	
 	/** Display set by Alchemy MIDlet. */
 	private static Display display;
@@ -186,7 +186,7 @@ public final class UIServer {
 	}
 	
 	/** Adds given event to the event queue. */
-	public static synchronized void pushEvent(Displayable d, Int kind, Object value) {
+	public static synchronized void pushEvent(Displayable d, Int32 kind, Object value) {
 		int i = frameIndex(d);
 		if (i >= 0) {
 			final UIFrame frame = (UIFrame)frames.get(i);
@@ -329,7 +329,7 @@ public final class UIServer {
 					int index = appList.getSelectedIndex();
 					if (index >= 0) {
 						UIFrame frame = (UIFrame)frames.get(index);
-						frame.c.interrupt();
+						frame.c.kill();
 					}
 				}
 			}
