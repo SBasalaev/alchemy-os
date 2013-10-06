@@ -28,6 +28,7 @@ import javax.microedition.io.Connection;
  * Method close() closes encapsulated stream.
  *
  * @author Sergey Basalaev
+ * @deprecated Use {@link ConnectionInputStream} and {@link ConnectionOutputStream}
  */
 public final class ConnectionBridge implements Connection {
 

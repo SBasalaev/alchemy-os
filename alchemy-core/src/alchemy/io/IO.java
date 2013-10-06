@@ -68,6 +68,7 @@ public final class IO {
 	 * </ul>
 	 * 
 	 * @throws IOException if an I/O error occurs.
+	 * @deprecated Use {@link ConnectionInputStream#read(byte[], int, int) } instead
 	 */
 	public static int readArray(InputStream in, byte[] buf, int ofs, int len) throws IOException {
 		if (buf == null)
@@ -81,6 +82,7 @@ public final class IO {
 	
 	/**
 	 * This is a shortcut for readArray(in, buf, 0, buf.length).
+	 * @deprecated Use {@link ConnectionInputStream#read(byte[]) } instead
 	 */
 	public static int readArray(InputStream in, byte[] buf) throws IOException {
 		return readArray(in, buf, 0, buf.length);
@@ -99,6 +101,7 @@ public final class IO {
 	 * </ul>
 	 * 
 	 * @throws IOException if an I/O error occurs.
+	 * @deprecated Use {@link ConnectionOutputStream#write(byte[], int, int)} instead
 	 */
 	public static void writeArray(OutputStream out, byte[] buf, int ofs, int len) throws IOException {
 		if (buf == null)
@@ -110,7 +113,9 @@ public final class IO {
 		out.write(buf, ofs, len);
 	}
 	
-	/** This is a shortcut for writeArray(out, buf, 0, buf.length). */
+	/** This is a shortcut for writeArray(out, buf, 0, buf.length).
+	 * @deprecated Use {@link ConnectionOutputStream#write(byte[])} instead
+	 */
 	public static void writeArray(OutputStream out, byte[] buf) throws IOException {
 		writeArray(out, buf, 0, buf.length);
 	}
@@ -128,6 +133,7 @@ public final class IO {
 	 * </ul>
 	 * 
 	 * @throws IOException 
+	 * @deprecated Use {@link ConnectionInputStream#skip(long) } instead
 	 */
 	public static long skip(InputStream in, long n) throws IOException {
 		if (n <= 0L) return 0L;
