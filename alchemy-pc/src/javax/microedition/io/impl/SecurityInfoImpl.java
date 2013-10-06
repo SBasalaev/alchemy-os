@@ -22,33 +22,26 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import javax.microedition.io.SecurityInfo;
 import javax.microedition.pki.Certificate;
-import javax.net.ssl.HttpsURLConnection;
 
 /**
- *
+ * Implementation of security info.
  * @author Sergey Basalaev
  */
 class SecurityInfoImpl implements SecurityInfo {
 
-	private final HttpsURLConnection conn;
-	private final CertificateImpl cert;
 	private final String protocol;
+	private final String cipherSuite;
+	private final CertificateImpl cert;
 
-	public SecurityInfoImpl(HttpsURLConnection conn, String protocol) throws IOException {
-		this.conn = conn;
+	SecurityInfoImpl(String protocol, String cipherSuite, X509Certificate cert) throws IOException {
 		this.protocol = protocol;
-		try {
-			this.cert = new CertificateImpl((X509Certificate)conn.getServerCertificates()[0]);
-		} catch (IOException ioe) {
-			throw ioe;
-		} catch (Throwable t) {
-			throw new IOException(t);
-		}
+		this.cipherSuite = cipherSuite;
+		this.cert = new CertificateImpl(cert);
 	}
 
 	@Override
 	public String getCipherSuite() {
-		return conn.getCipherSuite();
+		return cipherSuite;
 	}
 
 	@Override

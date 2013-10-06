@@ -19,28 +19,42 @@
 package javax.microedition.io.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URLConnection;
 import javax.microedition.io.HttpConnection;
 
 /**
  * Implementation for HttpConnection.
  * @author Sergey Basalaev
  */
-public class HttpConnectionImpl extends StreamConnectionImpl implements HttpConnection {
+public class HttpConnectionImpl implements HttpConnection {
 
-	public HttpConnectionImpl(URLConnection conn) {
-		super(conn);
+	protected final HttpURLConnection conn;
+
+	public HttpConnectionImpl(HttpURLConnection conn) {
+		this.conn = conn;
+		this.conn.setInstanceFollowRedirects(false);
 	}
 
 	@Override
 	public void close() throws IOException {
-		((HttpURLConnection)conn).disconnect();
+		conn.disconnect();
+	}
+
+	@Override
+	public InputStream openInputStream() throws IOException {
+		return conn.getInputStream();
+	}
+
+	@Override
+	public OutputStream openOutputStream() throws IOException {
+		return conn.getOutputStream();
 	}
 
 	@Override
 	public String getURL() {
-		return conn.getURL().toExternalForm();
+		return conn.getURL().toString();
 	}
 
 	@Override
@@ -70,32 +84,45 @@ public class HttpConnectionImpl extends StreamConnectionImpl implements HttpConn
 
 	@Override
 	public int getPort() {
-		return conn.getURL().getPort();
+		int port = conn.getURL().getPort();
+		return (port != -1) ? port : 80;
 	}
 
 	@Override
 	public String getEncoding() {
-		return conn.getContentEncoding();
+		try {
+			return getHeaderField("content-encoding");
+		} catch (IOException ioe) {
+			return null;
+		}
 	}
 
 	@Override
 	public String getType() {
-		return conn.getContentType();
+		try {
+			return getHeaderField("content-type");
+		} catch (IOException ioe) {
+			return null;
+		}
 	}
 
 	@Override
 	public long getLength() {
-		return conn.getContentLengthLong();
+		try {
+			return getHeaderFieldDate("content-length", -1);
+		} catch (IOException ioe) {
+			return -1;
+		}
 	}
 
 	@Override
 	public String getRequestMethod() {
-		return ((HttpURLConnection)conn).getRequestMethod();
+		return conn.getRequestMethod();
 	}
 
 	@Override
 	public void setRequestMethod(String method) throws IOException {
-		((HttpURLConnection)conn).setRequestMethod(method);
+		conn.setRequestMethod(method);
 	}
 
 	@Override
@@ -114,12 +141,12 @@ public class HttpConnectionImpl extends StreamConnectionImpl implements HttpConn
 
 	@Override
 	public int getResponseCode() throws IOException {
-		return ((HttpURLConnection)conn).getResponseCode();
+		return conn.getResponseCode();
 	}
 
 	@Override
 	public String getResponseMessage() throws IOException {
-		return ((HttpURLConnection)conn).getResponseMessage();
+		return conn.getResponseMessage();
 	}
 
 	@Override

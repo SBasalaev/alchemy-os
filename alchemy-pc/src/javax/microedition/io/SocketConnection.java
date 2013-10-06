@@ -19,12 +19,17 @@
 package javax.microedition.io;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-/**
- * Connection from which binary data can be read.
- * @author Sergey Basalaev
- */
-public interface InputConnection extends Connection {
-	InputStream openInputStream() throws IOException;
+public interface SocketConnection extends StreamConnection {
+	byte DELAY = 0;
+	byte LINGER = 1;
+	byte KEEPALIVE = 2;
+	byte RCVBUF = 3;
+	byte SNDBUF = 4;
+	void setSocketOption(byte option, int value) throws IOException;
+	int getSocketOption(byte option) throws IOException;
+	String getLocalAddress() throws IOException;
+	int getLocalPort() throws IOException;
+	String getAddress() throws IOException;
+	int getPort() throws IOException;
 }

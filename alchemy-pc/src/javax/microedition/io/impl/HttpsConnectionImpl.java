@@ -19,8 +19,8 @@
 package javax.microedition.io.impl;
 
 import java.io.IOException;
-import java.net.URLConnection;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import javax.microedition.io.HttpsConnection;
 import javax.microedition.io.SecurityInfo;
 import javax.net.ssl.HttpsURLConnection;
@@ -32,14 +32,19 @@ import javax.net.ssl.SSLContext;
  */
 public class HttpsConnectionImpl extends HttpConnectionImpl implements HttpsConnection {
 
-	public HttpsConnectionImpl(URLConnection conn) {
+	public HttpsConnectionImpl(HttpsURLConnection conn) {
 		super(conn);
 	}
 
 	@Override
 	public SecurityInfo getSecurityInfo() throws IOException {
+		HttpsURLConnection https = (HttpsURLConnection) conn;
+		if (https.getServerCertificates().length == 0) {
+			throw new IOException("No certificates");
+		}
+		X509Certificate cert = (X509Certificate) https.getServerCertificates()[0];
 		try {
-			return new SecurityInfoImpl((HttpsURLConnection)conn, SSLContext.getInstance("TLS").getProtocol());
+			return new SecurityInfoImpl(SSLContext.getInstance("TLS").getProtocol(), https.getCipherSuite(), cert);
 		} catch (NoSuchAlgorithmException nsae) {
 			throw new IOException(nsae);
 		}

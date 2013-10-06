@@ -18,14 +18,21 @@
 
 package javax.microedition.io;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
+import java.net.URLConnection;
 import javax.microedition.io.impl.HttpConnectionImpl;
 import javax.microedition.io.impl.HttpsConnectionImpl;
+import javax.microedition.io.impl.SecureConnectionImpl;
+import javax.microedition.io.impl.ServerSocketConnectionImpl;
+import javax.microedition.io.impl.SocketConnectionImpl;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * This is implementation of the generic connection
@@ -41,26 +48,56 @@ public class Connector {
 	public static final int READ_WRITE = READ | WRITE;
 
 	public static Connection open(String name) throws IOException {
-		URL url = new URL(name);
-		if (url.getProtocol().equals("http")) {
-			return new HttpConnectionImpl(url.openConnection());
-		} else if (url.getProtocol().equals("https")) {
-			return new HttpsConnectionImpl(url.openConnection());
-		} else {
-			throw new ConnectionNotFoundException("Unsupported protocol: " + url.getProtocol());
+		int colon = name.indexOf(':');
+		if (colon <= 0) {
+			throw new IllegalArgumentException(name);
 		}
-	}
-
-	public static DataInputStream openDataInputStream(String name) throws IOException {
-		StreamConnection conn = null;
-		try {
-			conn = (StreamConnection) open(name);
-			return conn.openDataInputStream();
-		} finally {
-			try {
-				if (conn != null) conn.close();
-			} catch (IOException ioe) { }
+		String protocol = name.substring(0, colon);
+		if (protocol.equals("http")) {
+			URLConnection conn = new URL(name).openConnection();
+			if (conn instanceof HttpURLConnection) {
+				return new HttpConnectionImpl((HttpURLConnection)conn);
+			}
+		} else if (protocol.equals("https")) {
+			URLConnection conn = new URL(name).openConnection();
+			if (conn instanceof HttpURLConnection) {
+				return new HttpsConnectionImpl((HttpsURLConnection)conn);
+			}
+		} else if (protocol.equals("socket")) {
+			if (!name.startsWith("socket://"))
+				throw new IllegalArgumentException(name);
+			name = name.substring("socket://".length());
+			colon = name.lastIndexOf(':');
+			String host;
+			int port;
+			if (colon < 0) {
+				host = name;
+				port = -1;
+			} else {
+				host = name.substring(0, colon);
+				port = Integer.parseInt(name.substring(colon+1));
+			}
+			if (host.length() == 0) {
+				return new ServerSocketConnectionImpl(port);
+			} else if (port == -1) {
+				throw new IllegalArgumentException("Port missing");
+			} else {
+				Socket socket = new Socket(host, port);
+				return new SocketConnectionImpl(socket);
+			}
+		} else if (protocol.equals("ssl")) {
+			if (!name.startsWith("ssl://"))
+				throw new IllegalArgumentException(name);
+			name = name.substring("ssl://".length());
+			colon = name.lastIndexOf(':');
+			if (colon < 0)
+				throw new IllegalArgumentException("Port missing");
+			String host = name.substring(0, colon);
+			int port = Integer.parseInt(name.substring(colon+1));
+			SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(host, port);
+			return new SecureConnectionImpl(socket);
 		}
+		throw new ConnectionNotFoundException("Connection not found: " + protocol);
 	}
 
 	public static InputStream openInputStream(String name) throws IOException {
@@ -68,18 +105,6 @@ public class Connector {
 		try {
 			conn = (StreamConnection) open(name);
 			return conn.openInputStream();
-		} finally {
-			try {
-				if (conn != null) conn.close();
-			} catch (IOException ioe) { }
-		}
-	}
-
-	public static DataOutputStream openDataOutputStream(String name) throws IOException {
-		StreamConnection conn = null;
-		try {
-			conn = (StreamConnection) open(name);
-			return conn.openDataOutputStream();
 		} finally {
 			try {
 				if (conn != null) conn.close();

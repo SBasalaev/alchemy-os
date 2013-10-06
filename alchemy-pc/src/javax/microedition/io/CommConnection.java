@@ -18,13 +18,7 @@
 
 package javax.microedition.io;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-/**
- * Connection from which binary data can be read.
- * @author Sergey Basalaev
- */
-public interface InputConnection extends Connection {
-	InputStream openInputStream() throws IOException;
+public interface CommConnection extends StreamConnection {
+	int getBaudRate();
+	int setBaudRate(int baudrate);
 }

@@ -18,43 +18,30 @@
 
 package javax.microedition.io.impl;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLConnection;
-import javax.microedition.io.StreamConnection;
+import java.security.cert.X509Certificate;
+import javax.microedition.io.SecureConnection;
+import javax.microedition.io.SecurityInfo;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 
 /**
- * Implementation of stream connection.
+ * Implementation of secure socket connection.
  * @author Sergey Basalaev
  */
-public abstract class StreamConnectionImpl implements StreamConnection {
+public class SecureConnectionImpl extends SocketConnectionImpl implements SecureConnection {
 
-	protected final URLConnection conn;
-
-	public StreamConnectionImpl(URLConnection conn) {
-		this.conn = conn;
+	public SecureConnectionImpl(SSLSocket socket) throws IOException {
+		super(socket);
 	}
 
 	@Override
-	public InputStream openInputStream() throws IOException {
-		return conn.getInputStream();
-	}
-
-	@Override
-	public DataInputStream openDataInputStream() throws IOException {
-		return new DataInputStream(openInputStream());
-	}
-
-	@Override
-	public OutputStream openOutputStream() throws IOException {
-		return conn.getOutputStream();
-	}
-
-	@Override
-	public DataOutputStream openDataOutputStream() throws IOException {
-		return new DataOutputStream(openOutputStream());
+	public SecurityInfo getSecurityInfo() throws IOException {
+		SSLSession session = ((SSLSocket)socket).getSession();
+		if (session.getPeerCertificates().length == 0) {
+			throw new IOException("No certificates");
+		}
+		X509Certificate cert = (X509Certificate) session.getPeerCertificates()[0];
+		return new SecurityInfoImpl(session.getProtocol(), session.getCipherSuite(), cert);
 	}
 }
