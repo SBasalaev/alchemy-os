@@ -1,0 +1,3 @@
+#@alchemy.libs.LibCore4
+soname=libcore.4.so
+symbols=/symbols/core4
