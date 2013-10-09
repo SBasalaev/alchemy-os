@@ -46,11 +46,12 @@ import javax.microedition.io.StreamConnection;
 
 /**
  * Alchemy core runtime library.
- * 
+ *
+ * @deprecated Will be removed after new API is finished
  * @author Sergey Basalaev
- * @version 4.0
+ * @version 3.0
  */
-public class LibCore4 extends NativeLibrary {
+public class LibCore3 extends NativeLibrary {
 
 	private static Random rnd = new Random();
 	
@@ -60,9 +61,9 @@ public class LibCore4 extends NativeLibrary {
 	 * @throws IOException if I/O error occured while reading
 	 *         function definitions file
 	 */
-	public LibCore4() throws IOException {
-		load("/symbols/core4");
-		name = "libcore.4.so";
+	public LibCore3() throws IOException {
+		load("/symbols/core3");
+		name = "libcore.3.so";
 	}
 
 	/**
