@@ -1,15 +1,9 @@
 build:
- make -C libcore
- make -C libui
- make -C libmedia
+ make -C libcoree
 
 clean:
- make -C libcore  clean
- make -C libui    clean
- make -C libmedia clean
+ make -C libcoree clean
 
 install:
- make -C libcore  install
- make -C libui    install
- make -C libmedia install
+ make -C libcoree install
  install inc lib ${DESTDIR}
