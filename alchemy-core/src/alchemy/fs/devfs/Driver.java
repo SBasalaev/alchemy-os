@@ -66,7 +66,7 @@ public final class Driver extends FSDriver {
 		sharedinputs.set("random", new RandomInputStream());
 
 		String comm = System.getProperty("microedition.commports");
-		commdevs = (comm == null) ? new String[0] : Strings.split(comm, ',');
+		commdevs = (comm == null) ? new String[0] : Strings.split(comm, ',', false);
 	}
 
 	public InputStream read(String file) throws IOException {

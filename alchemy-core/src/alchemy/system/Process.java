@@ -293,7 +293,7 @@ public final class Process {
 				}
 				case MAGIC_INTERPRETER: {
 					String intcmd = new UTFReader(libin).readLine();
-					String[] intargs = Strings.split(intcmd, ' ');
+					String[] intargs = Strings.split(intcmd, ' ', true);
 					intcmd = intargs[0];
 					System.arraycopy(intargs, 1, intargs, 0, intargs.length-1);
 					intargs[intargs.length-1] = libfile;
@@ -342,7 +342,7 @@ public final class Process {
 			name = toFile(name);
 			if (Filesystem.exists(name)) return name;
 		} else {
-			String[] paths = Strings.split(pathlist, ':');
+			String[] paths = Strings.split(pathlist, ':', true);
 			for (int i=0; i<paths.length; i++) {
 				String path = paths[i];
 				if (path.length() == 0) continue;

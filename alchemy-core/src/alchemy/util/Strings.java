@@ -178,19 +178,20 @@ public final class Strings {
 	 * @return the array of strings computed by splitting the string
 	 *   around given character
 	 */
-	public static String[] split(String str, char ch) {
+	public static String[] split(String str, char ch, boolean skipEmpty) {
 		ArrayList strings = new ArrayList();
-		int index = str.indexOf(ch);
-		while (index >= 0) {
-			strings.add(str.substring(0, index));
-			str = str.substring(index+1);
-			index = str.indexOf(ch);
+		int len = str.length();
+		int start = 0;
+		while (start < len) {
+			int end = str.indexOf(ch);
+			if (end < 0) end = len;
+			if (!skipEmpty || end - start > 1) {
+				strings.add(str);
+			}
+			start = end+1;
 		}
-		strings.add(str);
 		String[] ret = new String[strings.size()];
-		for (int i=strings.size()-1; i>=0; i--) {
-			ret[i] = strings.get(i).toString();
-		}
+		strings.copyInto(ret);
 		return ret;
 	}
 

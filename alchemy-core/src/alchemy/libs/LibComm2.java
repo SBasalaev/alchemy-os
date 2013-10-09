@@ -44,7 +44,7 @@ public class LibComm2 extends NativeLibrary {
 			case 0: { // listCommPorts(): [String]
 				String ports = System.getProperty("microedition.commports");
 				if (ports == null) ports = "";
-				return Strings.split(ports, ',');
+				return Strings.split(ports, ',', false);
 			}
 			case 1: { // Comm.new(port: String, cfg: CommCfg): Comm
 				StringBuffer url = new StringBuffer("comm://");
