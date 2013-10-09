@@ -272,40 +272,6 @@ public class LibCore3 extends NativeLibrary {
 			case 82: // seterr(out: OStream)
 				p.stderr = (OutputStream)args[0];
 				return null;
-			case 83: // abs(a: Double): Double
-				return Dval(Math.abs(dval(args[0])));
-			case 84: // sin(a: Double): Double
-				return Dval(Math.sin(dval(args[0])));
-			case 85: // cos(a: Double): Double
-				return Dval(Math.cos(dval(args[0])));
-			case 86: // tan(a: Double): Double
-				return Dval(Math.tan(dval(args[0])));
-			case 87: // sqrt(a: Double): Double
-				return Dval(Math.sqrt(dval(args[0])));
-			case 88: // ipow(a: Double, n: Int): Double
-				return Dval(ipow(dval(args[0]), ival(args[1])));
-			case 89: // exp(a: Double): Double
-				return Dval(exp(dval(args[0])));
-			case 90: // log(a: Double): Double
-				return Dval(log(dval(args[0])));
-			case 91: // asin(a: Double): Double
-				return Dval(asin(dval(args[0])));
-			case 92: // acos(a: Double): Double
-				return Dval(acos(dval(args[0])));
-			case 93: // atan(a: Double): Double
-				return Dval(atan(dval(args[0])));
-			case 94: // ca2str(chars: [Char]): String
-				return new String((char[])args[0]);
-			case 95: // ba2utf(bytes: [Byte]): String
-				return Strings.utfDecode((byte[])args[0]);
-			case 96: // ibits2f(bits: Int): Float
-				return Fval(Float.intBitsToFloat(ival(args[0])));
-			case 97: // f2ibits(f: Float): Int
-				return Ival(Float.floatToIntBits(fval(args[0])));
-			case 98: // lbits2d(bits: Long): Double
-				return Dval(Double.longBitsToDouble(lval(args[0])));
-			case 99: // d2lbits(d: Double): Long
-				return Lval(Double.doubleToLongBits(dval(args[0])));
 			case 100: // new_dict(): Dict
 				return new Hashtable();
 			case 101: // Dict.set(key: Any, value: Any)

@@ -152,6 +152,39 @@ public final class LibCore4 extends NativeLibrary {
 				return ((AlchemyException)args[0]).getTraceElementName(ival(args[1]));
 			case 38: // Error.traceDbg(index: Int): String
 				return ((AlchemyException)args[0]).getTraceElementInfo(ival(args[1]));
+
+			/* == Header: math.eh == */
+			case 39: // abs(val: Double): Double
+				return Dval(Math.abs(dval(args[0])));
+			case 40: // sin(val: Double): Double
+				return Dval(Math.sin(dval(args[0])));
+			case 41: // cos(val: Double): Double
+				return Dval(Math.cos(dval(args[0])));
+			case 42: // tan(val: Double): Double
+				return Dval(Math.tan(dval(args[0])));
+			case 43: // sqrt(val: Double): Double
+				return Dval(Math.sqrt(dval(args[0])));
+			case 44: // ipow(val: Double, pow: Int): Double
+				return Dval(alchemy.util.Math.ipow(dval(args[0]), ival(args[1])));
+			case 45: // exp(val: Double): Double
+				return Dval(alchemy.util.Math.exp(dval(args[0])));
+			case 46: // log(val: Double): Double
+				return Dval(alchemy.util.Math.log(dval(args[0])));
+			case 47: // asin(val: Double): Double
+				return Dval(alchemy.util.Math.asin(dval(args[0])));
+			case 48: // acos(val: Double): Double
+				return Dval(alchemy.util.Math.acos(dval(args[0])));
+			case 49: // atan(val: Double): Double
+				return Dval(alchemy.util.Math.atan(dval(args[0])));
+			case 50: // ibits2f(bits: Int): Float
+				return Fval(Float.intBitsToFloat(ival(args[0])));
+			case 51: // f2ibits(f: Float): Int
+				return Ival(Float.floatToIntBits(fval(args[0])));
+			case 52: // lbits2d(bits: Long): Double
+				return Dval(Double.longBitsToDouble(lval(args[0])));
+			case 53: // d2lbits(d: Double): Long
+				return Lval(Double.doubleToLongBits(dval(args[0])));
+
 			default:
 				return null;
 		}
