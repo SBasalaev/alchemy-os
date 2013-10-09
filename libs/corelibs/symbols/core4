@@ -32,3 +32,8 @@ String.replace
 String.hash
 ca2str
 ba2utf
+Error.code
+Error.msg
+Error.traceLen
+Error.traceName
+Error.traceDbg

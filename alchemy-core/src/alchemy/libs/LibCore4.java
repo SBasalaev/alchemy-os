@@ -18,6 +18,7 @@
 
 package alchemy.libs;
 
+import alchemy.system.AlchemyException;
 import alchemy.system.Function;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
@@ -138,6 +139,17 @@ public final class LibCore4 extends NativeLibrary {
 				return new String((char[])args[0]);
 			case 33: // ba2utf(ba: [Byte]): String
 				return Strings.utfDecode((byte[])args[0]);
+			/* == Header: error.eh == */
+			case 34: // Error.code(): Int
+				return Ival(((AlchemyException)args[0]).errcode);
+			case 35: // Error.msg(): String
+				return ((AlchemyException)args[0]).getMessage();
+			case 36: // Error.traceLen(): Int
+				return Ival(((AlchemyException)args[0]).getTraceLength());
+			case 37: // Error.traceName(index: Int): String
+				return ((AlchemyException)args[0]).getTraceElementName(ival(args[1]));
+			case 38: // Error.traceDbg(index: Int): String
+				return ((AlchemyException)args[0]).getTraceElementInfo(ival(args[1]));
 			default:
 				return null;
 		}

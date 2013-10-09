@@ -15,4 +15,8 @@ const ERR_MEDIA = 111
 
 def Error.code(): Int;
 def Error.msg(): String;
-def error(code: Int = FAIL, msg: String = null);
+def Error.traceLen(): Int;
+def Error.traceName(index: Int): String;
+def Error.traceDbg(index: Int): String;
+
+def throw(code: Int = FAIL, msg: String = null);
