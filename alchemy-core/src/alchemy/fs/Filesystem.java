@@ -95,7 +95,46 @@ public final class Filesystem {
 		if (lastslash < 0) return null;
 		return file.substring(0, lastslash);
 	}
-		
+
+	/**
+	 * Returns path relative to the given directory.
+	 * Both arguments must be normalized absolute paths.
+	 */
+	public static String relativePath(String dir, String file) {
+		if (dir.equals(file)) return ".";
+		//initializing cpath and fpath
+		if (dir.length() == 0) return file.substring(1);
+		char[] cpath = new char[dir.length()+1];
+		dir.getChars(0, dir.length(), cpath, 0);
+		char[] fpath = new char[file.length()+1];
+		file.getChars(0, file.length(), fpath, 0);
+		int cind = 0;
+		//searching the first different character
+		while (cpath[cind] == fpath[cind]) cind++;
+		//reverting to the beginning of name
+		if (!(cpath[cind] == 0 && fpath[cind] == '/') && !(cpath[cind] == '/' && fpath[cind] == 0)) {
+			do --cind;
+			while (cpath[cind] != '/');
+		}
+		int fpos = cind;
+		//while we have directories in cpath append ".."
+		StringBuffer relpath = new StringBuffer();
+		boolean needslash = false;
+		while (cpath[cind] != 0) {
+			if (cpath[cind] == '/') {
+				relpath.append(needslash ? "/.." : "..");
+				needslash = true;
+			}
+			cind++;
+		}
+		//append file remainder
+		if (fpath[fpos] != 0) {
+			if (!needslash) fpos++;
+			relpath.append(fpath, fpos, fpath.length-fpos-1);
+		}
+		return relpath.toString();
+	}
+
 	/**
 	 * Returns file system on which corresponding file is mounted.
 	 * File must be normalized.

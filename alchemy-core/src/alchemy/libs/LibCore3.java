@@ -23,12 +23,10 @@ import alchemy.io.ConnectionInputStream;
 import alchemy.io.ConnectionOutputStream;
 import alchemy.io.IO;
 import alchemy.io.Pipe;
-import alchemy.system.AlchemyException;
 import alchemy.system.Library;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
 import alchemy.util.ArrayList;
-import alchemy.util.Arrays;
 import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -64,230 +62,6 @@ public class LibCore3 extends NativeLibrary {
 	public LibCore3() throws IOException {
 		load("/symbols/core3");
 		name = "libcore.3.so";
-	}
-
-	/**
-	 * Calculates relative path from the current directory.
-	 * @param c execution path
-	 * @param f file to calculate path from
-	 * @return string with relative path
-	 */
-	public static String relPath(Process c, String f) {
-		if (c.getCurrentDirectory().equals(f)) return ".";
-		//initializing cpath and fpath
-		String tmp = c.getCurrentDirectory();
-		if (tmp.length() == 0) return f.substring(1);
-		char[] cpath = new char[tmp.length()+1];
-		tmp.getChars(0, tmp.length(), cpath, 0);
-		tmp = f;
-		char[] fpath = new char[tmp.length()+1];
-		tmp.getChars(0, tmp.length(), fpath, 0);
-		int cind = 0;
-		//searching the first different character
-		while (cpath[cind] == fpath[cind]) cind++;
-		//reverting to the beginning of name
-		if (!(cpath[cind] == 0 && fpath[cind] == '/') && !(cpath[cind] == '/' && fpath[cind] == 0)) {
-			do --cind;
-			while (cpath[cind] != '/');
-		}
-		int fpos = cind;
-		//while we have directories in cpath append ".."
-		StringBuffer relpath = new StringBuffer();
-		boolean needslash = false;
-		while (cpath[cind] != 0) {
-			if (cpath[cind] == '/') {
-				relpath.append(needslash ? "/.." : "..");
-				needslash = true;
-			}
-			cind++;
-		}
-		//append file remainder
-		if (fpath[fpos] != 0) {
-			if (!needslash) fpos++;
-			relpath.append(fpath, fpos, fpath.length-fpos-1);
-		}
-		return relpath.toString();
-	}
-
-	/**
-	 * Calculates integer power of the value.
-	 * @param val  double value
-	 * @param pow  integer power
-	 * @return <code>val</code> in the power of <code>pow</code>
-	 */
-	public static double ipow(double val, int pow) {
-		if (val == 0) return 1.0;
-		if (pow < 0) {
-			pow = -pow;
-			val = 1.0/val;
-		}
-		double result = 1;
-		// if _pow_ has bit _n_ then multiplying by _val^(2^n)_
-		while (pow != 0) {
-			if (pow%2 != 0) result *= val;
-			val *= val;
-			pow >>>= 1;
-		}
-		return result;
-	}
-
-	/**
-	 * Calculates exponent of the value.
-	 * @param val  double value
-	 * @return exponent of the value
-	 */
-	public static double exp(double val) {
-		boolean neg = false;
-		if (val < 0) {
-			neg = true;
-			val = -val;
-		}
-		if (val > 709.0) return neg ? 0 : Double.POSITIVE_INFINITY;
-		int ip = (int)val;       //[val]
-		double fp = val - ip;    //{val}
-		double result = 1.0;
-		//calculating  E^{val}
-		//as Taylor series
-		double add = fp;
-		int n = 2;
-		while (add > 1.0e-16) {
-			result += add;
-			add = add*fp/n;
-			n++;
-		}
-		//calculating  E^[val]
-		//using ipow
-		result *= ipow(Math.E, ip);
-		return neg ? 1.0/result : result;
-	}
-
-	/**
-	 * Calculates natural logarithm of the value.
-	 * @param val  double value
-	 * @return natural algoritm of the value
-	 */
-	public static double log(double val) {
-		boolean neg = false;
-		if (val < 0) return Double.NaN;
-		if (val < 1) {
-			val = 1.0/val;
-			neg = true;
-		}
-		//calculating exponent
-		double exp = 0;
-		while (val >= 64) {
-			val /= 64.0;
-			exp += 6.0;
-		}
-		while (val >= 2) {
-			val /= 2.0;
-			exp += 1.0;
-		}
-		if (val >= 1.414213562373095d) { //√2
-			val /= 1.414213562373095d;
-			exp += 0.5;
-		}
-		if (val >= 1.189207115002721d) { //√√2
-			val /= 1.189207115002721d;
-			exp += 0.25;
-		}
-		if (val >= 1.090507732665257d) { //√√√2
-			val /= 1.090507732665257d;
-			exp += 0.125;
-		}
-		//calculating ln of rest
-		val -= 1.0;
-		double ln = 0, rest = val;
-		int n=1;
-		while (rest > 1.0e-16*n || rest < -1.0e-16*n) {
-			ln += rest / n;
-			rest = -rest * val;
-			n++;
-		}
-		ln += exp * 0.693147180559945d;
-		return neg ? -ln : ln;
-	}
-
-	/**
-	 * Returns arcsine of the value.
-	 * @param val  double value
-	 * @return arcsine of the value
-	 */
-	public static double asin(double val) {
-		if (val > 1 || val < -1) return Double.NaN;
-	    boolean neg = false;
-		if (val < 0) {
-			val = -val;
-			neg = true;
-		}
-		//linear approximation where iterational method is impractical
-		//it really sucks and should be rewritten
-		if (val > 0.999999d) {
-			//1.56938... is asin(0.999999)
-			val = Math.PI/2 + (1-val) * 1000000 * (1.5693821131146521d - Math.PI/2);
-			return neg ? -val : val;
-		}
-		//calculating as Taylor series
-		double rest = val;
-		double x2 = val*val;
-		int n = 1;
-		while (rest > 1.0e-16) {
-			rest *= n * x2;
-			n++;
-			rest /= n;
-			n++;
-			val += rest / n;
-		}
-		return val;
-	}
-
-	/**
-	 * Returns arccosine of the value.
-	 * @param val  double value
-	 * @return arccosine of the value
-	 */
-	public static double acos(double val) {
-		return Math.PI/2.0d - asin(val);
-	}
-
-	/**
-	 * Returns arctangent of the value.
-	 * Slow and not very accurate though.
-	 * @param val  double value
-	 * @return arctangent of the value
-	 */
-	public static double atan(double val) {
-		//smokin' method from mobylab.ru
-		//shrinking domain
-		boolean neg = false, big = false;
-		if (val < 0) {
-			val = -val;
-			neg = true;
-		}
-		if (val > 1) {
-			val = 1/val;
-			big = true;
-		}
-		int offsteps = 0;
-		while (val > Math.PI/12.0d) {
-			// 1.732... is √3
-			val = (val * 1.732050807568877 - 1) / (val + 1.732050807568877);
-			offsteps++;
-		}
-		//calculating as Taylor series
-		double result = 0;
-		double rest = val;
-		val *= val;
-		int n = 1;
-		while (rest > 1.0e-16) {
-			result += rest/n;
-			n += 2;
-			rest = -rest*val;
-		}
-		// reverting our transformations
-		result += Math.PI/6 * offsteps;
-		if (big) result = Math.PI/2.0d - result;
-		return neg ? -result : result;
 	}
 
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
@@ -361,30 +135,6 @@ public class LibCore3 extends NativeLibrary {
 				return null;
 			case 23: // relpath(f: String): String
 				return relPath(p, p.toFile((String)args[0]));
-			case 24: // String.len(): Int
-				return Ival(((String)args[0]).length());
-			case 25: // String.ch(at: Int): Char
-				return Ival(((String)args[0]).charAt(ival(args[1])));
-			case 26: // String.indexof(ch: Char): Int
-				return Ival(((String)args[0]).indexOf(ival(args[1])));
-			case 27: // String.lindexof(ch: Char): Int
-				return Ival(((String)args[0]).lastIndexOf(ival(args[1])));
-			case 28: // String.find(sub: String): Int
-				return Ival(((String)args[0]).indexOf((String)args[1]));
-			case 29: // String.substr(from: Int, to: Int): String
-				return ((String)args[0]).substring(ival(args[1]), ival(args[2]));
-			case 30: // String.ucase(): String
-				return ((String)args[0]).toUpperCase();
-			case 31: // String.lcase(): String
-				return ((String)args[0]).toLowerCase();
-			case 32: // String.concat(str: String): String
-				return ((String)args[0]).concat(Strings.toString(args[1]));
-			case 33: // String.cmp(str: String): Int
-				return Ival(((String)args[0]).compareTo((String)args[1]));
-			case 34: // String.chars(): [Char]
-				return ((String)args[0]).toCharArray();
-			case 35: // String.trim(): String
-				return ((String)args[0]).trim();
 			case 36: // getenv(key: String): String
 				return p.getEnv(((String)args[0]));
 			case 37: // setenv(key: String, value: String)
@@ -501,13 +251,6 @@ public class LibCore3 extends NativeLibrary {
 				cc.start(prog, sargs);
 				return null;
 			}
-			case 72: // bacopy(src: [Byte], sofs: Int, dest: [Byte], dofs: Int, len: Int)
-				// DEPRECATED: remove in 2.2
-			case 73: // cacopy(src: [Char], sofs: Int, dest: [Char], dofs: Int, len: Int)
-				// DEPRECATED: remove in 2.2
-			case 74: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
-				Arrays.arrayCopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
-				return null;
 			case 75: // fprint(out: OStream, a: Any): OStream
 				IO.print((OutputStream)args[0], Strings.toString(args[1]));
 				return args[0];
@@ -607,8 +350,6 @@ public class LibCore3 extends NativeLibrary {
 				p.addConnection(connin);
 				return connin;
 			}
-			case 111: // Function.curry(arg: Any): Function
-				return new PartiallyAppliedFunction((Function)args[0], args[1]);
 			case 112: // loadlibrary(name: String): Library
 				try {
 					return p.loadLibrary((String)args[0]);
@@ -617,45 +358,11 @@ public class LibCore3 extends NativeLibrary {
 				}
 			case 113: // Library.getfunc(sig: String): Function
 				return ((Library)args[0]).getFunction((String)args[1]);
-			case 114: {// Structure.clone(): Structure
-				Object[] struct = (Object[])args[0];
-				Object[] clone = new Object[struct.length];
-				System.arraycopy(struct, 0, clone, 0, struct.length);
-				return clone;
-			}
-			case 115: // String.split(ch: Char): [String]
-				return Strings.split((String)args[0], (char) ival(args[1]));
-			case 116: // String.toint(): Int
-				try {
-					return Ival(Integer.parseInt((String)args[0]));
-				} catch (NumberFormatException nfe) {
-					return null;
-				}
-			case 117: // String.tolong(): Long
-				try {
-					return Lval(Long.parseLong((String)args[0]));
-				} catch (NumberFormatException nfe) {
-					return null;
-				}
-			case 118: // String.tofloat(): Float
-				try {
-					return Fval(Float.parseFloat((String)args[0]));
-				} catch (NumberFormatException nfe) {
-					return null;
-				}
-			case 119: // String.todouble(): Double
-				try {
-					return Dval(Double.parseDouble((String)args[0]));
-				} catch (NumberFormatException nfe) {
-					return null;
-				}
 			case 120: // getstatic(key: String): Any
 				return p.get(args[0]);
 			case 121: // setstatic(key: String, val: Any)
 				p.set(args[0], args[1]);
 				return null;
-			case 122: // String.format(args: [Any]): String
-				return Strings.format((String)args[0], (Object[])args[1]);
 			case 123: { // Dict.keys(): [Any]
 				ArrayList keyv = new ArrayList();
 				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
@@ -693,36 +400,6 @@ public class LibCore3 extends NativeLibrary {
 				return null;
 			case 130: // StrBuf.ch(at: Int): Char
 				return Ival(((StringBuffer)args[0]).charAt(ival(args[1])));
-			case 131: // Int.tobase(base: Int): String
-				return Integer.toString(ival(args[0]), ival(args[1]));
-			case 132: // Long.tobase(base: Int): String
-				return Long.toString(lval(args[0]), ival(args[1]));
-			case 133: // Int.tobin():String
-				return Integer.toBinaryString(ival(args[0]));
-			case 134: // Int.tooct():String
-				return Integer.toOctalString(ival(args[0]));
-			case 135: // Int.tohex():String
-				return Integer.toHexString(ival(args[0]));
-			case 136: // String.tointbase(base: Int): Int
-				try {
-					return Ival(Integer.parseInt((String)args[0], ival(args[1])));
-				} catch (NumberFormatException nfe) {
-					return null;
-				}
-			case 137: // String.tolongbase(base: Int): Long
-				try {
-					return Lval(Long.parseLong((String)args[0], ival(args[1])));
-				} catch (NumberFormatException nfe) {
-					return null;
-				}
-			case 138: // Error.code(): Int
-				return Ival(((AlchemyException)args[0]).errcode);
-			case 139: // Error.msg(): String
-				return ((AlchemyException)args[0]).getMessage();
-			case 140: // error(code: Int, msg: String)
-				throw new AlchemyException(ival(args[0]), (String)args[1]);
-			case 141: // String.hash(): Int
-				return Ival(args[0].hashCode());
 			case 142: // matches_glob(path: String, glob: String): Bool
 				return Ival(IO.matchesPattern((String)args[0], (String)args[1]));
 			case 143: // new_process(): Process
@@ -816,8 +493,6 @@ public class LibCore3 extends NativeLibrary {
 				return null;
 			case 175: // sys_property(key: String): String
 				return System.getProperty((String)args[0]);
-			case 176: // String.replace(oldch: Char, newch: Char): String
-				return ((String)args[0]).replace((char)ival(args[1]), (char)ival(args[2]));
 			case 177: { // buildlibrary(in: IStream)
 				InputStream in = (InputStream) args[0];
 				if (in.read() != 0xC0 || in.read() != 0xDE)
