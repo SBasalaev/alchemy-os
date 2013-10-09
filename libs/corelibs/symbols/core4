@@ -1,4 +1,6 @@
 acopy
+Function.curry
+Structure.clone
 Any.tostr
 Char.tostr
 Int.tobin

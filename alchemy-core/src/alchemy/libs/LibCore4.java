@@ -18,9 +18,11 @@
 
 package alchemy.libs;
 
+import alchemy.system.Function;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
 import alchemy.util.Arrays;
+import alchemy.util.PartiallyAppliedFunction;
 import alchemy.util.Strings;
 import java.io.IOException;
 
@@ -43,38 +45,46 @@ public final class LibCore4 extends NativeLibrary {
 			case 0: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
 				Arrays.arrayCopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
+			case 1: // Function.curry(a: Any): Function
+				return new PartiallyAppliedFunction((Function)args[0], args[1]);
+			case 2: { // Structure.clone(): Structure
+				Object[] struct = (Object[])args[0];
+				Object[] clone = new Object[struct.length];
+				System.arraycopy(struct, 0, clone, 0, struct.length);
+				return clone;
+			}
 			/* == Header: string.eh == */
-			case 1: // Any.tostr(): String
+			case 3: // Any.tostr(): String
 				return Strings.toString(args[0]);
-			case 2: // Char.tostr(): String
+			case 4: // Char.tostr(): String
 				return String.valueOf((char)ival(args[0]));
-			case 3: // Int.tobin():String
+			case 5: // Int.tobin():String
 				return Integer.toBinaryString(ival(args[0]));
-			case 4: // Int.tooct():String
+			case 6: // Int.tooct():String
 				return Integer.toOctalString(ival(args[0]));
-			case 5: // Int.tohex():String
+			case 7: // Int.tohex():String
 				return Integer.toHexString(ival(args[0]));
-			case 6: // Int.tobase(base: Int): String
+			case 8: // Int.tobase(base: Int): String
 				return Integer.toString(ival(args[0]), ival(args[1]));
-			case 7: // Long.tobase(base: Int): String
+			case 9: // Long.tobase(base: Int): String
 				return Long.toString(lval(args[0]), ival(args[1]));
-			case 8: // String.tointbase(base: Int): Int
+			case 10: // String.tointbase(base: Int): Int
 				return Ival(Integer.parseInt((String)args[0], ival(args[1])));
-			case 9: // String.tolongbase(base: Int): Long
+			case 11: // String.tolongbase(base: Int): Long
 				return Lval(Long.parseLong((String)args[0], ival(args[1])));
-			case 10: // String.tofloat(): Float
+			case 12: // String.tofloat(): Float
 				return Fval(Float.parseFloat((String)args[0]));
-			case 11: // String.todouble(): Double
+			case 13: // String.todouble(): Double
 				return Dval(Double.parseDouble((String)args[0]));
-			case 12: { // String.get(at: Int): Char
+			case 14: { // String.get(at: Int): Char
 				String str = (String)args[0];
 				int at = ival(args[1]);
 				if (at < 0) at += str.length();
 				return Ival(str.charAt(at));
 			}
-			case 13: // String.len(): Int
+			case 15: // String.len(): Int
 				return Ival(((String)args[0]).length());
-			case 14: { // String.range(from: Int, to: Int): String
+			case 16: { // String.range(from: Int, to: Int): String
 				String str = (String) args[0];
 				int from = ival(args[1]);
 				int to = ival(args[2]);
@@ -82,51 +92,51 @@ public final class LibCore4 extends NativeLibrary {
 				if (to < 0) to += str.length();
 				return str.substring(from, to);
 			}
-			case 15: { // String.indexof(ch: Char, from: Int = 0): Int
+			case 17: { // String.indexof(ch: Char, from: Int = 0): Int
 				String str = (String)args[0];
 				int from = ival(args[2]);
 				if (from < 0) from += str.length();
 				return Ival(str.indexOf(ival(args[1]), from));
 			}
-			case 16: // String.lindexof(ch: Char): Int
+			case 18: // String.lindexof(ch: Char): Int
 				return Ival(((String)args[0]).lastIndexOf(ival(args[1])));
-			case 17: { // String.find(sub: String, from: Int = 0): Int
+			case 19: { // String.find(sub: String, from: Int = 0): Int
 				String str = (String)args[0];
 				int from = ival(args[2]);
 				if (from < 0) from += str.length();
 				return Ival(str.indexOf((String)args[1], from));
 			}
-			case 18: // String.ucase(): String
+			case 20: // String.ucase(): String
 				return ((String)args[0]).toUpperCase();
-			case 19: // String.lcase(): String
+			case 21: // String.lcase(): String
 				return ((String)args[0]).toLowerCase();
-			case 20: // String.concat(str: String): String
+			case 22: // String.concat(str: String): String
 				return ((String)args[0]).concat((String)args[1]);
-			case 21: // String.cmp(str: String): Int
+			case 23: // String.cmp(str: String): Int
 				return Ival(((String)args[0]).compareTo((String)args[1]));
-			case 22: // String.trim(): String
+			case 24: // String.trim(): String
 				return ((String)args[0]).trim();
-			case 23: // String.split(ch: Char, skipEmpty: Bool = false): [String]
+			case 25: // String.split(ch: Char, skipEmpty: Bool = false): [String]
 				return Strings.split((String)args[0], (char)ival(args[1]), bval(args[2]));
-			case 24: // String.format(args: [Any]): String
+			case 26: // String.format(args: [Any]): String
 				return Strings.format((String)args[0], (Object[])args[1]);
-			case 25: // String.chars(): [Char]
+			case 27: // String.chars(): [Char]
 				return ((String)args[0]).toCharArray();
-			case 26: // String.utfbytes(): [Byte]
+			case 28: // String.utfbytes(): [Byte]
 				return Strings.utfEncode((String)args[0]);
-			case 27: { // String.startswith(prefix: String, from: Int = 0): Bool
+			case 29: { // String.startswith(prefix: String, from: Int = 0): Bool
 				String str = (String)args[0];
 				int from = ival(args[2]);
 				if (from < 0) from += str.length();
 				return Ival(str.startsWith((String)args[1], from));
 			}
-			case 28: // String.replace(oldch: Char, newch: Char): String
+			case 30: // String.replace(oldch: Char, newch: Char): String
 				return ((String)args[0]).replace((char)ival(args[1]), (char)ival(args[2]));
-			case 29: // String.hash(): Int
+			case 31: // String.hash(): Int
 				return Ival(((String)args[0]).hashCode());
-			case 30: // ca2str(ca: [Char]): String
+			case 32: // ca2str(ca: [Char]): String
 				return new String((char[])args[0]);
-			case 31: // ba2utf(ba: [Byte]): String
+			case 33: // ba2utf(ba: [Byte]): String
 				return Strings.utfDecode((byte[])args[0]);
 			default:
 				return null;

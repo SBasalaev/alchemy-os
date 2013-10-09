@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.libs.core;
+package alchemy.util;
 
 import alchemy.system.AlchemyException;
 import alchemy.system.Function;
