@@ -70,7 +70,7 @@ public final class AlchemyException extends Exception {
 	/**
 	 * Creates new AlchemyException from given exception.
 	 * Appropriate error code is determined from the class
-	 * of cause. Detail message 
+	 * of cause. Detail message is read from cause.
 	 */
 	public AlchemyException(Throwable cause) {
 		super(cause.getMessage());

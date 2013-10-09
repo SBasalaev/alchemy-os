@@ -123,6 +123,11 @@ public final class Process {
 	public OutputStream stdout;
 	/** Standard error stream. */
 	public OutputStream stderr;
+	/**
+	 * Killed status of this process.
+	 * Read-only, please.
+	 */
+	public volatile boolean killed;
 
 	/** Parent of this process. */
 	private final Process parent;
@@ -469,6 +474,7 @@ public final class Process {
 
 	/** Stops all threads and finalizes process. */
 	public void kill() {
+		killed = true;
 		synchronized (threads) {
 			for (int idx = threads.size()-1; idx >= 0; idx--) {
 				((ProcessThread)threads.get(idx)).interrupt();

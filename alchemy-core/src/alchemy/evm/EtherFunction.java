@@ -21,6 +21,7 @@ package alchemy.evm;
 import alchemy.system.AlchemyException;
 import alchemy.system.Function;
 import alchemy.system.Process;
+import alchemy.system.ProcessKilledException;
 import alchemy.types.Float32;
 import alchemy.types.Float64;
 import alchemy.types.Int32;
@@ -49,14 +50,14 @@ final class EtherFunction extends Function {
 		this.errtable = errtable;
 	}
 
-	public Object invoke(Process p, Object[] args) throws AlchemyException {
+	public Object invoke(Process p, Object[] args) throws AlchemyException, ProcessKilledException {
 		//initializing
 		final Object[] stack = new Object[localsize+stacksize];
 		System.arraycopy(args, 0, stack, 0, args.length);
 		int head = localsize-1;
 		final byte[] code = this.bcode;
 		int ct = 0;
-		while (true) {
+		while (!p.killed) {
 		try {
 			int instr = code[ct];
 			ct++;
@@ -912,6 +913,8 @@ final class EtherFunction extends Function {
 					throw new AlchemyException(((Int32)stack[head-1]).value, (String)stack[head]);
 				}
 			} /* the big switch */
+		} catch (ProcessKilledException pke) {
+			throw pke;
 		} catch (Throwable e) {
 			// the instruction on which error occured
 			ct--;
@@ -943,5 +946,6 @@ final class EtherFunction extends Function {
 			}
 		}
 		} /* the great while */
+		throw new ProcessKilledException();
 	}
 }

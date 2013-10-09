@@ -97,8 +97,9 @@ public abstract class Function {
 	 * @param args  function arguments
 	 * @return function result
 	 * @throws AlchemyException if an exception occurs
+	 * @throws ProcessKilledException if the process was killed
 	 */
-	public abstract Object invoke(Process p, Object[] args) throws AlchemyException;
+	public abstract Object invoke(Process p, Object[] args) throws AlchemyException, ProcessKilledException;
 
 	/**
 	 * Returns string representation of this object.

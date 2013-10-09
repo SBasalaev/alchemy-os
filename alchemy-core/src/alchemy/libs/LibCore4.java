@@ -54,6 +54,7 @@ public final class LibCore4 extends NativeLibrary {
 				System.arraycopy(struct, 0, clone, 0, struct.length);
 				return clone;
 			}
+
 			/* == Header: string.eh == */
 			case 3: // Any.tostr(): String
 				return Strings.toString(args[0]);
@@ -139,6 +140,7 @@ public final class LibCore4 extends NativeLibrary {
 				return new String((char[])args[0]);
 			case 33: // ba2utf(ba: [Byte]): String
 				return Strings.utfDecode((byte[])args[0]);
+
 			/* == Header: error.eh == */
 			case 34: // Error.code(): Int
 				return Ival(((AlchemyException)args[0]).errcode);

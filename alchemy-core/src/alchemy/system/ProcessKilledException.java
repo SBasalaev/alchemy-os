@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2013, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,32 +19,14 @@
 package alchemy.system;
 
 /**
- * Function loaded by native library.
+ * Thrown when process is killed.
+ * Cannot be catched in process.
  *
  * @author Sergey Basalaev
  */
-final class NativeFunction extends Function {
-	
-	private final NativeLibrary lib;
-	
-	/** Index of this function in invokeNative. */
-	private final int index;
-	
-	public NativeFunction(NativeLibrary lib, String name, int index) {
-		super(name);
-		this.index = index;
-		this.lib = lib;
-	}
-	
-	public final Object invoke(Process p, Object[] args) throws AlchemyException, ProcessKilledException {
-		try {
-			return lib.invokeNative(this.index, p, args);
-		} catch (ProcessKilledException pke) {
-			throw pke;
-		} catch (Exception e) {
-			AlchemyException ae = new AlchemyException(e);
-			ae.addTraceElement(this, "native");
-			throw ae;
-		}
+public class ProcessKilledException extends Exception {
+
+	public ProcessKilledException() {
+		super("killed");
 	}
 }
