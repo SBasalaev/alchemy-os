@@ -30,7 +30,7 @@ import alchemy.types.Int64;
  * Ether Virtual Machine.
  * @author Sergey Basalaev
  */
-class EtherFunction extends Function {
+final class EtherFunction extends Function {
 
 	private final int stacksize;
 	private final int localsize;
@@ -38,11 +38,9 @@ class EtherFunction extends Function {
 	private final char[] dbgtable;
 	private final char[] errtable;
 	private final Object[] cpool;
-	private final String libname;
 
-	public EtherFunction(String libname, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
+	EtherFunction(String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
 		super(funcname);
-		this.libname = libname;
 		this.stacksize = stacksize;
 		this.localsize = localsize;
 		this.bcode = code;
@@ -908,6 +906,10 @@ class EtherFunction extends Function {
 					int inc = code[ct];
 					ct++;
 					stack[idx] = Int32.toInt32(((Int32)stack[idx]).value + inc);
+					break;
+				}
+				case Opcodes.THROW: { //throw
+					throw new AlchemyException(((Int32)stack[head-1]).value, (String)stack[head]);
 				}
 			} /* the big switch */
 		} catch (Throwable e) {

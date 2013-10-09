@@ -33,7 +33,7 @@ import java.io.InputStream;
  * Loads Ether libraries.
  * @author Sergey Basalaev
  */
-public class EtherLoader {
+public final class EtherLoader {
 
 	private EtherLoader() { }
 
@@ -51,7 +51,7 @@ public class EtherLoader {
 	 * version must be equal to or less than this value.
 	 * </ul>
 	 */
-	static public final int VERSION = 0x0201;
+	static public final int VERSION = 0x0202;
 
 	/*
 	 * New in format 1.1
@@ -72,11 +72,14 @@ public class EtherLoader {
 	 *    lalen newfa faload fastore falen newda daload dastore dalen
 	 *  Jump instructions: jsr ret if_acmpeq if_acmpne
 	 *  Variable instructions: iinc
+	 *
+	 * New in format 2.2
+	 *  Instructions: throw
 	 */
 	
 	public static Library load(Process p, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
-		Library lib = new Library();
+		Library lib;
 		//reading format version
 		int ver = data.readUnsignedShort();
 		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
@@ -84,9 +87,10 @@ public class EtherLoader {
 		//reading object type
 		int lflags = data.readUnsignedByte();
 		//reading soname
-		String libname = null;
 		if ((lflags & Opcodes.LFLAG_SONAME) != 0) {
-			libname = data.readUTF();
+			lib = new Library(data.readUTF());
+		} else {
+			lib = new Library();
 		}
 		//loading dependency libs
 		Library[] libdeps = null;
@@ -152,7 +156,7 @@ public class EtherLoader {
 						}
 					}
 					//constructing function
-					Function func = new EtherFunction(libname, fname, cpool, stacksize, localsize, code, lnumtable, errtable);
+					Function func = new EtherFunction(fname, cpool, stacksize, localsize, code, lnumtable, errtable);
 					cpool[cindex] = func;
 					if ((fflags & Opcodes.FFLAG_SHARED) != 0) lib.putFunction(func);
 				} break;

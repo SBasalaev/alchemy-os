@@ -18,6 +18,7 @@
 
 package alchemy.system;
 
+import alchemy.evm.EtherLoader;
 import alchemy.fs.Filesystem;
 import alchemy.io.NullInputStream;
 import alchemy.io.NullOutputStream;
@@ -270,7 +271,6 @@ public final class Process {
 			switch (magic) {
 				case MAGIC_NATIVE: {
 					String classname = new UTFReader(libin).readLine();
-					libin.close();
 					try {
 						lib = (Library)Class.forName(classname).newInstance();
 						break;
@@ -302,7 +302,8 @@ public final class Process {
 					break;
 				}
 				case MAGIC_ETHER:
-					throw new RuntimeException("Not implemented");
+					lib = EtherLoader.load(this, libin);
+					break;
 				default:
 					throw new InstantiationException("Unknown library format: " + libfile);
 			}
