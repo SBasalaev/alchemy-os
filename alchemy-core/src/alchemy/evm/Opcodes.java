@@ -19,18 +19,24 @@
 package alchemy.evm;
 
 /**
- * Assembler opcodes.
+ * Assembler opcodes for Ether Virtual Machine v2.2
  * @author Sergey Basalaev
  */
 public interface Opcodes {
-	int LFLAG_SONAME = 1;  /* Library has soname. */
-	int LFLAG_DEPS = 2;    /* Library has dependencies. */
-	
-	int FFLAG_SHARED = 1;  /* Function is shared. */
-	int FFLAG_RELOCS = 2;  /* Function has relocation table. */
-	int FFLAG_LNUM   = 4;  /* Function has line number table. */
-	int FFLAG_ERRTBL = 8;  /* Function has error table. */
-	
+	/* Library has soname. */
+	int LFLAG_SONAME = 1;
+	/* Library has dependencies. */
+	int LFLAG_DEPS = 2;
+
+	/* Function is shared. */
+	int FFLAG_SHARED = 1;
+	/* Function has relocation table. */
+	int FFLAG_RELOCS = 2;
+	/* Function has line number table. */
+	int FFLAG_LNUM   = 4;
+	/* Function has error table. */
+	int FFLAG_ERRTBL = 8;
+
 	byte NOP         = (byte)0x00;
 	byte ACONST_NULL = (byte)0x01;
 	byte ICONST_M1   = (byte)0x02;
@@ -159,7 +165,7 @@ public interface Opcodes {
 	byte CALV_5      = (byte)0x7D;
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
-	
+
 	byte IINC        = (byte)0xD3;
 	byte JSR         = (byte)0xD4;
 	byte RET         = (byte)0xD5;
