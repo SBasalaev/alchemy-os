@@ -21,13 +21,14 @@ package alchemy.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
+import javax.microedition.io.Connection;
 
 /**
  * Input stream that generates pseudorandom data.
  *
  * @author Sergey Basalaev
  */
-public final class RandomInputStream extends InputStream {
+public final class RandomInputStream extends InputStream implements Connection {
 	private final Random rnd = new Random();
 
 	public RandomInputStream() { }

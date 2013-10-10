@@ -18,6 +18,9 @@
 
 package alchemy.libs;
 
+import alchemy.io.ConnectionInputStream;
+import alchemy.io.ConnectionOutputStream;
+import alchemy.io.IO;
 import alchemy.system.AlchemyException;
 import alchemy.system.Function;
 import alchemy.system.NativeLibrary;
@@ -26,7 +29,11 @@ import alchemy.util.Arrays;
 import alchemy.util.PartiallyAppliedFunction;
 import alchemy.util.Strings;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Random;
+import javax.microedition.io.Connection;
+import javax.microedition.io.StreamConnection;
 
 /**
  * Core runtime library for Alchemy OS
@@ -201,6 +208,66 @@ public final class LibCore4 extends NativeLibrary {
 				return Dval(((Random)args[0]).nextDouble());
 			case 60: // Random.setSeed(seed: Long)
 				((Random)args[0]).setSeed(lval(args[1]));
+				return null;
+
+			/* == Header: io.eh == */
+			case 61: { // Connection.close()
+				Connection conn = (Connection) args[0];
+				conn.close();
+				p.removeConnection(conn);
+				return null;
+			}
+			case 62: { // StreamConnection.openInput(): IStream
+				ConnectionInputStream in = new ConnectionInputStream(((StreamConnection)args[0]).openInputStream());
+				p.addConnection(in);
+				return in;
+			}
+			case 63: { // StreamConnection.openOutput(): OStream
+				ConnectionOutputStream out = new ConnectionOutputStream(((StreamConnection)args[0]).openOutputStream());
+				p.addConnection(out);
+				return out;
+			}
+			case 64: // IStream.read(): Int
+				return Ival(((InputStream)args[0]).read());
+			case 65: { // IStream.readArray(buf: [Byte], ofs: Int = 0, len: Int = -1): Int
+				byte[] buf = (byte[])args[1];
+				int len = ival(args[3]);
+				if (len < 0) len = buf.length;
+				return Ival(((InputStream)args[0]).read(buf, ival(args[2]), len));
+			}
+			case 66: // IStream.readFully(): [Byte]
+				return IO.readFully((InputStream)args[0]);
+			case 67: // IStream.skip(num: Long): Long
+				return Lval(((InputStream)args[0]).skip(lval(args[1])));
+			case 68: // IStream.available(): Int
+				return Ival(((InputStream)args[0]).available());
+			case 69: // IStream.reset()
+				((InputStream)args[0]).reset();
+				return null;
+			case 70: // OStream.write(b: Int)
+				((OutputStream)args[0]).write(ival(args[1]));
+				return null;
+			case 71: { // OStream.writeArray(buf: [Byte], ofs: Int, len: Int)
+				byte[] buf = (byte[])args[1];
+				int len = ival(args[3]);
+				if (len < 0) len = buf.length;
+				((OutputStream)args[0]).write(buf, ival(args[2]), len);
+				return null;
+			}
+			case 72: // OStream.print(a: Any)
+				IO.print((OutputStream)args[0], args[1]);
+				return null;
+			case 73: // OStream.println(a: Any)
+				IO.println((OutputStream)args[0], args[1]);
+				return null;
+			case 74: // OStream.flush()
+				((OutputStream)args[0]).flush();
+				return null;
+			case 75: // OStream.printf(fmt: String, args: [Any])
+				IO.print((OutputStream)args[0], Strings.format((String)args[1], (Object[])args[2]));
+				return null;
+			case 76: // OStream.writeAll(input: IStream)
+				IO.writeAll((InputStream)args[1], (OutputStream)args[0]);
 				return null;
 			default:
 				return null;

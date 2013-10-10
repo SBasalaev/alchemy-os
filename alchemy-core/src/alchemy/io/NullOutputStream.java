@@ -19,12 +19,13 @@
 package alchemy.io;
 
 import java.io.OutputStream;
+import javax.microedition.io.Connection;
 
 /**
  * An output stream that just ignores the data.
  * @author Sergey Basalaev
  */
-public final class NullOutputStream extends OutputStream {
+public final class NullOutputStream extends OutputStream implements Connection {
 	public NullOutputStream() { }
 	public void write(int b) { }
 }

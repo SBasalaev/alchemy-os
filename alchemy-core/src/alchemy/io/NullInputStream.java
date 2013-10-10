@@ -19,6 +19,7 @@
 package alchemy.io;
 
 import java.io.InputStream;
+import javax.microedition.io.Connection;
 
 /**
  * The input stream that always returns the same number.
@@ -26,7 +27,7 @@ import java.io.InputStream;
  *
  * @author Sergey Basalaev
  */
-public final class NullInputStream extends InputStream {
+public final class NullInputStream extends InputStream implements Connection {
 	
 	private final int b;
 	

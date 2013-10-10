@@ -37,10 +37,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Random;
-import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
-import javax.microedition.io.StreamConnection;
 
 /**
  * Alchemy core runtime library.
@@ -206,28 +203,8 @@ public class LibCore3 extends NativeLibrary {
 				return Lval(Filesystem.spaceFree(p.toFile((String)args[0])));
 			case 60: // space_used(root: String): Long
 				return Lval(Filesystem.spaceUsed(p.toFile((String)args[0])));
-			case 61: // Any.tostr(): String
-				return Strings.toString(args[0]);
 			case 62: // new_strbuf(): StrBuf
 				return new StringBuffer();
-			case 63: // IStream.close()
-				((InputStream)args[0]).close();
-				return null;
-			case 64: // IStream.read(): Int
-				return Ival(((InputStream)args[0]).read());
-			case 65: // IStream.readarray(buf: [Byte], ofs: Int, len: Int): Int
-				return Ival(((InputStream)args[0]).read((byte[])args[1], ival(args[2]), ival(args[3])));
-			case 66: // IStream.skip(n: Long): Long
-				return Lval(((InputStream)args[0]).skip(lval(args[1])));
-			case 67: // OStream.write(b: Int)
-				((OutputStream)args[0]).write(ival(args[1]));
-				return null;
-			case 68: // OStream.writearray(buf: [Byte], ofs: Int, len: Int)
-				((OutputStream)args[0]).write((byte[])args[1], ival(args[2]), ival(args[3]));
-				return null;
-			case 69: // OStream.flush(out: OStream)
-				((OutputStream)args[0]).flush();
-				return null;
 			case 70: { // Process.start_wait(cmd: String, args: [String]): Int
 				Process cc = (Process)args[0];
 				String prog = (String)args[1];
@@ -280,9 +257,6 @@ public class LibCore3 extends NativeLibrary {
 			case 103: // Dict.remove(key: Any)
 				((Hashtable)args[0]).remove(args[1]);
 				return null;
-			case 104: // OStream.close()
-				((OutputStream)args[0]).close();
-				return null;
 			case 110: { // readurl(url: String): IStream
 				String url = (String)args[0];
 				int cl = url.indexOf(':');
@@ -312,11 +286,6 @@ public class LibCore3 extends NativeLibrary {
 				}
 			case 113: // Library.getfunc(sig: String): Function
 				return ((Library)args[0]).getFunction((String)args[1]);
-			case 120: // getstatic(key: String): Any
-				return p.get(args[0]);
-			case 121: // setstatic(key: String, val: Any)
-				p.set(args[0], args[1]);
-				return null;
 			case 123: { // Dict.keys(): [Any]
 				ArrayList keyv = new ArrayList();
 				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
@@ -331,22 +300,6 @@ public class LibCore3 extends NativeLibrary {
 			case 124: // sleep(millis: Int)
 				Thread.sleep(ival(args[0]));
 				return null;
-			case 125: { // Connection.close()
-				Connection conn = ((Connection)args[0]);
-				conn.close();
-				p.removeConnection(conn);
-				return null;
-			}
-			case 126: { // StreamConnection.open_input(): IStream
-				ConnectionInputStream in = new ConnectionInputStream(((StreamConnection)args[0]).openInputStream());
-				p.addConnection(in);
-				return in;
-			}
-			case 127: { // StreamConnection.open_output(): OStream
-				ConnectionOutputStream out = new ConnectionOutputStream(((StreamConnection)args[0]).openOutputStream());
-				p.addConnection(out);
-				return out;
-			}
 			case 128: // Dict.size(): Int
 				return Ival(((Hashtable)args[0]).size());
 			case 129: // Dict.clear()
@@ -410,12 +363,8 @@ public class LibCore3 extends NativeLibrary {
 				return null;
 			case 165: // new_pipe(): StreamConnection
 				return new Pipe();
-			case 166: // IStream.available(): Int
-				return Ival(((InputStream)args[0]).available());
 			case 167: // this_process(): Process;
 				return p;
-			case 168: // chstr(ch: Char): String
-				return String.valueOf((char)ival(args[0]));
 			case 169: // IStream.reset()
 				((InputStream)args[0]).reset();
 				return null;
@@ -430,16 +379,6 @@ public class LibCore3 extends NativeLibrary {
 				cal.set(Calendar.MILLISECOND, ival(args[6]));
 				return Lval(cal.getTime().getTime());
 			}
-			case 171: { // getstaticdef(key: String, dflt: Any): Any
-				Object obj = p.get(args[0]);
-				if (obj == null) {
-					p.set(args[0], args[1]);
-					obj = args[1];
-				}
-				return obj;
-			}
-			case 172: // String.startswith(str: String, offset: Int): Bool
-				return Ival(((String)args[0]).startsWith((String)args[1], ival(args[2])));
 			case 173: // IStream.readfully(): [Byte]
 				return IO.readFully((InputStream)args[0]);
 			case 174: // OStream.writeall(input: IStream)
