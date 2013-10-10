@@ -51,8 +51,6 @@ import javax.microedition.io.StreamConnection;
  */
 public class LibCore3 extends NativeLibrary {
 
-	private static Random rnd = new Random();
-	
 	/**
 	 * Constructor without parameters to load
 	 * library through the native interface.
@@ -285,16 +283,6 @@ public class LibCore3 extends NativeLibrary {
 			case 104: // OStream.close()
 				((OutputStream)args[0]).close();
 				return null;
-			case 105: // rnd(n: Int): Int
-				return Ival(rnd.nextInt(ival(args[0])));
-			case 106: // rndint(): Int
-				return Ival(rnd.nextInt());
-			case 107: // rndlong(): Long
-				return Lval(rnd.nextLong());
-			case 108: // rndfloat(): Float
-				return Fval(rnd.nextFloat());
-			case 109: // rnddouble(): Double
-				return Dval(rnd.nextDouble());
 			case 110: { // readurl(url: String): IStream
 				String url = (String)args[0];
 				int cl = url.indexOf(':');

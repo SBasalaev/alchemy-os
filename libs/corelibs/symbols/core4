@@ -52,3 +52,10 @@ ibits2f
 f2ibits
 lbits2d
 d2lbits
+Random.new
+Random.next
+Random.nextInt
+Random.nextLong
+Random.nextFloat
+Random.nextDouble
+Random.setSeed

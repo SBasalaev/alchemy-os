@@ -26,6 +26,7 @@ import alchemy.util.Arrays;
 import alchemy.util.PartiallyAppliedFunction;
 import alchemy.util.Strings;
 import java.io.IOException;
+import java.util.Random;
 
 /**
  * Core runtime library for Alchemy OS
@@ -185,6 +186,22 @@ public final class LibCore4 extends NativeLibrary {
 			case 53: // d2lbits(d: Double): Long
 				return Lval(Double.doubleToLongBits(dval(args[0])));
 
+			/* == Header: rnd.eh == */
+			case 54: // Random.new(seed: Long)
+				return new Random(lval(args[0]));
+			case 55: // Random.next(n: Int): Int
+				return Ival(((Random)args[0]).nextInt(ival(args[1])));
+			case 56: // Random.nextInt(): Int
+				return Ival(((Random)args[0]).nextInt());
+			case 57: // Random.nextLong(): Long
+				return Lval(((Random)args[0]).nextLong());
+			case 58: // Random.nextFloat(): Float
+				return Fval(((Random)args[0]).nextFloat());
+			case 59: // Random.nextDouble(): Double
+				return Dval(((Random)args[0]).nextDouble());
+			case 60: // Random.setSeed(seed: Long)
+				((Random)args[0]).setSeed(lval(args[1]));
+				return null;
 			default:
 				return null;
 		}
