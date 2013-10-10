@@ -34,7 +34,7 @@ public class PartiallyAppliedFunction extends Function {
 	private final Function f;
 	
 	public PartiallyAppliedFunction(Function f, Object argument) {
-		super(f.name+"#curry");
+		super(f.name+".curry");
 		this.argument = argument;
 		this.f = f;
 	}
