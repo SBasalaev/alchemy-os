@@ -135,8 +135,16 @@ public final class Process {
 	private final String command;
 	/** Command-line arguments passed to this process. */
 	private final String[] cmdArgs;
-	/** Environment variables. */
+	/**
+	 * Environment variables.
+	 * <pre>String -&gt; String</pre>.
+	 */
 	private HashMap env;
+	/**
+	 * Global variables.
+	 * <pre>Library -&gt; String -&gt; Object</pre>
+	 */
+	private HashMap globals;
 	/** Listeners of this process. */
 	private final ArrayList listeners = new ArrayList();
 	/** Connections owned by this process. */
@@ -408,6 +416,30 @@ public final class Process {
 			if (env == null) env = new HashMap();
 			env.set(key, value);
 		}
+	}
+
+	/**
+	 * Returns value of the global variable.
+	 * If variable is not set, return default value.
+	 */
+	public Object getGlobal(Library lib, String name, Object dflt) {
+		if (globals == null) return dflt;
+		Object ret = ((HashMap)globals.get(lib)).get(name);
+		if (ret == null) return dflt;
+		return ret;
+	}
+
+	/**
+	 * Sets value to the global variable.
+	 */
+	public void setGlobal(Library lib, String name, Object value) {
+		if (globals == null) globals = new HashMap();
+		HashMap vars = (HashMap)globals.get(lib);
+		if (vars == null) {
+			vars = new HashMap();
+			globals.set(lib, vars);
+		}
+		vars.set(name, value);
 	}
 
 	/** Returns current priority of the process. */

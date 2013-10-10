@@ -20,6 +20,7 @@ package alchemy.evm;
 
 import alchemy.system.AlchemyException;
 import alchemy.system.Function;
+import alchemy.system.Library;
 import alchemy.system.Process;
 import alchemy.system.ProcessKilledException;
 import alchemy.types.Float32;
@@ -33,6 +34,7 @@ import alchemy.types.Int64;
  */
 final class EtherFunction extends Function {
 
+	private final Library owner;
 	private final int stacksize;
 	private final int localsize;
 	private final byte[] bcode;
@@ -40,8 +42,9 @@ final class EtherFunction extends Function {
 	private final char[] errtable;
 	private final Object[] cpool;
 
-	EtherFunction(String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
+	EtherFunction(Library owner, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
 		super(funcname);
+		this.owner = owner;
 		this.stacksize = stacksize;
 		this.localsize = localsize;
 		this.bcode = code;
@@ -444,6 +447,22 @@ final class EtherFunction extends Function {
 				case Opcodes.STORE: { //store <ubyte>
 					stack[code[ct] & 0xff] = stack[head];
 					ct++;
+					head--;
+					break;
+				}
+			
+			//GLOBALS LOADERS AND SAVERS
+				case Opcodes.GETGLOBAL: {
+					stack[head] = p.getGlobal(owner, (String)stack[head], null);
+					break;
+				}
+				case Opcodes.GETGLOBALDEF: {
+					head--;
+					stack[head] = p.getGlobal(owner, (String)stack[head], stack[head+1]);
+					break;
+				}
+				case Opcodes.SETGLOBAL: {
+					p.setGlobal(owner, (String)stack[head-1], stack[head]);
 					head--;
 					break;
 				}

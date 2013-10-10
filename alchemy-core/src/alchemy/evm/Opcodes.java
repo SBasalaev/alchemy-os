@@ -166,6 +166,9 @@ public interface Opcodes {
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
 
+	byte SETGLOBAL   = (byte)0xCF;
+	byte GETGLOBAL   = (byte)0xD0;
+	byte GETGLOBALDEF= (byte)0xD1;
 	byte THROW       = (byte)0xD2;
 	byte IINC        = (byte)0xD3;
 	byte JSR         = (byte)0xD4;

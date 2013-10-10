@@ -38,7 +38,7 @@ public final class EtherLoader {
 	private EtherLoader() { }
 
 	/**
-	 * Version of library file format.
+	 * Highest supported library format.
 	 * <ul>
 	 * <li>
 	 * Two highest bytes are zeroes.
@@ -74,9 +74,10 @@ public final class EtherLoader {
 	 *  Variable instructions: iinc
 	 *
 	 * New in format 2.2
-	 *  Instructions: throw
+	 *  Instructions: throw getglobal setglobal
 	 */
-	
+
+	/** Loads Ether library from given input stream. */
 	public static Library load(Process p, InputStream in) throws IOException, InstantiationException {
 		DataInputStream data = new DataInputStream(in);
 		Library lib;
@@ -156,7 +157,7 @@ public final class EtherLoader {
 						}
 					}
 					//constructing function
-					Function func = new EtherFunction(fname, cpool, stacksize, localsize, code, lnumtable, errtable);
+					Function func = new EtherFunction(lib, fname, cpool, stacksize, localsize, code, lnumtable, errtable);
 					cpool[cindex] = func;
 					if ((fflags & Opcodes.FFLAG_SHARED) != 0) lib.putFunction(func);
 				} break;
