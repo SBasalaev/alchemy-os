@@ -37,7 +37,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import javax.microedition.io.Connector;
 
 /**
  * Alchemy core runtime library.
@@ -61,75 +60,6 @@ public class LibCore3 extends NativeLibrary {
 
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
-			case 0: // pathfile(f: String): String
-				return Filesystem.fileName(p.toFile((String)args[0]));
-			case 1: // pathdir(f: String): String
-				return Filesystem.fileParent(p.toFile((String)args[0]));
-			case 2: // abspath(f: String): String
-				return p.toFile((String)args[0]);
-			case 3: // fcreate(f: String)
-				Filesystem.create(p.toFile((String)args[0]));
-				return null;
-			case 4: // fremove(f: String)
-				Filesystem.remove(p.toFile((String)args[0]));
-				return null;
-			case 5: // mkdir(f: String)
-				Filesystem.mkdir(p.toFile((String)args[0]));
-				return null;
-			case 6: // fcopy(src: String, dest: String)
-				Filesystem.copy(p.toFile((String)args[0]), p.toFile((String)args[1]));
-				return null;
-			case 7: // fmove(src: String, dest: String)
-				Filesystem.move(p.toFile((String)args[0]), p.toFile((String)args[1]));
-				return null;
-			case 8: // set_read(f: String, on: Bool)
-				Filesystem.setRead(p.toFile((String)args[0]), bval(args[1]));
-				return null;
-			case 9: // set_write(f: String, on: Bool)
-				Filesystem.setWrite(p.toFile((String)args[0]), bval(args[1]));
-				return null;
-			case 10: // set_exec(f: String, on: Bool)
-				Filesystem.setExec(p.toFile((String)args[0]), bval(args[1]));
-				return null;
-			case 11: // can_read(f: String): Bool
-				return Ival(Filesystem.canRead(p.toFile((String)args[0])));
-			case 12: // can_write(f: String): Bool
-				return Ival(Filesystem.canWrite(p.toFile((String)args[0])));
-			case 13: // can_exec(f: String): Bool
-				return Ival(Filesystem.canExec(p.toFile((String)args[0])));
-			case 14: // exists(f: String): Bool
-				return Ival(Filesystem.exists(p.toFile((String)args[0])));
-			case 15: // is_dir(f: String): Bool
-				return Ival(Filesystem.isDirectory(p.toFile((String)args[0])));
-			case 16: { // fopen_r(f: String): IStream
-				InputStream stream = Filesystem.read(p.toFile((String)args[0]));
-				ConnectionInputStream in = new ConnectionInputStream(stream);
-				p.addConnection(in);
-				return in;
-			}
-			case 17: { // fopen_w(f: String): OStream
-				OutputStream stream = Filesystem.write(p.toFile((String)args[0]));
-				ConnectionOutputStream out = new ConnectionOutputStream(stream);
-				p.addConnection(out);
-				return out;
-			}
-			case 18: { // fopen_a(f: String): OStream
-				OutputStream stream = Filesystem.append(p.toFile((String)args[0]));
-				ConnectionOutputStream out = new ConnectionOutputStream(stream);
-				p.addConnection(out);
-				return out;
-			}
-			case 19: // flist(f: String): [String]
-				return Filesystem.list(p.toFile((String)args[0]));
-			case 20: // fmodified(f: String): Long
-				return Lval(Filesystem.lastModified(p.toFile((String)args[0])));
-			case 21: // fsize(f: String): Long
-				return Lval(Filesystem.size(p.toFile((String)args[0])));
-			case 22: // set_cwd(f: String)
-				p.setCurrentDirectory(p.toFile((String)args[0]));
-				return null;
-			case 23: // relpath(f: String): String
-				return relPath(p, p.toFile((String)args[0]));
 			case 36: // getenv(key: String): String
 				return p.getEnv(((String)args[0]));
 			case 37: // setenv(key: String, value: String)
@@ -226,27 +156,6 @@ public class LibCore3 extends NativeLibrary {
 				cc.start(prog, sargs);
 				return null;
 			}
-			case 75: // fprint(out: OStream, a: Any): OStream
-				IO.print((OutputStream)args[0], Strings.toString(args[1]));
-				return args[0];
-			case 76: // fprintln(out: OStream, a: Any): OStream
-				IO.println((OutputStream)args[0], Strings.toString(args[1]));
-				return args[0];
-			case 77: // stdin(): IStream
-				return p.stdin;
-			case 78: // stdout(): OStream
-				return p.stdout;
-			case 79: // stderr(): OStream
-				return p.stderr;
-			case 80: // setin(in: IStream)
-				p.stdin = (InputStream)args[0];
-				return null;
-			case 81: // setout(out: OStream)
-				p.stdout = (OutputStream)args[0];
-				return null;
-			case 82: // seterr(out: OStream)
-				p.stderr = (OutputStream)args[0];
-				return null;
 			case 100: // new_dict(): Dict
 				return new Hashtable();
 			case 101: // Dict.set(key: Any, value: Any)
@@ -257,27 +166,6 @@ public class LibCore3 extends NativeLibrary {
 			case 103: // Dict.remove(key: Any)
 				((Hashtable)args[0]).remove(args[1]);
 				return null;
-			case 110: { // readurl(url: String): IStream
-				String url = (String)args[0];
-				int cl = url.indexOf(':');
-				if (cl < 0) throw new IllegalArgumentException("Protocol missing");
-				String protocol = url.substring(0, cl);
-				String addr = url.substring(cl+1);
-				InputStream in;
-				if (protocol.equals("file")) {
-					in = Filesystem.read(Filesystem.normalize(addr));
-				} else if (protocol.equals("res")) {
-					in = this.getClass().getResourceAsStream(addr);
-					if (in == null) throw new IOException("Resource not found: "+addr);
-				} else if (protocol.equals("http") || protocol.equals("https")) {
-					in = Connector.openInputStream(url);
-				} else {
-					throw new IllegalArgumentException("Unsupported protocol: "+protocol);
-				}
-				ConnectionInputStream connin = new ConnectionInputStream(in);
-				p.addConnection(connin);
-				return connin;
-			}
 			case 112: // loadlibrary(name: String): Library
 				try {
 					return p.loadLibrary((String)args[0]);
@@ -379,11 +267,6 @@ public class LibCore3 extends NativeLibrary {
 				cal.set(Calendar.MILLISECOND, ival(args[6]));
 				return Lval(cal.getTime().getTime());
 			}
-			case 173: // IStream.readfully(): [Byte]
-				return IO.readFully((InputStream)args[0]);
-			case 174: // OStream.writeall(input: IStream)
-				IO.writeAll((InputStream)args[1], (OutputStream)args[0]);
-				return null;
 			case 175: // sys_property(key: String): String
 				return System.getProperty((String)args[0]);
 			case 177: { // buildlibrary(in: IStream)

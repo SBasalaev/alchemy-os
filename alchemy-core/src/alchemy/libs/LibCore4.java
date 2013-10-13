@@ -18,6 +18,7 @@
 
 package alchemy.libs;
 
+import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
 import alchemy.io.ConnectionOutputStream;
 import alchemy.io.IO;
@@ -263,12 +264,109 @@ public final class LibCore4 extends NativeLibrary {
 			case 74: // OStream.flush()
 				((OutputStream)args[0]).flush();
 				return null;
-			case 75: // OStream.printf(fmt: String, args: [Any])
-				IO.print((OutputStream)args[0], Strings.format((String)args[1], (Object[])args[2]));
-				return null;
-			case 76: // OStream.writeAll(input: IStream)
+			case 75: // OStream.writeAll(input: IStream)
 				IO.writeAll((InputStream)args[1], (OutputStream)args[0]);
 				return null;
+			case 76: // stdin(): IStream
+				return p.stdin;
+			case 77: // stdout(): OStream
+				return p.stdout;
+			case 78: // stderr(): OStream
+				return p.stderr;
+			case 79: // setin(in: IStream)
+				p.stdin = ((InputStream)args[0]);
+				return null;
+			case 80: // setout(out: OStream)
+				p.stdout = ((OutputStream)args[0]);
+				return null;
+			case 81: // seterr(err: OStream)
+				p.stderr = ((OutputStream)args[0]);
+				return null;
+			case 82: // pathfile(path: String): String
+				return Filesystem.fileName((String)args[0]);
+			case 83: // pathdir(path: String): String
+				return Filesystem.fileParent((String)args[0]);
+			case 84: // abspath(path: String): String
+				return p.toFile((String)args[0]);
+			case 85: // relpath(path: String): String
+				return Filesystem.relativePath(p.getCurrentDirectory(), p.toFile((String)args[0]));
+			case 86: // fcreate(path: String)
+				Filesystem.create(p.toFile((String)args[0]));
+				return null;
+			case 87: // fremove(path: String)
+				Filesystem.remove(p.toFile((String)args[0]));
+				return null;
+			case 88: // fremoveTree(path: String)
+				Filesystem.removeTree(p.toFile((String)args[0]));
+				return null;
+			case 89: // mkdir(path: String)
+				Filesystem.mkdir(p.toFile((String)args[0]));
+				return null;
+			case 90: // mkdirTree(path: String)
+				Filesystem.mkdirTree(p.toFile((String)args[0]));
+				return null;
+			case 91: // fcopy(source: String, dest: String)
+				Filesystem.copy(p.toFile((String)args[0]), p.toFile((String)args[1]));
+				return null;
+			case 92: // fmove(source: String, dest: String)
+				Filesystem.move(p.toFile((String)args[0]), p.toFile((String)args[1]));
+				return null;
+			case 93: // exists(path: String): Bool
+				return Ival(Filesystem.exists(p.toFile((String)args[0])));
+			case 94: // isDir(path: String): Bool
+				return Ival(Filesystem.isDirectory(p.toFile((String)args[0])));
+			case 95: { // fread(path: String): IStream
+				ConnectionInputStream input = new ConnectionInputStream(Filesystem.read(p.toFile((String)args[0])));
+				p.addConnection(input);
+				return input;
+			}
+			case 96: { // fwrite(path: String): OStream
+				ConnectionOutputStream output = new ConnectionOutputStream(Filesystem.write(p.toFile((String)args[0])));
+				p.addConnection(output);
+				return output;
+			}
+			case 97: { // fappend(path: String): OStream
+				ConnectionOutputStream output = new ConnectionOutputStream(Filesystem.append(p.toFile((String)args[0])));
+				p.addConnection(output);
+				return output;
+			}
+			case 98: // flist(path: String): [String]
+				return Filesystem.list(p.toFile((String)args[0]));
+			case 99: // fmodified(path: String): Long
+				return Lval(Filesystem.lastModified(p.toFile((String)args[0])));
+			case 100: // fsize(path: String): Long
+				return Lval(Filesystem.size(p.toFile((String)args[0])));
+			case 101: // setRead(path: String, on: Bool)
+				Filesystem.setRead(p.toFile((String)args[0]), bval(args[1]));
+				return null;
+			case 102: // setWrite(path: String, on: Bool)
+				Filesystem.setWrite((String)args[0], bval(args[1]));
+				return null;
+			case 103: // setExec(path: String, on: Bool)
+				Filesystem.setExec((String)args[0], bval(args[1]));
+				return null;
+			case 104: // canRead(path: String): Bool
+				return Ival(Filesystem.canRead(p.toFile((String)args[0])));
+			case 105: // canWrite(path: String): Bool
+				return Ival(Filesystem.canWrite(p.toFile((String)args[0])));
+			case 106: // canExec(path: String): Bool
+				return Ival(Filesystem.canExec(p.toFile((String)args[0])));
+			case 107: // getCwd(): String
+				return p.getCurrentDirectory();
+			case 108: // setCwd(dir: String)
+				p.setCurrentDirectory(p.toFile((String)args[0]));
+				return null;
+			case 109: // spaceTotal(root: String): Long
+				return Lval(Filesystem.spaceTotal(p.toFile((String)args[0])));
+			case 110: // spaceFree(root: String): Long
+				return Lval(Filesystem.spaceFree(p.toFile((String)args[0])));
+			case 111: // spaceUsed(root: String): Long
+				return Lval(Filesystem.spaceUsed(p.toFile((String)args[0])));
+			case 112: { // readUrl(url: String): IStream
+				return IO.readUrl((String)args[0]);
+			}
+			case 113: // matchesGlob(path: String, glob: String): Bool
+				return Ival(IO.matchesPattern((String)args[0], (String)args[1]));
 			default:
 				return null;
 		}

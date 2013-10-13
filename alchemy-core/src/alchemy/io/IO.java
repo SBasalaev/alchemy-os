@@ -18,10 +18,12 @@
 
 package alchemy.io;
 
+import alchemy.fs.Filesystem;
 import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.microedition.io.Connector;
 
 /**
  * Miscellaneous I/O utilities used in Alchemy OS.
@@ -141,4 +143,34 @@ public final class IO {
         /* empty pattern matches empty string */
         return nameofs == namelen;
     }
+
+	/**
+	 * Returns input stream to read from the specified URL.
+	 * Supported protocols are "file", "res", "http" and "https".
+	 */
+	public static ConnectionInputStream readUrl(String url) throws IOException {
+		int cl = url.indexOf(':');
+		if (cl <= 0)
+			throw new IOException("No protocol in URL");
+		ConnectionInputStream input;
+		String protocol = url.substring(0,cl);
+		String path = url.substring(cl+1);
+		InputStream in;
+		if ("file".equals(protocol)) {
+			in = Filesystem.read(path);
+		} else if ("res".equals(protocol)) {
+			in = String.class.getResourceAsStream(path);
+			if (in == null)
+				throw new IOException("Resource not found: " + path);
+		} else if ("http".equals(protocol) || "https".equals(protocol)) {
+			in = Connector.openInputStream(url);
+		} else {
+			throw new IOException("Unknown protocol: " + protocol);
+		}
+		if (in instanceof ConnectionInputStream) {
+			return (ConnectionInputStream)in;
+		} else {
+			return new ConnectionInputStream(in);
+		}
+	}
 }

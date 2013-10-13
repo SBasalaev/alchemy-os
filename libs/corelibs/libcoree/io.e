@@ -4,7 +4,6 @@
  */
 
 use "list.eh"
-use "string.eh"
 use "textio.eh"
 
 def read(): Int = stdin().read()
@@ -19,7 +18,7 @@ def println(a: Any) = stdout().println(a)
 def flush() = stdout().flush()
 
 def OStream.printf(fmt: String, args: [Any]) = this.print(fmt.format(args))
-def printf(fmt: String, args: [Any]) = stdout().printf(fmt, args)
+def printf(fmt: String, args: [Any]) = stdout().print(fmt.format(args))
 
 def flistfilter(path: String, glob: String): [String] {
   var files = flist(path)
