@@ -24,8 +24,3 @@ def log(val: Double): Double;
 def asin(val: Double): Double;
 def acos(val: Double): Double;
 def atan(val: Double): Double;
-
-def ibits2f(bits: Int): Float;
-def f2ibits(f: Float): Int;
-def lbits2d(bits: Long): Double;
-def d2lbits(d: Double): Long;
