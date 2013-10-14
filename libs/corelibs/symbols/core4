@@ -117,3 +117,4 @@ BufferOStream.new
 BufferOStream.len
 BufferOStream.getBytes
 BufferOStream.reset
+Pipe.new

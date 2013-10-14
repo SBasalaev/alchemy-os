@@ -22,6 +22,7 @@ import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
 import alchemy.io.ConnectionOutputStream;
 import alchemy.io.IO;
+import alchemy.io.Pipe;
 import alchemy.system.AlchemyException;
 import alchemy.system.Function;
 import alchemy.system.NativeLibrary;
@@ -342,10 +343,10 @@ public final class LibCore4 extends NativeLibrary {
 				Filesystem.setRead(p.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 102: // setWrite(path: String, on: Bool)
-				Filesystem.setWrite((String)args[0], bval(args[1]));
+				Filesystem.setWrite(p.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 103: // setExec(path: String, on: Bool)
-				Filesystem.setExec((String)args[0], bval(args[1]));
+				Filesystem.setExec(p.toFile((String)args[0]), bval(args[1]));
 				return null;
 			case 104: // canRead(path: String): Bool
 				return Ival(Filesystem.canRead(p.toFile((String)args[0])));
@@ -372,9 +373,9 @@ public final class LibCore4 extends NativeLibrary {
 
 			/* == Header: bufferio.eh == */
 			case 114: // BufferIStream.new(buf: [Byte])
-				return new ByteArrayInputStream((byte[])args[0]);
+				return new ConnectionInputStream(new ByteArrayInputStream((byte[])args[0]));
 			case 115: // BufferOStream.new()
-				return new ByteArrayOutputStream();
+				return new ConnectionOutputStream(new ByteArrayOutputStream());
 			case 116: // BufferOStream.len(): Int
 				return Ival(((ByteArrayOutputStream)args[0]).size());
 			case 117: // BufferOStream.getBytes(): [Byte]
@@ -382,6 +383,13 @@ public final class LibCore4 extends NativeLibrary {
 			case 118: // BufferOStream.reset()
 				((ByteArrayOutputStream)args[0]).reset();
 				return null;
+
+			/* == Header: pipe.eh == */
+			case 119: { // Pipe.new()
+				Pipe pipe = new Pipe();
+				p.addConnection(pipe);
+				return pipe;
+			}
 			default:
 				return null;
 		}

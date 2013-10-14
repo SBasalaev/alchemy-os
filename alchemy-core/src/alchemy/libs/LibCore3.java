@@ -236,8 +236,6 @@ public class LibCore3 extends NativeLibrary {
 				return null;
 			case 159: // Process.get_exitcode(): Int
 				return Ival(((Process)args[0]).getExitCode());
-			case 165: // new_pipe(): StreamConnection
-				return new Pipe();
 			case 167: // this_process(): Process;
 				return p;
 			case 170: { // timeof(year: Int, month: Int, day: Int, hour: Int, min: Int, sec: Int, millis: Int): Long
