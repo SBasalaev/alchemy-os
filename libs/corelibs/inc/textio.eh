@@ -3,24 +3,23 @@
 use "io.eh"
 
 type Reader < Any;
-type Writer < Any;
 
-def new_reader(in: IStream, dec: (IStream):Int): Reader;
-const `Reader.new` = new_reader;
-
+def Reader.new(in: IStream, dec: (IStream):Int);
 def Reader.read(): Int;
-def Reader.readarray(buf: [Char], ofs: Int, len: Int): Int;
+def Reader.readArray(buf: [Char], ofs: Int, len: Int): Int;
 def Reader.readstr(len: Int): String;
 def Reader.readline(): String;
 def Reader.skip(n: Long): Long;
 def Reader.reset();
 def Reader.close();
 
+type Writer < Any;
+
 def new_writer(out: OStream, enc: (OStream,Int)): Writer;
 const `Writer.new` = new_writer;
 
 def Writer.write(ch: Int);
-def Writer.writearray(buf: [Char], ofs: Int, len: Int);
+def Writer.writeArray(buf: [Char], ofs: Int, len: Int);
 def Writer.print(str: String);
 def Writer.println(str: String);
 def Writer.printf(fmt: String, args: [Any]);

@@ -3,24 +3,24 @@
  * Licensed under GPL v3 with linkage exception
  */
 
-use "io.eh"
-use "string.eh"
-use "strbuf.eh"
+use "io"
+use "strbuf"
 
 type Reader {
   in: IStream,
   dec: (IStream):Int
 }
 
-def new_reader(in: IStream, dec: (IStream):Int): Reader {
-  new Reader(in, dec)
+def Reader.new(in: IStream, dec: (IStream):Int) {
+  this.in = in
+  this.dec = dec
 }
 
 def Reader.read(): Int {
   this.dec(this.in)
 }
 
-def Reader.readarray(buf: [Char], ofs: Int, len: Int): Int {
+def Reader.readArray(buf: [Char], ofs: Int, len: Int): Int {
   if (len == 0) {
     0
   } else {
@@ -92,7 +92,7 @@ type Writer {
   enc: (OStream,Int)
 }
 
-def new_writer(out: OStream, enc: (OStream,Int)): Writer {
+def Writer.new(out: OStream, enc: (OStream,Int)): Writer {
   new Writer(out, enc)
 }
 
@@ -100,7 +100,7 @@ def Writer.write(ch: Int) {
   this.enc(this.out, ch)
 }
 
-def Writer.writearray(buf: [Char], ofs: Int, len: Int) {
+def Writer.writeArray(buf: [Char], ofs: Int, len: Int) {
   for (var i=0, i<len, i += 1) {
     this.write(buf[ofs+i])
   }
@@ -127,6 +127,10 @@ def Writer.flush() {
 def Writer.close() {
   this.out.close()
 }
+
+/* ISO 8859-1 encoding. */
+def latin1reader(in: IStream): Reader = new Reader(in, `IStream.read`)
+def latin1writer(out: OStream): Writer = new Writer(out, `OStream.write`)
 
 /* UTF-8 encoding */
 def readch_utf8(in: IStream): Int {
@@ -169,15 +173,8 @@ def writech_utf8(out: OStream, ch: Int) {
   }
 }
 
-def utfreader(in: IStream): Reader = new_reader(in, readch_utf8)
-def utfwriter(out: OStream): Writer = new_writer(out, writech_utf8)
-
-/* ISO 8859-1 encoding. */
-def readch_latin1(in: IStream): Int = in.read()
-def writech_latin1(out: OStream, ch: Int) = out.write(ch)
-
-def latin1reader(in: IStream): Reader = new_reader(in, readch_latin1)
-def latin1writer(out: OStream): Writer = new_writer(out, writech_latin1)
+def utfreader(in: IStream): Reader = new Reader(in, readch_utf8)
+def utfwriter(out: OStream): Writer = new Writer(out, writech_utf8)
 
 /* UTF-16 encoding */
 def readch_utf16(in: IStream): Int {
@@ -196,5 +193,5 @@ def writech_utf16(out: OStream, ch: Int) {
   out.write(ch)
 }
 
-def utf16reader(in: IStream): Reader = new_reader(in, readch_utf16)
-def utf16writer(out: OStream): Writer = new_writer(out, writech_utf16)
+def utf16reader(in: IStream): Reader = new Reader(in, readch_utf16)
+def utf16writer(out: OStream): Writer = new Writer(out, writech_utf16)
