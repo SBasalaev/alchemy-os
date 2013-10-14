@@ -390,6 +390,32 @@ public final class LibCore4 extends NativeLibrary {
 				p.addConnection(pipe);
 				return pipe;
 			}
+
+			/* == Header: strbuf.eh == */
+			case 120: // StrBuf.new(): StrBuf
+				return new StringBuffer();
+			case 121: // StrBuf.get(at: Int): Char
+				return Ival(((StringBuffer)args[0]).charAt(ival(args[1])));
+			case 122: // StrBuf.chars(from: Int, to: Int, buf: [Char], ofs: Int)
+				((StringBuffer)args[0]).getChars(ival(args[1]), ival(args[2]), (char[])args[3], ival(args[4]));
+				return null;
+			case 123: // StrBuf.append(a: Any): StrBuf
+				return ((StringBuffer)args[0]).append(Strings.toString(args[1]));
+			case 124: // StrBuf.addch(ch: Char): StrBuf
+				return ((StringBuffer)args[0]).append((char)ival(args[1]));
+			case 125: // StrBuf.insert(at: Int, a: Any): StrBuf
+				return ((StringBuffer)args[0]).insert(ival(args[1]), Strings.toString(args[2]));
+			case 126: // StrBuf.insch(at: Int, ch: Char): StrBuf
+				return ((StringBuffer)args[0]).insert(ival(args[2]), (char)ival(args[3]));
+			case 127: // StrBuf.setch(at: Int, ch: Char): StrBuf
+				((StringBuffer)args[0]).setCharAt(ival(args[1]), (char)ival(args[2]));
+				return args[0];
+			case 128: // StrBuf.delete(from: Int, to: Int): StrBuf
+				return ((StringBuffer)args[0]).delete(ival(args[1]), ival(args[2]));
+			case 129: // StrBuf.delch(at: Int): StrBuf
+				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
+			case 130: // StrBuf.len(): Int
+				return Ival(((StringBuffer)args[0]).length());
 			default:
 				return null;
 		}

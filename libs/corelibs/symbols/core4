@@ -118,3 +118,14 @@ BufferOStream.len
 BufferOStream.getBytes
 BufferOStream.reset
 Pipe.new
+StrBuf.new
+StrBuf.get
+StrBuf.chars
+StrBuf.append
+StrBuf.addch
+StrBuf.insert
+StrBuf.insch
+StrBuf.setch
+StrBuf.delete
+StrBuf.delch
+StrBuf.len

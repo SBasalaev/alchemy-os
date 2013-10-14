@@ -20,14 +20,11 @@ package alchemy.libs;
 
 import alchemy.fs.Filesystem;
 import alchemy.io.IO;
-import alchemy.io.Pipe;
 import alchemy.system.Library;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
 import alchemy.util.ArrayList;
 import alchemy.util.Strings;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -102,23 +99,6 @@ public class LibCore3 extends NativeLibrary {
 				cal.setTime(new Date(lval(args[0])));
 				return Ival(cal.get(Calendar.SECOND));
 			}
-			case 47: // StrBuf.append(a: Any): StrBuf
-				return ((StringBuffer)args[0]).append(Strings.toString(args[1]));
-			case 48: // StrBuf.addch(ch: Char): StrBuf
-				return ((StringBuffer)args[0]).append((char)ival(args[1]));
-			case 49: // StrBuf.delete(from: Int, to: Int): StrBuf
-				return ((StringBuffer)args[0]).delete(ival(args[1]), ival(args[2]));
-			case 50: // StrBuf.delch(at: Int): StrBuf
-				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
-			case 51: // StrBuf.insert(at: Int, a: Any): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), Strings.toString(args[2]));
-			case 52: // StrBuf.insch(at: Int, ch: Char): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[1]), (char) ival(args[2]));
-			case 53: // StrBuf.setch(at: Int, ch: Char): StrBuf
-				((StringBuffer)args[0]).setCharAt(ival(args[1]), (char) ival(args[2]));
-				return args[0];
-			case 54: // StrBuf.len(): Int
-				return Ival(((StringBuffer)args[0]).length());
 			case 55: // millis(date: Long): Int
 				return Ival((int)(lval(args[0]) % 1000));
 			case 56: // systime(): Long
@@ -131,8 +111,6 @@ public class LibCore3 extends NativeLibrary {
 				return Lval(Filesystem.spaceFree(p.toFile((String)args[0])));
 			case 60: // space_used(root: String): Long
 				return Lval(Filesystem.spaceUsed(p.toFile((String)args[0])));
-			case 62: // new_strbuf(): StrBuf
-				return new StringBuffer();
 			case 70: { // Process.start_wait(cmd: String, args: [String]): Int
 				Process cc = (Process)args[0];
 				String prog = (String)args[1];
