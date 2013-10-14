@@ -1,4 +1,5 @@
 use "/inc/io.eh"
+use "/inc/bufferio.eh"
 use "connection.eh"
 
 const `IStream.readarray` = `IStream.readArray`;
@@ -21,3 +22,8 @@ const space_free = spaceFree;
 const space_used = spaceUsed;
 const readurl = readUrl;
 const matches_glob = matchesGlob;
+const istream_from_ba = `BufferIStream.new`;
+const new_baostream() = `BufferOStream.new`;
+const `BArrayOStream.len` = `BufferOStream.len`;
+const `BArrayOStream.tobarray` = `BufferOStream.getBytes`;
+const `BArrayOStream.reset` = `BufferOStream.reset`;

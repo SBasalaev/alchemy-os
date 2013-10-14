@@ -19,8 +19,6 @@
 package alchemy.libs;
 
 import alchemy.fs.Filesystem;
-import alchemy.io.ConnectionInputStream;
-import alchemy.io.ConnectionOutputStream;
 import alchemy.io.IO;
 import alchemy.io.Pipe;
 import alchemy.system.Library;
@@ -238,24 +236,10 @@ public class LibCore3 extends NativeLibrary {
 				return null;
 			case 159: // Process.get_exitcode(): Int
 				return Ival(((Process)args[0]).getExitCode());
-			case 160: // istream_from_ba(buf: [Byte]): IStream
-				return new ByteArrayInputStream((byte[])args[0]);
-			case 161: // new_baostream(): BArrayOStream
-				return new ByteArrayOutputStream();
-			case 162: // BArrayOStream.len(): Int
-				return Ival(((ByteArrayOutputStream)args[0]).size());
-			case 163: // BArrayOStream.tobarray(): [Byte]
-				return ((ByteArrayOutputStream)args[0]).toByteArray();
-			case 164: // BArrayOStream.reset()
-				((ByteArrayOutputStream)args[0]).reset();
-				return null;
 			case 165: // new_pipe(): StreamConnection
 				return new Pipe();
 			case 167: // this_process(): Process;
 				return p;
-			case 169: // IStream.reset()
-				((InputStream)args[0]).reset();
-				return null;
 			case 170: { // timeof(year: Int, month: Int, day: Int, hour: Int, min: Int, sec: Int, millis: Int): Long
 				Calendar cal = Calendar.getInstance();
 				cal.set(Calendar.YEAR, ival(args[0]));

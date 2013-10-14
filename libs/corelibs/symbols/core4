@@ -112,3 +112,8 @@ spaceFree
 spaceUsed
 readUrl
 matchesGlob
+BufferIStream.new
+BufferOStream.new
+BufferOStream.len
+BufferOStream.getBytes
+BufferOStream.reset

@@ -29,6 +29,8 @@ import alchemy.system.Process;
 import alchemy.util.Arrays;
 import alchemy.util.PartiallyAppliedFunction;
 import alchemy.util.Strings;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -367,6 +369,19 @@ public final class LibCore4 extends NativeLibrary {
 			}
 			case 113: // matchesGlob(path: String, glob: String): Bool
 				return Ival(IO.matchesPattern((String)args[0], (String)args[1]));
+
+			/* == Header: bufferio.eh == */
+			case 114: // BufferIStream.new(buf: [Byte])
+				return new ByteArrayInputStream((byte[])args[0]);
+			case 115: // BufferOStream.new()
+				return new ByteArrayOutputStream();
+			case 116: // BufferOStream.len(): Int
+				return Ival(((ByteArrayOutputStream)args[0]).size());
+			case 117: // BufferOStream.getBytes(): [Byte]
+				return ((ByteArrayOutputStream)args[0]).toByteArray();
+			case 118: // BufferOStream.reset()
+				((ByteArrayOutputStream)args[0]).reset();
+				return null;
 			default:
 				return null;
 		}
