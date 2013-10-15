@@ -18,20 +18,11 @@
 
 package alchemy.libs;
 
-import alchemy.fs.Filesystem;
-import alchemy.io.IO;
-import alchemy.system.Library;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
-import alchemy.util.ArrayList;
-import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * Alchemy core runtime library.
@@ -85,34 +76,8 @@ public class LibCore3 extends NativeLibrary {
 				cc.start(prog, sargs);
 				return null;
 			}
-			case 100: // new_dict(): Dict
-				return new Hashtable();
-			case 101: // Dict.set(key: Any, value: Any)
-				((Hashtable)args[0]).put(args[1], args[2]);
-				return null;
-			case 102: // Dict.get(key: Any): Any
-				return ((Hashtable)args[0]).get(args[1]);
-			case 103: // Dict.remove(key: Any)
-				((Hashtable)args[0]).remove(args[1]);
-				return null;
-			case 123: { // Dict.keys(): [Any]
-				ArrayList keyv = new ArrayList();
-				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
-					keyv.add(e.nextElement());
-				}
-				Object[] keys = new Object[keyv.size()];
-				for (int i=keys.length-1; i>=0; i--) {
-					keys[i] = keyv.get(i);
-				}
-				return keys;
-			}
 			case 124: // sleep(millis: Int)
 				Thread.sleep(ival(args[0]));
-				return null;
-			case 128: // Dict.size(): Int
-				return Ival(((Hashtable)args[0]).size());
-			case 129: // Dict.clear()
-				((Hashtable)args[0]).clear();
 				return null;
 			case 143: // new_process(): Process
 				return new Process(p);

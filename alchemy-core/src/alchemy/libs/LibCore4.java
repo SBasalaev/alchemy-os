@@ -29,7 +29,10 @@ import alchemy.system.Function;
 import alchemy.system.Library;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
+import alchemy.types.Int32;
+import alchemy.util.ArrayList;
 import alchemy.util.Arrays;
+import alchemy.util.HashMap;
 import alchemy.util.PartiallyAppliedFunction;
 import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
@@ -487,6 +490,157 @@ public final class LibCore4 extends NativeLibrary {
 				cal.set(Calendar.MILLISECOND, ival(args[6]));
 				return Lval(cal.getTime().getTime());
 			}
+
+			/* == Header: dict.eh == */
+			case 144: // Dict.new(): Dict
+				return new HashMap();
+			case 145: // Dict.len(): Int
+				return Ival(((HashMap)args[0]).size());
+			case 146: // Dict.get(key: Any): Any
+				return ((HashMap)args[0]).get(args[1]);
+			case 147: // Dict.set(key: Any, value: Any)
+				((HashMap)args[0]).set(args[1], args[2]);
+				return null;
+			case 148: // Dict.remove(key: Any)
+				((HashMap)args[0]).remove(args[1]);
+				return null;
+			case 149: // Dict.clear()
+				((HashMap)args[0]).clear();
+				return null;
+			case 150: // Dict.keys(): [Any]
+				return ((HashMap)args[0]).keys();
+
+			/* == Header: list.eh == */
+			case 151: // List.new(): List
+				return new ArrayList();
+			case 152: // List.len(): Int
+				return Ival(((ArrayList)args[0]).size());
+			case 153: // List.get(at: Int): Any
+				return ((ArrayList)args[0]).get(ival(args[1]));
+			case 154: // List.set(at: Int, val: Any)
+				((ArrayList)args[0]).set(ival(args[1]), args[2]);
+				return null;
+			case 155: // List.add(val: Any)
+				((ArrayList)args[0]).add(args[1]);
+				return null;
+			case 156: // List.addFrom(arr: Array, ofs: Int = 0, len: Int = -1)
+				((ArrayList)args[0]).addFrom(args[1], ival(args[2]), ival(args[3]));
+				return null;
+			case 157: // List.insert(at: Int, val: Any)
+				((ArrayList)args[0]).insert(ival(args[1]), args[2]);
+				return null;
+			case 158: // List.insertfrom(at: Int, arr: Array, ofs: Int = 0, len: Int = -1)
+				((ArrayList)args[0]).insertFrom(ival(args[1]), args[2], ival(args[3]), ival(args[4]));
+				return null;
+			case 159: // List.remove(at: Int)
+				((ArrayList)args[0]).remove(ival(args[1]));
+				return null;
+			case 160: // List.clear()
+				((ArrayList)args[0]).clear();
+				return null;
+			case 161: // List.range(from: Int, to: Int): List
+				return ((ArrayList)args[0]).getRange(ival(args[1]), ival(args[2]));
+			case 162: // List.indexof(val: Any, from: Int = 0): Int
+				return Ival(((ArrayList)args[0]).indexOf(args[1], ival(args[2])));
+			case 163: // List.lindexof(val: Any): Int
+				return Ival(((ArrayList)args[0]).lastIndexOf(args[1]));
+			case 164: { // List.filter(f: (Any):Bool): List
+				ArrayList oldlist = (ArrayList)args[0];
+				int len = oldlist.size();
+				ArrayList newlist = new ArrayList(len);
+				Function f = (Function)args[1];
+				for (int i=0; i<len; i++) {
+					Object e = oldlist.get(i);
+					if (f.invoke(p, new Object[] {oldlist.get(i)}) == Int32.ONE) {
+						newlist.add(e);
+					}
+				}
+				return newlist;
+			}
+			case 165: { // List.filterself(f: (Any):Bool)
+				ArrayList list = (ArrayList)args[0];
+				Function f = (Function)args[1];
+				int len = list.size();
+				int i=0;
+				while (i < len) {
+					if (f.invoke(p, new Object[] {list.get(i)}) == Int32.ONE) {
+						i++;
+					} else {
+						list.remove(i);
+						len--;
+					}
+				}
+				return null;
+			}
+			case 166: { // List.map(f: (Any):Any): List
+				ArrayList oldlist = (ArrayList)args[0];
+				int len = oldlist.size();
+				ArrayList newlist = new ArrayList(len);
+				Function f = (Function)args[1];
+				for (int i=0; i<len; i++) {
+					newlist.add(f.invoke(p, new Object[] {oldlist.get(i)}));
+				}
+				return newlist;
+			}
+			case 167: { // List.mapself(f: (Any):Any)
+				ArrayList list = (ArrayList)args[0];
+				Function f = (Function)args[1];
+				int len = list.size();
+				for (int i=0; i<len; i++) {
+					list.set(i, f.invoke(p, new Object[] {list.get(i)}));
+				}
+				return null;
+			}
+			case 168: { // List.reduce(f: (Any,Any):Any): Any
+				ArrayList list = (ArrayList)args[0];
+				Function f = (Function)args[1];
+				int len = list.size();
+				if (len == 0) return null;
+				Object ret = list.get(0);
+				Object[] fparams = new Object[2];
+				for (int i=1; i<len; i++) {
+					fparams[0] = ret;
+					fparams[1] = list.get(i);
+					ret = f.invoke(p, fparams);
+				}
+				return ret;
+			}
+			case 169: { // List.sort(f: (Any,Any):Int): List
+				ArrayList oldList = (ArrayList)args[0];
+				Object[] data = new Object[oldList.size()];
+				oldList.copyInto(data);
+				Arrays.qsort(data, 0, data.length, p, (Function)args[1]);
+				ArrayList newList = new ArrayList(data.length);
+				newList.addFrom(data, 0, data.length);
+				return newList;
+			}
+			case 170: { // List.sortself(f: (Any,Any):Int)
+				ArrayList list = (ArrayList)args[0];
+				Object[] data = new Object[list.size()];
+				list.copyInto(data);
+				Arrays.qsort(data, 0, data.length, p, (Function)args[1]);
+				list.clear();
+				list.addFrom(data, 0, data.length);
+				return null;
+			}
+			case 171: { // List.reverse(): List
+				ArrayList oldList = (ArrayList)args[0];
+				int len  = oldList.size();
+				ArrayList newList = new ArrayList(len);
+				for (int i=len-1; i>=0; i--) {
+					newList.add(oldList.get(i));
+				}
+				return newList;
+			}
+			case 172: { // List.toarray(): [Any]
+				ArrayList list = (ArrayList)args[0];
+				Object[] data = new Object[list.size()];
+				list.copyInto(data);
+				return data;
+			}
+			case 173: // List.copyInto(from: Int, buf: Array, ofs: Int, len: Int)
+				((ArrayList)args[0]).copyInto(ival(args[1]), args[2], ival(args[3]), ival(args[4]));
+				return null;
 
 			default:
 				return null;
