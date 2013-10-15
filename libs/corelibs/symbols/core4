@@ -132,3 +132,13 @@ StrBuf.len
 loadlibrary
 buildlibrary
 Library.getFunction
+datestr
+year
+month
+day
+dow
+hour
+minute
+second
+millis
+timeof

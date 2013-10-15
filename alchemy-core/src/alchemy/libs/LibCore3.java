@@ -60,57 +60,10 @@ public class LibCore3 extends NativeLibrary {
 			case 37: // setenv(key: String, value: String)
 				p.setEnv(((String)args[0]), (String)args[1]);
 				return null;
-			case 38: // utfbytes(str: String): [Byte]
-				return Strings.utfEncode((String)args[0]);
-			case 39: // datestr(date: Long): String
-				return new Date(lval(args[0])).toString();
-			case 40: { // year(date: Long): Int
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date(lval(args[0])));
-				return Ival(cal.get(Calendar.YEAR));
-			}
-			case 41: { // month(date: Long): Int
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date(lval(args[0])));
-				return Ival(cal.get(Calendar.MONTH));
-			}
-			case 42: { // day(date: Long): Int
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date(lval(args[0])));
-				return Ival(cal.get(Calendar.DAY_OF_MONTH));
-			}
-			case 43: { // dow(date: Long): Int
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date(lval(args[0])));
-				return Ival(cal.get(Calendar.DAY_OF_WEEK));
-			}
-			case 44: { // hour(date: Long): Int
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date(lval(args[0])));
-				return Ival(cal.get(Calendar.HOUR_OF_DAY));
-			}
-			case 45: { // minute(date: Long): Int
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date(lval(args[0])));
-				return Ival(cal.get(Calendar.MINUTE));
-			}
-			case 46: { // second(date: Long): Int
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(new Date(lval(args[0])));
-				return Ival(cal.get(Calendar.SECOND));
-			}
-			case 55: // millis(date: Long): Int
-				return Ival((int)(lval(args[0]) % 1000));
 			case 56: // systime(): Long
 				return Lval(System.currentTimeMillis());
 			case 57: // get_cwd(): String
 				return p.getCurrentDirectory();
-			case 58: // space_total(root: String): Long
-				return Lval(Filesystem.spaceTotal(p.toFile((String)args[0])));
-			case 59: // space_free(root: String): Long
-				return Lval(Filesystem.spaceFree(p.toFile((String)args[0])));
-			case 60: // space_used(root: String): Long
-				return Lval(Filesystem.spaceUsed(p.toFile((String)args[0])));
 			case 70: { // Process.start_wait(cmd: String, args: [String]): Int
 				Process cc = (Process)args[0];
 				String prog = (String)args[1];
@@ -204,22 +157,8 @@ public class LibCore3 extends NativeLibrary {
 				return Ival(((Process)args[0]).getExitCode());
 			case 167: // this_process(): Process;
 				return p;
-			case 170: { // timeof(year: Int, month: Int, day: Int, hour: Int, min: Int, sec: Int, millis: Int): Long
-				Calendar cal = Calendar.getInstance();
-				cal.set(Calendar.YEAR, ival(args[0]));
-				cal.set(Calendar.MONTH, ival(args[1]));
-				cal.set(Calendar.DAY_OF_MONTH, ival(args[2]));
-				cal.set(Calendar.HOUR_OF_DAY, ival(args[3]));
-				cal.set(Calendar.MINUTE, ival(args[4]));
-				cal.set(Calendar.SECOND, ival(args[5]));
-				cal.set(Calendar.MILLISECOND, ival(args[6]));
-				return Lval(cal.getTime().getTime());
-			}
 			case 175: // sys_property(key: String): String
 				return System.getProperty((String)args[0]);
-			case 178: // StrBuf.chars(from: Int, to: Int, buf: [Char], ofs: Int)
-				((StringBuffer)args[0]).getChars(ival(args[1]), ival(args[2]), (char[])(args[3]), ival(args[4]));
-				return null;
 			default:
 				return null;
 		}

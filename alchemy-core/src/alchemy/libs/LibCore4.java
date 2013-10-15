@@ -37,6 +37,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
@@ -430,6 +432,61 @@ public final class LibCore4 extends NativeLibrary {
 			}
 			case 133: // Library.getFunction(sig: String): Function
 				return ((Library)args[0]).getFunction((String)args[1]);
+
+			/* == Header: time.eh == */
+			case 134: // datestr(time: Long): String
+				return new Date(lval(args[0])).toString();
+			case 135: { // year(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.YEAR));
+			}
+			case 136: { // month(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.MONTH));
+			}
+			case 137: { // day(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.DAY_OF_MONTH));
+			}
+			case 138: { // dow(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.DAY_OF_WEEK));
+			}
+			case 139: { // hour(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.HOUR_OF_DAY));
+			}
+			case 140: { // minute(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.MINUTE));
+			}
+			case 141: { // second(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.SECOND));
+			}
+			case 142: { // millis(time: Long): Int
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(new Date(lval(args[0])));
+				return Ival(cal.get(Calendar.MILLISECOND));
+			}
+			case 143: { // timeof(year: Int, month: Int, day: Int, hour: Int, min: Int, sec: Int, millis: Int): Long
+				Calendar cal = Calendar.getInstance();
+				cal.set(Calendar.YEAR, ival(args[0]));
+				cal.set(Calendar.MONTH, ival(args[1]));
+				cal.set(Calendar.DAY_OF_MONTH, ival(args[2]));
+				cal.set(Calendar.HOUR_OF_DAY, ival(args[3]));
+				cal.set(Calendar.MINUTE, ival(args[4]));
+				cal.set(Calendar.SECOND, ival(args[5]));
+				cal.set(Calendar.MILLISECOND, ival(args[6]));
+				return Lval(cal.getTime().getTime());
+			}
 
 			default:
 				return null;
