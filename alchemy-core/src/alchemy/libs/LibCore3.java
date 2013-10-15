@@ -53,75 +53,9 @@ public class LibCore3 extends NativeLibrary {
 				return null;
 			case 56: // systime(): Long
 				return Lval(System.currentTimeMillis());
-			case 57: // get_cwd(): String
-				return p.getCurrentDirectory();
-			case 70: { // Process.start_wait(cmd: String, args: [String]): Int
-				Process cc = (Process)args[0];
-				String prog = (String)args[1];
-				Object[] oargs = (Object[])args[2];
-				String[] sargs = new String[oargs.length];
-				for (int i=oargs.length-1; i>=0; i--) {
-					sargs[i] = String.valueOf(oargs[i]);
-				}
-				return Ival(cc.startAndWait(prog, sargs));
-			}
-			case 71: { // Process.start(cmd: String, args: [String])
-				Process cc = (Process)args[0];
-				String prog = (String)args[1];
-				Object[] oargs = (Object[])args[2];
-				String[] sargs = new String[oargs.length];
-				for (int i=oargs.length-1; i>=0; i--) {
-					sargs[i] = String.valueOf(oargs[i]);
-				}
-				cc.start(prog, sargs);
-				return null;
-			}
 			case 124: // sleep(millis: Int)
 				Thread.sleep(ival(args[0]));
 				return null;
-			case 143: // new_process(): Process
-				return new Process(p);
-			case 144: // Process.get_state(): Int
-				return Ival(((Process)args[0]).getState());
-			case 145: // Process.getenv(key: String): String
-				return ((Process)args[0]).getEnv((String)args[1]);
-			case 146: // Process.setenv(key: String, value: String)
-				((Process)args[0]).setEnv((String)args[1], (String)args[2]);
-				return null;
-			case 147: // Process.get_in(): IStream
-				return ((Process)args[0]).stdin;
-			case 148: // Process.get_out(): OStream
-				return ((Process)args[0]).stdout;
-			case 149: // Process.get_err(): OStream
-				return ((Process)args[0]).stderr;
-			case 150: // Process.set_in(in: IStream)
-				((Process)args[0]).stdin = (InputStream)args[1];
-				return null;
-			case 151: // Process.set_out(out: OStream)
-				((Process)args[0]).stdout = (OutputStream)args[1];
-				return null;
-			case 152: // Process.set_err(err: OStream)
-				((Process)args[0]).stderr = (OutputStream)args[1];
-				return null;
-			case 153: // Process.get_cwd(): String
-				return ((Process)args[0]).getCurrentDirectory();
-			case 154: // Process.set_cwd(dir: String)
-				((Process)args[0]).setCurrentDirectory((String)args[1]);
-				return null;
-			case 155: // Process.get_priority(): Int
-				return Ival(((Process)args[0]).getPriority());
-			case 156: // Process.set_priority(value: Int)
-				((Process)args[0]).setPriority(ival(args[1]));
-				return null;
-			case 157: // Process.get_name(): String
-				return ((Process)args[0]).getName();
-			case 158: // Process.interrupt()
-				((Process)args[0]).interrupt();
-				return null;
-			case 159: // Process.get_exitcode(): Int
-				return Ival(((Process)args[0]).getExitCode());
-			case 167: // this_process(): Process;
-				return p;
 			case 175: // sys_property(key: String): String
 				return System.getProperty((String)args[0]);
 			default:

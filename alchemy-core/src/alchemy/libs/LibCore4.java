@@ -672,6 +672,90 @@ public final class LibCore4 extends NativeLibrary {
 			case 184: // Lock.unlock()
 				((Lock)args[0]).unlock();
 				return null;
+
+			/* == Header: process.eh == */
+			case 185: // currentProcess(): Process
+				return p;
+			case 186: { // Process.new(cmd: String, args: [String])
+				Object[] objArgs = (Object[])args[1];
+				String[] strArgs = new String[objArgs.length];
+				System.arraycopy(objArgs, 0, strArgs, 0, objArgs.length);
+				return new Process(p, null, (String)args[0], strArgs);
+			}
+			case 187: // Process.getState(): Int
+				return Ival(((Process)args[0]).getState());
+			case 188: // Process.getPriority(): Int
+				return Ival(((Process)args[0]).getPriority());
+			case 189: { // Process.setPriority(value: Int)
+				Process process = (Process)args[0];
+				if (process == p || process.getState() == Process.NEW) {
+					process.setPriority(ival(args[1]));
+					return null;
+				} else {
+					throw new SecurityException();
+				}
+			}
+			case 190: // Process.getName(): String
+				return ((Process)args[0]).getName();
+			case 191: // Process.getArgs(): [String]
+				return ((Process)args[0]).getArgs();
+			case 192: { // Process.setEnv(key: String, value: String)
+				Process process = (Process)args[0];
+				if (process == p || process.getState() == Process.NEW) {
+					process.setEnv((String)args[1], (String)args[2]);
+					return null;
+				} else {
+					throw new SecurityException();
+				}
+			}
+			case 193: { // Process.setIn(in: IStream)
+				Process process = (Process)args[0];
+				if (process == p || process.getState() == Process.NEW) {
+					process.stdin = (InputStream)args[1];
+					return null;
+				} else {
+					throw new SecurityException();
+				}
+			}
+			case 194: { // Process.setOut(out: OStream)
+				Process process = (Process)args[0];
+				if (process == p || process.getState() == Process.NEW) {
+					process.stdout = (OutputStream)args[1];
+					return null;
+				} else {
+					throw new SecurityException();
+				}
+			}
+			case 195: { // Process.setErr(err: OStream)
+				Process process = (Process)args[0];
+				if (process == p || process.getState() == Process.NEW) {
+					process.stderr = (OutputStream)args[1];
+					return null;
+				} else {
+					throw new SecurityException();
+				}
+			}
+			case 196: { // Process.setCwd(cwd: String)
+				Process process = (Process)args[0];
+				if (process == p || process.getState() == Process.NEW) {
+					process.setCurrentDirectory(p.toFile((String)args[1]));
+					return null;
+				} else {
+					throw new SecurityException();
+				}
+			}
+			case 197: // Process.start(): Process
+				return ((Process)args[0]).start();
+			case 198: // Process.waitFor(): Int
+				return Ival(((Process)args[0]).waitFor());
+			case 199: // Process.kill()
+				((Process)args[0]).kill();
+				return null;
+			case 200: // Process.getExitCode(): Int
+				return Ival(((Process)args[0]).getExitCode());
+			case 201: // Process.getError(): Error
+				return ((Process)args[0]).getError();
+
 			default:
 				return null;
 		}
