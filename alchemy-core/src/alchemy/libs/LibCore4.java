@@ -18,6 +18,7 @@
 
 package alchemy.libs;
 
+import alchemy.evm.EtherLoader;
 import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
 import alchemy.io.ConnectionOutputStream;
@@ -25,6 +26,7 @@ import alchemy.io.IO;
 import alchemy.io.Pipe;
 import alchemy.system.AlchemyException;
 import alchemy.system.Function;
+import alchemy.system.Library;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
 import alchemy.util.Arrays;
@@ -406,7 +408,7 @@ public final class LibCore4 extends NativeLibrary {
 			case 125: // StrBuf.insert(at: Int, a: Any): StrBuf
 				return ((StringBuffer)args[0]).insert(ival(args[1]), Strings.toString(args[2]));
 			case 126: // StrBuf.insch(at: Int, ch: Char): StrBuf
-				return ((StringBuffer)args[0]).insert(ival(args[2]), (char)ival(args[3]));
+				return ((StringBuffer)args[0]).insert(ival(args[1]), (char)ival(args[2]));
 			case 127: // StrBuf.setch(at: Int, ch: Char): StrBuf
 				((StringBuffer)args[0]).setCharAt(ival(args[1]), (char)ival(args[2]));
 				return args[0];
@@ -416,6 +418,19 @@ public final class LibCore4 extends NativeLibrary {
 				return ((StringBuffer)args[0]).deleteCharAt(ival(args[1]));
 			case 130: // StrBuf.len(): Int
 				return Ival(((StringBuffer)args[0]).length());
+
+			/* == Header: dl.eh == */
+			case 131: // loadlibrary(libname: String): Library
+				return p.loadLibrary((String)args[0]);
+			case 132: { // buildlibrary(in: IStream): Library
+				InputStream in = (InputStream)args[0];
+				if (((in.read() << 8) | in.read()) != 0xC0DE)
+					throw new InstantiationException("Not an Ether object");
+				return EtherLoader.load(p, in);
+			}
+			case 133: // Library.getFunction(sig: String): Function
+				return ((Library)args[0]).getFunction((String)args[1]);
+
 			default:
 				return null;
 		}

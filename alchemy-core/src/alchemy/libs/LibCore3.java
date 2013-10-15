@@ -142,14 +142,6 @@ public class LibCore3 extends NativeLibrary {
 			case 103: // Dict.remove(key: Any)
 				((Hashtable)args[0]).remove(args[1]);
 				return null;
-			case 112: // loadlibrary(name: String): Library
-				try {
-					return p.loadLibrary((String)args[0]);
-				} catch (Exception e) {
-					return null;
-				}
-			case 113: // Library.getfunc(sig: String): Function
-				return ((Library)args[0]).getFunction((String)args[1]);
 			case 123: { // Dict.keys(): [Any]
 				ArrayList keyv = new ArrayList();
 				for (Enumeration e = ((Hashtable)args[0]).keys(); e.hasMoreElements(); ) {
@@ -169,10 +161,6 @@ public class LibCore3 extends NativeLibrary {
 			case 129: // Dict.clear()
 				((Hashtable)args[0]).clear();
 				return null;
-			case 130: // StrBuf.ch(at: Int): Char
-				return Ival(((StringBuffer)args[0]).charAt(ival(args[1])));
-			case 142: // matches_glob(path: String, glob: String): Bool
-				return Ival(IO.matchesPattern((String)args[0], (String)args[1]));
 			case 143: // new_process(): Process
 				return new Process(p);
 			case 144: // Process.get_state(): Int
@@ -229,12 +217,6 @@ public class LibCore3 extends NativeLibrary {
 			}
 			case 175: // sys_property(key: String): String
 				return System.getProperty((String)args[0]);
-			case 177: { // buildlibrary(in: IStream)
-				InputStream in = (InputStream) args[0];
-				if (in.read() != 0xC0 || in.read() != 0xDE)
-					throw new InstantiationException("Not an Ether library");
-				return EtherLoader.load(p, in);
-			}
 			case 178: // StrBuf.chars(from: Int, to: Int, buf: [Char], ofs: Int)
 				((StringBuffer)args[0]).getChars(ival(args[1]), ival(args[2]), (char[])(args[3]), ival(args[4]));
 				return null;

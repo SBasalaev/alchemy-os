@@ -129,3 +129,6 @@ StrBuf.setch
 StrBuf.delete
 StrBuf.delch
 StrBuf.len
+loadlibrary
+buildlibrary
+Library.getFunction

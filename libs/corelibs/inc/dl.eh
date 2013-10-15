@@ -1,8 +1,9 @@
 /* dynamic loading support. */
 
+use "io"
+
 type Library < Any;
-type IStream;
 
 def loadlibrary(libname: String): Library;
 def buildlibrary(in: IStream): Library;
-def Library.getfunc(sig: String): Function;
+def Library.getFunction(sig: String): Function;
