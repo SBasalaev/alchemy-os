@@ -200,3 +200,8 @@ Process.waitFor
 Process.kill
 Process.getExitCode
 Process.getError
+systime
+getenv
+setenv
+sleep
+sysProperty

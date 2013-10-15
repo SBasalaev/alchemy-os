@@ -756,6 +756,20 @@ public final class LibCore4 extends NativeLibrary {
 			case 201: // Process.getError(): Error
 				return ((Process)args[0]).getError();
 
+			/* == Header: sys.eh == */
+			case 202: // systime(): Long
+				return Lval(System.currentTimeMillis());
+			case 203: // getenv(key: String): String
+				return p.getEnv((String)args[0]);
+			case 204: // setenv(key: String, val: String)
+				p.setEnv((String)args[0], (String)args[1]);
+				return null;
+			case 205: // sleep(millis: Int)
+				Thread.sleep(lval(args[0]));
+				return null;
+			case 206: // sysProperty(str: String): String
+				return System.getProperty((String)args[0]);
+
 			default:
 				return null;
 		}
