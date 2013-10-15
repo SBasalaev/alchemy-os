@@ -2,22 +2,18 @@
 
 type List < Any;
 
-def new_list(): List;
-const `List.new` = new_list;
-
+def List.new(): List;
 def List.len(): Int;
 def List.get(at: Int): Any;
 def List.set(at: Int, val: Any);
 def List.add(val: Any);
-def List.addfrom(arr: Array, ofs: Int, len: Int);
-def List.addall(vals: [Any]);
+def List.addFrom(arr: Array, ofs: Int = 0, len: Int = -1);
 def List.insert(at: Int, val: Any);
-def List.insertfrom(at: Int, arr: Array, ofs: Int, len: Int);
-def List.insertall(at: Int, vals: [Any]);
+def List.insertFrom(at: Int, arr: Array, ofs: Int = 0, len: Int = -1);
 def List.remove(at: Int);
 def List.clear();
 def List.range(from: Int, to: Int): List;
-def List.indexof(val: Any): Int;
+def List.indexof(val: Any, from: Int = 0): Int;
 def List.lindexof(val: Any): Int;
 def List.filter(f: (Any):Bool): List;
 def List.filterself(f: (Any):Bool);
@@ -28,6 +24,4 @@ def List.sort(f: (Any,Any):Int): List;
 def List.sortself(f: (Any,Any):Int);
 def List.reverse(): List;
 def List.toarray(): [Any];
-def List.copyinto(from: Int, buf: Array, ofs: Int, len: Int);
-def List.tostr(): String;
-def List.eq(other: List): Bool;
+def List.copyInto(from: Int, buf: Array, ofs: Int = 0, len: Int = -1);

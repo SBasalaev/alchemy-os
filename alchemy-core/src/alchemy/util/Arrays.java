@@ -18,6 +18,10 @@
 
 package alchemy.util;
 
+import alchemy.system.AlchemyException;
+import alchemy.system.Function;
+import alchemy.system.Process;
+import alchemy.system.ProcessKilledException;
 import alchemy.types.Float32;
 import alchemy.types.Float64;
 import alchemy.types.Int32;
@@ -278,5 +282,26 @@ public final class Arrays {
 			default:
 				throw new ClassCastException("Not an array");
 		}
+	}
+
+	/** Performs quick sort of array in the given range using given implementation. */
+	public static void qsort(Object[] a, int low, int high, Process p, Function f)
+	throws AlchemyException, ProcessKilledException {
+		int i = low;
+		int j = high;
+		Object x = a[(low+high)/2];
+		while(i <= j) {
+			while(((Int32)f.invoke(p, new Object[] {a[i],x})).value < 0) i++;
+			while(((Int32)f.invoke(p, new Object[] {a[j],x})).value > 0) j--;
+			if (i <= j) {
+				Object tmp = a[i];
+				a[i] = a[j];
+				a[j] = tmp;
+				i++;
+				j--;
+			}
+		}
+		if (low < j)  qsort(a, low, j, p, f);
+		if (i < high) qsort(a, i, high, p, f);
 	}
 }

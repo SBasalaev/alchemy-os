@@ -106,12 +106,34 @@ public final class ArrayList {
 		size++;
 	}
 
+	/** Inserts elements from given array. */
+	public void insertFrom(int index, Object array, int ofs, int len) {
+		if (len < 0) len = Arrays.arrayLength(array);
+		if (len == 0) return;
+		if (elements.length < size + len)
+			growBy(len);
+		if (index < size)
+			System.arraycopy(elements, index, elements, index+len, size-index);
+		Arrays.arrayCopy(array, ofs, elements, index, len);
+		size += len;
+	}
+
 	/** Adds element to the end of the list. */
 	public void add(Object e) {
 		if (elements.length == size)
 			growBy(1);
 		elements[size] = e;
 		size++;
+	}
+
+	/** Adds elements from given array. */
+	public void addFrom(Object array, int ofs, int len) {
+		if (len < 0) len = Arrays.arrayLength(array);
+		if (len == 0) return;
+		if (elements.length < size + len)
+			growBy(len);
+		Arrays.arrayCopy(array, ofs, elements, size, len);
+		size += len;
 	}
 
 	/** Removes element from given position of the list. */
@@ -129,6 +151,17 @@ public final class ArrayList {
 		int idx = indexOf(e, 0);
 		if (idx >= 0) remove(idx);
 		return idx >= 0;
+	}
+
+	/** Returns sublist of this list. */
+	public ArrayList getRange(int from, int to) {
+		if (from < 0) from += size;
+		if (to < 0) to += size;
+		int len = to-from;
+		ArrayList list = new ArrayList(len);
+		list.size = len;
+		System.arraycopy(elements, from, list.elements, 0, len);
+		return list;
 	}
 
 	/** Tests whether list contains given element. */
@@ -180,6 +213,7 @@ public final class ArrayList {
 	 * @param len     number of elements to copy
 	 */
 	public void copyInto(int from, Object array, int offset, int len) {
+		if (len < 0) len = Arrays.arrayLength(array);
 		if (from < 0 || from >= size || len > size || offset < 0 || offset + len > Arrays.arrayLength(array))
 			throw new IndexOutOfBoundsException();
 		Arrays.arrayCopy(elements, from, array, offset, len);

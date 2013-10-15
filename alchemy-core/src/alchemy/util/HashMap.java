@@ -26,14 +26,18 @@ package alchemy.util;
  * @author Sergey Basalaev
  */
 public final class HashMap {
-	
+
 	private HashMapEntry[] entries;
 	private int size;
 
+	/** Creates new empty map. */
 	public HashMap() {
 		entries = new HashMapEntry[11];
 	}
-	
+
+	/** Returns value assigned to given key.
+	 * Returns null if key is not in the map.
+	 */
 	public Object get(Object key) {
 		HashMapEntry[] table = entries;
 		int hash = key.hashCode();
@@ -46,6 +50,7 @@ public final class HashMap {
 		return null;
 	}
 
+	/** Sets new value to given key. */
 	public void set(Object key, Object value) {
 		if (value == null)
 			throw new NullPointerException();
@@ -74,7 +79,8 @@ public final class HashMap {
 		table[index] = e;
 		size++;
 	}
-	
+
+	/** Removes key and the corresponding value from the map. */
 	public void remove(Object key) {
 		HashMapEntry[] table = entries;
 		int hash = key.hashCode();
@@ -87,11 +93,13 @@ public final class HashMap {
 			}
 		}
 	}
-	
+
+	/** Returns number of keys in this map. */
 	public int size() {
 		return size;
 	}
-	
+
+	/** Removes all keys and values from this map. */
 	public void clear() {
 		HashMapEntry[] table = entries;
 		for (int i=table.length-1; i >= 0; i--) {
@@ -99,7 +107,8 @@ public final class HashMap {
 		}
 		size = 0;
 	}
-	
+
+	/** Returns all keys this map contains as object array. */
 	public Object[] keys() {
 		Object[] ret = new Object[size];
 		int pos = 0;
@@ -112,7 +121,7 @@ public final class HashMap {
 		}
 		return ret;
 	}
-	
+
 	private void rehash() {
 		HashMapEntry[] oldTable = entries;
 		HashMapEntry[] newTable = new HashMapEntry[oldTable.length * 2 + 1];
@@ -128,7 +137,7 @@ public final class HashMap {
 		}
 		entries = newTable;
 	}
-	
+
 	void buildString(ArrayList dejaVu, StringBuffer buf) {
 		if (dejaVu.indexOf(this, 0) >= 0) {
 			buf.append("{...}");
