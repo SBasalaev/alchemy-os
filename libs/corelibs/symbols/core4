@@ -172,3 +172,14 @@ List.sortself
 List.reverse
 List.toarray
 List.copyInto
+currentThread
+Thread.new
+Thread.start
+Thread.isAlive
+Thread.interrupt
+Thread.isInterrupted
+Thread.join
+Lock.new
+Lock.lock
+Lock.tryLock
+Lock.unlock

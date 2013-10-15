@@ -29,10 +29,12 @@ import alchemy.system.Function;
 import alchemy.system.Library;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
+import alchemy.system.ProcessThread;
 import alchemy.types.Int32;
 import alchemy.util.ArrayList;
 import alchemy.util.Arrays;
 import alchemy.util.HashMap;
+import alchemy.util.Lock;
 import alchemy.util.PartiallyAppliedFunction;
 import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
@@ -642,6 +644,34 @@ public final class LibCore4 extends NativeLibrary {
 				((ArrayList)args[0]).copyInto(ival(args[1]), args[2], ival(args[3]), ival(args[4]));
 				return null;
 
+			/* == Header: thread.eh == */
+			case 174: // currentThread(): Thread
+				return Thread.currentThread();
+			case 175: // Thread.new(run: ());
+				return p.createThread((Function)args[0]);
+			case 176: // Thread.start()
+				((ProcessThread)args[0]).start();
+				return null;
+			case 177: // Thread.isAlive(): Bool
+				return Ival(((ProcessThread)args[0]).isAlive());
+			case 178: // Thread.interrupt()
+				((ProcessThread)args[0]).interrupt();
+				return null;
+			case 179: // Thread.isInterrupted(): Bool
+				return Ival(((ProcessThread)args[0]).isInterrupted());
+			case 180: // Thread.join()
+				((ProcessThread)args[0]).join();
+				return null;
+			case 181: // Lock.new()
+				return new Lock();
+			case 182: // Lock.lock()
+				((Lock)args[0]).lock();
+				return null;
+			case 183: // Lock.tryLock(): Bool
+				return Ival(((Lock)args[0]).tryLock());
+			case 184: // Lock.unlock()
+				((Lock)args[0]).unlock();
+				return null;
 			default:
 				return null;
 		}
