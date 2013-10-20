@@ -19,7 +19,6 @@
 package alchemy.pc;
 
 import alchemy.fs.Filesystem;
-import java.io.IOException;
 
 /**
  * Main entry point for PC.
@@ -29,8 +28,21 @@ public class Main {
 
 	private Main() { }
 
-	public static void main(String[] args) throws IOException {
-		Filesystem.mount("/", "pc", ".");
-		// TODO: run
+	public static void main(String[] args) {
+		try {
+			Filesystem.mount("/", "pc", ".");
+			alchemy.system.Process ps = new alchemy.system.Process("terminal", new String[0]);
+			ps.setEnv("PATH", "/bin");
+			ps.setEnv("LIBPATH", "/lib");
+			ps.setEnv("INCPATH", "/inc");
+			ps.start().waitFor();
+			if (ps.getError() != null) {
+				System.err.println(ps.getError());
+			}
+			System.exit(ps.getExitCode());
+		} catch (Exception e) {
+			System.err.println("!!! Alchemy OS crashed !!!");
+			e.printStackTrace();
+		}
 	}
 }
