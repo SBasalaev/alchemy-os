@@ -18,13 +18,14 @@
 
 package alchemy.nec;
 
-import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.asm.FuncObject;
 import alchemy.nec.asm.FunctionWriter;
 import alchemy.nec.asm.Label;
 import alchemy.nec.asm.UnitWriter;
 import alchemy.nec.tree.*;
+import alchemy.types.Int32;
+import alchemy.types.Int64;
 import alchemy.util.ArrayList;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -86,7 +87,7 @@ public class EAsmWriter implements ExprVisitor {
 				} else {
 					writer.visitJumpInsn(cond ? Opcodes.IFNNULL : Opcodes.IFNULL, jumpto);
 				}
-			} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Int.ZERO)
+			} else if (cmp.rvalue instanceof ConstExpr && ((ConstExpr)cmp.rvalue).value.equals(Int32.ZERO)
 			        && cmp.lvalue.rettype() == BuiltinType.INT) {
 				// integer comparison with zero
 				cmp.lvalue.accept(this, null);
@@ -715,7 +716,7 @@ public class EAsmWriter implements ExprVisitor {
 
 	public Object visitNewArrayByEnum(NewArrayByEnumExpr newarray, Object isReturn) {
 		if (debug) writer.visitLine(newarray.lineNumber());
-		writer.visitLdcInsn(Int.toInt(newarray.initializers.length));
+		writer.visitLdcInsn(Int32.toInt32(newarray.initializers.length));
 		Type artype = newarray.rettype();
 		Type eltype = null;
 		if (artype instanceof ArrayType)
@@ -743,7 +744,7 @@ public class EAsmWriter implements ExprVisitor {
 			Expr e = newarray.initializers[i];
 			if (e != null) {
 				writer.visitInsn(Opcodes.DUP);
-				writer.visitLdcInsn(Int.toInt(i));
+				writer.visitLdcInsn(Int32.toInt32(i));
 				e.accept(this, Boolean.FALSE);
 				if (eltype == BuiltinType.BYTE) {
 					writer.visitInsn(Opcodes.BASTORE);
@@ -906,15 +907,15 @@ public class EAsmWriter implements ExprVisitor {
 			case '~':
 				unary.expr.accept(this, Boolean.FALSE);
 				if (type == BuiltinType.INT) {
-					writer.visitLdcInsn(Int.M_ONE);
+					writer.visitLdcInsn(Int32.M_ONE);
 					writer.visitInsn(Opcodes.IXOR);
 				} else if (type == BuiltinType.LONG) {
-					writer.visitLdcInsn(new Long(-1));
+					writer.visitLdcInsn(new Int64(-1));
 					writer.visitInsn(Opcodes.LXOR);
 				}
 				break;
 			case '!':
-				writer.visitLdcInsn(Int.ONE);
+				writer.visitLdcInsn(Int32.ONE);
 				unary.expr.accept(this, Boolean.FALSE);
 				writer.visitInsn(Opcodes.ISUB);
 				break;

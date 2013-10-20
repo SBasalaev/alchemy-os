@@ -18,9 +18,9 @@
 
 package alchemy.nec.asm;
 
-import alchemy.core.Int;
 import alchemy.evm.Opcodes;
 import alchemy.nec.tree.Null;
+import alchemy.types.Int32;
 import alchemy.util.ArrayList;
 import java.io.ByteArrayOutputStream;
 import java.util.Enumeration;
@@ -242,8 +242,8 @@ public class FunctionWriter implements Opcodes {
 			if (cnst.equals(Boolean.TRUE)) data.write(ICONST_1);
 			else data.write(ICONST_0);
 			written = true;
-		} else if (cnst instanceof Int) {
-			int i = ((Int)cnst).value;
+		} else if (cnst instanceof Int32) {
+			int i = ((Int32)cnst).value;
 			if (i >= -1 && i <= 5) {
 				data.write(ICONST_0 + i);
 				written = true;

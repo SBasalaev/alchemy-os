@@ -18,11 +18,11 @@
 
 package alchemy.nec;
 
-import alchemy.core.Process;
 import alchemy.fs.Filesystem;
 import alchemy.io.IO;
 import alchemy.nec.tree.Unit;
-import alchemy.nlib.NativeApp;
+import alchemy.system.NativeApp;
+import alchemy.system.Process;
 import java.io.OutputStream;
 
 /**

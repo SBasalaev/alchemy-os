@@ -79,7 +79,7 @@ public class Terminal extends NativeApp {
 				}
 			}
 			form.setTitle(childCmd+" - Terminal");
-			Process child = new Process(p, null, childCmd, childArgs);
+			Process child = new Process(p, childCmd, childArgs);
 			child.stdin = form.in;
 			child.stdout = form.out;
 			child.stderr = form.out;

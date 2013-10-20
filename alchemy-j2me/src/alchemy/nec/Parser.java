@@ -18,16 +18,16 @@
 
 package alchemy.nec;
 
-import alchemy.core.Process;
-import alchemy.core.Int;
 import alchemy.fs.Filesystem;
+import alchemy.io.ConnectionInputStream;
 import alchemy.io.IO;
 import alchemy.io.UTFReader;
 import alchemy.nec.tree.*;
+import alchemy.system.Process;
+import alchemy.types.Int32;
 import alchemy.util.ArrayList;
 import alchemy.util.Strings;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -137,7 +137,7 @@ public class Parser {
 		f = p.toFile(name+".eh");
 		if (Filesystem.exists(f)) return f;
 		if (name.charAt(0) != '/') {
-			String[] incpath = Strings.split(p.getEnv("INCPATH"), ':');
+			String[] incpath = Strings.split(p.getEnv("INCPATH"), ':', true);
 			for (int i=0; i<incpath.length; i++) {
 				f = p.toFile(incpath[i]+'/'+name);
 				if (Filesystem.exists(f) && !Filesystem.isDirectory(f)) return f;
@@ -161,11 +161,11 @@ public class Parser {
 		}
 		//push file in stack
 		Tokenizer oldt = t;
-		String olddir = p.getCurDir();
+		String olddir = p.getCurrentDirectory();
 		files.push(file);
-		p.setCurDir(Filesystem.fileParent(file));
-		InputStream in = Filesystem.read(file);
-		p.addStream(in);
+		p.setCurrentDirectory(Filesystem.fileParent(file));
+		ConnectionInputStream in = new ConnectionInputStream(Filesystem.read(file));
+		p.addConnection(in);
 		UTFReader fred = new UTFReader(in);
 		t = new Tokenizer(fred);
 		//parse
@@ -260,7 +260,7 @@ public class Parser {
 					v.constValue = Boolean.FALSE;
 				} else if (vartype == BuiltinType.INT || vartype == BuiltinType.SHORT
 				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
-					v.constValue = Int.ZERO;
+					v.constValue = Int32.ZERO;
 				} else if (vartype == BuiltinType.LONG) {
 					v.constValue = new Long(0l);
 				} else if (vartype == BuiltinType.FLOAT) {
@@ -393,9 +393,9 @@ public class Parser {
 		}
 		//move file to parsed
 		in.close();
-		p.removeStream(in);
+		p.removeConnection(in);
 		t = oldt;
-		p.setCurDir(olddir);
+		p.setCurrentDirectory(olddir);
 		parsed.add(files.pop());
 	}
 	
@@ -456,7 +456,7 @@ public class Parser {
 					var.constValue = Boolean.FALSE;
 				} else if (vartype == BuiltinType.INT || vartype == BuiltinType.SHORT
 				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
-					var.constValue = Int.ZERO;
+					var.constValue = Int32.ZERO;
 				} else if (vartype == BuiltinType.LONG) {
 					var.constValue = new Long(0l);
 				} else if (vartype == BuiltinType.FLOAT) {
@@ -645,7 +645,7 @@ public class Parser {
 			'*', '/', '%', 0
 		};
 
-	private int getPriority(Int operator) {
+	private int getPriority(Int32 operator) {
 		int op = operator.value;
 		for (int i=0; i<priorops.length; i++) {
 			if (priorops[i] == op) return i/4;
@@ -663,7 +663,7 @@ public class Parser {
 			exprs.add(parsePostfix(scope, parseExprNoop(scope)));
 			int opchar = t.nextToken();
 			if ("+-/*%^&|<>".indexOf(opchar) >= 0 || (opchar <= -20 && opchar >= -30)) {
-				operators.add(Int.toInt(opchar));
+				operators.add(Int32.toInt32(opchar));
 			} else {
 				t.pushBack();
 				break;
@@ -673,13 +673,13 @@ public class Parser {
 			int index = 0;
 			int priority = 0;
 			for (int i = 0; i < operators.size(); i++) {
-				int pr = getPriority((Int)operators.get(i));
+				int pr = getPriority((Int32)operators.get(i));
 				if (pr > priority) {
 					priority = pr;
 					index = i;
 				}
 			}
-			int op = ((Int)operators.get(index)).value;
+			int op = ((Int32)operators.get(index)).value;
 			Expr left = (Expr)exprs.get(index);
 			Expr right = (Expr)exprs.get(index+1);
 			Expr newexpr = makeBinaryExpr(left, op, right);
@@ -794,9 +794,9 @@ public class Parser {
 				return new NewArrayByEnumExpr(lnum, new ArrayType(eltype), init);
 			}
 			case Token.CHAR:
-				return new CharConstExpr(lnum, Int.toInt(t.ivalue));
+				return new CharConstExpr(lnum, Int32.toInt32(t.ivalue));
 			case Token.INT:
-				return new ConstExpr(lnum, Int.toInt(t.ivalue));
+				return new ConstExpr(lnum, Int32.toInt32(t.ivalue));
 			case Token.LONG:
 				return new ConstExpr(lnum, new Long(t.lvalue));
 			case Token.FLOAT:
@@ -854,7 +854,7 @@ public class Parser {
 						if ((Xmask & X_IINC) != 0 && var.type == BuiltinType.INT && value instanceof BinaryExpr) {
 							BinaryExpr bin = (BinaryExpr)value;
 							if (bin.lvalue == vexpr && bin.rvalue instanceof ConstExpr && (bin.operator == '+' || bin.operator == '-')) {
-								int incr = ((Int)((ConstExpr)bin.rvalue).value).value;
+								int incr = ((Int32)((ConstExpr)bin.rvalue).value).value;
 								if (bin.operator == '-') incr = -incr;
 								if (incr >= Byte.MIN_VALUE && incr <= Byte.MAX_VALUE) {
 									return new IincExpr(lnum, var, incr);
@@ -972,7 +972,7 @@ public class Parser {
 						Expr branchindex = (Expr) cast(parseExpr(scope), BuiltinType.INT).accept(constOptimizer, scope);
 						if (!(branchindex instanceof ConstExpr))
 							throw new ParseException("Constant expression expected.");
-						Int idx = (Int)((ConstExpr)branchindex).value;
+						Int32 idx = (Int32)((ConstExpr)branchindex).value;
 						if (keysunique.contains(idx))
 							throw new ParseException("branch for "+idx+" is already defined in this switch");
 						branchkeyv.add(idx);
@@ -980,7 +980,7 @@ public class Parser {
 					} while (t.nextToken() != ':');
 					int[] branchkeys = new int[branchkeyv.size()];
 					for (int i=0; i<branchkeys.length; i++) {
-						Int idx = (Int)branchkeyv.get(i);
+						Int32 idx = (Int32)branchkeyv.get(i);
 						branchkeys[i] = idx.value;
 					}
 					keys.add(branchkeys);
@@ -1058,7 +1058,7 @@ public class Parser {
 					varvalue = new ConstExpr(lnum, Boolean.FALSE);
 				} else if (vartype == BuiltinType.INT || vartype == BuiltinType.SHORT
 				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
-					varvalue = new ConstExpr(lnum, Int.ZERO);
+					varvalue = new ConstExpr(lnum, Int32.ZERO);
 				} else if (vartype == BuiltinType.LONG) {
 					varvalue = new ConstExpr(lnum, new Long(0l));
 				} else if (vartype == BuiltinType.FLOAT) {
@@ -1367,7 +1367,7 @@ public class Parser {
 				if (method == null || method.type.args.length != 3 ||
 				   method.type.args[1] != BuiltinType.INT || method.type.args[2] != BuiltinType.INT)
 						throw new ParseException("Operator [:] cannot be applied to " + artype);
-				Expr startexpr = new ConstExpr(lnum, Int.ZERO);
+				Expr startexpr = new ConstExpr(lnum, Int32.ZERO);
 				method.hits++;
 				return new FCallExpr(new ConstExpr(lnum, method), new Expr[] {arexpr, startexpr, endexpr});
 			}
@@ -1507,7 +1507,7 @@ public class Parser {
 				}
 			}
 			if (index >= 0) {
-				ConstExpr indexexpr = new ConstExpr(lnum, Int.toInt(index));
+				ConstExpr indexexpr = new ConstExpr(lnum, Int32.toInt32(index));
 				ALoadExpr ldexpr = new ALoadExpr(expr, indexexpr, fields[index].type);
 				if (Token.isAssignment(t.nextToken())) {
 					int assignop = t.ttype;
@@ -1624,7 +1624,7 @@ public class Parser {
 						cmpmethod.type.args.length == 2 && cmpmethod.type.args[1].isSupertypeOf(rtype)) {
 					cmpmethod.hits++;
 					Expr fcall = new FCallExpr(new ConstExpr(left.lineNumber(), cmpmethod), new Expr[] {left, right});
-					return new ComparisonExpr(fcall, op, new ConstExpr(-1, Int.ZERO));
+					return new ComparisonExpr(fcall, op, new ConstExpr(-1, Int32.ZERO));
 				}
 				break;
 			case Token.EQEQ:

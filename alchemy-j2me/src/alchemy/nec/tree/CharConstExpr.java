@@ -18,7 +18,7 @@
 
 package alchemy.nec.tree;
 
-import alchemy.core.Int;
+import alchemy.types.Int32;
 
 /**
  * Constant expression for character.
@@ -28,7 +28,7 @@ import alchemy.core.Int;
  */
 public class CharConstExpr extends ConstExpr {
 
-	public CharConstExpr(int lnum, Int obj) {
+	public CharConstExpr(int lnum, Int32 obj) {
 		super(lnum, obj);
 	}
 

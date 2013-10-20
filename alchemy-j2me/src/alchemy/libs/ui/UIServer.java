@@ -235,20 +235,22 @@ public final class UIServer {
 	}
 
 	public static String getDefaultTitle(Process p) {
-		Object title = String.valueOf(p.get("ui.title"));
-		return (title != null) ? title.toString() : p.getName();
+		// Object title = String.valueOf(p.get("ui.title"));
+		// return (title != null) ? title.toString() : p.getName();
+		return p.getName();
 	}
 	
 	public static void setDefaultTitle(Process p, String title) {
-		p.set("ui.title", title);
+		// p.set("ui.title", title);
 	}
 
 	public static Image getDefaultIcon(Process p) {
-		return (Image)p.get("ui.icon");
+		// return (Image)p.get("ui.icon");
+		return null;
 	}
 	
 	public static void setDefaultIcon(Process p, Image img) {
-		p.set("ui.icon", img);
+		// p.set("ui.icon", img);
 		synchronized (UIServer.class) {
 			int index = frameIndex(p);
 			if (index >= 0) {

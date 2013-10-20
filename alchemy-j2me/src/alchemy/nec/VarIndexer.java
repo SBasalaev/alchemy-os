@@ -18,8 +18,8 @@
 
 package alchemy.nec;
 
-import alchemy.core.Int;
 import alchemy.nec.tree.*;
+import alchemy.types.Int32;
 import alchemy.util.ArrayList;
 
 /**
@@ -41,7 +41,7 @@ public class VarIndexer implements ExprVisitor {
 					Var v = (Var)f.locals.get(vi);
 					v.index = vi;
 				}
-				f.body.accept(this, Int.toInt(f.locals.size()));
+				f.body.accept(this, Int32.toInt32(f.locals.size()));
 			}
 		}
 	}
@@ -83,14 +83,14 @@ public class VarIndexer implements ExprVisitor {
 	}
 
 	public Object visitBlock(BlockExpr block, Object offset) {
-		int start = ((Int)offset).value;
+		int start = ((Int32)offset).value;
 		int size = block.locals.size();
 		for (int vi=0; vi<size; vi++) {
 			Var v = (Var)block.locals.get(vi);
 			v.index = start+vi;
 		}
 		for (int ei=0; ei<block.exprs.size(); ei++) {
-			((Expr)block.exprs.get(ei)).accept(this, Int.toInt(start+size));
+			((Expr)block.exprs.get(ei)).accept(this, Int32.toInt32(start+size));
 		}
 		return null;
 	}

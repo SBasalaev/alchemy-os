@@ -24,7 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import alchemy.apps.TerminalForm.TerminalInputStream;
 import alchemy.fs.Filesystem;
-import alchemy.io.ConnectionBridge;
 import alchemy.system.NativeApp;
 import alchemy.system.Process;
 import alchemy.util.ArrayList;
@@ -56,7 +55,6 @@ public class Shell extends NativeApp {
 					cmdline.append(' ').append(args[i]);
 				}
 				scriptinput = new ByteArrayInputStream(Strings.utfEncode(cmdline.toString()));
-				p.addConnection(new ConnectionBridge(scriptinput));
 			} else {
 				String file = p.toFile(args[0]);
 				byte[] buf = new byte[(int)Filesystem.size(file)];
@@ -64,7 +62,6 @@ public class Shell extends NativeApp {
 				in.read(buf);
 				in.close();
 				scriptinput = new ByteArrayInputStream(buf);
-				p.addConnection(new ConnectionBridge(scriptinput));
 			}
 			if (p.stdin instanceof TerminalInputStream) {
 				((TerminalInputStream)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
@@ -109,7 +106,7 @@ public class Shell extends NativeApp {
 					}
 					exitcode = 0;
 				} else {
-					Process child = new Process(p, null, cc.cmd, cc.args);
+					Process child = new Process(p, cc.cmd, cc.args);
 					if (cc.in != null) {
 						child.stdin = Filesystem.read(p.toFile(cc.in));
 					}

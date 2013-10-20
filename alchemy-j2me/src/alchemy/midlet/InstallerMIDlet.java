@@ -151,8 +151,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	}
 	
 	private int compareVersions(String v1, String v2) {
-		String[] v1parts = Strings.split(v1, '.');
-		String[] v2parts = Strings.split(v2, '.');
+		String[] v1parts = Strings.split(v1, '.', false);
+		String[] v2parts = Strings.split(v2, '.', false);
 		int index = 0;
 		while (true) {
 			if (index < v1parts.length) {
@@ -175,7 +175,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		instCfg.put(InstallInfo.RMS_NAME, "rsfiles");
 		//choosing filesystem
 		ArrayList filesystems = new ArrayList();
-		String[] fstypes = Strings.split(setupCfg.get("install.fs"), ' ');
+		String[] fstypes = Strings.split(setupCfg.get("install.fs"), ' ', true);
 		for (int i=0; i<fstypes.length; i++) {
 			try {
 				Class.forName(setupCfg.get("install.fs."+fstypes[i]+".test"));
@@ -268,7 +268,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		Properties instCfg = InstallInfo.read();
 		Filesystem.mount("", instCfg.get(InstallInfo.FS_TYPE), instCfg.get(InstallInfo.FS_INIT));
 		// unpack base file archives
-		String[] archives = Strings.split(setupCfg.get("install.archives"), ' ');
+		String[] archives = Strings.split(setupCfg.get("install.archives"), ' ', true);
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));

@@ -18,7 +18,7 @@
 
 package alchemy.nec.tree;
 
-import alchemy.core.Int;
+import alchemy.types.Int32;
 
 /**
  * Constant expression.
@@ -37,7 +37,7 @@ public class ConstExpr extends Expr {
 	}
 
 	public Type rettype() {
-		if (value instanceof Int) {
+		if (value instanceof Int32) {
 			return BuiltinType.INT;
 		} else if (value instanceof Long) {
 			return BuiltinType.LONG;
