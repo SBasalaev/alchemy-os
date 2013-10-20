@@ -18,8 +18,11 @@
 
 package alchemy.nec;
 
-import alchemy.core.Int;
 import alchemy.nec.tree.*;
+import alchemy.types.Float32;
+import alchemy.types.Float64;
+import alchemy.types.Int32;
+import alchemy.types.Int64;
 import alchemy.util.ArrayList;
 
 /**
@@ -92,7 +95,7 @@ public class Optimizer implements ExprVisitor {
 				Expr e = newarray.initializers[i];
 				if (e != null) block.exprs.add(new DiscardExpr(e));
 			}
-			block.exprs.add(new ConstExpr(newarray.lineNumber(), Int.toInt(newarray.initializers.length)));
+			block.exprs.add(new ConstExpr(newarray.lineNumber(), Int32.toInt32(newarray.initializers.length)));
 			return block;
 		}
 		return alen;
@@ -170,8 +173,8 @@ public class Optimizer implements ExprVisitor {
 		// optimizing  expr op const
 		if (binary.rvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)binary.rvalue).value;
-			if (cnst instanceof Int) {
-				if (cnst.equals(Int.ZERO)) {
+			if (cnst instanceof Int32) {
+				if (cnst.equals(Int32.ZERO)) {
 					switch (binary.operator) {
 						case '+':
 						case '-':
@@ -195,7 +198,7 @@ public class Optimizer implements ExprVisitor {
 							return block;
 						}
 					}
-				} else if (cnst.equals(Int.ONE)) {
+				} else if (cnst.equals(Int32.ONE)) {
 					switch (binary.operator) {
 						case '*':
 						case '/':
@@ -204,7 +207,7 @@ public class Optimizer implements ExprVisitor {
 							return binary.lvalue;
 						}
 					}
-				} else if (cnst.equals(Int.M_ONE)) {
+				} else if (cnst.equals(Int32.M_ONE)) {
 					switch (binary.operator) {
 						case '&': {
 							optimized = true;
@@ -216,8 +219,8 @@ public class Optimizer implements ExprVisitor {
 						}
 					}
 				}
-			} else if (cnst instanceof Long) {
-				long l = ((Long)cnst).longValue();
+			} else if (cnst instanceof Int64) {
+				long l = ((Int64)cnst).value;
 				if (l == 0L) {
 					switch (binary.operator) {
 						case '+':
@@ -293,106 +296,106 @@ public class Optimizer implements ExprVisitor {
 			optimized = true;
 			switch (binary.operator) {
 				case '+':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value + ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() + ((Long)c2).longValue());
-					} else if (c1 instanceof Float) {
-						c1 = new Float(((Float)c1).floatValue() + ((Float)c2).floatValue());
-					} else if (c1 instanceof Double) {
-						c1 = new Double(((Double)c1).doubleValue() + ((Double)c2).doubleValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value + ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value + ((Int64)c2).value);
+					} else if (c1 instanceof Float32) {
+						c1 = new Float32(((Float32)c1).value + ((Float32)c2).value);
+					} else if (c1 instanceof Float64) {
+						c1 = new Float64(((Float64)c1).value + ((Float64)c2).value);
 					}
 					break;
 				case '-':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value - ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() - ((Long)c2).longValue());
-					} else if (c1 instanceof Float) {
-						c1 = new Float(((Float)c1).floatValue() - ((Float)c2).floatValue());
-					} else if (c1 instanceof Double) {
-						c1 = new Double(((Double)c1).doubleValue() - ((Double)c2).doubleValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value - ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value - ((Int64)c2).value);
+					} else if (c1 instanceof Float32) {
+						c1 = new Float32(((Float32)c1).value - ((Float32)c2).value);
+					} else if (c1 instanceof Float64) {
+						c1 = new Float64(((Float64)c1).value - ((Float64)c2).value);
 					}
 					break;
 				case '*':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value * ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() * ((Long)c2).longValue());
-					} else if (c1 instanceof Float) {
-						c1 = new Float(((Float)c1).floatValue() * ((Float)c2).floatValue());
-					} else if (c1 instanceof Double) {
-						c1 = new Double(((Double)c1).doubleValue() * ((Double)c2).doubleValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value * ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value * ((Int64)c2).value);
+					} else if (c1 instanceof Float32) {
+						c1 = new Float32(((Float32)c1).value * ((Float32)c2).value);
+					} else if (c1 instanceof Float64) {
+						c1 = new Float64(((Float64)c1).value * ((Float64)c2).value);
 					}
 					break;
 				case '/':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value / ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() / ((Long)c2).longValue());
-					} else if (c1 instanceof Float) {
-						c1 = new Float(((Float)c1).floatValue() / ((Float)c2).floatValue());
-					} else if (c1 instanceof Double) {
-						c1 = new Double(((Double)c1).doubleValue() / ((Double)c2).doubleValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value / ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value / ((Int64)c2).value);
+					} else if (c1 instanceof Float32) {
+						c1 = new Float32(((Float32)c1).value / ((Float32)c2).value);
+					} else if (c1 instanceof Float64) {
+						c1 = new Float64(((Float64)c1).value / ((Float64)c2).value);
 					}
 					break;
 				case '%':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value % ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() % ((Long)c2).longValue());
-					} else if (c1 instanceof Float) {
-						c1 = new Float(((Float)c1).floatValue() % ((Float)c2).floatValue());
-					} else if (c1 instanceof Double) {
-						c1 = new Double(((Double)c1).doubleValue() % ((Double)c2).doubleValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value % ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value % ((Int64)c2).value);
+					} else if (c1 instanceof Float32) {
+						c1 = new Float32(((Float32)c1).value % ((Float32)c2).value);
+					} else if (c1 instanceof Float64) {
+						c1 = new Float64(((Float64)c1).value % ((Float64)c2).value);
 					}
 					break;
 				case '&':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value & ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() & ((Long)c2).longValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value & ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value & ((Int64)c2).value);
 					} else if (c1 instanceof Boolean) {
 						c1 = c1.equals(Boolean.TRUE) ? c2 : Boolean.FALSE;
 					}
 					break;
 				case '|':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value | ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() | ((Long)c2).longValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value | ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value | ((Int64)c2).value);
 					} else if (c1 instanceof Boolean) {
 						c1 = c1.equals(Boolean.TRUE) ? Boolean.TRUE : c2;
 					}
 					break;
 				case '^':
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value ^ ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() ^ ((Long)c2).longValue());
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value ^ ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value ^ ((Int64)c2).value);
 					} else if (c1 instanceof Boolean) {
 						c1 = c1.equals(c2) ? Boolean.FALSE : Boolean.TRUE;
 					}
 					break;
 				case Token.LTLT:
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value << ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() << ((Int)c2).value);
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value << ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value << ((Int32)c2).value);
 					}
 					break;
 				case Token.GTGT:
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value >> ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() >> ((Int)c2).value);
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value >> ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value >> ((Int32)c2).value);
 					}
 					break;
 				case Token.GTGTGT:
-					if (c1 instanceof Int) {
-						c1 = Int.toInt(((Int)c1).value >>> ((Int)c2).value);
-					} else if (c1 instanceof Long) {
-						c1 = new Long(((Long)c1).longValue() >>> ((Int)c2).value);
+					if (c1 instanceof Int32) {
+						c1 = Int32.toInt32(((Int32)c1).value >>> ((Int32)c2).value);
+					} else if (c1 instanceof Int64) {
+						c1 = new Int64(((Int64)c1).value >>> ((Int32)c2).value);
 					}
 					break;
 			}
@@ -450,65 +453,65 @@ public class Optimizer implements ExprVisitor {
 			Type toType = cast.toType;
 			Object cnst = ((ConstExpr)cast.expr).value;
 			int line = cast.lineNumber();
-			if (cnst instanceof Int) {
-				int i = ((Int)cnst).value;
+			if (cnst instanceof Int32) {
+				int i = ((Int32)cnst).value;
 				if (toType == BuiltinType.DOUBLE) {
-					cnst = new Double(i);
+					cnst = new Float64(i);
 				} else if (toType == BuiltinType.FLOAT) {
-					cnst = new Float(i);
+					cnst = new Float32(i);
 				} else if (toType == BuiltinType.LONG) {
-					cnst = new Long(i);
+					cnst = new Int64(i);
 				} else if (toType == BuiltinType.SHORT) {
-					cnst = Int.toInt((short)i);
+					cnst = Int32.toInt32((short)i);
 				} else if (toType == BuiltinType.BYTE) {
-					cnst = Int.toInt((byte)i);
+					cnst = Int32.toInt32((byte)i);
 				} else if (toType == BuiltinType.CHAR) {
-					return new CharConstExpr(line, Int.toInt((char)i));
+					return new CharConstExpr(line, Int32.toInt32((char)i));
 				}
-			} else if (cnst instanceof Long) {
-				long l = ((Long)cnst).longValue();
+			} else if (cnst instanceof Int64) {
+				long l = ((Int64)cnst).value;
 				if (toType == BuiltinType.DOUBLE) {
-					cnst = new Double(l);
+					cnst = new Float64(l);
 				} else if (toType == BuiltinType.FLOAT) {
-					cnst = new Float(l);
+					cnst = new Float32(l);
 				} else if (toType == BuiltinType.INT) {
-					cnst = Int.toInt((int)l);
+					cnst = Int32.toInt32((int)l);
 				} else if (toType == BuiltinType.SHORT) {
-					cnst = Int.toInt((short)l);
+					cnst = Int32.toInt32((short)l);
 				} else if (toType == BuiltinType.BYTE) {
-					cnst = Int.toInt((byte)l);
+					cnst = Int32.toInt32((byte)l);
 				} else if (toType == BuiltinType.CHAR) {
-					return new CharConstExpr(line, Int.toInt((char)l));
+					return new CharConstExpr(line, Int32.toInt32((char)l));
 				}
-			} else if (cnst instanceof Float) {
-				float f = ((Float)cnst).floatValue();
+			} else if (cnst instanceof Float32) {
+				float f = ((Float32)cnst).value;
 				if (toType == BuiltinType.DOUBLE) {
-					cnst = new Double(f);
+					cnst = new Float64(f);
 				} else if (toType == BuiltinType.LONG) {
-					cnst = new Long((long)f);
+					cnst = new Int64((long)f);
 				} else if (toType == BuiltinType.INT) {
-					cnst = Int.toInt((int)f);
+					cnst = Int32.toInt32((int)f);
 				} else if (toType == BuiltinType.SHORT) {
-					cnst = Int.toInt((short)f);
+					cnst = Int32.toInt32((short)f);
 				} else if (toType == BuiltinType.BYTE) {
-					cnst = Int.toInt((byte)f);
+					cnst = Int32.toInt32((byte)f);
 				} else if (toType == BuiltinType.CHAR) {
-					return new CharConstExpr(line, Int.toInt((char)f));
+					return new CharConstExpr(line, Int32.toInt32((char)f));
 				}
-			} else if (cnst instanceof Double) {
-				double d = ((Double)cnst).doubleValue();
+			} else if (cnst instanceof Float64) {
+				double d = ((Float64)cnst).value;
 				if (toType.equals(BuiltinType.FLOAT)) {
-					cnst = new Float(d);
+					cnst = new Float32((float)d);
 				} else if (toType.equals(BuiltinType.LONG)) {
-					cnst = new Long((long)d);
+					cnst = new Int64((long)d);
 				} else if (toType.equals(BuiltinType.INT)) {
-					cnst = Int.toInt((int)d);
+					cnst = Int32.toInt32((int)d);
 				} else if (toType == BuiltinType.SHORT) {
-					cnst = Int.toInt((short)d);
+					cnst = Int32.toInt32((short)d);
 				} else if (toType == BuiltinType.BYTE) {
-					cnst = Int.toInt((byte)d);
+					cnst = Int32.toInt32((byte)d);
 				} else if (toType == BuiltinType.CHAR) {
-					return new CharConstExpr(line, Int.toInt((char)d));
+					return new CharConstExpr(line, Int32.toInt32((char)d));
 				}
 			}
 			return new ConstExpr(line, cnst);
@@ -546,54 +549,54 @@ public class Optimizer implements ExprVisitor {
 					c1 = (c1.equals(c2)) ? Boolean.FALSE : Boolean.TRUE;
 					break;
 				case '<':
-					if (c1 instanceof Int) {
-						c1 = ((Int)c1).value < ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Long) {
-						c1 = ((Long)c1).longValue() < ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Float) {
-						c1 = ((Float)c1).floatValue() < ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Double) {
-						c1 = ((Double)c1).doubleValue() < ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int32) {
+						c1 = ((Int32)c1).value < ((Int32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Int64) {
+						c1 = ((Int64)c1).value < ((Int64)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float32) {
+						c1 = ((Float32)c1).value < ((Float32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float64) {
+						c1 = ((Float64)c1).value < ((Float64)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
 				case '>':
-					if (c1 instanceof Int) {
-						c1 = ((Int)c1).value > ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Long) {
-						c1 = ((Long)c1).longValue() > ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Float) {
-						c1 = ((Float)c1).floatValue() > ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Double) {
-						c1 = ((Double)c1).doubleValue() > ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int32) {
+						c1 = ((Int32)c1).value > ((Int32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Int64) {
+						c1 = ((Int64)c1).value > ((Int64)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float32) {
+						c1 = ((Float32)c1).value > ((Float32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float64) {
+						c1 = ((Float64)c1).value > ((Float64)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
 				case Token.LTEQ:
-					if (c1 instanceof Int) {
-						c1 = ((Int)c1).value <= ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Long) {
-						c1 = ((Long)c1).longValue() <= ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Float) {
-						c1 = ((Float)c1).floatValue() <= ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Double) {
-						c1 = ((Double)c1).doubleValue() <= ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int32) {
+						c1 = ((Int32)c1).value <= ((Int32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Int64) {
+						c1 = ((Int64)c1).value <= ((Int64)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float32) {
+						c1 = ((Float32)c1).value <= ((Float32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float64) {
+						c1 = ((Float64)c1).value <= ((Float64)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
 				case Token.GTEQ:
-					if (c1 instanceof Int) {
-						c1 = ((Int)c1).value >= ((Int)c2).value ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Long) {
-						c1 = ((Long)c1).longValue() >= ((Long)c2).longValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Float) {
-						c1 = ((Float)c1).floatValue() >= ((Float)c2).floatValue() ? Boolean.TRUE : Boolean.FALSE;
-					} else if (c1 instanceof Double) {
-						c1 = ((Double)c1).doubleValue() >= ((Double)c2).doubleValue() ? Boolean.TRUE : Boolean.FALSE;
+					if (c1 instanceof Int32) {
+						c1 = ((Int32)c1).value >= ((Int32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Int64) {
+						c1 = ((Int64)c1).value >= ((Int64)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float32) {
+						c1 = ((Float32)c1).value >= ((Float32)c2).value ? Boolean.TRUE : Boolean.FALSE;
+					} else if (c1 instanceof Float64) {
+						c1 = ((Float64)c1).value >= ((Float64)c2).value ? Boolean.TRUE : Boolean.FALSE;
 					}
 					break;
 			}
 			return new ConstExpr(cmp.lineNumber(), c1);
 		} else if (cmp.lvalue instanceof ConstExpr) {
 			Object cnst = ((ConstExpr)cmp.lvalue).value;
-			if (cnst.equals(Int.ZERO)) {
+			if (cnst.equals(Int32.ZERO)) {
 				// to not duplicate code in EAsmWriter and
 				// allow it to make assumptions only on rvalue
 				optimized = true;
@@ -640,8 +643,8 @@ public class Optimizer implements ExprVisitor {
 			if (e1 instanceof ConstExpr && e2 instanceof ConstExpr) {
 				Object o1 = ((ConstExpr)e1).value;
 				Object o2 = ((ConstExpr)e2).value;
-				if (e1 instanceof CharConstExpr) o1 = String.valueOf((char)((Int)o1).value);
-				if (e2 instanceof CharConstExpr) o2 = String.valueOf((char)((Int)o2).value);
+				if (e1 instanceof CharConstExpr) o1 = String.valueOf((char)((Int32)o1).value);
+				if (e2 instanceof CharConstExpr) o2 = String.valueOf((char)((Int32)o2).value);
 				if (!(o1 instanceof Func) && !(o2 instanceof Func)) {
 					exprs.set(i, new ConstExpr(e1.lineNumber(), String.valueOf(o1).concat(String.valueOf(o2))));
 					exprs.remove(i+1);
@@ -788,7 +791,7 @@ public class Optimizer implements ExprVisitor {
 					optimized = true;
 					int line = fcall.lineNumber();
 					if (fcall.args[0].rettype() == BuiltinType.CHAR) {
-						return new ConstExpr(line, String.valueOf((char) ((Int)cnst).value));
+						return new ConstExpr(line, String.valueOf((char) ((Int32)cnst).value));
 					} else {
 						return new ConstExpr(line, String.valueOf(cnst));
 					}
@@ -903,7 +906,7 @@ public class Optimizer implements ExprVisitor {
 		if (swexpr.elseexpr != null) swexpr.elseexpr = (Expr)swexpr.elseexpr.accept(this, scope);
 		// optimize switch (const)
 		if (swexpr.indexexpr instanceof ConstExpr) {
-			int choice = ((Int)((ConstExpr)swexpr.indexexpr).value).value;
+			int choice = ((Int32)((ConstExpr)swexpr.indexexpr).value).value;
 			optimized = true;
 			for (int br=0; br < swexpr.keys.size(); br++) {
 				final int[] indices = (int[])swexpr.keys.get(br);
@@ -975,27 +978,27 @@ public class Optimizer implements ExprVisitor {
 					else cnst = Boolean.TRUE;
 					break;
 				case '-':
-					if (cnst instanceof Int) {
-						int i = ((Int)cnst).value;
-						cnst = Int.toInt(-i);
-					} else if (cnst instanceof Long) {
-						long l = ((Long)cnst).longValue();
-						cnst = new Long(-l);
-					} else if (cnst instanceof Float) {
-						float f = ((Float)cnst).floatValue();
-						cnst = new Float(-f);
-					} else if (cnst instanceof Double) {
-						double d = ((Double)cnst).doubleValue();
-						cnst = new Double(-d);
+					if (cnst instanceof Int32) {
+						int i = ((Int32)cnst).value;
+						cnst = Int32.toInt32(-i);
+					} else if (cnst instanceof Int64) {
+						long l = ((Int64)cnst).value;
+						cnst = new Int64(-l);
+					} else if (cnst instanceof Float32) {
+						float f = ((Float32)cnst).value;
+						cnst = new Float32(-f);
+					} else if (cnst instanceof Float64) {
+						double d = ((Float64)cnst).value;
+						cnst = new Float64(-d);
 					}
 					break;
 				case '~':
-					if (cnst instanceof Int) {
-						int i = ((Int)cnst).value;
-						cnst = Int.toInt(~i);
-					} else if (cnst instanceof Long) {
-						long l = ((Long)cnst).longValue();
-						cnst = new Long(~l);
+					if (cnst instanceof Int32) {
+						int i = ((Int32)cnst).value;
+						cnst = Int32.toInt32(~i);
+					} else if (cnst instanceof Int64) {
+						long l = ((Int64)cnst).value;
+						cnst = new Int64(~l);
 					}
 					break;
 			}
