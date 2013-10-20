@@ -76,10 +76,10 @@ Summary: headers for standard library
 File: libcore-dev_3.1.4.pkg
 
 Package: libcore3
-Version: 3.1.4
+Version: 3.1.4build2
 Section: libs
 Summary: standard library which is used by all programs
-File: libcore3_3.1.4.pkg
+File: libcore3_3.1.4build2.pkg
 
 Package: libfiletype1
 Version: 1.1.3
