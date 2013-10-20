@@ -161,24 +161,22 @@ public final class Process {
 	/**
 	 * Creates new parentless process.
 	 */
-	public Process(HashMap env, String command, String[] args) {
+	public Process(String command, String[] args) {
 		this.parent = null;
 		this.curdir = "";
 		this.stdin = new NullInputStream(-1);
 		this.stdout = this.stderr = new NullOutputStream();
-		this.env = env;
 		this.command = command;
 		this.cmdArgs = args;
 	}
 
 	/** Creates new process that inherits environment from its parent. */
-	public Process(Process parent, HashMap env, String command, String[] args) {
+	public Process(Process parent, String command, String[] args) {
 		this.parent = parent;
 		this.curdir = parent.curdir;
 		this.stdin = parent.stdin;
 		this.stdout = parent.stdout;
 		this.stderr = parent.stderr;
-		this.env = env;
 		this.command = command;
 		this.cmdArgs = args;
 	}
@@ -241,7 +239,7 @@ public final class Process {
 			Function main = program.getFunction("main");
 			if (main == null)
 				throw new InstantiationException("No main function in " + command);
-			mainThread = new ProcessThread(this, main, cmdArgs);
+			mainThread = new ProcessThread(this, main, new Object[] {cmdArgs});
 			mainThread.start();
 		}
 		return this;
@@ -326,7 +324,7 @@ public final class Process {
 
 		// assign name to the library and put it into the cache
 		if (lib != null) {
-			if (lib.name != null) lib.name = Filesystem.fileName(libfile);
+			if (lib.name == null) lib.name = Filesystem.fileName(libfile);
 			Cache.put(libfile, tstamp, lib);
 		}
 		return lib;
@@ -566,7 +564,7 @@ public final class Process {
 			System.arraycopy(intargs, 0, params, 0, intargs.length);
 			System.arraycopy(args, 0, params, intargs.length, args.length);
 			try {
-				return Int32.toInt32(new Process(p, null, intcmd, params).start().waitFor());
+				return Int32.toInt32(new Process(p, intcmd, params).start().waitFor());
 			} catch (Throwable t) {
 				throw new AlchemyException(t);
 			}

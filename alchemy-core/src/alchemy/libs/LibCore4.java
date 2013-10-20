@@ -680,7 +680,7 @@ public final class LibCore4 extends NativeLibrary {
 				Object[] objArgs = (Object[])args[1];
 				String[] strArgs = new String[objArgs.length];
 				System.arraycopy(objArgs, 0, strArgs, 0, objArgs.length);
-				return new Process(p, null, (String)args[0], strArgs);
+				return new Process(p, (String)args[0], strArgs);
 			}
 			case 187: // Process.getState(): Int
 				return Ival(((Process)args[0]).getState());
