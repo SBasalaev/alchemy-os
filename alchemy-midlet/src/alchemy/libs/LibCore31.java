@@ -213,30 +213,7 @@ public class LibCore31 extends NativeLibrary {
 	 */
 	public static double asin(double val) {
 		if (val > 1 || val < -1) return Double.NaN;
-	    boolean neg = false;
-		if (val < 0) {
-			val = -val;
-			neg = true;
-		}
-		//linear approximation where iterational method is impractical
-		//it really sucks and should be rewritten
-		if (val > 0.999999d) {
-			//1.56938... is asin(0.999999)
-			val = Math.PI/2 + (1-val) * 1000000 * (1.5693821131146521d - Math.PI/2);
-			return neg ? -val : val;
-		}
-		//calculating as Taylor series
-		double rest = val;
-		double x2 = val*val;
-		int n = 1;
-		while (rest > 1.0e-16) {
-			rest *= n * x2;
-			n++;
-			rest /= n;
-			n++;
-			val += rest / n;
-		}
-		return val;
+	    return atan(val / Math.sqrt(1 - val*val));
 	}
 
 	/**
@@ -250,12 +227,10 @@ public class LibCore31 extends NativeLibrary {
 
 	/**
 	 * Returns arctangent of the value.
-	 * Slow and not very accurate though.
 	 * @param val  double value
 	 * @return arctangent of the value
 	 */
 	public static double atan(double val) {
-		//smokin' method from mobylab.ru
 		//shrinking domain
 		boolean neg = false, big = false;
 		if (val < 0) {
@@ -277,7 +252,7 @@ public class LibCore31 extends NativeLibrary {
 		double rest = val;
 		val *= val;
 		int n = 1;
-		while (rest > 1.0e-16) {
+		while (rest > 1.0e-16 || rest < -1.0e-16) {
 			result += rest/n;
 			n += 2;
 			rest = -rest*val;
