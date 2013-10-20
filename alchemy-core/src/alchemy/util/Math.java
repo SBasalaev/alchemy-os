@@ -30,47 +30,46 @@ public final class Math {
 	private static final double QUADRT2 = 1.189207115002721; // √√2
 	private static final double OCTRT2 = 1.0905077326652577; // √√√2
 	private static final double SQRT3 = 1.7320508075688772; // √3
-	private static final double ASIN0999999 = 1.5693821131146521; // asin(0.999999)
 	private static final double LN2 = 0.6931471805599453; // ln(2)
 
 	private Math() { }
 
 	/**
 	 * Calculates integer power of the value.
-	 * @param val  double value
-	 * @param pow  integer power
+	 * @param x  double value
+	 * @param n  integer power
 	 * @return <code>val</code> in the power of <code>pow</code>
 	 */
-	public static double ipow(double val, int pow) {
-		if (val == 0) return 1.0;
-		if (pow < 0) {
-			pow = -pow;
-			val = 1.0/val;
+	public static double ipow(double x, int n) {
+		if (x == 0) return 1.0;
+		if (n < 0) {
+			n = -n;
+			x = 1.0/x;
 		}
 		double result = 1;
 		// if _pow_ has bit _n_ then multiplying by _val^(2^n)_
-		while (pow != 0) {
-			if (pow%2 != 0) result *= val;
-			val *= val;
-			pow >>>= 1;
+		while (n != 0) {
+			if (n%2 != 0) result *= x;
+			x *= x;
+			n >>>= 1;
 		}
 		return result;
 	}
 
 	/**
 	 * Calculates exponent of the value.
-	 * @param val  double value
+	 * @param x  double value
 	 * @return exponent of the value
 	 */
-	public static double exp(double val) {
+	public static double exp(double x) {
 		boolean neg = false;
-		if (val < 0) {
+		if (x < 0) {
 			neg = true;
-			val = -val;
+			x = -x;
 		}
-		if (val > 709.0) return neg ? 0 : Double.POSITIVE_INFINITY;
-		int ip = (int)val;       //[val]
-		double fp = val - ip;    //{val}
+		if (x > 709.0) return neg ? 0 : Double.POSITIVE_INFINITY;
+		int ip = (int)x;       //[val]
+		double fp = x - ip;    //{val}
 		double result = 1.0;
 		//calculating E^{val} as Taylor series
 		double add = fp;
@@ -87,45 +86,45 @@ public final class Math {
 
 	/**
 	 * Calculates natural logarithm of the value.
-	 * @param val  double value
+	 * @param x  double value
 	 * @return natural logarithm of the value
 	 */
-	public static double log(double val) {
+	public static double log(double x) {
 		boolean neg = false;
-		if (val < 0) return Double.NaN;
-		if (val < 1) {
-			val = 1.0/val;
+		if (x < 0) return Double.NaN;
+		if (x < 1) {
+			x = 1.0/x;
 			neg = true;
 		}
 		//calculating base-2 logarithm
 		double log2 = 0;
-		while (val >= 64) {
-			val /= 64.0;
+		while (x >= 64) {
+			x /= 64.0;
 			log2 += 6.0;
 		}
-		while (val >= 2) {
-			val /= 2.0;
+		while (x >= 2) {
+			x /= 2.0;
 			log2 += 1.0;
 		}
-		if (val >= SQRT2) {
-			val /= SQRT2;
+		if (x >= SQRT2) {
+			x /= SQRT2;
 			log2 += 0.5;
 		}
-		if (val >= QUADRT2) {
-			val /= QUADRT2;
+		if (x >= QUADRT2) {
+			x /= QUADRT2;
 			log2 += 0.25;
 		}
-		if (val >= OCTRT2) {
-			val /= OCTRT2;
+		if (x >= OCTRT2) {
+			x /= OCTRT2;
 			log2 += 0.125;
 		}
 		//calculating ln of rest
-		val -= 1.0;
-		double ln = 0, rest = val;
+		x -= 1.0;
+		double ln = 0, rest = x;
 		int n=1;
 		while (rest > 1.0e-16*n || rest < -1.0e-16*n) {
 			ln += rest / n;
-			rest = -rest * val;
+			rest = -rest * x;
 			n++;
 		}
 		ln += log2 * LN2;
@@ -134,77 +133,53 @@ public final class Math {
 
 	/**
 	 * Returns arcsine of the value.
-	 * @param val  double value
+	 * @param x  double value
 	 * @return arcsine of the value
 	 */
-	public static double asin(double val) {
-		if (val > 1 || val < -1) return Double.NaN;
-	    boolean neg = false;
-		if (val < 0) {
-			val = -val;
-			neg = true;
-		}
-		//linear approximation where iterational method is impractical
-		//it really sucks and should be rewritten
-		if (val > 0.999999) {
-			val = PI / 2.0d + (1-val) * 1000000 * (ASIN0999999 - Math.PI / 2.0d);
-			return neg ? -val : val;
-		}
-		//calculating as Taylor series
-		double rest = val;
-		double x2 = val*val;
-		int n = 1;
-		while (rest > 1.0e-16) {
-			rest *= n * x2;
-			n++;
-			rest /= n;
-			n++;
-			val += rest / n;
-		}
-		return val;
+	public static double asin(double x) {
+		if (x > 1 || x < -1) return Double.NaN;
+	    return atan(x / java.lang.Math.sqrt(1 - x*x));
 	}
 
 	/**
 	 * Returns arccosine of the value.
-	 * @param val  double value
+	 * @param x  double value
 	 * @return arccosine of the value
 	 */
-	public static double acos(double val) {
-		return PI / 2.0 - asin(val);
+	public static double acos(double x) {
+		return PI / 2.0 - asin(x);
 	}
 
 	/**
 	 * Returns arctangent of the value.
-	 * Slow and not very accurate though.
-	 * @param val  double value
+	 * @param x  double value
 	 * @return arctangent of the value
 	 */
-	public static double atan(double val) {
-		//smokin' method from mobylab.ru
+	public static double atan(double x) {
 		//shrinking domain
 		boolean neg = false, big = false;
-		if (val < 0) {
-			val = -val;
+		if (x < 0) {
+			x = -x;
 			neg = true;
 		}
-		if (val > 1) {
-			val = 1/val;
+		if (x > 1) {
+			x = 1/x;
 			big = true;
 		}
 		int offsteps = 0;
-		while (val > PI / 12.0) {
-			val = (val * SQRT3 - 1) / (val + SQRT3);
+		while (x > PI / 12.0) {
+			x = (x * SQRT3 - 1) / (x + SQRT3);
 			offsteps++;
 		}
 		//calculating as Taylor series
 		double result = 0;
-		double rest = val;
-		val *= val;
+		double rest = x;
+		x *= x;
 		int n = 1;
-		while (rest > 1.0e-16) {
+		while (rest > 1.0e-16 || rest < -1.0e-16) {
 			result += rest / n;
 			n += 2;
-			rest = -rest * val;
+			rest = -rest * x;
 		}
 		// reverting our transformations
 		result += PI / 6.0 * offsteps;
