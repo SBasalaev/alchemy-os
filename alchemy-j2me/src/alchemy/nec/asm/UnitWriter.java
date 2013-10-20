@@ -19,7 +19,10 @@
 package alchemy.nec.asm;
 
 import alchemy.evm.Opcodes;
+import alchemy.types.Float32;
+import alchemy.types.Float64;
 import alchemy.types.Int32;
+import alchemy.types.Int64;
 import alchemy.util.ArrayList;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -72,15 +75,15 @@ public class UnitWriter {
 			if (obj.getClass() == Int32.class) {
 				out.writeByte('i');
 				out.writeInt(((Int32)obj).value);
-			} else if (obj.getClass() == Long.class) {
+			} else if (obj.getClass() == Int64.class) {
 				out.writeByte('l');
-				out.writeLong(((Long)obj).longValue());
-			} else if (obj.getClass() == Float.class) {
+				out.writeLong(((Int64)obj).value);
+			} else if (obj.getClass() == Float32.class) {
 				out.writeByte('f');
-				out.writeFloat(((Float)obj).floatValue());
-			} else if (obj.getClass() == Double.class) {
+				out.writeFloat(((Float32)obj).value);
+			} else if (obj.getClass() == Float64.class) {
 				out.writeByte('d');
-				out.writeDouble(((Double)obj).doubleValue());
+				out.writeDouble(((Float64)obj).value);
 			} else if (obj.getClass() == String.class) {
 				out.writeByte('S');
 				out.writeUTF((String)obj);

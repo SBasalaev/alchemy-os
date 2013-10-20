@@ -24,7 +24,10 @@ import alchemy.io.IO;
 import alchemy.io.UTFReader;
 import alchemy.nec.tree.*;
 import alchemy.system.Process;
+import alchemy.types.Float32;
+import alchemy.types.Float64;
 import alchemy.types.Int32;
+import alchemy.types.Int64;
 import alchemy.util.ArrayList;
 import alchemy.util.Strings;
 import java.io.IOException;
@@ -262,11 +265,11 @@ public class Parser {
 				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
 					v.constValue = Int32.ZERO;
 				} else if (vartype == BuiltinType.LONG) {
-					v.constValue = new Long(0l);
+					v.constValue = new Int64(0l);
 				} else if (vartype == BuiltinType.FLOAT) {
-					v.constValue = new Float(0f);
+					v.constValue = new Float32(0f);
 				} else if (vartype == BuiltinType.DOUBLE) {
-					v.constValue = new Double(0d);
+					v.constValue = new Float64(0d);
 				}
 				unit.addVar(v);
 				if (!isConst && files.size() > 1)
@@ -458,11 +461,11 @@ public class Parser {
 				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
 					var.constValue = Int32.ZERO;
 				} else if (vartype == BuiltinType.LONG) {
-					var.constValue = new Long(0l);
+					var.constValue = new Int64(0l);
 				} else if (vartype == BuiltinType.FLOAT) {
-					var.constValue = new Float(0f);
+					var.constValue = new Float32(0f);
 				} else if (vartype == BuiltinType.DOUBLE) {
-					var.constValue = new Double(0d);
+					var.constValue = new Float64(0d);
 				}
 			}
 		}
@@ -798,11 +801,11 @@ public class Parser {
 			case Token.INT:
 				return new ConstExpr(lnum, Int32.toInt32(t.ivalue));
 			case Token.LONG:
-				return new ConstExpr(lnum, new Long(t.lvalue));
+				return new ConstExpr(lnum, new Int64(t.lvalue));
 			case Token.FLOAT:
-				return new ConstExpr(lnum, new Float(t.fvalue));
+				return new ConstExpr(lnum, new Float32(t.fvalue));
 			case Token.DOUBLE:
-				return new ConstExpr(lnum, new Double(t.dvalue));
+				return new ConstExpr(lnum, new Float64(t.dvalue));
 			case Token.QUOTED:
 				return new ConstExpr(lnum, t.svalue);
 			case Token.BOOL:
@@ -1060,11 +1063,11 @@ public class Parser {
 				        || vartype == BuiltinType.BYTE || vartype == BuiltinType.CHAR) {
 					varvalue = new ConstExpr(lnum, Int32.ZERO);
 				} else if (vartype == BuiltinType.LONG) {
-					varvalue = new ConstExpr(lnum, new Long(0l));
+					varvalue = new ConstExpr(lnum, new Int64(0l));
 				} else if (vartype == BuiltinType.FLOAT) {
-					varvalue = new ConstExpr(lnum, new Float(0f));
+					varvalue = new ConstExpr(lnum, new Float32(0f));
 				} else if (vartype == BuiltinType.DOUBLE) {
-					varvalue = new ConstExpr(lnum, new Double(0d));
+					varvalue = new ConstExpr(lnum, new Float64(0d));
 				}
 			}
 			// adding variable and returning expression

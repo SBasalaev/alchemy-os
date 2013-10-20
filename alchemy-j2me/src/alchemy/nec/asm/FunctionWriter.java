@@ -20,14 +20,17 @@ package alchemy.nec.asm;
 
 import alchemy.evm.Opcodes;
 import alchemy.nec.tree.Null;
+import alchemy.types.Float32;
+import alchemy.types.Float64;
 import alchemy.types.Int32;
+import alchemy.types.Int64;
 import alchemy.util.ArrayList;
 import java.io.ByteArrayOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
- *
+ * Writes function bytecode.
  * @author Sergey Basalaev
  */
 public class FunctionWriter implements Opcodes {
@@ -233,7 +236,7 @@ public class FunctionWriter implements Opcodes {
 	
 	/** Visit LDC instruction with given object.
 	 * The class of argument must be one of Null,
-	 * Boolean, Int, Long, Float, Double,
+	 * Boolean, Int32, Int64, Float32, Float64,
 	 * String, FuncObject.
 	 */
 	public void visitLdcInsn(Object cnst) {
@@ -257,8 +260,8 @@ public class FunctionWriter implements Opcodes {
 				data.write(i);
 				written = true;
 			}
-		} else if (cnst instanceof Long) {
-			long l = ((Long)cnst).longValue();
+		} else if (cnst instanceof Int64) {
+			long l = ((Int64)cnst).value;
 			if (l == 0l) {
 				data.write(LCONST_0);
 				written = true;
@@ -266,8 +269,8 @@ public class FunctionWriter implements Opcodes {
 				data.write(LCONST_1);
 				written = true;
 			}
-		} else if (cnst instanceof Float) {
-			float f = ((Float)cnst).floatValue();
+		} else if (cnst instanceof Float32) {
+			float f = ((Float32)cnst).value;
 			if (f == 0f) {
 				data.write(FCONST_0);
 				written = true;
@@ -278,8 +281,8 @@ public class FunctionWriter implements Opcodes {
 				data.write(FCONST_2);
 				written = true;
 			}
-		} else if (cnst instanceof Double) {
-			double d = ((Double)cnst).doubleValue();
+		} else if (cnst instanceof Float64) {
+			double d = ((Float64)cnst).value;
 			if (d == 0d) {
 				data.write(DCONST_0);
 				written = true;

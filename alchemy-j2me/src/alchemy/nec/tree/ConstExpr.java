@@ -18,7 +18,10 @@
 
 package alchemy.nec.tree;
 
+import alchemy.types.Float32;
+import alchemy.types.Float64;
 import alchemy.types.Int32;
+import alchemy.types.Int64;
 
 /**
  * Constant expression.
@@ -39,11 +42,11 @@ public class ConstExpr extends Expr {
 	public Type rettype() {
 		if (value instanceof Int32) {
 			return BuiltinType.INT;
-		} else if (value instanceof Long) {
+		} else if (value instanceof Int64) {
 			return BuiltinType.LONG;
-		} else if (value instanceof Float) {
+		} else if (value instanceof Float32) {
 			return BuiltinType.FLOAT;
-		} else if (value instanceof Double) {
+		} else if (value instanceof Float64) {
 			return BuiltinType.DOUBLE;
 		} else if (value instanceof String) {
 			return BuiltinType.STRING;
