@@ -49,7 +49,7 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
 
 /**
- * Core runtime library for Alchemy OS
+ * Core runtime library for Alchemy OS.
  *
  * @author Sergey Basalaev
  * @version 4.0

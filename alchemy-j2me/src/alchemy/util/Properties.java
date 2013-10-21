@@ -27,6 +27,7 @@ import java.util.Hashtable;
  * Reads properties from the text stream.
  *
  * @author Sergey Basalaev
+ * @deprecated 
  */
 public class Properties {
 

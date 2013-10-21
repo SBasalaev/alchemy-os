@@ -16,12 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.midlet;
+package alchemy.platform.j2me;
 
+import alchemy.io.IO;
 import alchemy.io.UTFReader;
-import alchemy.util.Properties;
-import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreNotFoundException;
 
@@ -42,29 +43,51 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  * <dd>Version of installation</dd>
  * </dl>
  * @author Sergey Basalaev
- * @deprecated alchemy.platform.Installer should be used instead
  */
-public class InstallInfo {
+public final class InstallInfo implements alchemy.platform.InstallInfo {
 
 	private static final String INSTALLINFO = "installinfo";
-
-	private static Properties props;
-
-	private InstallInfo() { }
-
 	/** Key for the installed version number. */
-	public static final String SYS_VERSION = "alchemy.version";
-	/** Key for the type of the root file system. */
-	public static final String FS_INIT = "fs.init";
+	private static final String INST_VERSION = "alchemy.version";
 	/** Key for the string used to initialize root file system. */
-	public static final String FS_TYPE = "fs.type";
+	private static final String FS_DRIVER = "fs.type";
+	/** Key for the type of the root file system. */
+	private static final String FS_OPTIONS = "fs.init";
 	/** Key for the current name of the record store used as emulated FS. */
-	public static final String RMS_NAME = "rms.name";
-	
-	/**
-	 * Tests whether installation info exists within MIDlet.
-	 */
-	public static boolean exists() {
+	private static final String RMS_NAME = "rms.name";
+
+	private String version;
+	private String fsdriver;
+	private String fsoptions;
+
+	public InstallInfo() throws IOException {
+		try {
+			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, false);
+			try {
+				byte[] b = rs.getRecord(1);
+				UTFReader r = new UTFReader(new ByteArrayInputStream(b));
+				String line;
+				while ((line = r.readLine()) != null) {
+					int eq = line.indexOf('=');
+					if (eq < 0) continue;
+					String key = line.substring(0, eq);
+					String value = line.substring(eq+1);
+					if (key.equals(INST_VERSION)) version = value;
+					else if (key.equals(FS_DRIVER)) fsdriver = value;
+					else if (key.equals(FS_OPTIONS)) fsoptions = value;
+				}
+				r.close();
+			} finally {
+				rs.closeRecordStore();
+			}
+		} catch (RecordStoreNotFoundException rsnfe) {
+			// ok, not installed
+		} catch (Exception e) {
+			throw new IOException(e.toString());
+		}
+	}
+
+	public boolean exists() {
 		try {
 			RecordStore.openRecordStore(INSTALLINFO, false).closeRecordStore();
 			return true;
@@ -75,39 +98,36 @@ public class InstallInfo {
 		}
 	}
 
-	/**
-	 * Reads installation information.
-	 * Returns empty properties if Alchemy is not installed.
-	 * Returned object should then be filled with new information.
-	 */
-	public static Properties read() {
-		if (props != null) return props;
-		try {
-			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, false);
-			try {
-				byte[] b = rs.getRecord(1);
-				UTFReader r = new UTFReader(new ByteArrayInputStream(b));
-				return props = Properties.readFrom(r);
-			} finally {
-				rs.closeRecordStore();
-			}
-		} catch (RecordStoreNotFoundException rsnfe) {
-			return props = new Properties();
-		} catch (Exception e) {
-			throw new RuntimeException(e.toString());
-		}
+	public String getFilesystemDriver() {
+		return fsdriver;
 	}
 
-	/**
-	 * Saves installation information that was changed
-	 * after the previous call to <code>read()</code>.
-	 */
-	public static void save() {
-		if (props == null) return;
+	public String getFilesystemOptions() {
+		return fsoptions;
+	}
+
+	public String getInstalledVersion() {
+		return version;
+	}
+
+	public void setFilesystem(String driver, String options) throws IOException {
+		fsdriver = driver;
+		fsoptions = options;
+	}
+
+	public void setInstalledVersion(String version) {
+		this.version = version;
+	}
+
+	public void save() throws IOException {
 		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			IO.println(out, INST_VERSION + '=' + version);
+			IO.println(out, FS_DRIVER + '=' + fsdriver);
+			IO.println(out, FS_OPTIONS + '=' + fsoptions);
 			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, true);
 			if (rs.getNextRecordID() == 1) rs.addRecord(null, 0, 0);
-			byte[] data = Strings.utfEncode(props.toString());
+			byte[] data = out.toByteArray();
 			rs.setRecord(1, data, 0, data.length);
 			rs.closeRecordStore();
 		} catch (Exception e) {
@@ -115,12 +135,8 @@ public class InstallInfo {
 		}
 	}
 
-	/**
-	 * Removes installation info and invalidates any produced properties.
-	 */
-	public static void remove() {
+	public void remove() {
 		try {
-			props = null;
 			RecordStore.deleteRecordStore(INSTALLINFO);
 		} catch (RecordStoreNotFoundException rsnfe) {
 			// already removed
