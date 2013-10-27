@@ -214,6 +214,7 @@ public final class ArrayList {
 	 */
 	public void copyInto(int from, Object array, int offset, int len) {
 		if (len < 0) len = Arrays.arrayLength(array);
+		if (len == 0) return;
 		if (from < 0 || from >= size || len > size || offset < 0 || offset + len > Arrays.arrayLength(array))
 			throw new IndexOutOfBoundsException();
 		Arrays.arrayCopy(elements, from, array, offset, len);

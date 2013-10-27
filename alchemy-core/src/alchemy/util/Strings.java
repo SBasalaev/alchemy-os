@@ -173,8 +173,9 @@ public final class Strings {
 
 	/**
 	 * Splits specified string around given characters.
-	 * @param str  string to split
-	 * @param ch   delimiter characters
+	 * @param str        string to split
+	 * @param ch         delimiter characters
+	 * @param skipEmpty  if true, empty strings are excluded
 	 * @return the array of strings computed by splitting the string
 	 *   around given character
 	 */
@@ -183,10 +184,10 @@ public final class Strings {
 		int len = str.length();
 		int start = 0;
 		while (start < len) {
-			int end = str.indexOf(ch);
+			int end = str.indexOf(ch, start);
 			if (end < 0) end = len;
 			if (!skipEmpty || end - start > 1) {
-				strings.add(str);
+				strings.add(str.substring(start, end));
 			}
 			start = end+1;
 		}

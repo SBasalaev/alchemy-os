@@ -110,6 +110,8 @@ public final class Installer {
 
 	/**
 	 * Creates base directories and unpacks installer.
+	 * This method mounts root file system, unpacks base files
+	 * and then unmounts it.
 	 */
 	public void install(String fsdriver, String fsoptions) throws IOException {
 		Filesystem.mount("", fsdriver, fsoptions);
@@ -165,6 +167,6 @@ public final class Installer {
 			}
 			datastream.close();
 		}
-		Filesystem.remove("/PACKAGE");
+		if (Filesystem.exists("/PACKAGE")) Filesystem.remove("/PACKAGE");
 	}
 }
