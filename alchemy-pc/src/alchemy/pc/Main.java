@@ -19,6 +19,9 @@
 package alchemy.pc;
 
 import alchemy.fs.Filesystem;
+import alchemy.platform.Installer;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Main entry point for PC.
@@ -30,19 +33,39 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			Filesystem.mount("/", "pc", ".");
-			alchemy.system.Process ps = new alchemy.system.Process("terminal", new String[0]);
-			ps.setEnv("PATH", "/bin");
-			ps.setEnv("LIBPATH", "/lib");
-			ps.setEnv("INCPATH", "/inc");
-			ps.start().waitFor();
-			if (ps.getError() != null) {
-				System.err.println(ps.getError());
-			}
-			System.exit(ps.getExitCode());
+			File root = new File("./root");
+			if (!root.exists()) root.mkdirs();
+			checkInstall();
+			run();
 		} catch (Exception e) {
 			System.err.println("!!! Alchemy OS crashed !!!");
 			e.printStackTrace();
 		}
+	}
+
+	public static void checkInstall() throws IOException {
+		Installer installer = new Installer();
+		if (!installer.isInstalled()) {
+			System.out.println("Installing Alchemy OS...");
+			installer.install("pc", "./root");
+		} else if (installer.isUpdateNeeded()) {
+			System.out.println("Updating Alchemy OS...");
+			installer.update();
+		}
+	}
+
+	public static void run() throws IOException, InstantiationException, InterruptedException {
+		Filesystem.mount("", "pc", "./root");
+		Filesystem.mount("/dev", "devfs", "");
+		System.out.println("Welcome!");
+		alchemy.system.Process ps = new alchemy.system.Process("terminal", new String[0]);
+		ps.setEnv("PATH", "/bin");
+		ps.setEnv("LIBPATH", "/lib");
+		ps.setEnv("INCPATH", "/inc");
+		ps.start().waitFor();
+		if (ps.getError() != null) {
+			System.err.println(ps.getError());
+		}
+		System.exit(ps.getExitCode());
 	}
 }
