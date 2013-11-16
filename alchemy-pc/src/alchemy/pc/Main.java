@@ -62,6 +62,7 @@ public class Main {
 		ps.setEnv("PATH", "/bin");
 		ps.setEnv("LIBPATH", "/lib");
 		ps.setEnv("INCPATH", "/inc");
+		ps.setCurrentDirectory("/home");
 		ps.start().waitFor();
 		if (ps.getError() != null) {
 			System.err.println(ps.getError());
