@@ -18,6 +18,7 @@
 
 package alchemy.apps;
 
+import alchemy.io.TerminalInput;
 import alchemy.util.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -114,17 +115,21 @@ class TerminalForm extends Form {
 		}
 	}
 
-	public class TerminalInputStream extends InputStream {
+	private class TerminalInputStream extends InputStream implements TerminalInput {
 
 		private ByteArrayInputStream buf = new ByteArrayInputStream(new byte[0]);
 
 		public TerminalInputStream() { }
 
+		public String getPrompt() {
+			return input.getLabel();
+		}
+
 		public void setPrompt(String prompt) {
 			input.setLabel(prompt);
 		}
 
-		public synchronized void clearScreen() {
+		public synchronized void clear() {
 			deleteAll();
 			if (inputvisible) append(input);
 		}

@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
+import alchemy.io.TerminalInput;
 import alchemy.system.NativeApp;
 import alchemy.system.Process;
 import alchemy.util.ArrayList;
@@ -39,7 +40,6 @@ public class Shell extends NativeApp {
 
 	public Shell() { }
 
-	@Override
 	public int main(Process p, String[] args) {
 		try {
 			int exitcode = 0;
@@ -51,7 +51,7 @@ public class Shell extends NativeApp {
 					IO.println(p.stderr, C_USAGE);
 					return -1;
 				}
-				StringBuilder cmdline = new StringBuilder(args[1]);
+				StringBuffer cmdline = new StringBuffer(args[1]);
 				for (int i=2; i<args.length; i++) {
 					cmdline.append(' ').append(args[i]);
 				}
@@ -66,8 +66,8 @@ public class Shell extends NativeApp {
 				scriptinput = new ByteArrayInputStream(buf);
 				p.addConnection(new ConnectionInputStream(scriptinput));
 			}
-			if (p.stdin instanceof TerminalInputStream) {
-				((TerminalInputStream)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
+			if (p.stdin instanceof TerminalInput) {
+				((TerminalInput)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
 			}
 			UTFReader r = new UTFReader(scriptinput);
 			while (true) try {
@@ -80,7 +80,7 @@ public class Shell extends NativeApp {
 				try { cc = split(line); }
 				catch (IllegalArgumentException e) {
 					IO.println(p.stderr, r.lineNumber()+':'+e.getMessage());
-					if (scriptinput instanceof TerminalInputStream) continue;
+					if (scriptinput instanceof TerminalInput) continue;
 					else return 1;
 				}
 				if (cc.cmd.equals("exit")) {
@@ -95,8 +95,8 @@ public class Shell extends NativeApp {
 					if (cc.args.length > 0) {
 						String newdir = p.toFile(cc.args[0]);
 						p.setCurrentDirectory(newdir);
-						if (p.stdin instanceof TerminalInputStream) {
-							((TerminalInputStream)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
+						if (p.stdin instanceof TerminalInput) {
+							((TerminalInput)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
 						}
 						exitcode = 0;
 					} else {
@@ -104,8 +104,8 @@ public class Shell extends NativeApp {
 						exitcode = 1;
 					}
 				} else if (cc.cmd.equals("cls")) {
-					if (p.stdin instanceof TerminalInputStream) {
-						((TerminalInputStream)p.stdin).clearScreen();
+					if (p.stdin instanceof TerminalInput) {
+						((TerminalInput)p.stdin).clear();
 					}
 					exitcode = 0;
 				} else {
@@ -129,15 +129,15 @@ public class Shell extends NativeApp {
 							child.stderr = Filesystem.write(errfile);
 						}
 					}
-					if (p.stdin instanceof TerminalInputStream) {
-						((TerminalInputStream)p.stdin).setPrompt("");
+					if (p.stdin instanceof TerminalInput) {
+						((TerminalInput)p.stdin).setPrompt("");
 					}
 					exitcode = child.start().waitFor();
 					if (cc.in != null) child.stdin.close();
 					if (cc.out != null) child.stdout.close();
 					if (cc.err != null) child.stderr.close();
-					if (p.stdin instanceof TerminalInputStream) {
-						((TerminalInputStream)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
+					if (p.stdin instanceof TerminalInput) {
+						((TerminalInput)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
 					}
 				}
 			} catch (Throwable t) {
