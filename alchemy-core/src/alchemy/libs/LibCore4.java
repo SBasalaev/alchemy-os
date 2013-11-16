@@ -24,6 +24,7 @@ import alchemy.io.ConnectionInputStream;
 import alchemy.io.ConnectionOutputStream;
 import alchemy.io.IO;
 import alchemy.io.Pipe;
+import alchemy.io.TerminalInput;
 import alchemy.system.AlchemyException;
 import alchemy.system.Function;
 import alchemy.system.Library;
@@ -770,6 +771,17 @@ public final class LibCore4 extends NativeLibrary {
 			case 206: // sysProperty(str: String): String
 				return System.getProperty((String)args[0]);
 
+			/* == Header: term.eh == */
+			case 207: // isTerm(stream: IStream): Bool
+				return Ival(args[0] instanceof TerminalInput);
+			case 208: // TermIStream.clear()
+				((TerminalInput)args[0]).clear();
+				return null;
+			case 209: // TermIStream.getPrompt(): String
+				return ((TerminalInput)args[0]).getPrompt();
+			case 210: // TermIStream.setPrompt(prompt: String)
+				((TerminalInput)args[0]).setPrompt((String)args[1]);
+				return null;
 			default:
 				return null;
 		}
