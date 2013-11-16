@@ -141,18 +141,20 @@ class Tokenizer {
 			return ttype = Token.WORD;
 		}
 
-		//dot and numbers
+		//dot, range and numbers
 		if (ch >= '0' && ch <= '9' || ch == '.') {
 			boolean dotseen = false;
 			if (ch == '.') {
-				nextch = ch = readChar();
-				if (ch < '0' || ch > '9') {
+				ch = readChar();
+				if (ch == '.') {
+					return ttype = Token.RANGE;
+				} else if (ch < '0' || ch > '9') {
+					nextch = ch;
 					return ttype = '.';
 				}
 				dotseen = true;
-			} else {
-				nextch = ch;
 			}
+			nextch = ch;
 			StringBuffer number = new StringBuffer();
 			if (dotseen) number.append('.');
 			String dec = readDecimal();
@@ -276,6 +278,8 @@ class Tokenizer {
 			svalue = id;
 			if (id.equals("true") || id.equals("false"))
 				return ttype = Token.BOOL;
+			if (id.equals("in"))
+				return ttype = Token.IN;
 			if (id.equals("def") || id.equals("if") || id.equals("else") ||
 			    id.equals("use") || id.equals("do") || id.equals("while")||
 			    id.equals("cast")|| id.equals("var")|| id.equals("type") ||

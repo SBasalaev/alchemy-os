@@ -51,7 +51,9 @@ public final class Token {
 	public static final int CHAR = -10;
 
 	/* OPERATORS */
-	
+
+	/** Token <code>'..'</code>. */
+	public static final int RANGE = -19;
 	/** Token <code>'=='</code>. */
 	public static final int EQEQ = -20;
 	/** Token <code>'&lt;='</code>. */
@@ -70,7 +72,9 @@ public final class Token {
 	public static final int AMPAMP = -27;
 	/** Token <code>'||'</code>. */
 	public static final int BARBAR = -28;
-	
+	/** Token <code>'in'</code>. */
+	public static final int IN = -29;
+
 	/* ASSIGNMENTS */
 	
 	/** Token <code>'+='</code>. */
