@@ -138,8 +138,8 @@ public final class ArrayList {
 
 	/** Removes element from given position of the list. */
 	public void remove(int index) {
-		if (index < 0 || index >= size)
-			throw new IndexOutOfBoundsException();
+		if (index < 0) index += size;
+		if (index < 0 || index >= size) throw new IndexOutOfBoundsException();
 		size--;
 		if (index < size)
 			System.arraycopy(elements, index+1, elements, index, size-index);
