@@ -32,7 +32,6 @@ import alchemy.util.ArrayList;
 import alchemy.util.Strings;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Stack;
 
 /**
  * Parses Ether language.
@@ -79,7 +78,7 @@ public class Parser {
 	private Unit unit;
 
 	/** Files in the process of parsing. */
-	private Stack files = new Stack();
+	private ArrayList files = new ArrayList();
 	/** Files that are already parsed. */
 	private ArrayList parsed = new ArrayList();
 	
@@ -158,14 +157,14 @@ public class Parser {
 		if (files.contains(file)) {
 			StringBuffer sb = new StringBuffer("Cyclic inclusion");
 			for (int i=0; i<files.size(); i++) {
-				sb.append("\n from ").append(files.elementAt(i));
+				sb.append("\n from ").append(files.get(i));
 			}
 			throw new ParseException(sb.toString());
 		}
 		//push file in stack
 		Tokenizer oldt = t;
 		String olddir = p.getCurrentDirectory();
-		files.push(file);
+		files.add(file);
 		p.setCurrentDirectory(Filesystem.fileParent(file));
 		ConnectionInputStream in = new ConnectionInputStream(Filesystem.read(file));
 		p.addConnection(in);
@@ -380,11 +379,11 @@ public class Parser {
 							block.exprs.add(new VarExpr(lnum, th));
 							fdef.body = block;
 							fdef.hits++;
-							fdef.source = Filesystem.fileName((String)files.peek());
+							fdef.source = Filesystem.fileName((String)files.last());
 						} else {
 							fdef.body = cast(parseExpr(fdef), fdef.type.rettype);
 							fdef.hits++;
-							fdef.source = Filesystem.fileName((String)files.peek());
+							fdef.source = Filesystem.fileName((String)files.last());
 						}
 						if (files.size() > 1)
 							warn(W_INCLUDED, "Function " + fdef.signature + " is implemented in included file");
@@ -399,7 +398,8 @@ public class Parser {
 		p.removeConnection(in);
 		t = oldt;
 		p.setCurrentDirectory(olddir);
-		parsed.add(files.pop());
+		parsed.add(files.last());
+		files.remove(-1);
 	}
 	
 	/** Creates Type.&lt;init&gt; from Type.new */
@@ -408,7 +408,7 @@ public class Parser {
 		Func init = new Func(unit);
 		init.hits++;
 		init.signature = rtype.toString() + ".<init>";
-		init.source = Filesystem.fileName((String)files.peek());
+		init.source = Filesystem.fileName((String)files.last());
 		Type[] initargs = new Type[constructor.type.args.length + 1];
 		initargs[0] = rtype;
 		System.arraycopy(constructor.type.args, 0, initargs, 1, initargs.length-1);
@@ -1162,7 +1162,7 @@ public class Parser {
 			// anonymous function
 			// TODO: I probably need to use scope here instead
 			Func func = new Func(unit);
-			func.source = Filesystem.fileName((String)files.peek());
+			func.source = Filesystem.fileName((String)files.last());
 			// parsing args
 			expect('(');
 			ArrayList args = new ArrayList();
@@ -1853,7 +1853,7 @@ public class Parser {
 	private void warn(int category, String msg) {
 		if (category == W_ERROR || ((1 << category) & Wmask) != 0) {
 			StringBuffer output = new StringBuffer();
-			output.append(files.peek()).append(':').append(t.lineNumber());
+			output.append(files.last()).append(':').append(t.lineNumber());
 			if (category == W_ERROR) output.append(": [Error]");
 			else output.append(": [Warning ").append(WARN_STRINGS[category]).append(']');
 			output.append("\n ").append(msg);
