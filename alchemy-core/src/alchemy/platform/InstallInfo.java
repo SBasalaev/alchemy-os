@@ -22,6 +22,8 @@ import java.io.IOException;
 
 /**
  * Information about current installation.
+ * Implementations of this interface load and store installation
+ * information in platform-dependent manner.
  *
  * @author Sergey Basalaev
  */

@@ -53,7 +53,7 @@ public final class Installer {
 	}
 
 	/** Reads setup.cfg embedded in the jar. */
-	private static HashMap getSetupCfg() throws IOException {
+	static HashMap getSetupCfg() throws IOException {
 		InputStream cfgin = Installer.class.getResourceAsStream("/setup.cfg");
 		if (cfgin == null) throw new IOException("setup.cfg not found");
 		HashMap map = readConfig(cfgin);
