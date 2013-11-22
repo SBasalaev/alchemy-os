@@ -23,6 +23,7 @@ import alchemy.fs.FSManager;
 import alchemy.nec.tree.Unit;
 import alchemy.nlib.NativeApp;
 import alchemy.util.IO;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -148,9 +149,11 @@ public class NEC extends NativeApp {
 			OutputStream out = FSManager.fs().write(p.toFile(outname));
 			wr.writeTo(unit, out);
 			out.close();
+		} catch (IOException ioe) {
+			IO.println(p.stderr, "I/O error: " + ioe);
 		} catch (Exception e) {
-			IO.println(p.stderr, "Error: "+e);
-			//e.printStackTrace();
+			IO.println(p.stderr, "There is a bug in compiler. Please report it with your source code and the following error message: "+e);
+			e.printStackTrace();
 			return -1;
 		}
 		return 0;
