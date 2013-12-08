@@ -41,8 +41,6 @@ public final class Token {
 	public static final int DOUBLE = -5;
 	/** Quoted string. */
 	public static final int QUOTED = -6;
-	/** Keyword. */
-	public static final int KEYWORD = -7;
 	/** Identifier. */
 	public static final int WORD = -8;
 	/** Boolean literal. */
@@ -72,8 +70,6 @@ public final class Token {
 	public static final int AMPAMP = -27;
 	/** Token <code>'||'</code>. */
 	public static final int BARBAR = -28;
-	/** Token <code>'in'</code>. */
-	public static final int IN = -29;
 
 	/* ASSIGNMENTS */
 	
@@ -99,11 +95,33 @@ public final class Token {
 	public static final int GTGTEQ = -40;
 	/** Token <code>'&gt;&gt;&gt;='</code>. */
 	public static final int GTGTGTEQ = -41;
-	
+
+	/* KEYWORDS */
+
+	/** Token <code>'in'</code>. */
+	public static final int CAST = -50;
+	public static final int CATCH = -51;
+	public static final int CONST = -52;
+	public static final int DEF = -53;
+	public static final int DO = -54;
+	public static final int ELSE = -55;
+	public static final int FOR = -56;
+	public static final int IF = -57;
+	public static final int IN = -58;
+	public static final int NEW = -59;
+	public static final int NULL = -60;
+	public static final int SUPER = -61;
+	public static final int SWITCH = -62;
+	public static final int TRY = -63;
+	public static final int TYPE = -64;
+	public static final int USE = -65;
+	public static final int VAR = -66;
+	public static final int WHILE = -67;
+
 	public static boolean isAssignment(int token) {
-		return (token <= -30) || (token == '=');
+		return (token >= -41 && token <= -30) || (token == '=');
 	}
-	
+
 	public static int getAssignOperator(int token) {
 		switch (token) {
 			case PLUSEQ: return '+';

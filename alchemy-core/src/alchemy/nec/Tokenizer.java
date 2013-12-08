@@ -29,7 +29,8 @@ class Tokenizer {
 	static private final int EOF_CHAR = -1;
 	static private final int NO_CHAR = -2;
 
-	private UTFReader r;
+	private final UTFReader r;
+	private final boolean compat21;
 	private boolean pushedBack;
 	private int nextch = NO_CHAR;
 	private int linenumber = 1;
@@ -71,8 +72,13 @@ class Tokenizer {
 		chtypes['~'] = OPCHAR;
 	}
 
-	public Tokenizer(UTFReader r) {
+	/**
+	 * Creates new tokenizer to read from this buffer.
+	 * If <code>compat</code> is true then work in 2.1 compatibility mode.
+	 */
+	public Tokenizer(UTFReader r, boolean compat) {
 		this.r = r;
+		this.compat21 = compat;
 	}
 
 	public void pushBack() {
@@ -88,7 +94,8 @@ class Tokenizer {
 		int ch = readChar();
 
 		//skipping whitespaces
-		while (ch <= ' ' && ch != EOF_CHAR) ch = readChar();
+		// in 2.1 '\n' is a whitespace, in 2.2 is a separate token
+		while (ch <= ' ' && ch != EOF_CHAR && (ch != '\n' || compat21)) ch = readChar();
 
 		//EOF
 		if (ch == EOF_CHAR) {
@@ -278,15 +285,42 @@ class Tokenizer {
 			svalue = id;
 			if (id.equals("true") || id.equals("false"))
 				return ttype = Token.BOOL;
+			if (id.equals("cast"))
+				return ttype = Token.CAST;
+			if (id.equals("catch"))
+				return ttype = Token.CATCH;
+			if (id.equals("const"))
+				return ttype = Token.CONST;
+			if (id.equals("def"))
+				return ttype = Token.DEF;
+			if (id.equals("do"))
+				return ttype = Token.DO;
+			if (id.equals("else"))
+				return ttype = Token.ELSE;
+			if (id.equals("for"))
+				return ttype = Token.FOR;
+			if (id.equals("if"))
+				return ttype = Token.IF;
 			if (id.equals("in"))
-				return ttype = Token.IN;
-			if (id.equals("def") || id.equals("if") || id.equals("else") ||
-			    id.equals("use") || id.equals("do") || id.equals("while")||
-			    id.equals("cast")|| id.equals("var")|| id.equals("type") ||
-			    id.equals("null")|| id.equals("new")|| id.equals("for")  ||
-			    id.equals("try") || id.equals("catch") || id.equals("const")||
-			    id.equals("switch") || id.equals("goto") || id.equals("super"))
-				return ttype = Token.KEYWORD;
+				return ttype = (compat21) ? Token.WORD : Token.IN;
+			if (id.equals("new"))
+				return ttype = Token.NEW;
+			if (id.equals("null"))
+				return ttype = Token.NULL;
+			if (id.equals("super"))
+				return ttype = Token.SUPER;
+			if (id.equals("switch"))
+				return ttype = Token.SWITCH;
+			if (id.equals("try"))
+				return ttype = Token.TRY;
+			if (id.equals("type"))
+				return ttype = Token.TYPE;
+			if (id.equals("use"))
+				return ttype = Token.USE;
+			if (id.equals("var"))
+				return ttype = Token.VAR;
+			if (id.equals("while"))
+				return ttype = Token.WHILE;
 			return ttype = Token.WORD;
 		}
 
@@ -514,7 +548,24 @@ class Tokenizer {
 				return ">>=";
 			case Token.GTGTGTEQ:
 				return ">>>=";
-			case Token.KEYWORD:
+			case Token.CAST:
+			case Token.CATCH:
+			case Token.CONST:
+			case Token.DEF:
+			case Token.DO:
+			case Token.ELSE:
+			case Token.FOR:
+			case Token.IF:
+			case Token.IN:
+			case Token.NEW:
+			case Token.NULL:
+			case Token.SUPER:
+			case Token.SWITCH:
+			case Token.TRY:
+			case Token.TYPE:
+			case Token.USE:
+			case Token.VAR:
+			case Token.WHILE:
 			case Token.WORD:
 			case Token.QUOTED:
 			case Token.BOOL:
