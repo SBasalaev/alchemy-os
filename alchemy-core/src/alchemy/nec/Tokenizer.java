@@ -76,9 +76,9 @@ class Tokenizer {
 	 * Creates new tokenizer to read from this buffer.
 	 * If <code>compat</code> is true then work in 2.1 compatibility mode.
 	 */
-	public Tokenizer(UTFReader r, boolean compat) {
+	public Tokenizer(CompilerEnv env, UTFReader r) {
 		this.r = r;
-		this.compat21 = compat;
+		this.compat21 = (env.options & (1 << CompilerEnv.F_COMPAT)) != 0;
 	}
 
 	public void pushBack() {
