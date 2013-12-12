@@ -30,13 +30,14 @@ public final class CompilerEnv {
 	public static final String[] OPTION_STRINGS = {"compat"};
 
 	/* OPTION FLAGS */
-	public static final int F_COMPAT = 0;
+	public static final int F_COMPAT = 1;
 
 	/** Identifiers for warning categories. */
 	public static final String[] WARNING_STRINGS = {};
 
 	/* WARNING CATEGORIES */
 	public static final int W_ERROR = -1;
+	public static final int W_DEPRECATED = 0;
 
 	/** Bit-mask of enabled option flags. */
 	public final int options;
@@ -44,14 +45,17 @@ public final class CompilerEnv {
 	public final int warnings;
 	/** Whether to generate debugging info. */
 	public final boolean debug;
+	/** Process instance for IO operations. */
+	public final Process io;
 
 	private int warncount = 0;
 	private int errcount = 0;
-	
-	public CompilerEnv(int optionflags, int warningflags, boolean debug) {
+
+	public CompilerEnv(Process p, int optionflags, int warningflags, boolean debug) {
 		this.options = optionflags;
 		this.warnings = warningflags;
 		this.debug = debug;
+		this.io = p;
 	}
 
 	public int getWarningCount() {
@@ -73,7 +77,7 @@ public final class CompilerEnv {
 			String output = file + ':' + line + ": ["
 					+ ((isError) ? "Error" : "Warning " + WARNING_STRINGS[category])
 					+ "]\n " + msg;
-			IO.println(Process.currentProcess().stderr, msg);
+			IO.println(io.stderr, output);
 		}
 	}
 }

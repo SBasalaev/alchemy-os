@@ -30,7 +30,8 @@ class Tokenizer {
 	static private final int NO_CHAR = -2;
 
 	private final UTFReader r;
-	private final boolean compat21;
+	private final String filename;
+	private final CompilerEnv env;
 	private boolean pushedBack;
 	private int nextch = NO_CHAR;
 	private int linenumber = 1;
@@ -76,16 +77,17 @@ class Tokenizer {
 	 * Creates new tokenizer to read from this buffer.
 	 * If <code>compat</code> is true then work in 2.1 compatibility mode.
 	 */
-	public Tokenizer(CompilerEnv env, UTFReader r) {
+	public Tokenizer(CompilerEnv env, String filename, UTFReader r) {
 		this.r = r;
-		this.compat21 = (env.options & (1 << CompilerEnv.F_COMPAT)) != 0;
+		this.filename = filename;
+		this.env = env;
 	}
 
 	public void pushBack() {
 		pushedBack = true;
 	}
 
-	public int nextToken() throws IOException, ParseException {
+	public int nextToken(boolean skipNewLine) throws IOException, ParseException {
 		if (pushedBack) {
 			pushedBack = false;
 			return ttype;
@@ -94,8 +96,7 @@ class Tokenizer {
 		int ch = readChar();
 
 		//skipping whitespaces
-		// in 2.1 '\n' is a whitespace, in 2.2 is a separate token
-		while (ch <= ' ' && ch != EOF_CHAR && (ch != '\n' || compat21)) ch = readChar();
+		while (ch <= ' ' && ch != EOF_CHAR && (skipNewLine || ch != '\n')) ch = readChar();
 
 		//EOF
 		if (ch == EOF_CHAR) {
@@ -256,7 +257,7 @@ class Tokenizer {
 			if (ch == 'l' || ch == 'L') {
 				try {
 					lvalue = Long.parseLong(number.toString(), 10);
-				} catch (Exception nfe) {
+				} catch (NumberFormatException nfe) {
 					throw new ParseException("Integer number too large: "+number);
 				}
 				return ttype = Token.LONG;
@@ -302,7 +303,12 @@ class Tokenizer {
 			if (id.equals("if"))
 				return ttype = Token.IF;
 			if (id.equals("in"))
-				return ttype = (compat21) ? Token.WORD : Token.IN;
+				if ((env.options & CompilerEnv.F_COMPAT) == 0) {
+					env.warn(filename, linenumber, CompilerEnv.W_DEPRECATED, "'in' will be a keyword in Ether 2.2");
+					return ttype = Token.IN;
+				} else {
+					return ttype = Token.WORD;
+				}
 			if (id.equals("new"))
 				return ttype = Token.NEW;
 			if (id.equals("null"))
@@ -371,7 +377,7 @@ class Tokenizer {
 				if (ch == '/' && ch2 == '/') {
 					do ch = readChar();
 					while (ch != '\n' && ch != EOF_CHAR);
-					return nextToken();
+					return nextToken(skipNewLine);
 				}
 				//block comment
 				if (ch == '/' && ch2 == '*') {
@@ -384,7 +390,7 @@ class Tokenizer {
 					if (ch2 == EOF_CHAR) {
 						throw new ParseException("Unclosed comment");
 					}
-					return nextToken();
+					return nextToken(skipNewLine);
 				}
 			} else {
 				nextch = ch2;
