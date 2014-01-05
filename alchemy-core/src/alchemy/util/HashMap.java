@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -65,11 +65,13 @@ public final class HashMap {
 				return;
 			}
 		}
-		
+
 		// rehash if too many objects
-		if (size * 3 / 4 > table.length)
+		if (size * 3 / 4 > table.length) {
 			rehash();
-		
+			table = entries;
+		}
+
 		// create new entry
 		HashMapEntry e = new HashMapEntry();
 		e.hash = hash;
@@ -145,8 +147,11 @@ public final class HashMap {
 			dejaVu.add(this);
 			buf.append('{');
 			HashMapEntry[] table = entries;
+			boolean first = true;
 			for (int index = table.length-1; index >= 0; index--) {
 				for (HashMapEntry e = table[index]; e != null; e = e.next) {
+					if (first) first = false;
+					else buf.append(", ");
 					Strings.buildString(e.key, dejaVu, buf);
 					buf.append('=');
 					Strings.buildString(e.value, dejaVu, buf);
