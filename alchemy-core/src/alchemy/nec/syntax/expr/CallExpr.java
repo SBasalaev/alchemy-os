@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,40 +16,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.FunctionType;
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Conditional expression.
- * <pre>
- * <b>if</b> (<i>condition</i>)
- *   <i>expr;</i>
- * <b>else</b>
- *   <i>expr;</i>
- * </pre>
+ * Function invocation.
+ * <pre><i>func</i>(<i>arg0</i>, ..., <i>argN</i>)</pre>
  * 
  * @author Sergey Basalaev
  */
-public class IfExpr extends Expr {
-	
-	public Expr condition;
-	public Expr ifexpr;
-	public Expr elseexpr;
+public final class CallExpr extends Expr {
 
-	public IfExpr(Expr condition, Expr ifexpr, Expr elseexpr) {
-		this.condition = condition;
-		this.ifexpr = ifexpr;
-		this.elseexpr = elseexpr;
-	}
+	/** Expression used to load reference to a function. */
+	public Expr fload;
+	/** Argument expressions. */
+	public Expr[] args;
 
-	public Type rettype() {
-		return ifexpr.rettype();
+	public CallExpr(Expr fload, Expr[] args) {
+		super(EXPR_CALL);
+		this.fload = fload;
+		this.args = args;
 	}
 
 	public int lineNumber() {
-		return condition.lineNumber();
+		return fload.lineNumber();
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitIf(this, data);
+	public Type returnType() {
+		return ((FunctionType)fload.returnType()).rettype;
+	}
+
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitCall(this, args);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,36 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
 
 /**
- * Function call.
- * <pre><i>func</i>(<i>arg0</i>, ..., <i>argN</i>)</pre>
- * 
+ * Visitor for expression trees.
  * @author Sergey Basalaev
  */
-public class FCallExpr extends Expr {
-
-	/** Expression used to load reference to a function. */
-	public Expr fload;
-	/** Argument expressions. */
-	public Expr[] args;
-
-	public FCallExpr(Expr fload, Expr[] args) {
-		this.fload = fload;
-		this.args = args;
-	}
-
-	public Type rettype() {
-		FunctionType ftype = (FunctionType)fload.rettype();
-		return ftype.rettype;
-	}
-
-	public int lineNumber() {
-		return fload.lineNumber();
-	}
-
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitFCall(this, data);
-	}
+public interface ExprVisitor {
+	Object visitBinary(BinaryExpr expr, Object args);
+	Object visitCall(CallExpr expr, Object args);
+	Object visitCast(CastExpr expr, Object args);
+	Object visitComparison(ComparisonExpr expr, Object args);
+	Object visitConst(ConstExpr expr, Object args);
+	Object visitIf(IfExpr expr, Object args);
+	Object visitUnary(UnaryExpr expr, Object args);
+	Object visitVar(VarExpr expr, Object args);
 }

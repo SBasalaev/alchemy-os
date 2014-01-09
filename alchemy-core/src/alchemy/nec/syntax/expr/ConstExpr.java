@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,23 +16,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
 
-import alchemy.types.Int32;
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Constant expression for character.
- * Uses Char as return type.
- * 
+ * Literal expression.
  * @author Sergey Basalaev
  */
-public class CharConstExpr extends ConstExpr {
+public final class ConstExpr extends Expr {
 
-	public CharConstExpr(int lnum, Int32 obj) {
-		super(lnum, obj);
+	private final int line;
+	private final Type type;
+	public final Object value;
+
+	public ConstExpr(int line, Type type, Object value) {
+		super(EXPR_CONST);
+		this.line = line;
+		this.type = type;
+		this.value = value;
 	}
 
-	public Type rettype() {
-		return BuiltinType.CHAR;
+	public int lineNumber() {
+		return line;
+	}
+
+	public Type returnType() {
+		return type;
+	}
+
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitConst(this, args);
 	}
 }
