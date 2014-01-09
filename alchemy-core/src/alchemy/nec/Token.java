@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,8 +43,6 @@ public final class Token {
 	public static final int QUOTED = -6;
 	/** Identifier. */
 	public static final int WORD = -8;
-	/** Boolean literal. */
-	public static final int BOOL = -9;
 	/** Character literal. */
 	public static final int CHAR = -10;
 
@@ -98,7 +96,6 @@ public final class Token {
 
 	/* KEYWORDS */
 
-	/** Token <code>'in'</code>. */
 	public static final int CAST = -50;
 	public static final int CATCH = -51;
 	public static final int CONST = -52;
@@ -117,9 +114,18 @@ public final class Token {
 	public static final int USE = -65;
 	public static final int VAR = -66;
 	public static final int WHILE = -67;
+	public static final int FALSE = -68;
+	public static final int TRUE = -69;
+	public static final int BREAK = -70;
+	public static final int CONTINUE = -71;
+	public static final int RETURN = -72;
 
 	public static boolean isAssignment(int token) {
 		return (token >= -41 && token <= -30) || (token == '=');
+	}
+
+	public static boolean isOperator(int token) {
+		return (token == IN) || (token >= -28 && token <= -19) || "+-/*%^&|<>".indexOf(token) >= 0;
 	}
 
 	public static int getAssignOperator(int token) {
@@ -137,6 +143,114 @@ public final class Token {
 			case GTGTGTEQ: return GTGTGT;
 			default:
 				throw new IllegalArgumentException("Not an assignment operator: " + token);
+		}
+	}
+
+	public static String toString(int token) {
+		switch (token) {
+			case INT:
+			case LONG:
+			case FLOAT:
+			case DOUBLE:
+				return "<number>";
+			case QUOTED:
+				return "<string>";
+			case WORD:
+				return "<word>";
+			case CHAR:
+				return "<character>";
+			case EOF:
+				return "<EOF>";
+			case RANGE:
+				return "..";
+			case EQEQ:
+				return "==";
+			case LTEQ:
+				return "<=";
+			case GTEQ:
+				return ">=";
+			case NOTEQ:
+				return "!=";
+			case LTLT:
+				return "<<";
+			case GTGT:
+				return ">>";
+			case GTGTGT:
+				return ">>>";
+			case AMPAMP:
+				return "&&";
+			case BARBAR:
+				return "||";
+			case PLUSEQ:
+				return "+=";
+			case MINUSEQ:
+				return "-=";
+			case STAREQ:
+				return "*=";
+			case SLASHEQ:
+				return "/=";
+			case PERCENTEQ:
+				return "%=";
+			case BAREQ:
+				return "|=";
+			case AMPEQ:
+				return "&=";
+			case HATEQ:
+				return "^=";
+			case LTLTEQ:
+				return "<<=";
+			case GTGTEQ:
+				return ">>=";
+			case GTGTGTEQ:
+				return ">>>=";
+			case CAST:
+				return "cast";
+			case CATCH:
+				return "catch";
+			case CONST:
+				return "const";
+			case DEF:
+				return "def";
+			case DO:
+				return "do";
+			case ELSE:
+				return "else";
+			case FOR:
+				return "for";
+			case IF:
+				return "if";
+			case IN:
+				return "in";
+			case NEW:
+				return "new";
+			case NULL:
+				return "null";
+			case SUPER:
+				return "super";
+			case SWITCH:
+				return "switch";
+			case TRY:
+				return "try";
+			case TYPE:
+				return "type";
+			case USE:
+				return "use";
+			case VAR:
+				return "var";
+			case WHILE:
+				return "while";
+			case FALSE:
+				return "false";
+			case TRUE:
+				return "true";
+			case BREAK:
+				return "break";
+			case CONTINUE:
+				return "continue";
+			case RETURN:
+				return "return";
+			default:
+				return String.valueOf((char)token);
 		}
 	}
 }

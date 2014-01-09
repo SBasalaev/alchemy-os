@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ class Tokenizer {
 		pushedBack = true;
 	}
 
-	public int nextToken(boolean skipNewLine) throws IOException, ParseException {
+	public int nextToken() throws IOException, ParseException {
 		if (pushedBack) {
 			pushedBack = false;
 			return ttype;
@@ -96,7 +96,7 @@ class Tokenizer {
 		int ch = readChar();
 
 		//skipping whitespaces
-		while (ch <= ' ' && ch != EOF_CHAR && (skipNewLine || ch != '\n')) ch = readChar();
+		while (ch <= ' ' && ch != EOF_CHAR) ch = readChar();
 
 		//EOF
 		if (ch == EOF_CHAR) {
@@ -284,39 +284,62 @@ class Tokenizer {
 			nextch = ch;
 			String id = idbuf.toString();
 			svalue = id;
-			if (id.equals("true") || id.equals("false"))
-				return ttype = Token.BOOL;
+			if (id.equals("break"))
+				if (env.hasOption(CompilerEnv.F_COMPAT21)) {
+					env.warn(filename, linenumber, CompilerEnv.W_DEPRECATED, "'break' will be a keyword in Ether 2.2");
+					return ttype = Token.WORD;
+				} else {
+					return ttype = Token.BREAK;
+				}
 			if (id.equals("cast"))
 				return ttype = Token.CAST;
 			if (id.equals("catch"))
 				return ttype = Token.CATCH;
 			if (id.equals("const"))
 				return ttype = Token.CONST;
+			if (id.equals("continue"))
+				if (env.hasOption(CompilerEnv.F_COMPAT21)) {
+					env.warn(filename, linenumber, CompilerEnv.W_DEPRECATED, "'continue' will be a keyword in Ether 2.2");
+					return ttype = Token.WORD;
+				} else {
+					return ttype = Token.CONTINUE;
+				}
 			if (id.equals("def"))
 				return ttype = Token.DEF;
 			if (id.equals("do"))
 				return ttype = Token.DO;
 			if (id.equals("else"))
 				return ttype = Token.ELSE;
+			if (id.equals("false"))
+				return ttype = Token.FALSE;
 			if (id.equals("for"))
 				return ttype = Token.FOR;
 			if (id.equals("if"))
 				return ttype = Token.IF;
 			if (id.equals("in"))
-				if ((env.options & CompilerEnv.F_COMPAT) == 0) {
+				if (env.hasOption(CompilerEnv.F_COMPAT21)) {
 					env.warn(filename, linenumber, CompilerEnv.W_DEPRECATED, "'in' will be a keyword in Ether 2.2");
-					return ttype = Token.IN;
-				} else {
 					return ttype = Token.WORD;
+				} else {
+					return ttype = Token.IN;
 				}
 			if (id.equals("new"))
 				return ttype = Token.NEW;
 			if (id.equals("null"))
 				return ttype = Token.NULL;
+			if (id.equals("return"))
+				if (env.hasOption(CompilerEnv.F_COMPAT21)) {
+					env.warn(filename, linenumber, CompilerEnv.W_DEPRECATED, "'return' will be a keyword in Ether 2.2");
+					return ttype = Token.WORD;
+				} else {
+					return ttype = Token.RETURN;
+				}
 			if (id.equals("super"))
 				return ttype = Token.SUPER;
 			if (id.equals("switch"))
 				return ttype = Token.SWITCH;
+			if (id.equals("true"))
+				return ttype = Token.TRUE;
 			if (id.equals("try"))
 				return ttype = Token.TRY;
 			if (id.equals("type"))
@@ -377,7 +400,7 @@ class Tokenizer {
 				if (ch == '/' && ch2 == '/') {
 					do ch = readChar();
 					while (ch != '\n' && ch != EOF_CHAR);
-					return nextToken(skipNewLine);
+					return nextToken();
 				}
 				//block comment
 				if (ch == '/' && ch2 == '*') {
@@ -390,7 +413,7 @@ class Tokenizer {
 					if (ch2 == EOF_CHAR) {
 						throw new ParseException("Unclosed comment");
 					}
-					return nextToken(skipNewLine);
+					return nextToken();
 				}
 			} else {
 				nextch = ch2;
@@ -554,30 +577,8 @@ class Tokenizer {
 				return ">>=";
 			case Token.GTGTGTEQ:
 				return ">>>=";
-			case Token.CAST:
-			case Token.CATCH:
-			case Token.CONST:
-			case Token.DEF:
-			case Token.DO:
-			case Token.ELSE:
-			case Token.FOR:
-			case Token.IF:
-			case Token.IN:
-			case Token.NEW:
-			case Token.NULL:
-			case Token.SUPER:
-			case Token.SWITCH:
-			case Token.TRY:
-			case Token.TYPE:
-			case Token.USE:
-			case Token.VAR:
-			case Token.WHILE:
-			case Token.WORD:
-			case Token.QUOTED:
-			case Token.BOOL:
-				return svalue;
 			default:
-				return String.valueOf((char)ttype);
+				return (ttype < 0) ? svalue : String.valueOf((char)ttype);
 		}
 	}
 

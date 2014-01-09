@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2013-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,20 +29,29 @@ public final class CompilerEnv {
 	/** Identifiers for optional features. */
 	public static final String[] OPTION_STRINGS = {"compat"};
 
-	/* OPTION FLAGS */
-	public static final int F_COMPAT = 1;
+	/** Option for 2.1 compatibility mode. */
+	public static final int F_COMPAT21 = 0;
 
 	/** Identifiers for warning categories. */
-	public static final String[] WARNING_STRINGS = {};
+	public static final String[] WARNING_STRINGS = {"deprecated", "main", "operators", "included", "empty", "typesafe"};
 
-	/* WARNING CATEGORIES */
+	/**
+	 * Warning category for errors.
+	 * Using this constant in {@link #warn(String, int, int, String) warn()}
+	 * method increases error counter.
+	 */
 	public static final int W_ERROR = -1;
 	public static final int W_DEPRECATED = 0;
+	public static final int W_MAIN = 1;
+	public static final int W_OPERATORS = 2;
+	public static final int W_INCLUDED = 3;
+	public static final int W_EMPTY = 4;
+	public static final int W_TYPESAFE = 5;
 
 	/** Bit-mask of enabled option flags. */
-	public final int options;
+	private final int options;
 	/** Bit-mask of enabled warning flags. */
-	public final int warnings;
+	private final int warnings;
 	/** Whether to generate debugging info. */
 	public final boolean debug;
 	/** Process instance for IO operations. */
@@ -64,6 +73,10 @@ public final class CompilerEnv {
 
 	public int getErrorCount() {
 		return errcount;
+	}
+
+	public boolean hasOption(int option) {
+		return (options & (1 << option)) != 0;
 	}
 
 	public void warn(String file, int line, int category, String msg) {
