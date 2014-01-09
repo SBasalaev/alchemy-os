@@ -233,11 +233,15 @@ public class FunctionWriter implements Opcodes {
 		data.write(var);
 		data.write(incr);
 	}
-	
+
+	public void visitLdFunc(String name) {
+		visitLdcInsn(new FuncObject(name));
+	}
+
 	/** Visit LDC instruction with given object.
 	 * The class of argument must be one of Null,
 	 * Boolean, Int32, Int64, Float32, Float64,
-	 * String, FuncObject.
+	 * String.
 	 */
 	public void visitLdcInsn(Object cnst) {
 		boolean written = false;

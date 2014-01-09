@@ -18,7 +18,7 @@
 
 package alchemy.nec.asm;
 
-public class FuncObject {
+class FuncObject {
 	final String value;
 
 	public FuncObject(String value) {
