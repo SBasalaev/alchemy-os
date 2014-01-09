@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,21 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax;
 
 /**
- * An expression.
+ * Object instance to represent null value.
  * @author Sergey Basalaev
  */
-public abstract class Expr {
+public final class Null {
 	
-	public Expr() { }
+	private Null() { }
 	
-	/** Type that this expression returns. */
-	public abstract Type rettype();
+	public final static Null NULL = new Null();
 
-	/** Returns line in the source on which expression starts. */
-	public abstract int lineNumber();
-	
-	public abstract Object accept(ExprVisitor v, Object data);
+	public String toString() {
+		return "null";
+	}
 }

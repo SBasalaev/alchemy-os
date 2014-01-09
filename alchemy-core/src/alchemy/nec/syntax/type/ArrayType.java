@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,32 +16,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.type;
 
 /**
- * Cast expression.
- * <pre><b>cast</b> (<i>type</i>) <i>expr</i></pre>.
- * This does not include primitive casts and produces no code.
- * @author Sergey Basalaev
+ * Array type.
+ * <pre>
+ * [<i>elementType</i>]
+ * </pre>
+ * 
+ * @author Sergey Basalaev.
  */
-public class CastExpr extends Expr {
-	public Type toType;
-	public Expr expr;
+public final class ArrayType extends Type {
 
-	public CastExpr(Type toType, Expr expr) {
-		this.toType = toType;
-		this.expr = expr;
+	public final Type elementType;
+
+	public ArrayType(Type elementType) {
+		super("Array", TYPE_ARRAY);
+		this.elementType = elementType;
 	}
 
-	public Type rettype() {
-		return toType;
+	public boolean equals(Type type) {
+		if (type.kind != TYPE_ARRAY) return false;
+		final ArrayType other = (ArrayType)type;
+		return this.elementType.equals(other.elementType);
 	}
 
-	public int lineNumber() {
-		return expr.lineNumber();
+	public String toString() {
+		return "["+elementType+"]";
 	}
-	
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitCast(this, data);
+
+	public Type superType() {
+		return BuiltinType.ARRAY;
 	}
 }
