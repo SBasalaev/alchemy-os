@@ -19,31 +19,18 @@
 package alchemy.nec.syntax.statement;
 
 /**
- * Single statement in Ether code.
+ *
  * @author Sergey Basalaev
  */
-public abstract class Statement {
-
-	public static final int STAT_ASSIGN = 0;
-	public static final int STAT_BLOCK = 1;
-	public static final int STAT_BREAK = 2;
-	public static final int STAT_COMPOUND_ASSIGN = 3;
-	public static final int STAT_CONTINUE = 4;
-	public static final int STAT_EMPTY = 5;
-	public static final int STAT_EXPR = 6;
-	public static final int STAT_IF = 7;
-	public static final int STAT_LOOP = 8;
-	public static final int STAT_RETURN = 9;
-
-	/** Kind of this statement, one of STAT_* constants. */
-	public final int kind;
-
-	protected Statement(int kind) {
-		this.kind = kind;
-	}
-
-	/** Number of the starting line of this statement. */
-	public abstract int lineNumber();
-
-	public abstract Object accept(StatementVisitor v, Object args);
+public interface StatementVisitor {
+	Object visitAssignStatement(AssignStatement stat, Object args);
+	Object visitBlockStatement(BlockStatement stat, Object args);
+	Object visitBreakStatement(BreakStatement stat, Object args);
+	Object visitCompoundAssignStatement(CompoundAssignStatement stat, Object args);
+	Object visitContinueStatement(ContinueStatement stat, Object args);
+	Object visitEmptyStatement(EmptyStatement stat, Object args);
+	Object visitExprStatement(ExprStatement stat, Object args);
+	Object visitIfStatement(IfStatement stat, Object args);
+	Object visitLoopStatement(LoopStatement stat, Object args);
+	Object visitReturnStatement(ReturnStatement stat, Object args);
 }

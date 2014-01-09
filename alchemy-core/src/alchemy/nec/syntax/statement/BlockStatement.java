@@ -18,32 +18,48 @@
 
 package alchemy.nec.syntax.statement;
 
+import alchemy.nec.syntax.Scope;
+import alchemy.nec.syntax.Var;
+import alchemy.nec.syntax.type.Type;
+import alchemy.util.ArrayList;
+
 /**
- * Single statement in Ether code.
+ * Block statement.
+ * <pre>
+ * {
+ *     <i>statement1</i>;
+ *     ...
+ *     <i>statementN</i>;
+ * }
+ * </pre>
+ * 
  * @author Sergey Basalaev
  */
-public abstract class Statement {
+public final class BlockStatement extends Statement implements Scope {
 
-	public static final int STAT_ASSIGN = 0;
-	public static final int STAT_BLOCK = 1;
-	public static final int STAT_BREAK = 2;
-	public static final int STAT_COMPOUND_ASSIGN = 3;
-	public static final int STAT_CONTINUE = 4;
-	public static final int STAT_EMPTY = 5;
-	public static final int STAT_EXPR = 6;
-	public static final int STAT_IF = 7;
-	public static final int STAT_LOOP = 8;
-	public static final int STAT_RETURN = 9;
+	private final Scope parent;
 
-	/** Kind of this statement, one of STAT_* constants. */
-	public final int kind;
+	public ArrayList statements;
 
-	protected Statement(int kind) {
-		this.kind = kind;
+	public BlockStatement(Scope scope) {
+		super(STAT_BLOCK);
+		parent = scope;
 	}
 
-	/** Number of the starting line of this statement. */
-	public abstract int lineNumber();
+	public int lineNumber() {
+		if (statements.isEmpty()) return -1;
+		return ((Statement)statements.get(0)).lineNumber();
+	}
 
-	public abstract Object accept(StatementVisitor v, Object args);
+	public Type getType(String name) {
+		return parent.getType(name);
+	}
+
+	public Var getVar(String name) {
+		return parent.getVar(name);
+	}
+
+	public Object accept(StatementVisitor v, Object args) {
+		return v.visitBlockStatement(this, args);
+	}
 }

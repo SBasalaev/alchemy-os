@@ -18,32 +18,32 @@
 
 package alchemy.nec.syntax.statement;
 
+import alchemy.nec.syntax.Var;
+import alchemy.nec.syntax.expr.Expr;
+
 /**
- * Single statement in Ether code.
+ * Assignment to a variable.
+ * <pre>
+ * <i>varname</i> = <i>expr</i>
+ * </pre>
  * @author Sergey Basalaev
  */
-public abstract class Statement {
+public final class AssignStatement extends Statement {
 
-	public static final int STAT_ASSIGN = 0;
-	public static final int STAT_BLOCK = 1;
-	public static final int STAT_BREAK = 2;
-	public static final int STAT_COMPOUND_ASSIGN = 3;
-	public static final int STAT_CONTINUE = 4;
-	public static final int STAT_EMPTY = 5;
-	public static final int STAT_EXPR = 6;
-	public static final int STAT_IF = 7;
-	public static final int STAT_LOOP = 8;
-	public static final int STAT_RETURN = 9;
+	public final Var var;
+	public Expr expr;
 
-	/** Kind of this statement, one of STAT_* constants. */
-	public final int kind;
-
-	protected Statement(int kind) {
-		this.kind = kind;
+	public AssignStatement(Var var, Expr expr) {
+		super(STAT_ASSIGN);
+		this.var = var;
+		this.expr = expr;
 	}
 
-	/** Number of the starting line of this statement. */
-	public abstract int lineNumber();
+	public int lineNumber() {
+		return expr.lineNumber();
+	}
 
-	public abstract Object accept(StatementVisitor v, Object args);
+	public Object accept(StatementVisitor v, Object args) {
+		return v.visitAssignStatement(this, args);
+	}
 }

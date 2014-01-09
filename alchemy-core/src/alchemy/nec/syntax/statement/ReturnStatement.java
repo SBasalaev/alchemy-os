@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,33 +16,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.statement;
+
+import alchemy.nec.syntax.expr.Expr;
 
 /**
- * Loop expression with postcondition.
- * <pre><b>do</b> <i>expr</i> <b>while</b> (<i>cond</i>);</pre>
- * 
+ * Return statement.
+ * <pre>
+ * <b>return</b> <i>expression</i>
+ *
+ * <b>return</b>;
+ * </pre>
  * @author Sergey Basalaev
  */
-public class DoWhileExpr extends Expr {
-	
-	public Expr condition;
-	public Expr body;
+public final class ReturnStatement extends Statement {
 
-	public DoWhileExpr(Expr condition, Expr body) {
-		this.condition = condition;
-		this.body = body;
-	}
+	public Expr expr;
 
-	public Type rettype() {
-		return BuiltinType.NONE;
+	public ReturnStatement(Expr expr) {
+		super(STAT_RETURN);
+		this.expr = expr;
 	}
 
 	public int lineNumber() {
-		return body.lineNumber();
+		return expr.lineNumber();
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitDoWhile(this, data);
+	public Object accept(StatementVisitor v, Object args) {
+		return v.visitReturnStatement(this, args);
 	}
 }

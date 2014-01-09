@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,33 +16,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.statement;
 
 /**
- * Loop expression with precondition.
- * <pre>
- * <b>while</b> (<i>condition</i>) <i>expr</i>;
- * </pre>
+ * Statement with no action.
+ * <pre>;</pre>
  * @author Sergey Basalaev
  */
-public class WhileExpr extends Expr {
-	public Expr condition;
-	public Expr body;
+public final class EmptyStatement extends Statement {
 
-	public WhileExpr(Expr condition, Expr body) {
-		this.condition = condition;
-		this.body = body;
-	}
-
-	public Type rettype() {
-		return BuiltinType.NONE;
+	public EmptyStatement() {
+		super(STAT_EMPTY);
 	}
 
 	public int lineNumber() {
-		return condition.lineNumber();
+		return -1;
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitWhile(this, data);
+	public Object accept(StatementVisitor v, Object args) {
+		return v.visitEmptyStatement(this, args);
 	}
 }

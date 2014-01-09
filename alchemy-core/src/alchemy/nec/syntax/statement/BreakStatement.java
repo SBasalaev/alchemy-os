@@ -19,31 +19,24 @@
 package alchemy.nec.syntax.statement;
 
 /**
- * Single statement in Ether code.
+ * Loop break statement.
+ * <pre><b>break</b></pre>
  * @author Sergey Basalaev
  */
-public abstract class Statement {
+public final class BreakStatement extends Statement {
 
-	public static final int STAT_ASSIGN = 0;
-	public static final int STAT_BLOCK = 1;
-	public static final int STAT_BREAK = 2;
-	public static final int STAT_COMPOUND_ASSIGN = 3;
-	public static final int STAT_CONTINUE = 4;
-	public static final int STAT_EMPTY = 5;
-	public static final int STAT_EXPR = 6;
-	public static final int STAT_IF = 7;
-	public static final int STAT_LOOP = 8;
-	public static final int STAT_RETURN = 9;
+	private final int line;
 
-	/** Kind of this statement, one of STAT_* constants. */
-	public final int kind;
-
-	protected Statement(int kind) {
-		this.kind = kind;
+	public BreakStatement(int line) {
+		super(STAT_BREAK);
+		this.line = line;
 	}
 
-	/** Number of the starting line of this statement. */
-	public abstract int lineNumber();
+	public int lineNumber() {
+		return line;
+	}
 
-	public abstract Object accept(StatementVisitor v, Object args);
+	public Object accept(StatementVisitor v, Object args) {
+		return v.visitBreakStatement(this, args);
+	}
 }

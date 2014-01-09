@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,33 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.statement;
 
 /**
- * Assignment expression.
- * <pre><i>var</i> = <i>expr</i></pre>
+ * Loop continue statement.
+ * <pre><b>continue</b></pre>
  *
  * @author Sergey Basalaev
  */
-public class AssignExpr extends Expr {
+public final class ContinueStatement extends Statement {
 
-	public Var var;
-	public Expr expr;
+	private final int line;
 
-	public AssignExpr(Var v, Expr e) {
-		this.var = v;
-		this.expr = e;
-	}
-
-	public Type rettype() {
-		return BuiltinType.NONE;
+	public ContinueStatement(int line) {
+		super(STAT_CONTINUE);
+		this.line = line;
 	}
 
 	public int lineNumber() {
-		return expr.lineNumber();
+		return line;
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitAssign(this, data);
+	public Object accept(StatementVisitor v, Object args) {
+		return v.visitContinueStatement(this, args);
 	}
 }
