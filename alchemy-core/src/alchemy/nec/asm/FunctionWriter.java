@@ -19,7 +19,7 @@
 package alchemy.nec.asm;
 
 import alchemy.evm.Opcodes;
-import alchemy.nec.tree.Null;
+import alchemy.nec.syntax.Null;
 import alchemy.types.Float32;
 import alchemy.types.Float64;
 import alchemy.types.Int32;
