@@ -18,20 +18,29 @@
 
 package alchemy.nec.syntax.statement;
 
+import alchemy.nec.syntax.expr.Expr;
+
 /**
- *
+ * Error throwing statement.
+ * <pre><b>throw</b> (<i>errCode</i>, <i>errMsg</i>)</pre>
  * @author Sergey Basalaev
  */
-public interface StatementVisitor {
-	Object visitAssignStatement(AssignStatement stat, Object args);
-	Object visitBlockStatement(BlockStatement stat, Object args);
-	Object visitBreakStatement(BreakStatement stat, Object args);
-	Object visitCompoundAssignStatement(CompoundAssignStatement stat, Object args);
-	Object visitContinueStatement(ContinueStatement stat, Object args);
-	Object visitEmptyStatement(EmptyStatement stat, Object args);
-	Object visitExprStatement(ExprStatement stat, Object args);
-	Object visitIfStatement(IfStatement stat, Object args);
-	Object visitLoopStatement(LoopStatement stat, Object args);
-	Object visitReturnStatement(ReturnStatement stat, Object args);
-	Object visitThrowStatement(ThrowStatement stat, Object args);
+public final class ThrowStatement extends Statement {
+
+	public Expr errCodeExpr;
+	public Expr errMsgExpr;
+
+	public ThrowStatement(Expr errCodeExpr, Expr errMsgExpr) {
+		super(STAT_THROW);
+		this.errCodeExpr = errCodeExpr;
+		this.errMsgExpr = errMsgExpr;
+	}
+
+	public int lineNumber() {
+		return errCodeExpr.lineNumber();
+	}
+
+	public Object accept(StatementVisitor v, Object args) {
+		return v.visitThrowStatement(this, args);
+	}
 }
