@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,39 +16,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax;
+
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Variable.
+ * Variable in Ether code.
  * @author Sergey Basalaev
  */
-public class Var {
-	/** Name of the variable. */
-	public String name;
-
-	/** Type of the variable. */
-	public Type type;
-	
-	/** Indicates whether this variable is a constant. */
-	public boolean isConst = false;
-	
-	/**
-	 * If not null, contains constant or default value of variable.
-	 */
-	public Object constValue = null;
-	
-	/** Index assigned to a variable by compiler. */
-	public int index = -1;
+public final class Var {
+	public final Type type;
+	public final String name;
+	public boolean isConstant;
+	public Object defaultValue;
 
 	public Var(String name, Type type) {
-		this.name = name;
 		this.type = type;
-	}
-	
-	public Var clone() {
-		Var newvar = new Var(this.name, this.type);
-		newvar.isConst = isConst;
-		newvar.constValue = constValue;
-		return newvar;
+		this.name = name;
 	}
 }
