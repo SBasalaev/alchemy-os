@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.type;
 
 /**
  * Type of a function.
@@ -27,36 +27,40 @@ package alchemy.nec.tree;
  * 
  * @author Sergey Basalaev
  */
-public class FunctionType extends Type {
-	public final Type rettype;
-	public final Type[] args;
+public final class FunctionType extends Type {
 
-	public FunctionType(Type rettype, Type[] args) {
+	public final Type rettype;
+	public final Type[] argtypes;
+
+	public FunctionType(Type rettype, Type[] argtypes) {
+		super("Function", TYPE_FUNCTION);
 		this.rettype = rettype;
-		this.args = args;
+		this.argtypes = argtypes;
 	}
 
-	public boolean equals(Object obj) {
-		if (obj == null) return false;
-		if (obj.getClass() != FunctionType.class) return false;
-		final FunctionType other = (FunctionType)obj;
-		if (!this.rettype.equals(other.rettype)) return false;
-		if (this.args.length != other.args.length) return false;
-		for (int i=0; i<args.length; i++) {
-			if (!this.args[i].equals(other.args[i])) return false;
+	public boolean equals(Type other) {
+		if (other.kind != TYPE_FUNCTION) return false;
+		FunctionType f = (FunctionType) other;
+		int len = f.argtypes.length;
+		if (len != this.argtypes.length) return false;
+		if (!f.rettype.equals(this.rettype)) return false;
+		for (int i=0; i<len; i++) {
+			if (!f.argtypes[i].equals(this.argtypes[i])) return false;
 		}
 		return true;
 	}
 
 	public String toString() {
-		StringBuffer buf = new StringBuffer().append('(');
-		for (int i=0; i<args.length; i++) {
+		StringBuffer buf = new StringBuffer();
+		buf.append('(');
+		int len = this.argtypes.length;
+		for (int i=0; i<len; i++) {
 			if (i != 0) buf.append(',');
-			buf.append(args[i]);
+			buf.append(argtypes[i]);
 		}
 		buf.append(')');
-		if (!rettype.equals(BuiltinType.NONE)) {
-			buf.append(':').append(rettype);
+		if (this.rettype != BuiltinType.NONE) {
+			buf.append(':').append(this.rettype);
 		}
 		return buf.toString();
 	}

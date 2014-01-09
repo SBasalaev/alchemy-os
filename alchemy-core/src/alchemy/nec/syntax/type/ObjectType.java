@@ -16,13 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.type;
+
+import alchemy.nec.syntax.Var;
 
 /**
- * Structured type.
+ * Object type.
  * <pre>
- * type Structure {
+ * <b>type</b> <i>Name</i> &lt; <i>Supertype</i> {
  *   field1: type1,
+ *   field2: type2 = defaultValue,
  *   ...
  *   fieldN: typeN
  * }
@@ -30,11 +33,22 @@ package alchemy.nec.tree;
  * 
  * @author Sergey Basalaev
  */
-public class StructureType extends NamedType {
+public final class ObjectType extends Type {
 
-	public Var[] fields;
+	public final Var[] fields;
+	public final ObjectType parent;
 
-	public StructureType(String name, Type parent) {
-		super(name, parent);
+	public ObjectType(String name, ObjectType parent, Var[] fields) {
+		super(name, TYPE_OBJECT);
+		this.parent = parent;
+		this.fields = fields;
+	}
+
+	public boolean equals(Type other) {
+		return this.name.equals(other.name);
+	}
+
+	public Type superType() {
+		return (this.parent != null) ? (Type)this.parent : (Type)BuiltinType.ANY;
 	}
 }
