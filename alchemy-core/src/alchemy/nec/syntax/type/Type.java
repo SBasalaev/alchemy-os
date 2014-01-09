@@ -86,4 +86,21 @@ public abstract class Type {
 		}
 		return equals(other);
 	}
+
+	public static Type commonSuperType(Type t1, Type t2) {
+		if (t1.kind == Type.TYPE_NONE || t2.kind == Type.TYPE_NONE)
+			return BuiltinType.NONE;
+		while (t2 != null && !t1.safeToCastTo(t2)) {
+			t2 = t2.superType();
+		}
+		return t2;
+	}
+
+	public final boolean isNumeric() {
+		int k = kind;
+		return k == Type.TYPE_BYTE || k == Type.TYPE_CHAR
+		    || k == Type.TYPE_SHORT || k == Type.TYPE_INT
+		    || k == Type.TYPE_LONG || k == Type.TYPE_FLOAT
+		    || k == Type.TYPE_DOUBLE;
+	}
 }

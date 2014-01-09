@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,34 +16,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Loading element from array or structure.
- * <pre><i>arrayexpr</i> [ <i>indexexpr</i> ]</pre>
+ * Getting element of array or object.
+ * <pre>
+ * <i>arrayExpr</i> [ <i>indexExpr</i> ]
+ * </pre>
  * @author Sergey Basalaev
  */
-public class ALoadExpr extends Expr {
+public final class ArrayGetExpr extends Expr {
 
-	public final Type returnType;
-	public Expr arrayexpr;
-	public Expr indexexpr;
+	private final Type returnType;
+	public Expr arrayExpr;
+	public Expr indexExpr;
 
-	public ALoadExpr(Expr arrayexpr, Expr indexexpr, Type type) {
-		this.arrayexpr = arrayexpr;
-		this.indexexpr = indexexpr;
+	public ArrayGetExpr(Expr arrayExpr, Expr indexExpr, Type type) {
+		super(EXPR_ARRAY_GET);
+		this.arrayExpr = arrayExpr;
+		this.indexExpr = indexExpr;
 		this.returnType = type;
 	}
 
-	public Type rettype() {
+	public int lineNumber() {
+		return arrayExpr.lineNumber();
+	}
+
+	public Type returnType() {
 		return returnType;
 	}
 
-	public int lineNumber() {
-		return arrayexpr.lineNumber();
-	}
-
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitALoad(this, data);
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitArrayGet(this, args);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,31 +16,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.BuiltinType;
+import alchemy.nec.syntax.type.Type;
 
 /**
  * Array length expression.
- * <pre><i>array</i>.len</pre>
+ * <pre><i>arrayExpr</i>.len</pre>
  *
  * @author Sergey Basalaev
  */
-public class ALenExpr extends Expr {
+public final class ArrayLenExpr extends Expr {
 
-	public Expr arrayexpr;
+	public Expr arrayExpr;
 
-	public ALenExpr(Expr arrayexpr) {
-		this.arrayexpr = arrayexpr;
+	public ArrayLenExpr(Expr arrayExpr) {
+		super(EXPR_ARRAY_LEN);
+		this.arrayExpr = arrayExpr;
 	}
 
-	public Type rettype() {
-		return BuiltinType.INT;
+	public ArrayLenExpr(int kind) {
+		super(kind);
 	}
 
 	public int lineNumber() {
-		return arrayexpr.lineNumber();
+		return arrayExpr.lineNumber();
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitALen(this, data);
+	public Type returnType() {
+		return BuiltinType.INT;
+	}
+
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitArrayLen(this, args);
 	}
 }

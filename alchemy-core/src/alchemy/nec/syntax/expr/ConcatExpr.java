@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,30 +16,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
 
+import alchemy.nec.syntax.type.BuiltinType;
+import alchemy.nec.syntax.type.Type;
 import alchemy.util.ArrayList;
 
 /**
  * String concatenation expression.
- *
  * @author Sergey Basalaev
  */
-public class ConcatExpr extends Expr {
-	
-	public ArrayList exprs = new ArrayList();
-	
-	public ConcatExpr() { }
+public final class ConcatExpr extends Expr {
 
-	public Type rettype() {
-		return BuiltinType.STRING;
+	public ArrayList exprs = new ArrayList();
+
+	public ConcatExpr() {
+		super(EXPR_CONCAT);
 	}
 
 	public int lineNumber() {
 		return ((Expr)exprs.first()).lineNumber();
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitConcat(this, data);
+	public Type returnType() {
+		return BuiltinType.STRING;
+	}
+
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitConcat(this, args);
 	}
 }
