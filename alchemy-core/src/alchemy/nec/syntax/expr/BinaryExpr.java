@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,10 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.Type;
 
 /**
  * Expression with binary operator.
+ * <pre><i>expr</i> + <i>expr</i></pre>
  * Valid binary operators are <code>+</code>,
  * <code>-</code>, <code>*</code>, <code>/</code>,
  * <code>%</code>, <code>&amp;</code>, <code>|</code>,
@@ -27,27 +30,27 @@ package alchemy.nec.tree;
  *
  * @author Sergey Basalaev
  */
-public class BinaryExpr extends Expr {
-
-	public Expr lvalue;
+public final class BinaryExpr extends Expr {
 	public int operator;
-	public Expr rvalue;
+	public Expr lhs;
+	public Expr rhs;
 
-	public BinaryExpr(Expr lvalue, int operator, Expr rvalue) {
-		this.lvalue = lvalue;
+	public BinaryExpr(Expr lhs, int operator, Expr rhs) {
+		super(EXPR_BINARY);
+		this.lhs = lhs;
 		this.operator = operator;
-		this.rvalue = rvalue;
+		this.rhs = rhs;
 	}
 
-	public Type rettype() {
-		return lvalue.rettype();
+	public Type returnType() {
+		return lhs.returnType();
 	}
 
 	public int lineNumber() {
-		return lvalue.lineNumber();
+		return lhs.lineNumber();
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitBinary(this, data);
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitBinary(this, args);
 	}
 }

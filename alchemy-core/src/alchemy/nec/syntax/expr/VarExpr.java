@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,34 +16,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.Var;
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Comparison expression.
- * 
+ * Variable expression.
  * @author Sergey Basalaev
  */
-public class ComparisonExpr extends Expr {
-	
-	public Expr lvalue;
-	public int operator;
-	public Expr rvalue;
+public final class VarExpr extends Expr {
 
-	public ComparisonExpr(Expr lvalue, int operator, Expr rvalue) {
-		this.lvalue = lvalue;
-		this.operator = operator;
-		this.rvalue = rvalue;
+	private final int line;
+	public final Var var;
+
+	public VarExpr(int line, Var v) {
+		super(EXPR_VAR);
+		this.line = line;
+		this.var = v;
 	}
 
-	public Type rettype() {
-		return BuiltinType.BOOL;
+	public Type returnType() {
+		return var.type;
 	}
 
 	public int lineNumber() {
-		return lvalue.lineNumber();
+		return line;
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitComparison(this, data);
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitVar(this, args);
 	}
 }
