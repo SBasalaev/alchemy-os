@@ -38,6 +38,8 @@ public abstract class Expr {
 	public static final int EXPR_EQUALITY = 11;
 	public static final int EXPR_PROPERTY = 12;
 	public static final int EXPR_ARRAYLIKE = 13;
+	public static final int EXPR_NEWARRAY = 14;
+	public static final int EXPR_NEWARRAY_INIT = 15;
 
 	/** Kind of this expression, one of EXPR_* constants. */
 	public final int kind;

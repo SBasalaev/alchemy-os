@@ -34,6 +34,8 @@ public interface ExprVisitor {
 	Object visitConst(ConstExpr expr, Object args);
 	Object visitEquality(EqualityExpr expr, Object args);
 	Object visitIfElse(IfElseExpr expr, Object args);
+	Object visitNewArray(NewArrayExpr expr, Object args);
+	Object visitNewArrayInit(NewArrayInitExpr expr, Object args);
 	Object visitProperty(PropertyExpr expr, Object args);
 	Object visitUnary(UnaryExpr expr, Object args);
 	Object visitVar(VarExpr expr, Object args);

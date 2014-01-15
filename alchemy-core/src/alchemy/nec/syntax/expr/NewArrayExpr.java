@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,25 +16,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Creation of array and structure by enumerating its elements.
+ * Creation of new array or object.
+ * <pre><b>new</b> [arrayType](lengthExprs[0], ..., lengthExprs[N])</pre>
+ *
  * @author Sergey Basalaev
  */
-public class NewArrayByEnumExpr extends Expr {
+public final class NewArrayExpr extends Expr {
 
-	private final Type type;
-	public final Expr[] initializers;
 	private final int line;
+	private final Type type;
+	public final Expr[] lengthExprs;
 
-	public NewArrayByEnumExpr(int lnum, Type type, Expr[] initializers) {
+	public NewArrayExpr(int lnum, Type arrayType, Expr[] lengthExprs) {
+		super(EXPR_NEWARRAY);
 		this.line = lnum;
-		this.type = type;
-		this.initializers = initializers;
+		this.type = arrayType;
+		this.lengthExprs = lengthExprs;
 	}
-	
-	public Type rettype() {
+
+	public Type returnType() {
 		return type;
 	}
 
@@ -42,7 +47,7 @@ public class NewArrayByEnumExpr extends Expr {
 		return line;
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitNewArrayByEnum(this, data);
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitNewArray(this, args);
 	}
 }

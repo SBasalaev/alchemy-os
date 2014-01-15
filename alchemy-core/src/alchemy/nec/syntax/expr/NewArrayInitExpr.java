@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,25 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Creation of new array or structure.
+ * Creation of array or object and initializing its elements.
  * @author Sergey Basalaev
  */
-public class NewArrayExpr extends Expr {
+public final class NewArrayInitExpr extends Expr {
 
-	private final Type type;
-	public Expr lengthexpr;
 	private final int line;
+	private final Type type;
+	public final Expr[] initializers;
 
-	public NewArrayExpr(int lnum, Type type, Expr lengthexpr) {
+	public NewArrayInitExpr(int lnum, Type type, Expr[] initializers) {
+		super(EXPR_NEWARRAY_INIT);
 		this.line = lnum;
 		this.type = type;
-		this.lengthexpr = lengthexpr;
+		this.initializers = initializers;
 	}
 
-	public Type rettype() {
+	public Type returnType() {
 		return type;
 	}
 
@@ -43,6 +46,6 @@ public class NewArrayExpr extends Expr {
 	}
 
 	public Object accept(ExprVisitor v, Object data) {
-		return v.visitNewArray(this, data);
+		return v.visitNewArrayInit(this, data);
 	}
 }
