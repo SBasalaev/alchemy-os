@@ -22,7 +22,8 @@ import alchemy.nec.syntax.type.Type;
 
 /**
  * Unary operator preceding expression.
- * One of '+', '-', '~', '!'.
+ * <pre>- expr</pre>
+ * Valid operators are '-', '~', '!'.
  * 
  * @author Sergey Basalaev
  */

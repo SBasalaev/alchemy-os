@@ -74,7 +74,7 @@ public abstract class Type {
 			for (int i=self.argtypes.length-1; i>=0; i--) {
 				if (!func.argtypes[i].safeToCastTo(self.argtypes[i])) return false;
 			}
-			return self.rettype.safeToCastTo(func.rettype);
+			return self.returnType.safeToCastTo(func.returnType);
 		} else if (kind == TYPE_OBJECT && other.kind == TYPE_OBJECT) {
 			Type self = this;
 			if (self == BuiltinType.NULL) return true;

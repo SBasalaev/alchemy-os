@@ -18,40 +18,65 @@
 
 package alchemy.nec.syntax.expr;
 
+import alchemy.nec.syntax.Function;
+import alchemy.nec.syntax.type.BuiltinType;
 import alchemy.nec.syntax.type.Type;
 
 /**
- * Expression with binary operator.
- * <pre>lhs + rhs</pre>
- * Valid binary operators are <code>+</code>,
- * <code>-</code>, <code>*</code>, <code>/</code>,
- * <code>%</code>, <code>&amp;</code>, <code>|</code>,
- * <code>^</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>,
- * <code>&gt;&gt;&gt;</code>.
+ * Equality expression.
+ * <pre>lhs == rhs</pre>
+ *
+ * Valid operators are == and !=.
+ * If <i>eqmethod</i> is not null then
+ * this expression will be compiled as safe
+ * method call. For == this will be
+ * <pre>
+ * <b>if</b> (lhs == <b>null</b> || rhs == <b>null</b>)
+ *   rhs == lhs
+ * <b>else</b>
+ *   eqmethod(lhs, rhs)
+ * </pre>
+ * For != this will be
+ * <pre>
+ * <b>if</b> (lhs == <b>null</b> || rhs == <b>null</b>)
+ *   rhs != lhs
+ * <b>else</b>
+ *   !eqmethod(lhs, rhs)
+ * </pre>
  *
  * @author Sergey Basalaev
  */
-public final class BinaryExpr extends Expr {
-	public int operator;
+public final class EqualityExpr extends Expr {
+	public final Function eqmethod;
 	public Expr lhs;
+	public int operator;
 	public Expr rhs;
 
-	public BinaryExpr(Expr lhs, int operator, Expr rhs) {
-		super(EXPR_BINARY);
+	public EqualityExpr(Expr lhs, int operator, Expr rhs) {
+		super(EXPR_EQUALITY);
+		this.eqmethod = null;
 		this.lhs = lhs;
 		this.operator = operator;
 		this.rhs = rhs;
 	}
 
-	public Type returnType() {
-		return lhs.returnType();
+	public EqualityExpr(Function eqmethod, Expr lhs, int operator, Expr rhs) {
+		super(EXPR_EQUALITY);
+		this.eqmethod = eqmethod;
+		this.lhs = lhs;
+		this.operator = operator;
+		this.rhs = rhs;
 	}
 
 	public int lineNumber() {
 		return lhs.lineNumber();
 	}
 
+	public Type returnType() {
+		return BuiltinType.BOOL;
+	}
+
 	public Object accept(ExprVisitor v, Object args) {
-		return v.visitBinary(this, args);
+		return v.visitEquality(this, args);
 	}
 }

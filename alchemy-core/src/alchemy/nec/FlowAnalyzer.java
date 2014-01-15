@@ -59,7 +59,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 		this.loopcount = 0;
 		Object result = f.body.accept(this, null);
 		if (result != RETURN) {
-			if (f.type.rettype == BuiltinType.NONE) {
+			if (f.type.returnType == BuiltinType.NONE) {
 				BlockStatement block = new BlockStatement(f);
 				block.statements.add(f.body);
 				block.statements.add(new ReturnStatement(null));
@@ -72,7 +72,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 					Statement last = (Statement) block.statements.last();
 					if (last.kind == Statement.STAT_EXPR) {
 						Expr expr = ((ExprStatement)last).expr;
-						if (expr.returnType().safeToCastTo(f.type.rettype)) {
+						if (expr.returnType().safeToCastTo(f.type.returnType)) {
 							env.warn(f.source, expr.lineNumber(), CompilerEnv.W_DEPRECATED,
 									"In Ether 2.2 'return' keyword should be used to return function result");
 							block.statements.set(block.statements.size()-1, new ReturnStatement(expr));

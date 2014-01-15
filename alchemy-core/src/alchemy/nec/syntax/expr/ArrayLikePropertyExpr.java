@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,37 +18,43 @@
 
 package alchemy.nec.syntax.expr;
 
+import alchemy.nec.syntax.Function;
 import alchemy.nec.syntax.type.Type;
 
 /**
- * Getting element of array or object.
- * <pre>
- * <i>arrayExpr</i> [ <i>indexExpr</i> ]
- * </pre>
+ * Expression for overriden [] operator.
+ * <pre>objectExpr <b>[</b> indexExprs[0], ..., indexExprs[N] <b>]</b></pre>
+ *
  * @author Sergey Basalaev
  */
-public final class ArrayGetExpr extends Expr {
+public final class ArrayLikePropertyExpr extends Expr {
 
-	private final Type returnType;
-	public Expr arrayExpr;
-	public Expr indexExpr;
+	public Expr objectExpr;
+	public Expr[] indexExprs;
+	public Function getter;
+	public Function setter;
 
-	public ArrayGetExpr(Expr arrayExpr, Expr indexExpr, Type type) {
-		super(EXPR_ARRAY_GET);
-		this.arrayExpr = arrayExpr;
-		this.indexExpr = indexExpr;
-		this.returnType = type;
+	public ArrayLikePropertyExpr(Expr objectExpr, Expr[] indexExprs, Function getter, Function setter) {
+		super(EXPR_ARRAYLIKE);
+		this.objectExpr = objectExpr;
+		this.indexExprs = indexExprs;
+		this.getter = getter;
+		this.setter = setter;
 	}
 
 	public int lineNumber() {
-		return arrayExpr.lineNumber();
+		return objectExpr.lineNumber();
 	}
 
 	public Type returnType() {
-		return returnType;
+		return getter.type.returnType;
+	}
+
+	public boolean isLvalue() {
+		return true;
 	}
 
 	public Object accept(ExprVisitor v, Object args) {
-		return v.visitArrayGet(this, args);
+		return v.visitArrayLikeProperty(this, args);
 	}
 }

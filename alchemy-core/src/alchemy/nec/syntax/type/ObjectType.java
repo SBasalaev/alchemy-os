@@ -35,7 +35,7 @@ import alchemy.nec.syntax.Var;
  */
 public final class ObjectType extends Type {
 
-	public final Var[] fields;
+	public Var[] fields;
 	public final ObjectType parent;
 
 	public ObjectType(String name, ObjectType parent, Var[] fields) {

@@ -29,12 +29,12 @@ package alchemy.nec.syntax.type;
  */
 public final class FunctionType extends Type {
 
-	public final Type rettype;
+	public final Type returnType;
 	public final Type[] argtypes;
 
 	public FunctionType(Type rettype, Type[] argtypes) {
 		super("Function", TYPE_FUNCTION);
-		this.rettype = rettype;
+		this.returnType = rettype;
 		this.argtypes = argtypes;
 	}
 
@@ -43,7 +43,7 @@ public final class FunctionType extends Type {
 		FunctionType f = (FunctionType) other;
 		int len = f.argtypes.length;
 		if (len != this.argtypes.length) return false;
-		if (!f.rettype.equals(this.rettype)) return false;
+		if (!f.returnType.equals(this.returnType)) return false;
 		for (int i=0; i<len; i++) {
 			if (!f.argtypes[i].equals(this.argtypes[i])) return false;
 		}
@@ -59,8 +59,8 @@ public final class FunctionType extends Type {
 			buf.append(argtypes[i]);
 		}
 		buf.append(')');
-		if (this.rettype != BuiltinType.NONE) {
-			buf.append(':').append(this.rettype);
+		if (this.returnType != BuiltinType.NONE) {
+			buf.append(':').append(this.returnType);
 		}
 		return buf.toString();
 	}

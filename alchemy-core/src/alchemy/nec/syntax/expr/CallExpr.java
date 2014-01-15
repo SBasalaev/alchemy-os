@@ -23,7 +23,7 @@ import alchemy.nec.syntax.type.Type;
 
 /**
  * Function invocation.
- * <pre><i>func</i>(<i>arg0</i>, ..., <i>argN</i>)</pre>
+ * <pre>fload(args[0], ..., args[N])</pre>
  * 
  * @author Sergey Basalaev
  */
@@ -45,7 +45,7 @@ public final class CallExpr extends Expr {
 	}
 
 	public Type returnType() {
-		return ((FunctionType)fload.returnType()).rettype;
+		return ((FunctionType)fload.returnType()).returnType;
 	}
 
 	public Object accept(ExprVisitor v, Object args) {

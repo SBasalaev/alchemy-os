@@ -33,8 +33,11 @@ public abstract class Expr {
 	public static final int EXPR_IF = 6;
 	public static final int EXPR_UNARY = 7;
 	public static final int EXPR_VAR = 8;
-	public static final int EXPR_ARRAY_GET = 9;
+	public static final int EXPR_ARRAY_ELEMENT = 9;
 	public static final int EXPR_ARRAY_LEN = 10;
+	public static final int EXPR_EQUALITY = 11;
+	public static final int EXPR_PROPERTY = 12;
+	public static final int EXPR_ARRAYLIKE = 13;
 
 	/** Kind of this expression, one of EXPR_* constants. */
 	public final int kind;
@@ -48,6 +51,11 @@ public abstract class Expr {
 
 	/** Returns type of the result of this expression. */
 	public abstract Type returnType();
+
+	/** Tests whether this expression can appear on the left-hand side of assignment. */
+	public boolean isLvalue() {
+		return false;
+	}
 
 	public abstract Object accept(ExprVisitor v, Object args);
 }

@@ -22,7 +22,7 @@ import alchemy.nec.syntax.type.Type;
 
 /**
  * Cast expression.
- * <pre><i>expr</i>.<b>cast</b>(<i>type</i>)</pre>.
+ * <pre>expr.<b>cast</b>(toType)</pre>.
  * @author Sergey Basalaev
  */
 public final class CastExpr extends Expr {

@@ -23,15 +23,18 @@ package alchemy.nec.syntax.expr;
  * @author Sergey Basalaev
  */
 public interface ExprVisitor {
-	Object visitArrayGet(ArrayGetExpr expr, Object args);
+	Object visitArrayElement(ArrayElementExpr expr, Object args);
 	Object visitArrayLen(ArrayLenExpr expr, Object args);
+	Object visitArrayLikeProperty(ArrayLikePropertyExpr expr, Object args);
 	Object visitBinary(BinaryExpr expr, Object args);
 	Object visitCall(CallExpr expr, Object args);
 	Object visitCast(CastExpr expr, Object args);
 	Object visitComparison(ComparisonExpr expr, Object args);
 	Object visitConcat(ConcatExpr expr, Object args);
 	Object visitConst(ConstExpr expr, Object args);
-	Object visitIf(IfExpr expr, Object args);
+	Object visitEquality(EqualityExpr expr, Object args);
+	Object visitIfElse(IfElseExpr expr, Object args);
+	Object visitProperty(PropertyExpr expr, Object args);
 	Object visitUnary(UnaryExpr expr, Object args);
 	Object visitVar(VarExpr expr, Object args);
 }

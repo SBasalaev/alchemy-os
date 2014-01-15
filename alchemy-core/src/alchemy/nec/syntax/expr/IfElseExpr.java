@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,41 +16,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Changing element in array using operator assignment.
+ * Conditional expression.
  * <pre>
- * <i>array</i>[<i>index</i>] += <i>expr</i>
+ * <b>if</b> (condition)
+ *   ifexpr
+ * <b>else</b>
+ *   elseexpr
  * </pre>
  * 
  * @author Sergey Basalaev
  */
-public class AChangeExpr extends Expr {
+public final class IfElseExpr extends Expr {
 	
-	public Expr arrayexpr;
-	public Expr indexexpr;
-	public final Type elementType;
-	public final int operator;
-	public Expr rvalue;
+	public Expr condition;
+	public Expr ifexpr;
+	public Expr elseexpr;
 
-	public AChangeExpr(Expr arrayexpr, Expr indexexpr, Type elementType, int operator, Expr rvalue) {
-		this.arrayexpr = arrayexpr;
-		this.indexexpr = indexexpr;
-		this.elementType = elementType;
-		this.operator = operator;
-		this.rvalue = rvalue;
+	public IfElseExpr(Expr condition, Expr ifexpr, Expr elseexpr) {
+		super(EXPR_IF);
+		this.condition = condition;
+		this.ifexpr = ifexpr;
+		this.elseexpr = elseexpr;
 	}
-	
-	public Type rettype() {
-		return BuiltinType.NONE;
+
+	public Type returnType() {
+		return ifexpr.returnType();
 	}
 
 	public int lineNumber() {
-		return arrayexpr.lineNumber();
+		return condition.lineNumber();
 	}
 
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitAChange(this, data);
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitIfElse(this, args);
 	}
 }

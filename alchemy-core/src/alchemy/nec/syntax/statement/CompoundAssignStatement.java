@@ -18,30 +18,35 @@
 
 package alchemy.nec.syntax.statement;
 
-import alchemy.nec.syntax.Var;
+import alchemy.nec.syntax.Function;
 import alchemy.nec.syntax.expr.Expr;
 
 /**
- * Compound assignment to a variable.
- * <pre><i>varname</i> += <i>expr</i></pre>
+ * Compound assignment.
+ * <pre><i>lvalue</i> += <i>assignExpr</i></pre>
+ *
+ * If <i>opmethod</i> is not null it is used
+ * as override for operator.
  *
  * @author Sergey Basalaev
  */
 public final class CompoundAssignStatement extends Statement {
 
-	public final Var var;
-	public final int operator;
-	public Expr expr;
+	public Expr lvalue;
+	public final int assignOperator;
+	public Expr assignExpr;
+	public final Function opmethod;
 
-	public CompoundAssignStatement(Var var, int operator, Expr expr) {
+	public CompoundAssignStatement(Expr lvalue, int assignOperator, Expr assignExpr, Function opmethod) {
 		super(STAT_COMPOUND_ASSIGN);
-		this.var = var;
-		this.operator = operator;
-		this.expr = expr;
+		this.lvalue = lvalue;
+		this.assignOperator = assignOperator;
+		this.assignExpr = assignExpr;
+		this.opmethod = opmethod;
 	}
 
 	public int lineNumber() {
-		return expr.lineNumber();
+		return assignExpr.lineNumber();
 	}
 
 	public Object accept(StatementVisitor v, Object args) {
