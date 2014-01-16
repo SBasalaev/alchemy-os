@@ -1,6 +1,5 @@
 acopy
-Function.curry
-Structure.clone
+Function.apply
 Any.tostr
 Char.tostr
 Int.tobin
