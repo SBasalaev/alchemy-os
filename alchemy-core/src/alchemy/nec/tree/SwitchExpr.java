@@ -16,47 +16,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.nec.tree;
-
-import alchemy.util.ArrayList;
-
-/**
- * Switch expression.
- * <pre>
- * <b>switch</b> (<i>expr</i>) {
- *   1: <i>expr1</i>
- *   2,3: <i>expr2</i>
- *   <b>else</b>: <i>expr</i>
- * }
- * </pre>
- * 
- * @author Sergey Basalaev
- */
-public class SwitchExpr extends Expr {
-	
-	public Expr indexexpr;
-	
-	/** May be null! */
-	public Expr elseexpr;
-	
-	/** int[] arrays. */
-	public ArrayList keys = new ArrayList();
-	
-	public ArrayList exprs = new ArrayList();
-	
-	public Type rettype;
-	
-	public SwitchExpr() { }
-
-	public Type rettype() {
-		return rettype;
-	}
-
-	public int lineNumber() {
-		return indexexpr.lineNumber();
-	}
-
-	public Object accept(ExprVisitor v, Object data) {
-		return v.visitSwitch(this, data);
-	}
-}
+//package alchemy.nec.tree;
+//
+//import alchemy.util.ArrayList;
+//
+///**
+// * Switch expression.
+// * <pre>
+// * <b>switch</b> (<i>expr</i>) {
+// *   1: <i>expr1</i>
+// *   2,3: <i>expr2</i>
+// *   <b>else</b>: <i>expr</i>
+// * }
+// * </pre>
+// * 
+// * @author Sergey Basalaev
+// */
+//public class SwitchExpr extends Expr {
+//	
+//	public Expr indexexpr;
+//	
+//	/** May be null! */
+//	public Expr elseexpr;
+//	
+//	/** int[] arrays. */
+//	public ArrayList keys = new ArrayList();
+//	
+//	public ArrayList exprs = new ArrayList();
+//	
+//	public Type rettype;
+//	
+//	public SwitchExpr() { }
+//
+//	public Type rettype() {
+//		return rettype;
+//	}
+//
+//	public int lineNumber() {
+//		return indexexpr.lineNumber();
+//	}
+//
+//	public Object accept(ExprVisitor v, Object data) {
+//		return v.visitSwitch(this, data);
+//	}
+//}
