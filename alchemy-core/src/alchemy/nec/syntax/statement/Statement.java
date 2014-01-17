@@ -36,6 +36,7 @@ public abstract class Statement {
 	public static final int STAT_RETURN = 9;
 	public static final int STAT_THROW = 10;
 	public static final int STAT_ARRAYSET = 11;
+	public static final int STAT_TRYCATCH = 12;
 
 	/** Kind of this statement, one of STAT_* constants. */
 	public final int kind;

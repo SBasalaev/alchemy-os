@@ -35,4 +35,5 @@ public interface StatementVisitor {
 	Object visitLoopStatement(LoopStatement stat, Object args);
 	Object visitReturnStatement(ReturnStatement stat, Object args);
 	Object visitThrowStatement(ThrowStatement stat, Object args);
+	Object visitTryCatchStatement(TryCatchStatement stat, Object args);
 }
