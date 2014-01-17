@@ -18,28 +18,29 @@
 
 package alchemy.nec.syntax.statement;
 
+import alchemy.nec.syntax.Var;
 import alchemy.nec.syntax.expr.Expr;
 
 /**
- * Simple assignment.
+ * Assignment to a variable.
  * <pre>
- * <i>lvalue</i> = <i>assignExpr</i>
+ * <i>var</i> = <i>assignExpr</i>
  * </pre>
  * @author Sergey Basalaev
  */
 public final class AssignStatement extends Statement {
 
-	public Expr lvalue;
+	public Var var;
 	public Expr assignExpr;
 
-	public AssignStatement(Expr lvalue, Expr assignExpr) {
+	public AssignStatement(Var var, Expr assignExpr) {
 		super(STAT_ASSIGN);
-		this.lvalue = assignExpr;
+		this.var = var;
 		this.assignExpr = assignExpr;
 	}
 
 	public int lineNumber() {
-		return lvalue.lineNumber();
+		return assignExpr.lineNumber();
 	}
 
 	public Object accept(StatementVisitor v, Object args) {

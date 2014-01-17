@@ -23,6 +23,7 @@ package alchemy.nec.syntax.expr;
  * @author Sergey Basalaev
  */
 public interface ExprVisitor {
+	Object visitApply(ApplyExpr expr, Object args);
 	Object visitArrayElement(ArrayElementExpr expr, Object args);
 	Object visitArrayLen(ArrayLenExpr expr, Object args);
 	Object visitArrayLikeProperty(ArrayLikePropertyExpr expr, Object args);
@@ -37,6 +38,7 @@ public interface ExprVisitor {
 	Object visitNewArray(NewArrayExpr expr, Object args);
 	Object visitNewArrayInit(NewArrayInitExpr expr, Object args);
 	Object visitProperty(PropertyExpr expr, Object args);
+	Object visitSequential(SequentialExpr expr, Object args);
 	Object visitUnary(UnaryExpr expr, Object args);
 	Object visitVar(VarExpr expr, Object args);
 }

@@ -18,6 +18,7 @@
 
 package alchemy.nec.syntax.expr;
 
+import alchemy.nec.syntax.Function;
 import alchemy.nec.syntax.type.FunctionType;
 import alchemy.nec.syntax.type.Type;
 
@@ -38,6 +39,10 @@ public final class CallExpr extends Expr {
 		super(EXPR_CALL);
 		this.fload = fload;
 		this.args = args;
+	}
+
+	public CallExpr(int line, Function func, Expr[] args) {
+		this(new ConstExpr(line, func.type, func), args);
 	}
 
 	public int lineNumber() {

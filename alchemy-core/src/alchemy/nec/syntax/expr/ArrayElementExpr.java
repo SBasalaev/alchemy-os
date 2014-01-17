@@ -48,10 +48,6 @@ public final class ArrayElementExpr extends Expr {
 		return returnType;
 	}
 
-	public boolean isLvalue() {
-		return true;
-	}
-
 	public Object accept(ExprVisitor v, Object args) {
 		return v.visitArrayElement(this, args);
 	}

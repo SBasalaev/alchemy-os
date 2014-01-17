@@ -19,6 +19,7 @@
 package alchemy.nec.syntax.expr;
 
 import alchemy.nec.syntax.Function;
+import alchemy.nec.syntax.type.BuiltinType;
 import alchemy.nec.syntax.type.Type;
 
 /**
@@ -47,11 +48,7 @@ public final class ArrayLikePropertyExpr extends Expr {
 	}
 
 	public Type returnType() {
-		return getter.type.returnType;
-	}
-
-	public boolean isLvalue() {
-		return true;
+		return (getter != null) ? getter.type.returnType : BuiltinType.NONE;
 	}
 
 	public Object accept(ExprVisitor v, Object args) {

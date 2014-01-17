@@ -44,10 +44,6 @@ public final class VarExpr extends Expr {
 		return line;
 	}
 
-	public boolean isLvalue() {
-		return true;
-	}
-
 	public Object accept(ExprVisitor v, Object args) {
 		return v.visitVar(this, args);
 	}

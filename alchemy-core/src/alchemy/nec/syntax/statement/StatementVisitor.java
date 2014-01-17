@@ -23,6 +23,7 @@ package alchemy.nec.syntax.statement;
  * @author Sergey Basalaev
  */
 public interface StatementVisitor {
+	Object visitArraySetStatement(ArraySetStatement stat, Object args);
 	Object visitAssignStatement(AssignStatement stat, Object args);
 	Object visitBlockStatement(BlockStatement stat, Object args);
 	Object visitBreakStatement(BreakStatement stat, Object args);
