@@ -35,10 +35,12 @@ public final class FlowAnalyzer implements StatementVisitor {
 
 	/** Indicates that execution continues after this statement. */
 	public final Object NEXT = new Object();
-	/** Indicates that function returns after this statement. */
+	/** Indicates that function returns normally after this statement. */
 	public final Object RETURN = new Object();
 	/** Indicates that control breaks outside innermost loop after this statement. */
 	public final Object BREAK = new Object();
+	/** Indicates that error is thrown in this statement. */
+	public final Object THROW = new Object();
 
 	private final CompilerEnv env;
 
@@ -58,7 +60,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 		this.function = f;
 		this.loopcount = 0;
 		Object result = f.body.accept(this, null);
-		if (result != RETURN) {
+		if (result != RETURN && result != THROW) {
 			if (f.type.returnType == BuiltinType.NONE) {
 				BlockStatement block = new BlockStatement(f);
 				block.statements.add(f.body);
@@ -83,6 +85,10 @@ public final class FlowAnalyzer implements StatementVisitor {
 			}
 			env.warn(f.source, f.body.lineNumber(), CompilerEnv.W_ERROR, "Missing return statement");
 		}
+	}
+
+	public Object visitArraySetStatement(ArraySetStatement stat, Object args) {
+		return NEXT;
 	}
 
 	public Object visitAssignStatement(AssignStatement assign, Object args) {
@@ -135,6 +141,8 @@ public final class FlowAnalyzer implements StatementVisitor {
 			return NEXT;
 		} else if (ifResult == BREAK || elseResult == BREAK) {
 			return BREAK;
+		} else if (ifResult == THROW || elseResult == THROW) {
+			return THROW;
 		} else {
 			return RETURN;
 		}
@@ -147,10 +155,17 @@ public final class FlowAnalyzer implements StatementVisitor {
 		loopcount--;
 		if (preResult == RETURN && postResult == RETURN) {
 			return RETURN;
+		} else if (preResult == THROW && postResult == THROW) {
+			return THROW;
 		} else if (stat.condition.kind == Expr.EXPR_CONST
 		           && ((ConstExpr)stat.condition).value == Boolean.TRUE
 		           && preResult != BREAK && postResult != BREAK) {
-			return RETURN;
+			// unconditional loop
+			if (preResult == THROW || postResult == THROW) {
+				return THROW;
+			} else {
+				return RETURN;
+			}
 		} else {
 			return NEXT;
 		}
@@ -161,6 +176,21 @@ public final class FlowAnalyzer implements StatementVisitor {
 	}
 
 	public Object visitThrowStatement(ThrowStatement stat, Object args) {
-		return RETURN;
+		return THROW;
+	}
+
+	public Object visitTryCatchStatement(TryCatchStatement stat, Object args) {
+		Object tryResult = stat.tryStat.accept(this, args);
+		Object catchResult = stat.catchStat.accept(this, args);
+		if (tryResult == THROW) {
+			return catchResult;
+		}
+		if (tryResult == NEXT || catchResult == NEXT) {
+			return NEXT;
+		} else if (tryResult == BREAK || catchResult == BREAK) {
+			return BREAK;
+		} else {
+			return catchResult;
+		}
 	}
 }
