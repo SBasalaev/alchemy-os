@@ -17,13 +17,13 @@ import alchemy.nec.syntax.type.Type;
  *
  * @author Sergey Basalaev
  */
-public final class PropertyExpr extends Expr {
+public final class PropertyLvalue extends Expr {
 	public Expr objectExpr;
 	public String propertyName;
 	public Function getter;
 	public Function setter;
 
-	public PropertyExpr(Expr objectExpr, String propertyName, Function getter, Function setter) {
+	public PropertyLvalue(Expr objectExpr, String propertyName, Function getter, Function setter) {
 		super(EXPR_PROPERTY);
 		this.objectExpr = objectExpr;
 		this.propertyName = propertyName;
@@ -40,6 +40,6 @@ public final class PropertyExpr extends Expr {
 	}
 
 	public Object accept(ExprVisitor v, Object args) {
-		return v.visitProperty(this, args);
+		throw new RuntimeException("Lvalue appears in the final tree");
 	}
 }

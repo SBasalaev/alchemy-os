@@ -16,17 +16,14 @@ import alchemy.nec.syntax.type.Type;
  *
  * @author Sergey Basalaev
  */
-public final class SequentialExpr extends Expr implements Scope {
-
-	private final Scope parent;
+public final class SequentialExpr extends Expr {
 
 	public Var[] seqVars;
 	public Expr[] seqExprs;
 	public Expr lastExpr;
 
-	public SequentialExpr(Scope parent, Var[] seqVars, Expr[] seqExprs, Expr lastExpr) {
+	public SequentialExpr(Var[] seqVars, Expr[] seqExprs, Expr lastExpr) {
 		super(EXPR_SEQUENTIAL);
-		this.parent = parent;
 		this.seqVars = seqVars;
 		this.seqExprs = seqExprs;
 		this.lastExpr = lastExpr;
@@ -42,13 +39,5 @@ public final class SequentialExpr extends Expr implements Scope {
 
 	public Object accept(ExprVisitor v, Object args) {
 		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public Type getType(String name) {
-		return parent.getType(name);
-	}
-
-	public Var getVar(String name) {
-		return parent.getVar(name);
 	}
 }

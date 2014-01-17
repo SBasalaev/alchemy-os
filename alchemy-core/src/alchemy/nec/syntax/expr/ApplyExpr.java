@@ -16,13 +16,13 @@ import alchemy.nec.syntax.type.Type;
 public final class ApplyExpr extends Expr {
 
 	public Expr funcExpr;
-	public Expr[] arguments;
+	public final Expr[] args;
 	private final Type type;
 
 	public ApplyExpr(Expr funcExpr, Expr[] arguments) {
 		super(EXPR_APPLY);
 		this.funcExpr = funcExpr;
-		this.arguments = arguments;
+		this.args = arguments;
 		// computing return type
 		FunctionType ftype = (FunctionType) funcExpr.returnType();
 		Type[] argTypes = new Type[ftype.argtypes.length - arguments.length];

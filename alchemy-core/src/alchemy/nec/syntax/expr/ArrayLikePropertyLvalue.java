@@ -28,14 +28,14 @@ import alchemy.nec.syntax.type.Type;
  *
  * @author Sergey Basalaev
  */
-public final class ArrayLikePropertyExpr extends Expr {
+public final class ArrayLikePropertyLvalue extends Expr {
 
 	public Expr objectExpr;
 	public Expr[] indexExprs;
 	public Function getter;
 	public Function setter;
 
-	public ArrayLikePropertyExpr(Expr objectExpr, Expr[] indexExprs, Function getter, Function setter) {
+	public ArrayLikePropertyLvalue(Expr objectExpr, Expr[] indexExprs, Function getter, Function setter) {
 		super(EXPR_ARRAYLIKE);
 		this.objectExpr = objectExpr;
 		this.indexExprs = indexExprs;
@@ -52,6 +52,6 @@ public final class ArrayLikePropertyExpr extends Expr {
 	}
 
 	public Object accept(ExprVisitor v, Object args) {
-		return v.visitArrayLikeProperty(this, args);
+		throw new RuntimeException("Lvalue appears in the final tree");
 	}
 }
