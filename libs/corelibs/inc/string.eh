@@ -44,3 +44,4 @@ def ba2utf(ba: [Byte]): String;
 const chstr = `Char.tostr`;
 const `String.ch` = `String.get`;
 const `String.substr` = `String.range`;
+const `String.add` = `String.concat`;

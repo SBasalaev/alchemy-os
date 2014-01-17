@@ -6,6 +6,7 @@ def StrBuf.new(): StrBuf;
 def StrBuf.get(at: Int): Char;
 def StrBuf.chars(from: Int, to: Int, buf: [Char], ofs: Int);
 def StrBuf.append(a: Any): StrBuf;
+const `StrBuf.add` = `StrBuf.append`;
 def StrBuf.addch(ch: Char): StrBuf;
 def StrBuf.insert(at: Int, a: Any): StrBuf;
 def StrBuf.insch(at: Int, ch: Char): StrBuf;
