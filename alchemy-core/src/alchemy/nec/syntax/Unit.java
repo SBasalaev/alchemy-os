@@ -19,6 +19,7 @@
 package alchemy.nec.syntax;
 
 import alchemy.nec.syntax.type.Type;
+import alchemy.util.ArrayList;
 import alchemy.util.HashMap;
 
 /**
@@ -31,6 +32,8 @@ public final class Unit implements Scope {
 	private final HashMap vars = new HashMap();
 	/** String -&gt; Type */
 	private final HashMap types = new HashMap();
+
+	public final ArrayList implementedFunctions = new ArrayList();
 
 	public Function getFunction(String name) {
 		Var v = getVar(name);
