@@ -52,7 +52,7 @@ public final class CompilerEnv {
 	/** Bit-mask of enabled option flags. */
 	private final int options;
 	/** Bit-mask of enabled warning flags. */
-	private final int warnings;
+	private int warnings;
 	/** Whether to generate debugging info. */
 	public final boolean debug;
 	/** Process instance for IO operations. */
@@ -74,6 +74,10 @@ public final class CompilerEnv {
 
 	public int getErrorCount() {
 		return errcount;
+	}
+
+	public void suppressWarnings() {
+		warnings = 0;
 	}
 
 	public boolean hasOption(int option) {

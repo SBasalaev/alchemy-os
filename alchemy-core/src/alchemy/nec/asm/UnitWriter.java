@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Code writer for version 2.1
+ * Code writer for version 2.2
  * @author Sergey Basalaev
  */
 public class UnitWriter {

@@ -138,8 +138,10 @@ public class NEC extends NativeApp {
 		try {
 			unit = parser.parseUnit(p.toFile(fname));
 			if (unit == null || env.getErrorCount() > 0) return 1;
+			new FlowAnalyzer(env).visitUnit(unit);
+			if (env.getErrorCount() > 0) return 1;
 			// TODO: optimize
-			EAsmWriter wr = new EAsmWriter(dbginfo);
+			EAsmWriter wr = new EAsmWriter(env);
 			OutputStream out = Filesystem.write(p.toFile(outname));
 			wr.writeTo(unit, out);
 			out.flush();

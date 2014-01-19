@@ -19,6 +19,7 @@
 package alchemy.nec;
 
 import alchemy.nec.syntax.Function;
+import alchemy.nec.syntax.Null;
 import alchemy.nec.syntax.Unit;
 import alchemy.nec.syntax.expr.ConstExpr;
 import alchemy.nec.syntax.expr.Expr;
@@ -26,7 +27,8 @@ import alchemy.nec.syntax.statement.*;
 import alchemy.nec.syntax.type.BuiltinType;
 
 /**
- * Checks control flow.
+ * Checks the control flow.
+ * Arguments are not used.
  * @author Sergey Basalaev
  */
 public final class FlowAnalyzer implements StatementVisitor {
@@ -64,7 +66,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 			if (f.type.returnType == BuiltinType.NONE) {
 				BlockStatement block = new BlockStatement(f);
 				block.statements.add(f.body);
-				block.statements.add(new ReturnStatement(null));
+				block.statements.add(new ReturnStatement(new ConstExpr(-1, BuiltinType.NULL, Null.NULL)));
 				f.body = block;
 				return;
 			}
