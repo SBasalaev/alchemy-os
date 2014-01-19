@@ -33,7 +33,7 @@ public final class CompilerEnv {
 	public static final int F_COMPAT21 = 0;
 
 	/** Identifiers for warning categories. */
-	public static final String[] WARNING_STRINGS = {"deprecated", "main", "operators", "included", "empty", "typesafe"};
+	public static final String[] WARNING_STRINGS = {"deprecated", "main", "operators", "included", "empty", "typesafe", "cast"};
 
 	/**
 	 * Warning category for errors.
@@ -47,6 +47,7 @@ public final class CompilerEnv {
 	public static final int W_INCLUDED = 3;
 	public static final int W_EMPTY = 4;
 	public static final int W_TYPESAFE = 5;
+	public static final int W_CAST = 6;
 
 	/** Bit-mask of enabled option flags. */
 	private final int options;

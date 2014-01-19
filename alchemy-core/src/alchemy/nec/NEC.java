@@ -20,7 +20,7 @@ package alchemy.nec;
 
 import alchemy.fs.Filesystem;
 import alchemy.io.IO;
-import alchemy.nec.tree.Unit;
+import alchemy.nec.syntax.Unit;
 import alchemy.system.NativeApp;
 import alchemy.system.Process;
 import java.io.IOException;
@@ -31,20 +31,19 @@ import java.io.OutputStream;
  * @author Sergey Basalaev
  */
 public class NEC extends NativeApp {
-	
+
 	static private final String VERSION =
-			"Native Ether Compiler version 2.0";
+			"Native Ether Compiler version 2.2";
 
 	static private final String HELP =
 			"Usage: ec [options] <input> \n" +
 			"Options:\n" +
 			"-o <output>\n write to this file\n" +
-			"-t<target>\n compile for given target\n" +
 			"-O<level>\n choose optimization level\n" +
 			"-I<path>\n add path to includes\n" +
-			"-W<cat> -Wno-<cat>\n Switches category of warnings\n" +
+			"-W<cat> -Wno-<cat>\n Turns on/off category of warnings\n" +
 			"-g\n turn on debugging info\n" +
-			"-Xcommand\n use experimental feature\n" +
+			"-f<opt> -fno-<opt>\n Turns on/off option\n" +
 			"-h\n print this help and exit\n" +
 			"-v\n print version and exit";
 
@@ -61,9 +60,8 @@ public class NEC extends NativeApp {
 		boolean wait_outname = false;
 		int optlevel = 1;
 		boolean dbginfo = false;
-		int Wmask = -1; // all warnings
-		int Xmask = 0;
-		int target = 0x0201;
+		int warnmask = -1; // all warnings
+		int optmask = 0;
 		for (int i=0; i<args.length; i++) {
 			String arg = args[i];
 			if (arg.equals("-h")) {
@@ -74,41 +72,39 @@ public class NEC extends NativeApp {
 				return 0;
 			} else if (arg.equals("-o")) {
 				wait_outname = true;
-			} else if (arg.startsWith("-t")) {
-				// does anyone really need cross-compilation?
-				if (arg.equals("-t2.1")) {
-					target = 0x0201;
-				} else {
-					IO.println(p.stderr, "Unsupported target: "+arg.substring(2));
-					return 1;
-				}
 			} else if (arg.startsWith("-O")) {
 				try {
 					optlevel = Integer.parseInt(arg.substring(2));
 				} catch (Exception e) {
 					optlevel = 1;
 				}
-			} else if (arg.startsWith("-X")) {
-				String Xfeature = arg.substring(2);
-				for (int j=0; j < Parser.X_STRINGS.length; j++) {
-					if (Xfeature.equals(Parser.X_STRINGS[j]))
-						Xmask |= (1 << j);
-				}
 			} else if (arg.equals("-g")) {
 				dbginfo = true;
+			} else if (arg.startsWith("-fno-")) {
+				String nooption = arg.substring(5);
+				for (int j=0; j < CompilerEnv.OPTION_STRINGS.length; j++) {
+					if (nooption.equals(CompilerEnv.OPTION_STRINGS[j]))
+						optmask &= ~(1 << j);
+				}
+			} else if (arg.startsWith("-f")) {
+				String option = arg.substring(2);
+				for (int j=0; j < CompilerEnv.OPTION_STRINGS.length; j++) {
+					if (option.equals(CompilerEnv.OPTION_STRINGS[j]))
+						optmask |= (1 << j);
+				}
 			} else if (arg.startsWith("-Wno-")) {
 				String nowarn = arg.substring(5);
-				if (nowarn.equals("all")) Wmask = 0;
-				else for (int j=0; j < Parser.WARN_STRINGS.length; j++) {
-					if (nowarn.equals(Parser.WARN_STRINGS[j]))
-						Wmask &= ~(1 << j);
+				if (nowarn.equals("all")) warnmask = 0;
+				else for (int j=0; j < CompilerEnv.WARNING_STRINGS.length; j++) {
+					if (nowarn.equals(CompilerEnv.WARNING_STRINGS[j]))
+						warnmask &= ~(1 << j);
 				}
 			} else if (arg.startsWith("-W")) {
 				String warn = arg.substring(2);
-				if (warn.equals("all")) Wmask = 0xffffffff;
-				else for (int j=0; j < Parser.WARN_STRINGS.length; j++) {
-					if (warn.equals(Parser.WARN_STRINGS[j]))
-						Wmask |= (1 << j);
+				if (warn.equals("all")) warnmask = 0xffffffff;
+				else for (int j=0; j < CompilerEnv.WARNING_STRINGS.length; j++) {
+					if (warn.equals(CompilerEnv.WARNING_STRINGS[j]))
+						warnmask |= (1 << j);
 				}
 			} else if (arg.startsWith("-I") && arg.length() > 2) {
 				p.setEnv("INCPATH", p.getEnv("INCPATH")+':'+arg.substring(2));
@@ -128,34 +124,38 @@ public class NEC extends NativeApp {
 				fname = arg;
 			}
 		}
+		if (fname == null) {
+			IO.println(p.stderr, "No input files.");
+			return 1;
+		}
 		if (outname == null) {
 			outname = fname+".o";
 		}
 		//parsing source
-		Parser parser = new Parser(p, target, optlevel, Wmask, Xmask);
+		CompilerEnv env = new CompilerEnv(p, optmask, warnmask, dbginfo);
+		Parser parser = new Parser(env);
 		Unit unit = null;
 		try {
-			unit = parser.parse(p.toFile(fname));
-		} catch (Exception e) {
-			IO.println(p.stderr, "There is a bug in compiler. Please report it with your source code and the following error message: "+e);
-		}
-		if (unit == null) return -1;
-		//optimizing
-		if (optlevel > 0) new Optimizer().visitUnit(unit);
-		//writing object code
-		new VarIndexer().visitUnit(unit);
-		EAsmWriter wr = new EAsmWriter(dbginfo);
-		try {
+			unit = parser.parseUnit(p.toFile(fname));
+			if (unit == null || env.getErrorCount() > 0) return 1;
+			// TODO: optimize
+			EAsmWriter wr = new EAsmWriter(dbginfo);
 			OutputStream out = Filesystem.write(p.toFile(outname));
 			wr.writeTo(unit, out);
+			out.flush();
 			out.close();
+			return 0;
 		} catch (IOException ioe) {
-			IO.println(p.stderr, "I/O error: " + ioe);
+			IO.println(p.stderr, "I/O error: " + ioe.getMessage());
+			return 1;
 		} catch (Exception e) {
 			IO.println(p.stderr, "There is a bug in compiler. Please report it with your source code and the following error message: "+e);
 			e.printStackTrace();
-			return -1;
+			return 2;
 		}
-		return 0;
+		//optimizing
+//		if (optlevel > 0) new Optimizer().visitUnit(unit);
+		//writing object code
+//		new VarIndexer().visitUnit(unit);
 	}
 }
