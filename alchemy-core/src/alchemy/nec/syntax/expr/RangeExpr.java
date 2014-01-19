@@ -18,39 +18,36 @@
 
 package alchemy.nec.syntax.expr;
 
-import alchemy.nec.syntax.Var;
+import alchemy.nec.syntax.type.BuiltinType;
 import alchemy.nec.syntax.type.Type;
 
 /**
- * Helper expression for some constructs.
- * Results from expressions in sequence are
- * stored in local variables. Result of the last
- * expression is returned.
+ * Range of Int or Long values.
+ * <pre>fromExpr .. toExpr</pre>
  *
  * @author Sergey Basalaev
  */
-public final class SequentialExpr extends Expr {
+public final class RangeExpr extends Expr {
 
-	public Var[] seqVars;
-	public Expr[] seqExprs;
-	public Expr lastExpr;
+	public Expr fromExpr;
+	public Expr toExpr;
 
-	public SequentialExpr(Var[] seqVars, Expr[] seqExprs, Expr lastExpr) {
-		super(EXPR_SEQUENTIAL);
-		this.seqVars = seqVars;
-		this.seqExprs = seqExprs;
-		this.lastExpr = lastExpr;
+	public RangeExpr(Expr fromExpr, Expr toExpr) {
+		super(EXPR_RANGE);
+		this.fromExpr = fromExpr;
+		this.toExpr = toExpr;
 	}
 
 	public int lineNumber() {
-		return seqExprs[0].lineNumber();
+		return fromExpr.lineNumber();
 	}
 
 	public Type returnType() {
-		return lastExpr.returnType();
+		return (fromExpr.returnType() == BuiltinType.INT)
+				? BuiltinType.INTRANGE : BuiltinType.LONGRANGE;
 	}
 
 	public Object accept(ExprVisitor v, Object args) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return v.visitRange(this, args);
 	}
 }

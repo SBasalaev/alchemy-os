@@ -35,6 +35,7 @@ public interface ExprVisitor {
 	Object visitIfElse(IfElseExpr expr, Object args);
 	Object visitNewArray(NewArrayExpr expr, Object args);
 	Object visitNewArrayInit(NewArrayInitExpr expr, Object args);
+	Object visitRange(RangeExpr expr, Object args);
 	Object visitSequential(SequentialExpr expr, Object args);
 	Object visitTryCatch(TryCatchExpr expr, Object args);
 	Object visitUnary(UnaryExpr expr, Object args);

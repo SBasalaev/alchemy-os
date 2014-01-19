@@ -33,6 +33,8 @@ public final class BuiltinType extends Type {
 	public static final BuiltinType LONG = new BuiltinType("Long", TYPE_LONG);
 	public static final BuiltinType FLOAT = new BuiltinType("Float", TYPE_FLOAT);
 	public static final BuiltinType DOUBLE = new BuiltinType("Double", TYPE_DOUBLE);
+	public static final BuiltinType INTRANGE = new BuiltinType("IntRange", TYPE_INTRANGE);
+	public static final BuiltinType LONGRANGE = new BuiltinType("LongRange", TYPE_LONGRANGE);
 
 	/* Object types. */
 	public static final BuiltinType NULL = new BuiltinType("Null", TYPE_OBJECT);

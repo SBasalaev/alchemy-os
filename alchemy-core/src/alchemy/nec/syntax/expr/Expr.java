@@ -34,7 +34,7 @@ public abstract class Expr {
 	public static final int EXPR_CAST = 7;
 	public static final int EXPR_COMPARISON = 8;
 	public static final int EXPR_CONCAT = 9;
-	/* public static final int EXPR_EQUALITY = 10; */
+	public static final int EXPR_RANGE = 10;
 	public static final int EXPR_IF = 11;
 	public static final int EXPR_NEWARRAY = 12;
 	public static final int EXPR_NEWARRAY_INIT = 13;

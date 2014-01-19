@@ -36,6 +36,8 @@ public abstract class Type {
 	public static final int TYPE_OBJECT = 9;
 	public static final int TYPE_FUNCTION = 10;
 	public static final int TYPE_ARRAY = 11;
+	public static final int TYPE_INTRANGE = 12;
+	public static final int TYPE_LONGRANGE = 13;
 
 	/** Kind of this type, one of TYPE_* constants. */
 	public final int kind;
