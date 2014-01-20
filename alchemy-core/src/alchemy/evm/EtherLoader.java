@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ public final class EtherLoader {
 	 *  Variable instructions: iinc
 	 *
 	 * New in format 2.2
-	 *  Instructions: throw getglobal setglobal
+	 *  Instructions: throw getglobal setglobal newmultiarray
 	 */
 
 	/** Loads Ether library from given input stream. */

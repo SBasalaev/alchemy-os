@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2013-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -281,6 +281,35 @@ public final class Arrays {
 				return new Float64(((double[])array)[index]);
 			default:
 				throw new ClassCastException("Not an array");
+		}
+	}
+
+	/** Returns new multidimensional array. */
+	public static Object newMultiArray(int[] sizes, int type) {
+		if (sizes.length == 0) throw new IllegalArgumentException();
+		return newMultiArray(sizes, type, 0);
+	}
+
+	private static Object newMultiArray(int[] sizes, int type, int level) {
+		if (level == sizes.length-1) {
+			switch (type) {
+				case AR_OBJECT:  return new Object[sizes[level]];
+				case AR_BOOLEAN: return new boolean[sizes[level]];
+				case AR_BYTE:    return new byte[sizes[level]];
+				case AR_CHAR:    return new char[sizes[level]];
+				case AR_SHORT:   return new short[sizes[level]];
+				case AR_INT:     return new int[sizes[level]];
+				case AR_LONG:    return new long[sizes[level]];
+				case AR_FLOAT:   return new float[sizes[level]];
+				case AR_DOUBLE:  return new double[sizes[level]];
+				default: throw new IllegalArgumentException();
+			}
+		} else {
+			Object[] array = new Object[sizes[level]];
+			for (int i=0; i<sizes[level]; i++) {
+				array[i] = newMultiArray(sizes, type, level+1);
+			}
+			return array;
 		}
 	}
 

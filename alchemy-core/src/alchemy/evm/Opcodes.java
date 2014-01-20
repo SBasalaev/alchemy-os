@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -166,6 +166,7 @@ public interface Opcodes {
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
 
+	byte MULTINEWARRAY = (byte)0xCE;
 	byte SETGLOBAL   = (byte)0xCF;
 	byte GETGLOBAL   = (byte)0xD0;
 	byte GETGLOBALDEF= (byte)0xD1;

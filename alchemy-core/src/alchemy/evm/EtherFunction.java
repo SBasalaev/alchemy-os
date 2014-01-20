@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import alchemy.types.Float32;
 import alchemy.types.Float64;
 import alchemy.types.Int32;
 import alchemy.types.Int64;
+import alchemy.util.Arrays;
 
 /**
  * Ether Virtual Machine.
@@ -585,6 +586,7 @@ final class EtherFunction extends Function {
 					head--;
 					break;
 				}
+
 			//FUNCTION CALLS
 				case Opcodes.CALL_0:
 				case Opcodes.CALL_1:
@@ -819,6 +821,20 @@ final class EtherFunction extends Function {
 				}
 				case Opcodes.DALEN: {
 					stack[head] = Int32.toInt32(((double[])stack[head]).length);
+					break;
+				}
+				case Opcodes.MULTINEWARRAY: {
+					int dimension = code[ct] & 0xff;
+					ct++;
+					if (dimension < 2) throw new IllegalArgumentException();
+					int[] sizes = new int[dimension];
+					head -= dimension-1;
+					for (int i=0; i<dimension; i++) {
+						sizes[i] = ((Int32)stack[head+i]).value;
+					}
+					int type = code[ct];
+					ct++;
+					stack[head] = Arrays.newMultiArray(sizes, type);
 					break;
 				}
 
