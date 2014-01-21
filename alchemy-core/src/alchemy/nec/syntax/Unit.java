@@ -47,8 +47,9 @@ public final class Unit implements Scope {
 		return v;
 	}
 
-	public void addVar(Var v) {
+	public boolean addVar(Var v) {
 		vars.set(v.name, v);
+		return false;
 	}
 
 	public Type getType(String name) {

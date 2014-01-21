@@ -128,8 +128,8 @@ public final class Token {
 		return (token == IN) || (token >= -28 && token <= -19) || "+-/*%^&|<>".indexOf(token) >= 0;
 	}
 
-	public static int getAssignOperator(int token) {
-		switch (token) {
+	public static int getBinaryOperator(int assignment) {
+		switch (assignment) {
 			case PLUSEQ: return '+';
 			case MINUSEQ: return '-';
 			case STAREQ: return '*';
@@ -142,7 +142,7 @@ public final class Token {
 			case GTGTEQ: return GTGT;
 			case GTGTGTEQ: return GTGTGT;
 			default:
-				throw new IllegalArgumentException("Not an assignment operator: " + token);
+				throw new IllegalArgumentException("Not an assignment operator: " + assignment);
 		}
 	}
 

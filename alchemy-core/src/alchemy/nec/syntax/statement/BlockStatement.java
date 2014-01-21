@@ -39,8 +39,8 @@ import alchemy.util.HashMap;
 public final class BlockStatement extends Statement implements Scope {
 
 	private final Scope parent;
-	private final HashMap vars = new HashMap();
 
+	public final HashMap vars = new HashMap();
 	public final ArrayList statements = new ArrayList();
 
 	public BlockStatement(Scope scope) {
