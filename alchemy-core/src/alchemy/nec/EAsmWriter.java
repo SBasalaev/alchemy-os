@@ -34,7 +34,7 @@ import alchemy.nec.syntax.type.Type;
 import alchemy.types.Int32;
 import alchemy.types.Int64;
 import alchemy.util.ArrayList;
-import alchemy.util.HashMap;
+import alchemy.util.Arrays;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -48,16 +48,42 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 	private final FlowAnalyzer flow;
 	
 	private Unit unit;
-	private HashMap varIndices;
 	private FunctionWriter writer;
 
 	private Label loopStart;
 	private Label loopEnd;
 
+	private Var[] localVars = new Var[256];
+
 	public EAsmWriter(CompilerEnv env) {
 		env.suppressWarnings();
 		this.env = env;
 		this.flow = new FlowAnalyzer(env);
+	}
+
+	private int getVarIndex(Var var) {
+		for (int i=0; i<256; i++) {
+			if (localVars[i] == var) return i;
+		}
+		return -1;
+	}
+
+	private int addVar(Var var) {
+		for (int i=0; i<256; i++) {
+			if (localVars[i] == null) {
+				localVars[i] = var;
+				return i;
+			}
+		}
+		throw new RuntimeException("Too many variables");
+	}
+
+	private void removeVar(Var var) {
+		for (int i=0; i<256; i++) {
+			if (localVars[i] == var) {
+				localVars[i] = null;
+			}
+		}
 	}
 
 	public void writeTo(Unit unit, OutputStream out) throws IOException {
@@ -70,7 +96,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			if (f.hits > 0) {
 				writer = uw.visitFunction(f.signature, true, f.type.argtypes.length);
 				if (env.debug) writer.visitSource(f.source);
+				for (int vi=0; vi<f.args.length; vi++) addVar(f.args[vi]);
 				f.body.accept(this, null);
+				for (int vi=0; vi<f.args.length; vi++) removeVar(f.args[vi]);
 				writer.visitEnd();
 			}
 		}
@@ -328,56 +356,6 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		return Opcodes.NOP;
 	}
 
-//	public Object visitAssign(AssignExpr assign, Object isReturn) {
-//		assign.expr.accept(this, Boolean.FALSE);
-//		writer.visitVarInsn(Opcodes.STORE, assign.var.index);
-//		if (isReturn == Boolean.TRUE) {
-//			writer.visitInsn(Opcodes.RET_NULL);
-//		}
-//		return null;
-//	}
-//	
-//	public Object visitIinc(IincExpr iinc, Object isReturn) {
-//		if (debug) writer.visitLine(iinc.lineNumber());
-//		writer.visitIincInsn(iinc.var.index, iinc.incr);
-//		if (isReturn == Boolean.TRUE) {
-//			writer.visitInsn(Opcodes.RET_NULL);
-//		}
-//		return null;
-//	}
-//
-//	public Object visitNewArray(NewArrayExpr newarray, Object isReturn) {
-//		if (debug) writer.visitLine(newarray.lineNumber());
-//		newarray.lengthexpr.accept(this, Boolean.FALSE);
-//		Type artype = newarray.rettype();
-//		Type eltype = null;
-//		if (artype instanceof ArrayType)
-//			eltype = ((ArrayType)artype).elementType();
-//		if (eltype == BuiltinType.BYTE) {
-//			writer.visitInsn(Opcodes.NEWBA);
-//		} else if (eltype == BuiltinType.CHAR) {
-//			writer.visitInsn(Opcodes.NEWCA);
-//		} else if (eltype == BuiltinType.SHORT) {
-//			writer.visitInsn(Opcodes.NEWSA);
-//		} else if (eltype == BuiltinType.BOOL) {
-//			writer.visitInsn(Opcodes.NEWZA);
-//		} else if (eltype == BuiltinType.INT) {
-//			writer.visitInsn(Opcodes.NEWIA);
-//		} else if (eltype == BuiltinType.LONG) {
-//			writer.visitInsn(Opcodes.NEWLA);
-//		} else if (eltype == BuiltinType.FLOAT) {
-//			writer.visitInsn(Opcodes.NEWFA);
-//		} else if (eltype == BuiltinType.DOUBLE) {
-//			writer.visitInsn(Opcodes.NEWDA);
-//		} else {
-//			writer.visitInsn(Opcodes.NEWAA);
-//		}
-//		if (isReturn == Boolean.TRUE) {
-//			writer.visitInsn(Opcodes.RETURN);
-//		}
-//		return null;
-//	}
-//
 //	public Object visitSwitch(SwitchExpr swexpr, Object isReturn) {
 //		swexpr.indexexpr.accept(this, Boolean.FALSE);
 //		// computing count of numbers, min, max
@@ -465,15 +443,6 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 //			}
 //		}
 //		writer.visitLabel(lafter);
-//		return null;
-//	}
-//
-//	public Object visitVar(VarExpr vexpr, Object isReturn) {
-//		if (debug) writer.visitLine(vexpr.lineNumber());
-//		writer.visitVarInsn(Opcodes.LOAD, vexpr.var.index);
-//		if (isReturn == Boolean.TRUE) {
-//			writer.visitInsn(Opcodes.RETURN);
-//		}
 //		return null;
 //	}
 
@@ -767,34 +736,30 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		return null;
 	}
 
-//	public Object visitNewArray(NewArrayExpr newarray, Object args) {
-//		if (env.debug) writer.visitLine(newarray.lineNumber());
-//		newarray.lengthexpr.accept(this, Boolean.FALSE);
-//		Type artype = newarray.rettype();
-//		Type eltype = null;
-//		if (artype instanceof ArrayType)
-//			eltype = ((ArrayType)artype).elementType();
-//		if (eltype == BuiltinType.BYTE) {
-//			writer.visitInsn(Opcodes.NEWBA);
-//		} else if (eltype == BuiltinType.CHAR) {
-//			writer.visitInsn(Opcodes.NEWCA);
-//		} else if (eltype == BuiltinType.SHORT) {
-//			writer.visitInsn(Opcodes.NEWSA);
-//		} else if (eltype == BuiltinType.BOOL) {
-//			writer.visitInsn(Opcodes.NEWZA);
-//		} else if (eltype == BuiltinType.INT) {
-//			writer.visitInsn(Opcodes.NEWIA);
-//		} else if (eltype == BuiltinType.LONG) {
-//			writer.visitInsn(Opcodes.NEWLA);
-//		} else if (eltype == BuiltinType.FLOAT) {
-//			writer.visitInsn(Opcodes.NEWFA);
-//		} else if (eltype == BuiltinType.DOUBLE) {
-//			writer.visitInsn(Opcodes.NEWDA);
-//		} else {
-//			writer.visitInsn(Opcodes.NEWAA);
-//		}
-//		return null;
-//	}
+	public Object visitNewArray(NewArrayExpr newarray, Object args) {
+		if (env.debug) writer.visitLine(newarray.lineNumber());
+		for (int i=0; i<newarray.lengthExprs.length; i++) {
+			newarray.lengthExprs[i].accept(this, args);
+		}
+		Type type = newarray.returnType();
+		for (int i=0; i<newarray.lengthExprs.length; i++) {
+			type = ((ArrayType)type).elementType;
+		}
+		int typebyte;
+		switch (type.kind) {
+			case Type.TYPE_BOOL:   typebyte = Arrays.AR_BOOLEAN; break;
+			case Type.TYPE_BYTE:   typebyte = Arrays.AR_BYTE;    break;
+			case Type.TYPE_CHAR:   typebyte = Arrays.AR_CHAR;    break;
+			case Type.TYPE_SHORT:  typebyte = Arrays.AR_SHORT;   break;
+			case Type.TYPE_INT:    typebyte = Arrays.AR_INT;     break;
+			case Type.TYPE_LONG:   typebyte = Arrays.AR_LONG;    break;
+			case Type.TYPE_FLOAT:  typebyte = Arrays.AR_FLOAT;   break;
+			case Type.TYPE_DOUBLE: typebyte = Arrays.AR_DOUBLE;  break;
+			default:               typebyte = Arrays.AR_OBJECT;  break;
+		}
+		writer.visitNewMultiArray(newarray.lengthExprs.length, typebyte);
+		return null;
+	}
 
 	public Object visitNewArrayInit(NewArrayInitExpr newarray, Object args) {
 		if (env.debug) writer.visitLine(newarray.lineNumber());
@@ -867,11 +832,13 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 	}
 
 	public Object visitSequential(SequentialExpr expr, Object args) {
+		for (int vi=0; vi<expr.seqVars.length; vi++) addVar(expr.seqVars[vi]);
 		for (int i=0; i < expr.seqExprs.length; i++) {
 			expr.seqExprs[i].accept(this, args);
-			writer.visitVarInsn(Opcodes.STORE, ((Int32)varIndices.get(expr.seqVars[i])).value);
+			writer.visitVarInsn(Opcodes.STORE, getVarIndex(expr.seqVars[i]));
 		}
 		expr.lastExpr.accept(this, args);
+		for (int vi=0; vi<expr.seqVars.length; vi++) removeVar(expr.seqVars[vi]);
 		return null;
 	}
 
@@ -941,7 +908,7 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			}
 		} else {
 			// local var
-			writer.visitVarInsn(Opcodes.LOAD, ((Int32)varIndices.get(var)).value);
+			writer.visitVarInsn(Opcodes.LOAD, getVarIndex(var));
 		}
 		return null;
 	}
@@ -980,22 +947,60 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		} else {
 			// local var
 			stat.assignExpr.accept(this, args);
-			writer.visitVarInsn(Opcodes.STORE, ((Int32)varIndices.get(var)).value);
+			writer.visitVarInsn(Opcodes.STORE, getVarIndex(var));
 		}
 		return null;
 	}
 
 	public Object visitBlockStatement(BlockStatement block, Object args) {
+		Object[] varnames = block.vars.keys();
+		for (int vi=0; vi<varnames.length; vi++) addVar((Var)block.vars.get(varnames[vi]));
 		for (int i=0; i<block.statements.size(); i++) {
 			Expr expr = (Expr)block.statements.get(i);
 			expr.accept(this, args);
 		}
+		for (int vi=0; vi<varnames.length; vi++) removeVar((Var)block.vars.get(varnames[vi]));
 		return null;
 	}
 
 	public Object visitBreakStatement(BreakStatement stat, Object args) {
 		if (env.debug) writer.visitLine(stat.lineNumber());
 		writer.visitJumpInsn(Opcodes.GOTO, loopEnd);
+		return null;
+	}
+
+	public Object visitCompoundAssignStatement(CompoundAssignStatement stat, Object args) {
+		Var var = stat.var;
+		if (unit.getVar(var.name) == var) {
+			// global var
+			writer.visitLdcInsn(var.name);
+			writer.visitInsn(Opcodes.DUP);
+			if (var.defaultValue != null) {
+				writer.visitLdcInsn(var.defaultValue);
+				writer.visitInsn(Opcodes.GETGLOBALDEF);
+			} else {
+				writer.visitInsn(Opcodes.GETGLOBAL);
+			}
+			stat.assignExpr.accept(this, args);
+			writer.visitInsn(binaryOperatorInsn(var.type, Token.getBinaryOperator(stat.assignOperator)));
+			writer.visitInsn(Opcodes.SETGLOBAL);
+		} else {
+			// local var
+			if (stat.assignExpr.kind == Expr.EXPR_CONST && stat.var.type.kind == Type.TYPE_INT
+					&& (stat.assignOperator == Token.PLUSEQ || stat.assignOperator == Token.MINUSEQ)) {
+				int incr = ((Int32)((ConstExpr)stat.assignExpr).value).value;
+				if (stat.assignOperator == Token.MINUSEQ) incr = -incr;
+				if (incr >= Byte.MIN_VALUE && incr <= Byte.MAX_VALUE) {
+					if (env.debug) writer.visitLine(stat.lineNumber());
+					writer.visitIincInsn(getVarIndex(var), incr);
+					return null;
+				}
+			}
+			writer.visitVarInsn(Opcodes.LOAD, getVarIndex(var));
+			stat.assignExpr.accept(this, args);
+			writer.visitInsn(binaryOperatorInsn(stat.var.type, Token.getBinaryOperator(stat.assignOperator)));
+			writer.visitVarInsn(Opcodes.STORE, getVarIndex(var));
+		}
 		return null;
 	}
 
@@ -1084,9 +1089,13 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		if (trycatch.catchVar == null) {
 			writer.visitInsn(Opcodes.POP);
 		} else {
-			writer.visitVarInsn(Opcodes.STORE, ((Int32)varIndices.get(trycatch.catchVar)).value);
+			addVar(trycatch.catchVar);
+			writer.visitVarInsn(Opcodes.STORE, getVarIndex(trycatch.catchVar));
 		}
 		trycatch.catchStat.accept(this, args);
+		if (trycatch.catchVar != null) {
+			removeVar(trycatch.catchVar);
+		}
 		writer.visitLabel(afterTry);
 		return null;
 	}
