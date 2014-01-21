@@ -25,6 +25,7 @@ import alchemy.nec.syntax.expr.ConstExpr;
 import alchemy.nec.syntax.expr.Expr;
 import alchemy.nec.syntax.statement.*;
 import alchemy.nec.syntax.type.BuiltinType;
+import alchemy.util.ArrayList;
 
 /**
  * Checks the control flow.
@@ -54,7 +55,11 @@ public final class FlowAnalyzer implements StatementVisitor {
 	}
 
 	public void visitUnit(Unit u) {
-		
+		ArrayList funcs = u.implementedFunctions;
+		for (int i=0; i<funcs.size(); i++) {
+			Function f = (Function)funcs.get(i);
+			visitFunction(f);
+		}
 	}
 
 	public void visitFunction(Function f) {

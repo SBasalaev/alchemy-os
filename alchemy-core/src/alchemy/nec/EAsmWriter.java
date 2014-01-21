@@ -956,8 +956,8 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		Object[] varnames = block.vars.keys();
 		for (int vi=0; vi<varnames.length; vi++) addVar((Var)block.vars.get(varnames[vi]));
 		for (int i=0; i<block.statements.size(); i++) {
-			Expr expr = (Expr)block.statements.get(i);
-			expr.accept(this, args);
+			Statement stat = (Statement)block.statements.get(i);
+			stat.accept(this, args);
 		}
 		for (int vi=0; vi<varnames.length; vi++) removeVar((Var)block.vars.get(varnames[vi]));
 		return null;
