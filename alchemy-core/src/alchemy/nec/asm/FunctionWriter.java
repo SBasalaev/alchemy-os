@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,19 +46,19 @@ public class FunctionWriter implements Opcodes {
 	private int varcount;
 	private ArrayList objects;
 	private AsmFunc func;
-	
+
 	FunctionWriter(AsmFunc func, ArrayList objects, int arglen) {
 		this.objects = objects;
 		this.varcount = arglen;
 		this.func = func;
 	}
-	
+
 	private void visitStack(int inc) {
 		stackpos += inc;
 		if (inc > 0 && stackmax < stackpos) stackmax = stackpos;
 		if (stackpos < 0) throw new IllegalStateException("Stack inconsistency: empty stack");
 	}
-	
+
 	/** Visit name of the source file. */
 	public void visitSource(String name) {
 		if (dbgtable.length() > 0) throw new IllegalStateException("Source already visited");
@@ -69,7 +69,7 @@ public class FunctionWriter implements Opcodes {
 		}
 		dbgtable.append((char)index);
 	}
-	
+
 	/** Visit number of the line in the source file. */
 	public void visitLine(int num) {
 		int len = dbgtable.length();
@@ -80,7 +80,7 @@ public class FunctionWriter implements Opcodes {
 			dbgtable.append((char)num).append((char)data.size());
 		}
 	}
-	
+
 	/** Visit instruction without arguments. */
 	public void visitInsn(int opcode) {
 		data.write(opcode);
@@ -95,6 +95,10 @@ public class FunctionWriter implements Opcodes {
 			case FASTORE:
 			case DASTORE:
 				visitStack(-3);
+				break;
+			case THROW:
+			case SETGLOBAL:
+				visitStack(-2);
 				break;
 			case ACMP:
 			case AALOAD:
@@ -144,6 +148,7 @@ public class FunctionWriter implements Opcodes {
 			case LXOR:
 			case POP:
 			case RETURN:
+			case GETGLOBALDEF:
 				visitStack(-1);
 				break;
 			case AALEN:
@@ -186,6 +191,7 @@ public class FunctionWriter implements Opcodes {
 			case I2C:
 			case I2B:
 			case I2S:
+			case GETGLOBAL:
 				break;
 			case DUP:
 				visitStack(1);
@@ -197,7 +203,7 @@ public class FunctionWriter implements Opcodes {
 				throw new IllegalArgumentException();
 		}
 	}
-	
+
 	/** Visit CALL or CALV instruction. */
 	public void visitCallInsn(int opcode, int arglen) {
 		if (arglen < 0 || arglen > 255) throw new IllegalArgumentException();
@@ -210,7 +216,7 @@ public class FunctionWriter implements Opcodes {
 		}
 		visitStack(opcode == CALL ? -arglen : -arglen-1);
 	}
-	
+
 	/** Visit LOAD or STORE instruction. */
 	public void visitVarInsn(int opcode, int var) {
 		if (var < 0 || var > 255) throw new IllegalArgumentException();
@@ -224,7 +230,7 @@ public class FunctionWriter implements Opcodes {
 		}
 		visitStack(opcode == LOAD ? 1 : -1);
 	}
-	
+
 	public void visitIincInsn(int var, int incr) {
 		if (var < 0 || var > 255) throw new IllegalArgumentException();
 		if (var >= varcount) varcount = var+1;
@@ -232,6 +238,14 @@ public class FunctionWriter implements Opcodes {
 		data.write(IINC);
 		data.write(var);
 		data.write(incr);
+	}
+
+	public void visitNewMultiArray(int dimension, int type) {
+		if (dimension <= 0) throw new IllegalArgumentException();
+		data.write(NEWMULTIARRAY);
+		data.write(dimension);
+		data.write(type);
+		visitStack(dimension-1);
 	}
 
 	public void visitLdFunc(String name) {
@@ -311,7 +325,7 @@ public class FunctionWriter implements Opcodes {
 		}
 		visitStack(1);
 	}
-	
+
 	/**
 	 * Marks current code position as pointer with label address.
 	 */
@@ -335,7 +349,7 @@ public class FunctionWriter implements Opcodes {
 			throw new IllegalStateException("Stack inconsistency: other jump expects different stack");
 		}
 	}
-	
+
 	public void visitJumpInsn(int opcode, Label label) {
 		data.write(opcode);
 		switch (opcode) {
@@ -364,7 +378,7 @@ public class FunctionWriter implements Opcodes {
 		}
 		visitLabelPtr(label);
 	}
-	
+
 	public void visitTableSwitch(int min, int max, Label dflt, Label[] jumps) {
 		data.write(Opcodes.TABLESWITCH);
 		visitStack(-1);
@@ -381,7 +395,7 @@ public class FunctionWriter implements Opcodes {
 			visitLabelPtr(jumps[i]);
 		}
 	}
-	
+
 	public void visitLookupSwitch(Label dflt, int[] cases, Label[] jumps) {
 		data.write(Opcodes.LOOKUPSWITCH);
 		visitStack(-1);
@@ -396,7 +410,7 @@ public class FunctionWriter implements Opcodes {
 			visitLabelPtr(jumps[i]);
 		}
 	}
-	
+
 	public void visitLabel(Label label) {
 		if (label.addr >= 0) throw new IllegalStateException("Label already visited");
 		if (label.stackpos < 0) {
@@ -406,7 +420,7 @@ public class FunctionWriter implements Opcodes {
 		}
 		label.addr = data.size();
 	}
-	
+
 	public void visitTryCatchHandler(Label from, Label to) {
 		if (from.stackpos < 0)
 			throw new IllegalStateException("Try/Catch handler must be visited after corresponding block");
@@ -417,7 +431,7 @@ public class FunctionWriter implements Opcodes {
 		errdata.add(to);
 		errdata.add(handler);
 	}
-	
+
 	public void visitEnd() {
 		byte[] code = data.toByteArray();
 		for (Enumeration e = labeldata.keys(); e.hasMoreElements(); ) {

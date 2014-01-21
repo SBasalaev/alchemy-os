@@ -823,7 +823,7 @@ final class EtherFunction extends Function {
 					stack[head] = Int32.toInt32(((double[])stack[head]).length);
 					break;
 				}
-				case Opcodes.MULTINEWARRAY: {
+				case Opcodes.NEWMULTIARRAY: {
 					int dimension = code[ct] & 0xff;
 					ct++;
 					if (dimension < 2) throw new IllegalArgumentException();
