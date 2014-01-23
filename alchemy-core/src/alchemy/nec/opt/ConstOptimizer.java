@@ -690,7 +690,9 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 	public Object visitNewArrayInit(NewArrayInitExpr expr, Object scope) {
 		Expr[] inits = expr.initializers;
 		for (int i=0; i<inits.length; i++) {
-			inits[i] = (Expr) inits[i].accept(this, scope);
+			if (inits[i] != null) {
+				inits[i] = (Expr) inits[i].accept(this, scope);
+			}
 		}
 		return expr;
 	}

@@ -41,6 +41,7 @@ public final class ProcessThread extends Thread {
 	private boolean interrupted;
 
 	ProcessThread(Process process, Function func, Object[] args) {
+		super(process.getName() + ':' + func.name);
 		this.process = process;
 		this.func = func;
 		this.args = args;

@@ -70,6 +70,7 @@ public final class HashMap {
 		if (size * 3 / 4 > table.length) {
 			rehash();
 			table = entries;
+			index = (hash & 0x7FFFFFFF) % table.length;
 		}
 
 		// create new entry

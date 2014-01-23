@@ -142,7 +142,7 @@ public final class Token {
 			case GTGTEQ: return GTGT;
 			case GTGTGTEQ: return GTGTGT;
 			default:
-				throw new IllegalArgumentException("Not an assignment operator: " + assignment);
+				throw new IllegalArgumentException("Not an assignment operator: " + Token.toString(assignment));
 		}
 	}
 
