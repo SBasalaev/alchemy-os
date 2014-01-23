@@ -56,9 +56,13 @@ public final class FlowAnalyzer implements StatementVisitor {
 
 	public void visitUnit(Unit u) {
 		ArrayList funcs = u.implementedFunctions;
-		for (int i=0; i<funcs.size(); i++) {
-			Function f = (Function)funcs.get(i);
-			visitFunction(f);
+		try {
+			for (int i=0; i<funcs.size(); i++) {
+				Function f = (Function)funcs.get(i);
+				visitFunction(f);
+			}
+		} catch (Exception e) {
+			env.exceptionHappened("FlowAnalyzer", "Function: " + function.signature, e);
 		}
 	}
 

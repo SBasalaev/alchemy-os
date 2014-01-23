@@ -129,35 +129,29 @@ public class NEC extends NativeApp {
 			return 1;
 		}
 		if (outname == null) {
-			outname = fname+".o";
+			outname = fname + ".o";
 		}
 		//parsing source
 		CompilerEnv env = new CompilerEnv(p, optmask, warnmask, dbginfo);
 		Parser parser = new Parser(env);
 		Unit unit = null;
+		unit = parser.parseUnit(p.toFile(fname));
+		if (env.getErrorCount() > 0) return 1;
+		// running analyzers
+		new FlowAnalyzer(env).visitUnit(unit);
+		if (env.getErrorCount() > 0) return 1;
+		// TODO: optimize
+		// writing binary code
 		try {
-			unit = parser.parseUnit(p.toFile(fname));
-			if (unit == null || env.getErrorCount() > 0) return 1;
-			new FlowAnalyzer(env).visitUnit(unit);
-			if (env.getErrorCount() > 0) return 1;
-			// TODO: optimize
 			EAsmWriter wr = new EAsmWriter(env);
 			OutputStream out = Filesystem.write(p.toFile(outname));
 			wr.writeTo(unit, out);
 			out.flush();
 			out.close();
-			return 0;
 		} catch (IOException ioe) {
-			IO.println(p.stderr, "I/O error: " + ioe.getMessage());
+			IO.println(p.stderr, "I/O error while writing " + outname + '\n' + ioe.getMessage());
 			return 1;
-		} catch (Exception e) {
-			IO.println(p.stderr, "There is a bug in compiler. Please report it with your source code and the following error message: "+e);
-			e.printStackTrace();
-			return 2;
 		}
-		//optimizing
-//		if (optlevel > 0) new Optimizer().visitUnit(unit);
-		//writing object code
-//		new VarIndexer().visitUnit(unit);
+		return 0;
 	}
 }

@@ -20,6 +20,7 @@ package alchemy.nec;
 
 import alchemy.io.IO;
 import alchemy.system.Process;
+import java.io.OutputStream;
 
 /**
  * Compiler environment.
@@ -33,7 +34,18 @@ public final class CompilerEnv {
 	public static final int F_COMPAT21 = 0;
 
 	/** Identifiers for warning categories. */
-	public static final String[] WARNING_STRINGS = {"deprecated", "main", "operators", "included", "empty", "typesafe", "cast"};
+	public static final String[] WARNING_STRINGS = {
+		"deprecated",
+		"main",
+		"operators",
+		"included",
+		"empty",
+		"typesafe",
+		"cast",
+		"hidden",
+	};
+
+	static final String BUGMSG = "There is a bug in compiler. Please report it with your source code and the following error messages.";
 
 	/**
 	 * Warning category for errors.
@@ -48,6 +60,7 @@ public final class CompilerEnv {
 	public static final int W_EMPTY = 4;
 	public static final int W_TYPESAFE = 5;
 	public static final int W_CAST = 6;
+	public static final int W_HIDDEN = 7;
 
 	/** Bit-mask of enabled option flags. */
 	private final int options;
@@ -84,6 +97,11 @@ public final class CompilerEnv {
 		return (options & (1 << option)) != 0;
 	}
 
+	/**
+	 * Prints warning message on stderr and increases warning count.
+	 * Argument <emph>category</emph> is one of W_* constants.
+	 * If it is W_ERROR, then error count increases.
+	 */
 	public void warn(String file, int line, int category, String msg) {
 		boolean isError = category == W_ERROR;
 		if (isError || (warnings | (1 << category)) != 0) {
@@ -97,5 +115,29 @@ public final class CompilerEnv {
 					+ "]\n " + msg;
 			IO.println(io.stderr, output);
 		}
+	}
+
+	/** Returns string of options for debugging messages. */
+	public String optionString() {
+		StringBuffer buf = new StringBuffer();
+		if (debug) buf.append(" -g");
+		for (int i=0; i<OPTION_STRINGS.length; i++) {
+			if ((options & (1 << i)) != 0) buf.append(" -f").append(OPTION_STRINGS[i]);
+		}
+		for (int i=0; i<WARNING_STRINGS.length; i++) {
+			if ((warnings & (1 << i)) != 0) buf.append(" -W").append(WARNING_STRINGS[i]);
+		}
+		return buf.toString();
+	}
+
+	public void exceptionHappened(String component, String info, Exception e) {
+		OutputStream err = io.stderr;
+		IO.println(err, BUGMSG);
+		IO.println(err, "Component: " + component);
+		IO.println(err, "Compiler options:" + optionString());
+		IO.println(err, info);
+		IO.println(err, "Exception: " + e);
+		e.printStackTrace();
+		errcount++;
 	}
 }
