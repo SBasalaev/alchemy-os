@@ -28,6 +28,7 @@ public final class NewArrayInitExpr extends Expr {
 
 	private final int line;
 	private final Type type;
+	/** Some of them may be null. */
 	public final Expr[] initializers;
 
 	public NewArrayInitExpr(int lnum, Type type, Expr[] initializers) {

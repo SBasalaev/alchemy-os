@@ -38,10 +38,9 @@ public final class ObjectType extends Type {
 	public Var[] fields;
 	public final ObjectType parent;
 
-	public ObjectType(String name, ObjectType parent, Var[] fields) {
+	public ObjectType(String name, ObjectType parent) {
 		super(name, TYPE_OBJECT);
 		this.parent = parent;
-		this.fields = fields;
 	}
 
 	public boolean equals(Type other) {

@@ -27,7 +27,8 @@ import alchemy.nec.syntax.type.Type;
 public interface Scope {
 	/** Returns type for given name. */
 	Type getType(String name);
-
 	/** Returns variable for given name. */
 	Var getVar(String name);
+	/** Returns function that contains this scope. */
+	Function enclosingFunction();
 }

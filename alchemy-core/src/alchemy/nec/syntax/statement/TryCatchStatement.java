@@ -37,7 +37,7 @@ public final class TryCatchStatement extends Statement {
 	public Statement catchStat;
 	public final Var catchVar;
 
-	public TryCatchStatement(Statement tryStat, Statement catchStat, Var catchVar) {
+	public TryCatchStatement(Statement tryStat, Var catchVar, Statement catchStat) {
 		super(STAT_TRYCATCH);
 		this.tryStat = tryStat;
 		this.catchStat = catchStat;

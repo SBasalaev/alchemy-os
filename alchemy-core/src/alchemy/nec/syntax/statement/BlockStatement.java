@@ -18,6 +18,7 @@
 
 package alchemy.nec.syntax.statement;
 
+import alchemy.nec.syntax.Function;
 import alchemy.nec.syntax.Scope;
 import alchemy.nec.syntax.Var;
 import alchemy.nec.syntax.type.Type;
@@ -65,6 +66,10 @@ public final class BlockStatement extends Statement implements Scope {
 	public boolean addVar(Var var) {
 		vars.set(var.name, var);
 		return parent.getVar(var.name) != null;
+	}
+
+	public Function enclosingFunction() {
+		return parent.enclosingFunction();
 	}
 
 	public Object accept(StatementVisitor v, Object args) {

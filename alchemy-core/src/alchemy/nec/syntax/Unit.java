@@ -59,4 +59,8 @@ public final class Unit implements Scope {
 	public void addType(Type type) {
 		types.set(type.name, type);
 	}
+
+	public Function enclosingFunction() {
+		return null;
+	}
 }

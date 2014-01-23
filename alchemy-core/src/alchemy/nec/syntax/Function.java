@@ -59,4 +59,8 @@ public class Function implements Scope {
 		}
 		return parent.getVar(name);
 	}
+
+	public Function enclosingFunction() {
+		return this;
+	}
 }
