@@ -46,7 +46,7 @@ def stdin(): IStream;
 def stdout(): OStream;
 def stderr(): OStream;
 
-def setin(in: IStream);
+def setin(input: IStream);
 def setout(out: OStream);
 def seterr(err: OStream);
 

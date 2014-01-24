@@ -1,6 +1,5 @@
 acopy
-Function.curry
-Structure.clone
+Function.apply
 Any.tostr
 Char.tostr
 Int.tobin
@@ -205,3 +204,7 @@ getenv
 setenv
 sleep
 sysProperty
+isTerm
+TermIStream.clear
+TermIStream.getPrompt
+TermIStream.setPrompt
