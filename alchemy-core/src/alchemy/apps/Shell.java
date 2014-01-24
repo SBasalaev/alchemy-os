@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -84,11 +84,15 @@ public class Shell extends NativeApp {
 					else return 1;
 				}
 				if (cc.cmd.equals("exit")) {
-					if (cc.args.length > 0) try {
-						exitcode = Integer.parseInt(cc.args[0]);
-					} catch (NumberFormatException e) {
-						IO.println(p.stderr, "exit: Not a number: "+cc.args[0]);
-						exitcode = 1;
+					if (cc.args.length > 0) {
+						try {
+							exitcode = Integer.parseInt(cc.args[0]);
+						} catch (NumberFormatException e) {
+							IO.println(p.stderr, "exit: Not a number: "+cc.args[0]);
+							exitcode = 1;
+						}
+					} else {
+						exitcode = 0;
 					}
 					return exitcode;
 				} else if (cc.cmd.equals("cd")) {
@@ -136,12 +140,18 @@ public class Shell extends NativeApp {
 					if (cc.in != null) child.stdin.close();
 					if (cc.out != null) child.stdout.close();
 					if (cc.err != null) child.stderr.close();
+					if (child.getError() != null) {
+						IO.println(p.stderr, child.getError());
+					}
 					if (p.stdin instanceof TerminalInput) {
 						((TerminalInput)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
 					}
 				}
 			} catch (Throwable t) {
 				IO.println(p.stderr, t);
+				if (p.stdin instanceof TerminalInput) {
+					((TerminalInput)p.stdin).setPrompt(p.getCurrentDirectory()+'>');
+				}
 			}
 			return exitcode;
 		} catch (Exception e) {
