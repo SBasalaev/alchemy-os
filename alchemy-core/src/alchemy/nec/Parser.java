@@ -31,7 +31,6 @@ import alchemy.types.*;
 import alchemy.util.ArrayList;
 import alchemy.util.Strings;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Parser for Ether language revision 2.2.
@@ -223,6 +222,9 @@ public class Parser {
 							if (func.body != null)
 								throw new ParseException("Function " + func.signature + " is already implemented");
 							func.body = parseFunctionBody(func);
+							func.hits++;
+							func.source = (String) files.last();
+							unit.implementedFunctions.add(func);
 						}
 					}
 					break;
@@ -377,13 +379,12 @@ public class Parser {
 	}
 
 	private Function parseFunctionDef(Scope scope) throws IOException, ParseException {
-		Function func = new Function(scope, null);
-
 		// parse name
 		if (t.nextToken() != Token.WORD)
 			throw new ParseException("Function name expected, got "+t);
 		String sig = t.svalue;
 		Type owner = null;
+		boolean isConstructor = false;
 		if (t.nextToken() == '.') {
 			owner = scope.getType(sig);
 			if (owner == null) {
@@ -391,7 +392,7 @@ public class Parser {
 				owner = BuiltinType.ANY;
 			}
 			if (t.nextToken() == Token.NEW) {
-				func.isConstructor = true;
+				isConstructor = true;
 			} else if (t.ttype != Token.WORD) {
 				throw new ParseException("Function name expected, got "+t);
 			}
@@ -399,11 +400,13 @@ public class Parser {
 		} else {
 			t.pushBack();
 		}
+		Function func = new Function(scope, sig);
+		func.isConstructor = isConstructor;
 
 		// parse argument list
 		expect('(');
 		ArrayList arglist = new ArrayList();
-		if (owner != null && !func.isConstructor) {
+		if (owner != null && !isConstructor) {
 			arglist.add(new Var("this", owner));
 		}
 		boolean first = true;
@@ -458,7 +461,6 @@ public class Parser {
 		for (int i=args.length-1; i>=0; i--) {
 			ftype.argtypes[i] = args[i].type;
 		}
-		func.signature = sig;
 		func.type = ftype;
 
 		// semantic checks on main function
@@ -605,6 +607,7 @@ public class Parser {
 					t.pushBack();
 					block.statements.add(parseStatement(block));
 				}
+				if (block.statements.isEmpty()) return new EmptyStatement();
 				return block;
 			}
 			case Token.BREAK: {
@@ -670,6 +673,7 @@ public class Parser {
 				expect(Token.CATCH);
 				if (t.nextToken() == '(') {
 					if (t.nextToken() == Token.VAR) {
+						// parse as 'catch (var error) { catchBlock }'
 						if (t.nextToken() != Token.WORD)
 							throw new ParseException("Variable name expected");
 						catchVar = new Var(t.svalue, BuiltinType.ERROR);
@@ -680,6 +684,7 @@ public class Parser {
 						catchStat = parseStatement(catchBlock);
 						catchBlock.statements.add(catchStat);
 					} else {
+						// rewind to 'catch { catchBlock }'
 						t.pushBack();
 						catchStat = parseStatement(scope);
 						expect(')');
@@ -744,12 +749,147 @@ public class Parser {
 					warn(CompilerEnv.W_HIDDEN, "Variable " + varname + " hides another variable with the same name");
 				return new AssignStatement(var, varvalue);
 			}
+			case Token.FOR:
+				return parseForLoop(scope);
 			default: {
 				t.pushBack();
 				Statement stat = parseExprStatement(scope);
 				if (t.nextToken() != ';') t.pushBack();
 				return stat;
 			}
+		}
+	}
+
+	/**
+	 * Parses for loops.
+	 * <br/>
+	 * Classic for:
+	 * <pre>
+	 * for (init, condition, increment) body
+	 * </pre>
+	 * we parse as
+	 * <pre>
+	 * BlockStatement {
+	 *   init
+	 *   ForLoopStatement {
+	 *     condition
+	 *     increment
+	 *     body
+	 *   }
+	 * }
+	 * </pre>
+	 *
+	 * Loops over collections are translated as:
+	 * <pre>
+	 * for (var i in from..to)  =&gt;  for (var i=from, i &lt;= to, i+=1)
+	 * for (var i in range)     =&gt;  for (var i=range.from, i &lt;= range.to, i+=1)
+	 * for (var i in array)     =&gt;  for (var #=0, # &lt; array.len, #+=1) { i = array[#], ... }
+	 */
+	private Statement parseForLoop(Scope scope) throws IOException, ParseException {
+		expect('(');
+		BlockStatement forBlock = new BlockStatement(scope);
+		if (t.nextToken() != Token.VAR) {
+			// old style 'for (init, cond, incr)'
+			t.pushBack();
+			forBlock.statements.add(parseExprStatement(forBlock));
+			expect(',');
+			Expr condition = cast(parseExpr(forBlock), BuiltinType.BOOL);
+			expect(',');
+			Statement incr = parseExprStatement(forBlock);
+			expect(')');
+			Statement forBody = parseStatement(forBlock);
+			forBlock.statements.add(new ForLoopStatement(condition, incr, forBody));
+			return forBlock;
+		}
+		// starts with 'for (var name ...'
+		if (t.nextToken() != Token.WORD)
+			throw new ParseException("Variable name expected");
+		String varname = t.svalue;
+		Type vartype = null;
+		if (t.nextToken() == ':') {
+			vartype = parseType(forBlock);
+		} else {
+			t.pushBack();
+		}
+		if (t.nextToken() == '=') {
+			// still classic for loop
+			Expr initExpr = parseExpr(forBlock);
+			if (vartype == null) {
+				vartype = initExpr.returnType();
+			} else {
+				initExpr = cast(initExpr, vartype);
+			}
+			Var var = new Var(varname, vartype);
+			if (forBlock.addVar(var)) {
+				warn(CompilerEnv.W_HIDDEN, "Variable " + varname + " hides another variable with the same name");
+			}
+			forBlock.statements.add(new AssignStatement(var, initExpr));
+			expect(',');
+			Expr condition = cast(parseExpr(forBlock), BuiltinType.BOOL);
+			expect(',');
+			Statement incr = parseStatement(forBlock);
+			expect(')');
+			forBlock.statements.add(new ForLoopStatement(condition, incr, parseStatement(forBlock)));
+			return forBlock;
+		}
+		t.pushBack();
+		// for loop over collection
+		expect(Token.IN);
+		Expr collection = parseExpr(forBlock);
+		Type collType = collection.returnType();
+		expect(')');
+		switch (collType.kind) {
+			case Type.TYPE_INTRANGE:
+			case Type.TYPE_LONGRANGE: {
+				// init is 'loopVar = from; var #to = to'
+				Type itemType = (collType.kind == Type.TYPE_INTRANGE) ? BuiltinType.INT : BuiltinType.LONG;
+				if (vartype == null) vartype = itemType;
+				Var loopVar = new Var(varname, vartype);
+				if (forBlock.addVar(loopVar)) {
+					warn(CompilerEnv.W_HIDDEN, "Variable " + varname + " hides another variable with the same name");
+				}
+				Var toVar = new Var("#to", vartype);
+				toVar.isConstant = true;
+				forBlock.addVar(toVar);
+				if (collection.kind == Expr.EXPR_RANGE) {
+					forBlock.statements.add(new AssignStatement(loopVar, cast(((RangeExpr)collection).fromExpr, vartype)));
+					forBlock.statements.add(new AssignStatement(toVar, cast(((RangeExpr)collection).toExpr, vartype)));
+				} else {
+					Var rangeVar = new Var("#range", collType);
+					rangeVar.isConstant = true;
+					Expr rangeLoad = new VarExpr(-1, rangeVar);
+					Expr getFrom = new ArrayElementExpr(rangeLoad, new ConstExpr(-1, BuiltinType.INT, Int32.ZERO), itemType);
+					Expr getTo = new ArrayElementExpr(rangeLoad, new ConstExpr(-1, BuiltinType.INT, Int32.ONE), itemType);
+					// create subBlock in which #range will live
+					BlockStatement subBlock = new BlockStatement(forBlock);
+					subBlock.addVar(rangeVar);
+					subBlock.statements.add(new AssignStatement(rangeVar, collection));
+					subBlock.statements.add(new AssignStatement(loopVar, cast(getFrom, vartype)));
+					subBlock.statements.add(new AssignStatement(toVar, cast(getTo, vartype)));
+					forBlock.statements.add(subBlock);
+				}
+				Expr loadVar = new VarExpr(-1, loopVar);
+				Expr loadTo = new VarExpr(-1, toVar);
+				// condition is 'var <= toConst'
+				Expr condition  = new ComparisonExpr(loadVar, Token.LTEQ, loadTo);
+				// increment is 'var += 1'
+				Expr plusOne;
+				switch (vartype.kind) {
+					case Type.TYPE_INT:
+						plusOne = new ConstExpr(-1, BuiltinType.INT, Int32.ONE);
+						break;
+					case Type.TYPE_LONG:
+						plusOne = new ConstExpr(-1, BuiltinType.LONG, new Int64(1L));
+						break;
+					default:
+						throw new ParseException("Variable " + varname + " must be Int or Long");
+				}
+				Statement increment = new CompoundAssignStatement(loopVar, Token.PLUSEQ, plusOne);
+				forBlock.statements.add(new ForLoopStatement(condition, increment, parseStatement(forBlock)));
+				return forBlock;
+			}
+			default:
+				throw new ParseException("Type " + collType + " is not iterable");
 		}
 	}
 
@@ -1419,7 +1559,7 @@ public class Parser {
 							} while (t.nextToken() != ')');
 							int arrayDim = 0;
 							Type elType = type;
-							while (type.kind == Type.TYPE_ARRAY) {
+							while (elType.kind == Type.TYPE_ARRAY) {
 								arrayDim++;
 								elType = ((ArrayType)elType).elementType;
 							}

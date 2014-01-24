@@ -31,7 +31,7 @@ public class Function implements Scope {
 	/** Name of the source file for this function. */
 	public String source;
 	/** Signature of this function. */
-	public String signature;
+	public final String signature;
 	/** Type of this function. */
 	public FunctionType type;
 	/** Whether this function is a .new method. */
@@ -47,6 +47,7 @@ public class Function implements Scope {
 
 	public Function(Scope scope, String name) {
 		this.parent = scope;
+		this.signature = name;
 	}
 
 	public Type getType(String name) {

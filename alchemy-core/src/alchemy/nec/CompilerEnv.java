@@ -28,7 +28,9 @@ import java.io.OutputStream;
  */
 public final class CompilerEnv {
 	/** Identifiers for optional features. */
-	public static final String[] OPTION_STRINGS = {"compat"};
+	public static final String[] OPTION_STRINGS = {
+		"compat",
+	};
 
 	/** Option for 2.1 compatibility mode. */
 	public static final int F_COMPAT21 = 0;
@@ -44,8 +46,6 @@ public final class CompilerEnv {
 		"cast",
 		"hidden",
 	};
-
-	static final String BUGMSG = "There is a bug in compiler. Please report it with your source code and the following error messages.";
 
 	/**
 	 * Warning category for errors.
@@ -132,7 +132,7 @@ public final class CompilerEnv {
 
 	public void exceptionHappened(String component, String info, Exception e) {
 		OutputStream err = io.stderr;
-		IO.println(err, BUGMSG);
+		IO.println(err, "There is a bug in compiler. Please report it with your source code and the following error messages.");
 		IO.println(err, "Component: " + component);
 		IO.println(err, "Compiler options:" + optionString());
 		IO.println(err, info);
