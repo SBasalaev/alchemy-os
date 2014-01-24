@@ -145,6 +145,29 @@ public final class FlowAnalyzer implements StatementVisitor {
 		return NEXT;
 	}
 
+	public Object visitForLoopStatement(ForLoopStatement stat, Object args) {
+		loopcount++;
+		Object incrResult = stat.increment.accept(this, args);
+		Object bodyResult = stat.body.accept(this, args);
+		loopcount--;
+		if (incrResult == RETURN && bodyResult == RETURN) {
+			return RETURN;
+		} else if (incrResult == THROW && bodyResult == THROW) {
+			return THROW;
+		} else if (stat.condition.kind == Expr.EXPR_CONST
+		           && ((ConstExpr)stat.condition).value == Boolean.TRUE
+		           && incrResult != BREAK && bodyResult != BREAK) {
+			// unconditional loop
+			if (incrResult == THROW || bodyResult == THROW) {
+				return THROW;
+			} else {
+				return RETURN;
+			}
+		} else {
+			return NEXT;
+		}
+	}
+
 	public Object visitIfStatement(IfStatement stat, Object args) {
 		Object ifResult = stat.ifstat.accept(this, args);
 		Object elseResult = stat.elsestat.accept(this, args);

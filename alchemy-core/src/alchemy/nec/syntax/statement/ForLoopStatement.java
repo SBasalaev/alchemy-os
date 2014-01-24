@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,35 +21,31 @@ package alchemy.nec.syntax.statement;
 import alchemy.nec.syntax.expr.Expr;
 
 /**
- * Unified statement for do/while loops.
- *
+ * For loop.
  * <pre>
- * <b>while</b> (<i>condition</i>) <i>postBody</i>
- *
- * <b>while</b> (<i>preBody</i>, <i>condition</i>) <i>postBody</i>
- *
- * <b>do</b> <i>preBody</i> <b>while</b> (<i>condition</i>)
+ * for (var loopVar = init, condition, increment)
+ *   body
  * </pre>
+ *
  * @author Sergey Basalaev
  */
-public final class LoopStatement extends Statement {
-
-	public Statement preBody;
+public final class ForLoopStatement extends Statement {
 	public Expr condition;
-	public Statement postBody;
+	public Statement increment;
+	public Statement body;
 
-	public LoopStatement(Statement preBody, Expr condition, Statement postBody) {
-		super(STAT_LOOP);
-		this.preBody = preBody;
+	public ForLoopStatement(Expr condition, Statement increment, Statement body) {
+		super(STAT_FOR);
 		this.condition = condition;
-		this.postBody = postBody;
+		this.increment = increment;
+		this.body = body;
 	}
 
 	public int lineNumber() {
-		return preBody.lineNumber();
+		return condition.lineNumber();
 	}
 
 	public Object accept(StatementVisitor v, Object args) {
-		return v.visitLoopStatement(this, args);
+		return v.visitForLoopStatement(this, args);
 	}
 }

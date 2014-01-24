@@ -1022,6 +1022,30 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		return null;
 	}
 
+	public Object visitForLoopStatement(ForLoopStatement stat, Object args) {
+		Label outerLoopStart = loopStart;
+		Label outerLoopEnd = loopEnd;
+		loopStart = new Label();
+		loopEnd = new Label();
+		// at first iteration we jump over increment
+		Label afterIncr = new Label();
+		writer.visitJumpInsn(Opcodes.GOTO, afterIncr);
+		writer.visitLabel(loopStart);
+		stat.increment.accept(this, args);
+		writer.visitLabel(afterIncr);
+		if (stat.body.kind == Statement.STAT_EMPTY) {
+			visitCondition(stat.condition, loopStart, true);
+		} else {
+			visitCondition(stat.condition, loopEnd, false);
+			stat.body.accept(this, args);
+			writer.visitJumpInsn(Opcodes.GOTO, loopStart);
+		}
+		writer.visitLabel(loopEnd);
+		loopStart = outerLoopStart;
+		loopEnd = outerLoopEnd;
+		return null;
+	}
+
 	public Object visitIfStatement(IfStatement stat, Object args) {
 		Label elseBranch = new Label();
 		Label afterIf = new Label();
@@ -1043,7 +1067,6 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		loopEnd = new Label();
 		writer.visitLabel(loopStart);
 		stat.preBody.accept(this, args);
-		stat.condition.accept(this, args);
 		if (stat.postBody.kind == Statement.STAT_EMPTY) {
 			visitCondition(stat.condition, loopStart, true);
 		} else {

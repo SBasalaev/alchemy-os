@@ -978,6 +978,25 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 	/**
 	 * <pre>
 	 * DCE:
+	 *   for (... ,false, ...)  =&gt;  empty
+	 * </pre>
+	 */
+	public Object visitForLoopStatement(ForLoopStatement forloop, Object scope) {
+		forloop.condition = (Expr) forloop.condition.accept(this, scope);
+		forloop.increment = (Statement) forloop.increment.accept(this, scope);
+		forloop.body = (Statement) forloop.body.accept(this, scope);
+		if (forloop.condition.kind == Expr.EXPR_CONST) {
+			Object cnst = ((ConstExpr)forloop.condition).value;
+			if (cnst.equals(Boolean.FALSE)) {
+				return new EmptyStatement();
+			}
+		}
+		return forloop;
+	}
+
+	/**
+	 * <pre>
+	 * DCE:
 	 *   if (true) st1 else st2   =&gt;  st1
 	 *   if (false) st1 else st2  =&gt;  st2
 	 *   if (expr) {} else st     =&gt;  if (!expr) st
@@ -1010,7 +1029,9 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 	/**
 	 * <pre>
 	 * DCE:
-	 *   do stat while (false)  =&gt;  stat
+	 *   do stat while (false)   =&gt;  stat
+	 *   while (stat, false) ... =&gt;  stat
+	 *   while (false) ...       =&gt;  empty
 	 * </pre>
 	 */
 	public Object visitLoopStatement(LoopStatement stat, Object scope) {

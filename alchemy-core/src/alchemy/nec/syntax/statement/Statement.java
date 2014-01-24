@@ -31,6 +31,7 @@ public abstract class Statement {
 	public static final int STAT_CONTINUE = 4;
 	public static final int STAT_EMPTY = 5;
 	public static final int STAT_EXPR = 6;
+	public static final int STAT_FOR = 13;
 	public static final int STAT_IF = 7;
 	public static final int STAT_LOOP = 8;
 	public static final int STAT_RETURN = 9;

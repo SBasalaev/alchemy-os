@@ -31,6 +31,7 @@ public interface StatementVisitor {
 	Object visitContinueStatement(ContinueStatement stat, Object args);
 	Object visitEmptyStatement(EmptyStatement stat, Object args);
 	Object visitExprStatement(ExprStatement stat, Object args);
+	Object visitForLoopStatement(ForLoopStatement stat, Object args);
 	Object visitIfStatement(IfStatement stat, Object args);
 	Object visitLoopStatement(LoopStatement stat, Object args);
 	Object visitReturnStatement(ReturnStatement stat, Object args);
