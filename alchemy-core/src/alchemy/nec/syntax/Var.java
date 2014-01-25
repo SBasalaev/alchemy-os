@@ -29,6 +29,8 @@ public final class Var {
 	public final String name;
 	public boolean isConstant;
 	public Object defaultValue;
+	/** Number of times value of this variable is used. */
+	public int hits;
 
 	public Var(String name, Type type) {
 		this.type = type;

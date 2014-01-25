@@ -18,6 +18,7 @@
 
 package alchemy.nec.opt;
 
+import alchemy.nec.CompilerEnv;
 import alchemy.nec.Token;
 import alchemy.nec.syntax.Function;
 import alchemy.nec.syntax.Scope;
@@ -32,6 +33,7 @@ import alchemy.types.Float64;
 import alchemy.types.Int32;
 import alchemy.types.Int64;
 import alchemy.util.ArrayList;
+import alchemy.util.HashMap;
 
 /**
  * Simple optimizer used with {@code -O1}
@@ -39,6 +41,7 @@ import alchemy.util.ArrayList;
  * Performs the following optimizations:
  * <ul>
  * <li>Constant folding (CF)</li>
+ * <li>Constant/copy propagation (CP)</li>
  * <li>Dead code elimination (DCE)</li>
  * <li>Structural transformations (ST)</li>
  * </ul>
@@ -51,13 +54,29 @@ import alchemy.util.ArrayList;
  */
 public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 
-	public ConstOptimizer() { }
+	private final CompilerEnv env;
+
+	private HashMap copyVars = new HashMap();
+
+	public ConstOptimizer(CompilerEnv env) {
+		this.env = env;
+	}
 
 	public void visitUnit(Unit u) {
 		ArrayList funcs = u.implementedFunctions;
-		for (int i=0; i<funcs.size(); i++) {
-			Function f = (Function) funcs.get(i);
-			visitFunction(f);
+		int fi = 0;
+		while (fi<funcs.size()) {
+			Function f = (Function) funcs.get(fi);
+			if (f.hits > 0) {
+				try {
+					visitFunction(f);
+				} catch (Exception e) {
+					env.exceptionHappened("Optimizer", "Function: " + f.signature, e);
+				}
+				fi++;
+			} else {
+				funcs.remove(fi);
+			}
 		}
 	}
 
@@ -703,9 +722,7 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 		return expr;
 	}
 
-	/**
-	 * Constant propagation.
-	 */
+	/** Constant/copy propagation. */
 	public Object visitSequential(SequentialExpr expr, Object scope) {
 		Expr[] seq = expr.seqExprs;
 		int newsize = 0;
@@ -714,6 +731,9 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 			seq[i] = e;
 			if (e.kind == Expr.EXPR_CONST) {
 				expr.seqVars[i].defaultValue = ((ConstExpr)e).value;
+				seq[i] = null;
+			} else if (e.kind == Expr.EXPR_VAR) {
+				copyVars.set(expr.seqVars[i], ((VarExpr)e).var);
 				seq[i] = null;
 			} else {
 				newsize++;
@@ -855,7 +875,14 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 	/** Constant/copy propagation. */
 	public Object visitVar(VarExpr expr, Object scope) {
 		if (expr.var.isConstant && expr.var.defaultValue != null) {
+			expr.var.hits--;
 			return new ConstExpr(expr.lineNumber(), expr.var.type, expr.var.defaultValue);
+		}
+		Var copyVar = (Var) copyVars.get(expr.var);
+		if (copyVar != null) {
+			expr.var.hits--;
+			copyVar.hits++;
+			return new VarExpr(expr.lineNumber(), copyVar);
 		}
 		return expr;
 	}
@@ -867,8 +894,29 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 		return stat;
 	}
 
+	/** Constant/copy propagation. */
 	public Object visitAssignStatement(AssignStatement stat, Object scope) {
 		stat.assignExpr = (Expr) stat.assignExpr.accept(this, scope);
+		if (stat.var.hits == 0) {
+			return new ExprStatement(stat.assignExpr).accept(this, scope);
+		}
+		if (stat.var.hits == 1) {
+			stat.var.isConstant = true;
+		}
+		if (stat.var.isConstant) {
+			switch (stat.assignExpr.kind) {
+				case Expr.EXPR_CONST: {
+					stat.var.hits--;
+					stat.var.defaultValue = ((ConstExpr)stat.assignExpr).value;
+					return new EmptyStatement();
+				}
+				case Expr.EXPR_VAR: {
+					stat.var.hits--;
+					copyVars.set(stat.var, ((VarExpr)stat.assignExpr).var);
+					return new EmptyStatement();
+				}
+			}
+		}
 		return stat;
 	}
 
@@ -882,12 +930,25 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 	 */
 	public Object visitBlockStatement(BlockStatement block, Object scope) {
 		ArrayList statements = block.statements;
-		int i=0;
-		while (i < block.statements.size()) {
-			Statement stat = (Statement) block.statements.get(i);
+		int sti = 0;
+		while (sti < block.statements.size()) {
+			Statement stat = (Statement) block.statements.get(sti);
 			stat = (Statement) stat.accept(this, block);
-			if (stat.kind == Statement.STAT_EMPTY) statements.remove(i);
-			else statements.set(i, stat);
+			if (stat.kind == Statement.STAT_EMPTY) {
+				statements.remove(sti);
+			} else {
+				statements.set(sti, stat);
+				sti++;
+			}
+		}
+		// remove unused vars
+		Object[] varnames = block.vars.keys();
+		for (int vi=0; vi<varnames.length; vi++) {
+			Var var = (Var) block.vars.get(varnames[vi]);
+			if (var.hits == 0) {
+				block.vars.remove(varnames[vi]);
+				copyVars.remove(var);
+			}
 		}
 		switch (statements.size()) {
 			case 0:  return new EmptyStatement();

@@ -93,14 +93,12 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		ArrayList funcs = unit.implementedFunctions;
 		for (int i=0; i<funcs.size(); i++) {
 			Function f = (Function) funcs.get(i);
-			if (f.hits > 0) {
-				writer = uw.visitFunction(f.signature, true, f.type.argtypes.length);
-				if (env.debug) writer.visitSource(f.source);
-				for (int vi=0; vi<f.args.length; vi++) addVar(f.args[vi]);
-				f.body.accept(this, null);
-				for (int vi=0; vi<f.args.length; vi++) removeVar(f.args[vi]);
-				writer.visitEnd();
-			}
+			writer = uw.visitFunction(f.signature, true, f.type.argtypes.length);
+			if (env.debug) writer.visitSource(f.source);
+			for (int vi=0; vi<f.args.length; vi++) addVar(f.args[vi]);
+			f.body.accept(this, null);
+			for (int vi=0; vi<f.args.length; vi++) removeVar(f.args[vi]);
+			writer.visitEnd();
 		}
 		uw.writeTo(out);
 	}
