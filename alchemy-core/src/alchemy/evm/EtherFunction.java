@@ -464,7 +464,7 @@ final class EtherFunction extends Function {
 				}
 				case Opcodes.SETGLOBAL: {
 					p.setGlobal(owner, (String)stack[head-1], stack[head]);
-					head--;
+					head -= 2;
 					break;
 				}
 
