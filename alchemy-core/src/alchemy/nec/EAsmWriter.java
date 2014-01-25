@@ -706,9 +706,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			for (int i=0; i<concat.exprs.size(); i++) {
 				Expr expr = (Expr)concat.exprs.get(i);
 				if (expr.returnType().kind == Type.TYPE_CHAR) {
-					writer.visitLdcInsn("StrBuf.addch");
+					writer.visitLdFunc("StrBuf.addch");
 				} else {
-					writer.visitLdcInsn("StrBuf.append");
+					writer.visitLdFunc("StrBuf.append");
 				}
 				writer.visitInsn(Opcodes.SWAP);
 				expr.accept(this, args);
@@ -744,18 +744,59 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			type = ((ArrayType)type).elementType;
 		}
 		int typebyte;
+		int insn;
 		switch (type.kind) {
-			case Type.TYPE_BOOL:   typebyte = Arrays.AR_BOOLEAN; break;
-			case Type.TYPE_BYTE:   typebyte = Arrays.AR_BYTE;    break;
-			case Type.TYPE_CHAR:   typebyte = Arrays.AR_CHAR;    break;
-			case Type.TYPE_SHORT:  typebyte = Arrays.AR_SHORT;   break;
-			case Type.TYPE_INT:    typebyte = Arrays.AR_INT;     break;
-			case Type.TYPE_LONG:   typebyte = Arrays.AR_LONG;    break;
-			case Type.TYPE_FLOAT:  typebyte = Arrays.AR_FLOAT;   break;
-			case Type.TYPE_DOUBLE: typebyte = Arrays.AR_DOUBLE;  break;
-			default:               typebyte = Arrays.AR_OBJECT;  break;
+			case Type.TYPE_BOOL: {
+				typebyte = Arrays.AR_BOOLEAN;
+				insn = Opcodes.NEWZA;
+				break;
+			}
+			case Type.TYPE_BYTE: {
+				typebyte = Arrays.AR_BYTE;
+				insn = Opcodes.NEWBA;
+				break;
+			}
+			case Type.TYPE_CHAR: {
+				typebyte = Arrays.AR_CHAR;
+				insn = Opcodes.NEWCA;
+				break;
+			}
+			case Type.TYPE_SHORT: {
+				typebyte = Arrays.AR_SHORT;
+				insn = Opcodes.NEWSA;
+				break;
+			}
+			case Type.TYPE_INT: {
+				typebyte = Arrays.AR_INT;
+				insn = Opcodes.NEWIA;
+				break;
+			}
+			case Type.TYPE_LONG: {
+				typebyte = Arrays.AR_LONG;
+				insn = Opcodes.NEWLA;
+				break;
+			}
+			case Type.TYPE_FLOAT: {
+				typebyte = Arrays.AR_FLOAT;
+				insn = Opcodes.NEWFA;
+				break;
+			}
+			case Type.TYPE_DOUBLE: {
+				typebyte = Arrays.AR_DOUBLE;
+				insn = Opcodes.NEWDA;
+				break;
+			}
+			default: {
+				typebyte = Arrays.AR_OBJECT;
+				insn = Opcodes.NEWAA;
+				break;
+			}
 		}
-		writer.visitNewMultiArray(newarray.lengthExprs.length, typebyte);
+		if (newarray.lengthExprs.length == 1) {
+			writer.visitInsn(insn);
+		} else {
+			writer.visitNewMultiArray(newarray.lengthExprs.length, typebyte);
+		}
 		return null;
 	}
 
