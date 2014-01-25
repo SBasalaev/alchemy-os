@@ -39,7 +39,7 @@ import java.io.IOException;
 public class Parser {
 
 	private final CompilerEnv env;
-	private final ConstOptimizer constOptimizer = new ConstOptimizer();
+	private final ConstOptimizer constOptimizer;
 	private Unit unit;
 
 	/** Set of all files that were already parsed. */
@@ -51,6 +51,7 @@ public class Parser {
 
 	public Parser(CompilerEnv env) {
 		this.env = env;
+		this.constOptimizer = new ConstOptimizer(env);
 	}
 
 	public Unit parseUnit(String file) {
@@ -845,11 +846,13 @@ public class Parser {
 				Type itemType = (collType.kind == Type.TYPE_INTRANGE) ? BuiltinType.INT : BuiltinType.LONG;
 				if (vartype == null) vartype = itemType;
 				Var loopVar = new Var(varname, vartype);
+				loopVar.hits = 2; // in comparison and increment
 				if (forBlock.addVar(loopVar)) {
 					warn(CompilerEnv.W_HIDDEN, "Variable " + varname + " hides another variable with the same name");
 				}
 				Var toVar = new Var("#to", vartype);
 				toVar.isConstant = true;
+				toVar.hits = 1; // in comparison
 				forBlock.addVar(toVar);
 				if (collection.kind == Expr.EXPR_RANGE) {
 					forBlock.statements.add(new AssignStatement(loopVar, cast(((RangeExpr)collection).fromExpr, vartype)));
@@ -857,6 +860,7 @@ public class Parser {
 				} else {
 					Var rangeVar = new Var("#range", collType);
 					rangeVar.isConstant = true;
+					rangeVar.hits = 2; // to load .from and .to
 					Expr rangeLoad = new VarExpr(-1, rangeVar);
 					Expr getFrom = new ArrayElementExpr(rangeLoad, new ConstExpr(-1, BuiltinType.INT, Int32.ZERO), itemType);
 					Expr getTo = new ArrayElementExpr(rangeLoad, new ConstExpr(-1, BuiltinType.INT, Int32.ONE), itemType);
@@ -942,7 +946,7 @@ public class Parser {
 					VarExpr lhs = (VarExpr) expr;
 					if (lhs.var.isConstant)
 						throw new ParseException("Cannot assign to constant " + lhs.var.name);
-					Expr binary = makeBinaryExpr(lhs, assignOp, rhs);
+					Expr binary = makeBinaryExpr(lhs, Token.getBinaryOperator(assignOp), rhs);
 					if (binary.kind == Expr.EXPR_BINARY) {
 						if (assignOp == Token.LTLTEQ || assignOp == Token.GTGTEQ || assignOp == Token.GTGTGTEQ) {
 							rhs = cast(rhs, BuiltinType.INT);
@@ -960,7 +964,9 @@ public class Parser {
 					// #lvalue[#0] = #lvalue[#0] * rhs
 					ArrayElementExpr lhs = (ArrayElementExpr) expr;
 					Var arrVar = new Var("#lvalue", lhs.arrayExpr.returnType());
+					arrVar.hits = 2;
 					Var idxVar = new Var("#0", lhs.indexExpr.returnType());
+					idxVar.hits = 2;
 					Expr arrExpr = new VarExpr(-1, arrVar);
 					Expr idxExpr = new VarExpr(-1, idxVar);
 					rhs = makeBinaryExpr(
@@ -981,6 +987,7 @@ public class Parser {
 					PropertyLvalue lhs = (PropertyLvalue) expr;
 					Var objVar = new Var("#lvalue", lhs.objectExpr.returnType());
 					objVar.isConstant = true;
+					objVar.hits = 2;
 					Expr objExpr = new VarExpr(-1, objVar);
 					Expr getterCall = new CallExpr(lhs.lineNumber(), lhs.getter, new Expr[] { objExpr });
 					rhs = makeBinaryExpr(getterCall, Token.getBinaryOperator(assignOp), rhs);
@@ -1000,10 +1007,12 @@ public class Parser {
 					Var[] seqVars = new Var[idxsize+1];
 					Expr[] seqExprs = new Expr[idxsize+1];
 					seqVars[0] = new Var("#lvalue", lhs.objectExpr.returnType());
+					seqVars[0].hits  = 2;
 					seqExprs[0] = lhs.objectExpr;
 					for (int i=0; i<idxsize; i++) {
 						seqVars[i+1] = new Var("#" + i, lhs.indexExprs[i].returnType());
 						seqVars[i+1].isConstant = true;
+						seqVars[i+1].hits = 2;
 						seqExprs[i+1] = lhs.indexExprs[i];
 					}
 					Expr[] getterArgs = new Expr[idxsize + 1];
@@ -1458,6 +1467,7 @@ public class Parser {
 					}
 					return new ConstExpr(line, var.type, var.defaultValue);
 				} else {
+					var.hits++;
 					return new VarExpr(line, var);
 				}
 			}
@@ -1596,6 +1606,18 @@ public class Parser {
 				// TODO: use default constructor
 				throw new ParseException("Operator " + Token.toString(Token.NEW) + " is not applicable to " + type);
 			}
+			case Token.IF: {
+				expect('(');
+				Expr condition = cast(parseExpr(scope), BuiltinType.BOOL);
+				expect(')');
+				Expr trueExpr = parseExpr(scope);
+				expect(Token.ELSE);
+				Expr falseExpr = parseExpr(scope);
+				Type binaryType = binaryCastType(trueExpr.returnType(), falseExpr.returnType());
+				trueExpr = cast(trueExpr, binaryType);
+				falseExpr = cast(falseExpr, binaryType);
+				return new IfElseExpr(condition, trueExpr, falseExpr);
+			}
 			default:
 				throw new ParseException(t.toString() + " unexpected here");
 		}
@@ -1692,8 +1714,10 @@ public class Parser {
 						Var[] seqVars = new Var[2];
 						seqVars[0] = new Var("#0", left.returnType());
 						seqVars[0].isConstant = true;
+						seqVars[0].hits = 2;
 						seqVars[1] = new Var("#1", right.returnType());
 						seqVars[1].isConstant = true;
+						seqVars[1].hits = 3;
 						Expr[] seqExprs = new Expr[] { left, right };
 						left = new VarExpr(-1, seqVars[0]);
 						right = new VarExpr(-1, seqVars[1]);
@@ -1765,6 +1789,8 @@ public class Parser {
 				if (rtype == BuiltinType.INTRANGE || rtype == BuiltinType.LONGRANGE) {
 					left = cast(left, rtype == BuiltinType.INTRANGE ? BuiltinType.INT : BuiltinType.LONG);
 					Var[] seqVars = new Var[] { new Var("#0", BuiltinType.INT) };
+					seqVars[0].isConstant = true;
+					seqVars[0].hits = 2;
 					Expr[] seqExprs = new Expr[] { left };
 					Expr leftVar = new VarExpr(-1, seqVars[0]);
 					Expr comparison = new IfElseExpr(

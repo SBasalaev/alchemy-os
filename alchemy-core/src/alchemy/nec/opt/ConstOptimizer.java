@@ -906,12 +906,10 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 		if (stat.var.isConstant) {
 			switch (stat.assignExpr.kind) {
 				case Expr.EXPR_CONST: {
-					stat.var.hits--;
 					stat.var.defaultValue = ((ConstExpr)stat.assignExpr).value;
 					return new EmptyStatement();
 				}
 				case Expr.EXPR_VAR: {
-					stat.var.hits--;
 					copyVars.set(stat.var, ((VarExpr)stat.assignExpr).var);
 					return new EmptyStatement();
 				}
