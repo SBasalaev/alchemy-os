@@ -20,6 +20,7 @@ package alchemy.nec;
 
 import alchemy.fs.Filesystem;
 import alchemy.io.IO;
+import alchemy.nec.opt.ConstOptimizer;
 import alchemy.nec.syntax.Unit;
 import alchemy.system.NativeApp;
 import alchemy.system.Process;
@@ -140,7 +141,11 @@ public class NEC extends NativeApp {
 		// running analyzers
 		new FlowAnalyzer(env).visitUnit(unit);
 		if (env.getErrorCount() > 0) return 1;
-		// TODO: optimize
+		// optimizing
+		if (optlevel > 0) {
+			new ConstOptimizer(env).visitUnit(unit);
+		}
+		if (env.getErrorCount() > 0) return 1;
 		// writing binary code
 		try {
 			EAsmWriter wr = new EAsmWriter(env);
