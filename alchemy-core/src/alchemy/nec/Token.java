@@ -119,6 +119,7 @@ public final class Token {
 	public static final int BREAK = -70;
 	public static final int CONTINUE = -71;
 	public static final int RETURN = -72;
+	public static final int THROW = -73;
 
 	public static boolean isAssignment(int token) {
 		return (token >= -41 && token <= -30) || (token == '=');

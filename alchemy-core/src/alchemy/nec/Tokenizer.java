@@ -349,6 +349,14 @@ class Tokenizer {
 				return ttype = Token.SUPER;
 			if (id.equals("switch"))
 				return ttype = Token.SWITCH;
+			if (id.equals("throw")) {
+				if (env.hasOption(CompilerEnv.F_COMPAT21)) {
+					env.warn(filename, linenumber, CompilerEnv.W_DEPRECATED, "'throw' will be a keyword in Ether 2.2");
+					return ttype = Token.WORD;
+				} else {
+					return ttype = Token.THROW;
+				}
+			}
 			if (id.equals("true"))
 				return ttype = Token.TRUE;
 			if (id.equals("try"))
