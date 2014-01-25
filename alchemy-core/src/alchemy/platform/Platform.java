@@ -27,11 +27,11 @@ import java.io.IOException;
  */
 public final class Platform {
 
-	private final UI ui;
+	private final Core core;
 
 	private Platform() throws IOException {
 		String name = (String) Installer.getSetupCfg().get("platform");
-		ui = (UI) load(name, "UI");
+		core = (Core) load(name, "Core");
 	}
 
 	private static Platform instance;
@@ -50,7 +50,7 @@ public final class Platform {
 		}
 	}
 
-	public UI getUI() {
-		return ui;
+	public Core getCore() {
+		return core;
 	}
 }

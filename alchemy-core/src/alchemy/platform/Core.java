@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@
 package alchemy.platform;
 
 /**
- * Bindings to platform graphical user interface.
+ * Platform dependent core functions.
  * @author Sergey Basalaev
  */
-public interface UI {
+public interface Core {
+	boolean platformRequest(String url);
 }

@@ -1,5 +1,6 @@
 acopy
 Function.apply
+throw
 Any.tostr
 Char.tostr
 Int.tobin
@@ -204,6 +205,7 @@ getenv
 setenv
 sleep
 sysProperty
+platformRequest
 isTerm
 TermIStream.clear
 TermIStream.getPrompt

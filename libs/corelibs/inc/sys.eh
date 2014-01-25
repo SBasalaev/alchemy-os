@@ -11,3 +11,4 @@ def execWait(prog: String, args: [String]): Int;
 def exec(prog: String, args: [String]);
 
 def sysProperty(str: String): String;
+def platformRequest(url: String): Bool;
