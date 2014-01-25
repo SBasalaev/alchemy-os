@@ -28,6 +28,7 @@ import java.io.IOException;
 class Tokenizer {
 	static private final int EOF_CHAR = -1;
 	static private final int NO_CHAR = -2;
+	static private final int RANGE_CHAR = -3;
 
 	private final UTFReader r;
 	private final String filename;
@@ -96,11 +97,16 @@ class Tokenizer {
 		int ch = readChar();
 
 		//skipping whitespaces
-		while (ch <= ' ' && ch != EOF_CHAR) ch = readChar();
+		while (ch >= 0 && ch <= ' ') ch = readChar();
 
 		//EOF
 		if (ch == EOF_CHAR) {
 			return ttype = Token.EOF;
+		}
+
+		//range hack
+		if (ch == RANGE_CHAR) {
+			return ttype = Token.RANGE;
 		}
 
 		//character literal
@@ -197,12 +203,17 @@ class Tokenizer {
 			if (!dotseen) {
 				ch = readChar();
 				if (ch == '.') {
-					number.append('.');
-					nextch = ch = readChar();
-					if (ch >= '0' && ch <= '9') {
-						number.append(readDecimal());
+					ch = readChar();
+					if (ch == '.') {
+						nextch = RANGE_CHAR;
+					} else {
+						dotseen = true;
+						number.append('.');
+						nextch = ch;
+						if (ch >= '0' && ch <= '9') {
+							number.append(readDecimal());
+						}
 					}
-					dotseen = true;
 				} else {
 					nextch = ch;
 				}
