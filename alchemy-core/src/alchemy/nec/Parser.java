@@ -174,7 +174,9 @@ public class Parser {
 						else
 							throw new ParseException("Variable "+func.signature+" is already defined");
 					}
-					func = (Function) fvar.defaultValue;
+					Function oldfunc = (Function) fvar.defaultValue;
+					oldfunc.args = func.args;
+					func = oldfunc;
 
 					if (func.isConstructor) {
 						// also create .<init>(), it may be used by subclasses
@@ -193,6 +195,8 @@ public class Parser {
 							}
 							initFunc.type = new FunctionType(BuiltinType.NONE, argtypes);
 							initVar = new Var(initFunc.signature, initFunc.type);
+							initVar.isConstant = true;
+							initVar.defaultValue = initFunc;
 							unit.addVar(initVar);
 						} else {
 							initFunc = (Function) initVar.defaultValue;
@@ -322,7 +326,7 @@ public class Parser {
 
 		Type prevType = unit.getType(typename);
 		if (prevType != null) {
-			if (!(prevType instanceof ObjectType) || !parent.equals((Object)((ObjectType)prevType).parent))
+			if (!(prevType instanceof ObjectType) || !parent.equals(prevType.superType()))
 				throw new ParseException("Definition of " + typename + " conflicts with previous definition");
 			newType = (ObjectType)prevType;
 		} else {
@@ -381,7 +385,7 @@ public class Parser {
 
 	private Function parseFunctionDef(Scope scope) throws IOException, ParseException {
 		// parse name
-		if (t.nextToken() != Token.WORD)
+		if (t.nextToken() != Token.WORD && t.ttype != Token.THROW)
 			throw new ParseException("Function name expected, got "+t);
 		String sig = t.svalue;
 		Type owner = null;
@@ -442,16 +446,16 @@ public class Parser {
 		Type rettype;
 		if (t.nextToken() == ':') {
 			rettype = parseType(func);
-			if (func.isConstructor) {
-				boolean compatConstructor = rettype.equals(owner) && env.hasOption(CompilerEnv.F_COMPAT21);
-				if (compatConstructor)
-					warn(CompilerEnv.W_DEPRECATED, "Constructor should not return value");
-				else
-					throw new ParseException("Constructor returns value");
-			}
 		} else {
 			t.pushBack();
-			rettype = (func.isConstructor) ? owner : BuiltinType.NONE;
+			rettype = BuiltinType.NONE;
+		}
+		if (func.isConstructor) {
+			if (rettype == BuiltinType.NONE) {
+				rettype = owner;
+			} else if (!rettype.equals(owner)) {
+				warn(CompilerEnv.W_ERROR, "Constructor returns value other than " + owner);
+			}
 		}
 
 		// fill function fields
@@ -513,6 +517,9 @@ public class Parser {
 			throw new ParseException("Cannot create constructor of " + owner + " since its structure is not known");
 		BlockStatement block = new BlockStatement(newFunc);
 		Var thisVar = new Var("this", owner);
+		thisVar.isConstant = true;
+		thisVar.hits = 2;
+		block.addVar(thisVar);
 		// create object and initialize default fields
 		int line = t.lineNumber();
 		Expr[] initializers = new Expr[owner.fields.length];
@@ -752,6 +759,26 @@ public class Parser {
 			}
 			case Token.FOR:
 				return parseForLoop(scope);
+			case Token.THROW: {
+				expect('(');
+				Expr errCode;
+				Expr errMsg;
+				if (t.nextToken() == ')') {
+					errCode = new ConstExpr(t.lineNumber(), BuiltinType.INT, Int32.ONE);
+					errMsg = new ConstExpr(t.lineNumber(), BuiltinType.STRING, Null.NULL);
+				} else {
+					t.pushBack();
+					errCode = cast(parseExpr(scope), BuiltinType.INT);
+					if (t.nextToken() == ',') {
+						errMsg = cast(parseExpr(scope), BuiltinType.STRING);
+					} else {
+						t.pushBack();
+						errMsg = new ConstExpr(t.lineNumber(), BuiltinType.STRING, Null.NULL);
+					}
+					expect(')');
+				}
+				return new ThrowStatement(errCode, errMsg);
+			}
 			default: {
 				t.pushBack();
 				Statement stat = parseExprStatement(scope);
@@ -1403,9 +1430,9 @@ public class Parser {
 			getter.hits++;
 			Expr[] args = new Expr[1 + indices.size()];
 			args[0] = arexpr;
-			for (int i=1; i <= args.length; i++) {
-				Expr index = (Expr) indices.get(i);
-				args[i] = cast(index, getter.type.argtypes[i+1]);
+			for (int i=1; i < args.length; i++) {
+				Expr index = (Expr) indices.get(i-1);
+				args[i] = cast(index, getter.type.argtypes[i]);
 			}
 			return new CallExpr(arexpr.lineNumber(), getter, args);
 		}
@@ -1510,6 +1537,7 @@ public class Parser {
 				return new ConstExpr(line, BuiltinType.BOOL, Boolean.TRUE);
 			case Token.NULL:
 				return new ConstExpr(line, BuiltinType.NULL, Null.NULL);
+			case Token.THROW:
 			case Token.WORD: {
 				Var var = scope.getVar(t.svalue);
 				if (var == null)
