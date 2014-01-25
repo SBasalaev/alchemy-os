@@ -892,6 +892,47 @@ public class Parser {
 				forBlock.statements.add(new ForLoopStatement(condition, increment, parseStatement(forBlock)));
 				return forBlock;
 			}
+			case Type.TYPE_ARRAY: {
+				Type itemType = ((ArrayType)collType).elementType;
+				if (vartype == null) vartype = itemType;
+				// init is 'var #array = collection; var #index = 0; var #len = #array.len'
+				Var arrayVar = new Var("#array", collection.returnType());
+				Var indexVar = new Var("#index", BuiltinType.INT);
+				Var lenVar = new Var("#len", BuiltinType.INT);
+				arrayVar.isConstant = true;
+				lenVar.isConstant = true;
+				arrayVar.hits = 2; // in init and body
+				indexVar.hits = 2; // in body and condition
+				lenVar.hits = 1;   // in condition
+				forBlock.addVar(arrayVar);
+				forBlock.addVar(indexVar);
+				forBlock.addVar(lenVar);
+				Expr getArray = new VarExpr(-1, arrayVar);
+				Expr getIndex = new VarExpr(-1, indexVar);
+				Expr getLen = new VarExpr(-1, lenVar);
+				forBlock.statements.add(new AssignStatement(arrayVar, collection));
+				forBlock.statements.add(new AssignStatement(indexVar, new ConstExpr(-1, BuiltinType.INT, Int32.ZERO)));
+				if (collection.kind == Expr.EXPR_NEWARRAY_INIT) {
+					arrayVar.hits = 1;
+					int len = ((NewArrayInitExpr)collection).initializers.length;
+					forBlock.statements.add(new AssignStatement(lenVar, new ConstExpr(-1, BuiltinType.INT, Int32.toInt32(len))));
+				} else {
+					forBlock.statements.add(new AssignStatement(lenVar, new ArrayLenExpr(getArray)));
+				}
+				// condition is '#index < #len'
+				Expr condition = new ComparisonExpr(getIndex, '<', getLen);
+				// increment is '#index += 1'
+				Statement increment = new CompoundAssignStatement(indexVar, Token.PLUSEQ, new ConstExpr(-1, BuiltinType.INT, Int32.ONE));
+				// add 'var loopVar = #array[#index]' to body
+				BlockStatement body = new BlockStatement(forBlock);
+				Var loopVar = new Var(varname, vartype);
+				body.addVar(loopVar);
+				Expr arrayItem = cast(new ArrayElementExpr(getArray, getIndex, itemType), vartype);
+				body.statements.add(new AssignStatement(loopVar, arrayItem));
+				body.statements.add(parseStatement(body));
+				forBlock.statements.add(new ForLoopStatement(condition, increment, body));
+				return forBlock;
+			}
 			default:
 				throw new ParseException("Type " + collType + " is not iterable");
 		}

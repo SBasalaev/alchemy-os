@@ -118,7 +118,7 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 	}
 
 	public Object visitArrayLen(ArrayLenExpr alen, Object scope) {
-		alen.arrayExpr = (Expr) alen.accept(this, scope);
+		alen.arrayExpr = (Expr) alen.arrayExpr.accept(this, scope);
 		return alen;
 	}
 

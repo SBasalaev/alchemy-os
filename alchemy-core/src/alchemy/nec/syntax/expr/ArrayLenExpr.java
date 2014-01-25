@@ -36,10 +36,6 @@ public final class ArrayLenExpr extends Expr {
 		this.arrayExpr = arrayExpr;
 	}
 
-	public ArrayLenExpr(int kind) {
-		super(kind);
-	}
-
 	public int lineNumber() {
 		return arrayExpr.lineNumber();
 	}
