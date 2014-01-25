@@ -51,6 +51,6 @@ public final class SequentialExpr extends Expr {
 	}
 
 	public Object accept(ExprVisitor v, Object args) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return v.visitSequential(this, args);
 	}
 }

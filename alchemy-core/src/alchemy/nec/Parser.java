@@ -1799,7 +1799,7 @@ public class Parser {
 					Expr comparison = new IfElseExpr(
 							new ComparisonExpr(leftVar, Token.GTEQ, ((RangeExpr)right).fromExpr),
 							new ConstExpr(-1, BuiltinType.BOOL, Boolean.TRUE),
-							new ComparisonExpr(leftVar, Token.LTEQ, ((RangeExpr)left).toExpr));
+							new ComparisonExpr(leftVar, Token.LTEQ, ((RangeExpr)right).toExpr));
 					return new SequentialExpr(seqVars, seqExprs, comparison);
 				}
 				Function method = findMethod(rtype, "contains");

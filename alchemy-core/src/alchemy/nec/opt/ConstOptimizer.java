@@ -902,9 +902,6 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 		if (stat.var.hits == 0) {
 			return new ExprStatement(stat.assignExpr).accept(this, scope);
 		}
-		if (stat.var.hits == 1) {
-			stat.var.isConstant = true;
-		}
 		if (stat.var.isConstant) {
 			switch (stat.assignExpr.kind) {
 				case Expr.EXPR_CONST: {
