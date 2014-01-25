@@ -965,8 +965,10 @@ public class Parser {
 					ArrayElementExpr lhs = (ArrayElementExpr) expr;
 					Var arrVar = new Var("#lvalue", lhs.arrayExpr.returnType());
 					arrVar.hits = 2;
+					arrVar.isConstant = true;
 					Var idxVar = new Var("#0", lhs.indexExpr.returnType());
 					idxVar.hits = 2;
+					idxVar.isConstant = true;
 					Expr arrExpr = new VarExpr(-1, arrVar);
 					Expr idxExpr = new VarExpr(-1, idxVar);
 					rhs = makeBinaryExpr(
@@ -1295,6 +1297,7 @@ public class Parser {
 			rangeMethod.hits++;
 			return new CallExpr(lnum, rangeMethod, new Expr[] {arexpr, (Expr)indices.get(0), (Expr)indices.get(1)});
 		}
+		t.pushBack();
 
 		// parse remaining indices
 		while (t.nextToken() != ']') {

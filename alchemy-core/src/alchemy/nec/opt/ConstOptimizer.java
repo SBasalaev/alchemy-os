@@ -69,6 +69,7 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 			Function f = (Function) funcs.get(fi);
 			if (f.hits > 0) {
 				try {
+					copyVars.clear();
 					visitFunction(f);
 				} catch (Exception e) {
 					env.exceptionHappened("Optimizer", "Function: " + f.signature, e);
@@ -730,6 +731,7 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 			Expr e = (Expr) seq[i].accept(this, scope);
 			seq[i] = e;
 			if (e.kind == Expr.EXPR_CONST) {
+				expr.seqVars[i].isConstant = true;
 				expr.seqVars[i].defaultValue = ((ConstExpr)e).value;
 				seq[i] = null;
 			} else if (e.kind == Expr.EXPR_VAR) {
