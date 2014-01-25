@@ -132,7 +132,7 @@ public class NEC extends NativeApp {
 		if (outname == null) {
 			outname = fname + ".o";
 		}
-		//parsing source
+		// parsing source
 		CompilerEnv env = new CompilerEnv(p, optmask, warnmask, dbginfo);
 		Parser parser = new Parser(env);
 		Unit unit = null;
@@ -142,6 +142,7 @@ public class NEC extends NativeApp {
 		new FlowAnalyzer(env).visitUnit(unit);
 		if (env.getErrorCount() > 0) return 1;
 		// optimizing
+		if (env.hasOption(CompilerEnv.F_COMPAT21)) optlevel = 0;
 		if (optlevel > 0) {
 			new ConstOptimizer(env).visitUnit(unit);
 		}

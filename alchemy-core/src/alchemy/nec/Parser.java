@@ -1208,11 +1208,21 @@ public class Parser {
 		String member = t.svalue;
 		Type type = expr.returnType();
 
-		// object field, array.len or function.apply
+		// object field or emulated field
 		switch (type.kind) {
 			case Type.TYPE_ARRAY: {
 				if (member.equals("len")) {
 					return new ArrayLenExpr(expr);
+				}
+				break;
+			}
+			case Type.TYPE_INTRANGE:
+			case Type.TYPE_LONGRANGE: {
+				Type itemType = (type.kind == Type.TYPE_INTRANGE) ? BuiltinType.INT : BuiltinType.LONG;
+				if (member.equals("from")) {
+					return new ArrayElementExpr(expr, new ConstExpr(lnum, BuiltinType.INT, Int32.ZERO), type);
+				} else if (member.equals("to")) {
+					return new ArrayElementExpr(expr, new ConstExpr(lnum, BuiltinType.INT, Int32.ONE), type);
 				}
 				break;
 			}

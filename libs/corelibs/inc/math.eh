@@ -4,11 +4,11 @@ const PI = 3.141592653589793;
 
 const POS_INFTY = 1d/0d;
 const NEG_INFTY = -1d/0d;
-const NaN = 0d/0d;
+const NAN = 0d/0d;
 
 const FPOS_INFTY = 1f/0f;
 const FNEG_INFTY = -1f/0f;
-const FNaN = 0f/0f;
+const FNAN = 0f/0f;
 
 def abs(val: Double): Double;
 def sgn(val: Double): Int;

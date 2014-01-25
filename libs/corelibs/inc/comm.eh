@@ -1,6 +1,6 @@
 /* COMM connections. */
 
-use "connection.eh"
+use "io.eh"
 
 type Comm < StreamConnection;
 
@@ -16,6 +16,6 @@ type CommCfg {
 
 def listCommPorts(): [String];
 
-def Comm.new(port: String, cfg: CommCfg): Comm;
+def Comm.new(port: String, cfg: CommCfg);
 def Comm.getBaudRate(): Int;
 def Comm.setBaudRate(baudrate: Int);

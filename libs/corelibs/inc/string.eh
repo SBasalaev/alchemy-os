@@ -33,8 +33,8 @@ def String.split(ch: Char, skipEmpty: Bool = false): [String];
 def String.format(args: [Any]): String;
 def String.chars(): [Char];
 def String.utfbytes(): [Byte];
-def String.startswith(prefix: String, from: Int = 0): Bool;
-def String.endswith(suffix: String): Bool;
+def String.startsWith(prefix: String, from: Int = 0): Bool;
+def String.endsWith(suffix: String): Bool;
 def String.replace(oldch: Char, newch: Char): String;
 def String.hash(): Int;
 

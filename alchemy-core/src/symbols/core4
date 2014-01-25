@@ -27,7 +27,7 @@ String.split
 String.format
 String.chars
 String.utfbytes
-String.startswith
+String.startsWith
 String.replace
 String.hash
 ca2str
