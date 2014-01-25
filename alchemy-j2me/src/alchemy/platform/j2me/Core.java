@@ -16,14 +16,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.platform;
+package alchemy.platform.j2me;
 
+import alchemy.midlet.AlchemyMIDlet;
 import java.io.IOException;
 
 /**
- * Platform dependent core functions.
+ * j2me implementation of platform dependent core functions.
  * @author Sergey Basalaev
  */
-public interface Core {
-	boolean platformRequest(String url) throws IOException;
+public final class Core implements alchemy.platform.Core {
+
+	public Core() { }
+
+	public boolean platformRequest(String url) throws IOException {
+		return AlchemyMIDlet.instance.platformRequest(url);
+	}
 }

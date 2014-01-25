@@ -16,14 +16,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package alchemy.platform;
+package alchemy.platform.pc;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
- * Platform dependent core functions.
+ * PC implementation of platform dependent core functions.
  * @author Sergey Basalaev
  */
-public interface Core {
-	boolean platformRequest(String url) throws IOException;
+public final class Core implements alchemy.platform.Core {
+
+	public Core() { }
+
+	@Override
+	public boolean platformRequest(String url) throws IOException {
+		if (Desktop.isDesktopSupported()) {
+			try {
+				Desktop.getDesktop().browse(new URI(url));
+			} catch (URISyntaxException use) {
+				throw new IllegalArgumentException(use.getMessage());
+			}
+		}
+		return false;
+	}
 }
