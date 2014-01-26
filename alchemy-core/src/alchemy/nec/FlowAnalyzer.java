@@ -98,6 +98,18 @@ public final class FlowAnalyzer implements StatementVisitor {
 		}
 	}
 
+	private Object common(Object flow1, Object flow2) {
+		if (flow1 == NEXT || flow2 == NEXT) {
+			return NEXT;
+		} else if (flow1 == BREAK || flow2 == BREAK) {
+			return BREAK;
+		} else if (flow1 == THROW || flow2 == THROW) {
+			return THROW;
+		} else {
+			return RETURN;
+		}
+	}
+
 	public Object visitArraySetStatement(ArraySetStatement stat, Object args) {
 		return NEXT;
 	}
@@ -171,15 +183,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 	public Object visitIfStatement(IfStatement stat, Object args) {
 		Object ifResult = stat.ifstat.accept(this, args);
 		Object elseResult = stat.elsestat.accept(this, args);
-		if (ifResult == NEXT || elseResult == NEXT) {
-			return NEXT;
-		} else if (ifResult == BREAK || elseResult == BREAK) {
-			return BREAK;
-		} else if (ifResult == THROW || elseResult == THROW) {
-			return THROW;
-		} else {
-			return RETURN;
-		}
+		return common(ifResult, elseResult);
 	}
 
 	public Object visitLoopStatement(LoopStatement stat, Object args) {
@@ -207,6 +211,14 @@ public final class FlowAnalyzer implements StatementVisitor {
 
 	public Object visitReturnStatement(ReturnStatement stat, Object args) {
 		return RETURN;
+	}
+
+	public Object visitSwitchStatement(SwitchStatement stat, Object args) {
+		Object result = stat.elseStat.accept(this, args);
+		for (int i=0; i<stat.statements.length; i++) {
+			result = common(result, stat.statements[i].accept(this, args));
+		}
+		return result;
 	}
 
 	public Object visitThrowStatement(ThrowStatement stat, Object args) {

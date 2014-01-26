@@ -354,96 +354,6 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		return Opcodes.NOP;
 	}
 
-//	public Object visitSwitch(SwitchExpr swexpr, Object isReturn) {
-//		swexpr.indexexpr.accept(this, Boolean.FALSE);
-//		// computing count of numbers, min, max
-//		int count = 0;
-//		int min = 0;
-//		int max = 0;
-//		ArrayList vkeys = swexpr.keys;
-//		for (int i=0; i<vkeys.size(); i++) {
-//			int[] ik = (int[])vkeys.get(i);
-//			if (i==0) {
-//				min = ik[0];
-//				max = ik[0];
-//			}
-//			for (int j=0; j<ik.length; j++) {
-//				min = Math.min(min, ik[j]);
-//				max = Math.max(max, ik[j]);
-//			}
-//			count += ik.length;
-//		}
-//		// preparing labels
-//		Label lafter = new Label();
-//		Label ldflt = new Label();
-//		Label[] labelsunique = new Label[vkeys.size()];
-//		for (int i=0; i<labelsunique.length; i++) {
-//			labelsunique[i] = new Label();
-//		}
-//		// writing switch instruction.
-//		int tablelen = 4 + 4 + 2*(max-min+1);
-//		int lookuplen = 2 + count*6;
-//		if (tablelen <= lookuplen) {
-//			// do tableswitch
-//			Label[] labels = new Label[max-min+1];
-//			for (int i=0; i<labels.length; i++) {
-//				labels[i] = (swexpr.elseexpr != null) ? ldflt : lafter;
-//			}
-//			for (int ei=0; ei<labelsunique.length; ei++) {
-//				int[] ik = (int[])vkeys.get(ei);
-//				for (int i=0; i<ik.length; i++) {
-//					labels[ik[i]-min] = labelsunique[ei];
-//				}
-//			}
-//			// write it
-//			if (swexpr.elseexpr != null) {
-//				writer.visitTableSwitch(min, max, ldflt, labels);
-//				writer.visitLabel(ldflt);
-//				swexpr.elseexpr.accept(this, isReturn);
-//				if (isReturn != Boolean.TRUE) {
-//					writer.visitJumpInsn(Opcodes.GOTO, lafter);
-//				}
-//			} else {
-//				writer.visitTableSwitch(min, max, lafter, labels);
-//			}
-//		} else {
-//			// do lookupswitch
-//			int[] keys = new int[count];
-//			Label[] labels = new Label[count];
-//			int ofs = 0;
-//			for (int ei=0; ei<labelsunique.length; ei++) {
-//				int[] ik = (int[])vkeys.get(ei);
-//				System.arraycopy(ik, 0, keys, ofs, ik.length);
-//				for (int j=0; j<ik.length; j++) {
-//					labels[ofs+j] = labelsunique[ei];
-//				}
-//				ofs += ik.length;
-//			}
-//			// write it
-//			if (swexpr.elseexpr != null) {
-//				writer.visitLookupSwitch(ldflt, keys, labels);
-//				writer.visitLabel(ldflt);
-//				swexpr.elseexpr.accept(this, isReturn);
-//				if (isReturn != Boolean.TRUE) {
-//					writer.visitJumpInsn(Opcodes.GOTO, lafter);
-//				}
-//			} else {
-//				writer.visitLookupSwitch(lafter, keys, labels);
-//			}
-//		}
-//		// write expressions
-//		for (int i=0; i<labelsunique.length; i++) {
-//			Expr e = (Expr)swexpr.exprs.get(i);
-//			writer.visitLabel(labelsunique[i]);
-//			e.accept(this, isReturn);
-//			if (isReturn != Boolean.TRUE && i != labelsunique.length-1) {
-//				writer.visitJumpInsn(Opcodes.GOTO, lafter);
-//			}
-//		}
-//		writer.visitLabel(lafter);
-//		return null;
-//	}
-
 	public Object visitApply(ApplyExpr expr, Object args) {
 		if (env.debug) writer.visitLine(expr.lineNumber());
 		writer.visitLdFunc("Function.apply");
@@ -1127,6 +1037,79 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			stat.expr.accept(this, args);
 			writer.visitInsn(Opcodes.RETURN);
 		}
+		return null;
+	}
+
+	public Object visitSwitchStatement(SwitchStatement switchStat, Object args) {
+		switchStat.keyExpr.accept(this, args);
+		// computing count of numbers, min, max
+		int count = 0;
+		int min = 0;
+		int max = 0;
+		int[][] keySets = switchStat.keySets;
+		for (int setIndex = 0; setIndex < keySets.length; setIndex++) {
+			int[] set = keySets[setIndex];
+			if (setIndex == 0) {
+				min = set[0];
+				max = set[0];
+			}
+			for (int j = 0; j < set.length; j++) {
+				int key = set[j];
+				if (key < min) min = key;
+				else if (key > max) max = key;
+			}
+			count += set.length;
+		}
+		// preparing labels
+		Label afterSwitch = new Label();
+		Label defaultBranch = new Label();
+		Label[] branches = new Label[keySets.length];
+		for (int i=0; i < branches.length; i++) {
+			branches[i] = new Label();
+		}
+		// we choose switch instruction which is shorter
+		int tableSize = 4 + 4 + 2*(max-min+1);
+		int lookupSize = 2 + count*6;
+		if (tableSize <= lookupSize) {
+			// TABLESWITCH
+			Label[] jumps = new Label[max-min+1];
+			for (int i=0; i < jumps.length; i++) {
+				jumps[i] = defaultBranch;
+			}
+			for (int setIndex = 0; setIndex < keySets.length; setIndex++) {
+				int[] set = keySets[setIndex];
+				for (int i = 0; i < set.length; i++) {
+					jumps[set[i]-min] = branches[setIndex];
+				}
+			}
+			writer.visitTableSwitch(min, max, defaultBranch, branches);
+		} else {
+			// LOOKUPSWITCH
+			int[] keys = new int[count];
+			Label[] jumps = new Label[count];
+			int ofs = 0;
+			for (int setIndex = 0; setIndex < keySets.length; setIndex++) {
+				int[] set = keySets[setIndex];
+				for (int j=0; j < set.length; j++) {
+					keys[ofs+j] = set[j];
+					jumps[ofs+j] = branches[setIndex];
+				}
+				ofs += set.length;
+			}
+			writer.visitLookupSwitch(defaultBranch, keys, jumps);
+		}
+		// write expressions
+		for (int i=0; i<keySets.length; i++) {
+			Statement stat = switchStat.statements[i];
+			writer.visitLabel(branches[i]);
+			stat.accept(this, args);
+			if (stat.accept(flow, null) == flow.NEXT) {
+				writer.visitJumpInsn(Opcodes.GOTO, afterSwitch);
+			}
+		}
+		writer.visitLabel(defaultBranch);
+		switchStat.elseStat.accept(this, args);
+		writer.visitLabel(afterSwitch);
 		return null;
 	}
 

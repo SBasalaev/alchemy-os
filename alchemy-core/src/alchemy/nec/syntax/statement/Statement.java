@@ -35,6 +35,7 @@ public abstract class Statement {
 	public static final int STAT_IF = 7;
 	public static final int STAT_LOOP = 8;
 	public static final int STAT_RETURN = 9;
+	public static final int STAT_SWITCH = 14;
 	public static final int STAT_THROW = 10;
 	public static final int STAT_ARRAYSET = 11;
 	public static final int STAT_TRYCATCH = 12;
