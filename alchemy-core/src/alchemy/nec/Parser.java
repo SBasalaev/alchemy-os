@@ -1679,14 +1679,56 @@ public class Parser {
 							throw new ParseException("Expected '(' or '{' in array constructor");
 					}
 				}
+
 				// use .new() method
 				Function newMethod = findMethod(type, "new");
 				if (newMethod != null) {
 					expect('(');
 					return parseFunctionCall(scope, new ConstExpr(line, newMethod.type, newMethod), null);
 				}
-				// TODO: use default constructor
-				throw new ParseException("Operator " + Token.toString(Token.NEW) + " is not applicable to " + type);
+
+				// use default constructor
+				if (type != BuiltinType.ANY && findMethod(type.superType(), "new") != null) {
+					warn(CompilerEnv.W_ERROR, "Type " + type + " has no constructor but parent type " + type.superType() + " has");
+				}
+				if (!(type instanceof ObjectType) || ((ObjectType)type).fields == null) {
+					throw new ParseException("Cannot use default constructor, structure of " + type + " is not defined");
+				}
+				Var[] fields = ((ObjectType)type).fields;
+				Expr[] initializers = new Expr[fields.length];
+				if (t.nextToken()== '(') {
+					for (int i=0; i<initializers.length; i++) {
+						if (i != 0) expect(',');
+						initializers[i] = cast(parseExpr(scope), fields[i].type);
+					}
+					expect(')');
+				} else {
+					t.pushBack();
+					for (int i=0; i<initializers.length; i++) {
+						if (fields[i].defaultValue != null) {
+							initializers[i] = new ConstExpr(line, fields[i].type, fields[i].defaultValue);
+						}
+					}
+					expect('{');
+					boolean first = true;
+					while (t.nextToken() != '}') {
+						t.pushBack();
+						if (first) first = false;
+						else expect(',');
+						if (t.nextToken() != Token.WORD)
+							throw new ParseException("Field name expected, got " + t);
+						String fieldName = t.svalue;
+						int i=fields.length-1;
+						while (i >= 0) {
+							if (fields[i].name.equals(fieldName)) break;
+							i--;
+						}
+						if (i < 0) throw new ParseException("Type " + type + " has no field " + fieldName);
+						expect('=');
+						initializers[i] = cast(parseExpr(scope), fields[i].type);
+					}
+				}
+				return new NewArrayInitExpr(line, type, initializers);
 			}
 			case Token.IF: {
 				expect('(');
