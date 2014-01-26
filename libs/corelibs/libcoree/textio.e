@@ -7,84 +7,72 @@ use "io"
 use "strbuf"
 
 type Reader {
-  in: IStream,
+  inp: IStream,
   dec: (IStream):Int
 }
 
-def Reader.new(in: IStream, dec: (IStream):Int) {
-  this.in = in
+def Reader.new(inp: IStream, dec: (IStream):Int) {
+  this.inp = inp
   this.dec = dec
 }
 
 def Reader.read(): Int {
-  this.dec(this.in)
+  return this.dec(this.inp)
 }
 
 def Reader.readArray(buf: [Char], ofs: Int, len: Int): Int {
-  if (len == 0) {
-    0
-  } else {
-    var n = 0
-    var ch = this.read()
-    while (ch >= 0 && n < len) {
-      buf[ofs+n] = ch
-      n = n+1
-      ch = this.read()
-    }
-    if (n == 0) EOF
-    else n
+  if (len == 0) return 0
+  var n = 0
+  var ch = this.read()
+  while (ch >= 0 && n < len) {
+    buf[ofs+n] = ch
+    n += 1
+    ch = this.read()
   }
+  if (n == 0) return EOF
+  else return n
 }
 
-def Reader.readstr(len: Int): String {
+def Reader.readString(len: Int): String {
   var ch = this.read()
-  if (ch < 0) {
-    null
-  } else {
-    var sb = new_strbuf()
-    var n = 0
-    while (n < len && ch >= 0) {
-      sb.addch(ch)
-      ch = this.read()
-    }
-    sb.tostr()
+  if (ch < 0) return null
+  var sb = new StrBuf()
+  var n = 0
+  while (n < len && ch >= 0) {
+    sb.addch(ch)
+    ch = this.read()
   }
+  return sb.tostr()
 }
 
-def Reader.readline(): String {
+def Reader.readLine(): String {
   var ch = this.read()
-  if (ch < 0)
-    null
-  else {
-    var sb = new_strbuf()
-    while (ch != '\n' && ch >= 0) {
-      if (ch != '\r') sb.addch(ch)
-      ch = this.read()
-    }
-    sb.tostr()
+  if (ch < 0) return null
+  var sb = new StrBuf()
+  while (ch != '\n' && ch >= 0) {
+    if (ch != '\r') sb.addch(ch)
+    ch = this.read()
   }
+  return sb.tostr()
 }
 
 def Reader.skip(n: Long): Long {
-  if (n <= 0) {
-    0l
-  } else {
-    var realskip = 0l
-    var ch = this.read()
-    while (ch >= 0) {
-      realskip = realskip+1
-      ch = this.read()
-    }
-    realskip
+  if (n <= 0) return 0L
+  var realskip = 0l
+  var ch = this.read()
+  while (ch >= 0) {
+    realskip = realskip+1
+    ch = this.read()
   }
+  return realskip
 }
 
 def Reader.reset() {
-  this.in.reset()
+  this.inp.reset()
 }
 
 def Reader.close() {
-  this.in.close()
+  this.inp.close()
 }
 
 type Writer {
@@ -93,7 +81,8 @@ type Writer {
 }
 
 def Writer.new(out: OStream, enc: (OStream,Int)): Writer {
-  new Writer(out, enc)
+  this.out = out
+  this.enc = enc
 }
 
 def Writer.write(ch: Int) {
@@ -108,7 +97,7 @@ def Writer.writeArray(buf: [Char], ofs: Int, len: Int) {
 
 def Writer.print(str: String) {
   var chars = str.chars()
-  this.writearray(chars, 0, chars.len)
+  this.writeArray(chars, 0, chars.len)
 }
 
 def Writer.println(str: String) {
@@ -129,31 +118,31 @@ def Writer.close() {
 }
 
 /* ISO 8859-1 encoding. */
-def latin1reader(in: IStream): Reader = new Reader(in, `IStream.read`)
+def latin1reader(inp: IStream): Reader = new Reader(inp, `IStream.read`)
 def latin1writer(out: OStream): Writer = new Writer(out, `OStream.write`)
 
 /* UTF-8 encoding */
-def readch_utf8(in: IStream): Int {
-  var b1 = in.read()
+def readch_utf8(inp: IStream): Int {
+  var b1 = inp.read()
   if (b1 < 0)
-    EOF
+    return EOF
   else if (b1 < 0x7f)
-    b1
+    return b1
   else if ((b1 & 0xe0) == 0xc0) {
-    var b2 = in.read()
+    var b2 = inp.read()
     if (b2 < 0 || (b2 & 0xc0) != 0x80)
-      '\uFFFD'
+      return '\uFFFD'
     else
-      ((b1 & 0x1f) << 6) | (b2 & 0x3f)
+      return ((b1 & 0x1f) << 6) | (b2 & 0x3f)
   } else if ((b1 & 0xf0) == 0xe0) {
-    var b2 = in.read()
-    var b3 = in.read()
+    var b2 = inp.read()
+    var b3 = inp.read()
     if (b3 < 0 || (b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80)
-      '\uFFFD'
+      return '\uFFFD'
     else
-      ((b1 & 0xf) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f)
+      return ((b1 & 0xf) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f)
   } else {
-    '\uFFFD'
+    return '\uFFFD'
   }
 }
 
@@ -173,19 +162,16 @@ def writech_utf8(out: OStream, ch: Int) {
   }
 }
 
-def utfreader(in: IStream): Reader = new Reader(in, readch_utf8)
+def utfreader(inp: IStream): Reader = new Reader(inp, readch_utf8)
 def utfwriter(out: OStream): Writer = new Writer(out, writech_utf8)
 
 /* UTF-16 encoding */
-def readch_utf16(in: IStream): Int {
-  var b1 = in.read()
-  if (b1 < 0) {
-    EOF
-  } else {
-    var b2 = in.read()
-    if (b2 < 0) '\uFFFD'
-    else (b1 << 8) | b2
-  }
+def readch_utf16(inp: IStream): Int {
+  var b1 = inp.read()
+  if (b1 < 0) return EOF
+  var b2 = inp.read()
+  if (b2 < 0) return '\uFFFD'
+  else return (b1 << 8) | b2
 }
 
 def writech_utf16(out: OStream, ch: Int) {
@@ -193,5 +179,5 @@ def writech_utf16(out: OStream, ch: Int) {
   out.write(ch)
 }
 
-def utf16reader(in: IStream): Reader = new Reader(in, readch_utf16)
+def utf16reader(inp: IStream): Reader = new Reader(inp, readch_utf16)
 def utf16writer(out: OStream): Writer = new Writer(out, writech_utf16)

@@ -23,7 +23,7 @@ def Process.getArgs(): [String];
 
 // methods for NEW state
 def Process.setEnv(key: String, value: String);
-def Process.setIn(in: IStream);
+def Process.setIn(inp: IStream);
 def Process.setOut(out: OStream);
 def Process.setErr(err: OStream);
 def Process.setCwd(dir: String);

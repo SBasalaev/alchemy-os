@@ -1,5 +1,5 @@
 /* Core library: data I/O functions
- * (C) 2011-2013 Sergey Basalaev
+ * (C) 2011-2014 Sergey Basalaev
  * Licensed under GPL v3 with linkage exception
  */
 
@@ -8,33 +8,33 @@ use "dataio.eh"
 def IStream.readBool(): Bool {
   var b = this.read()
   if (b < 0) throw(ERR_IO, "End of stream")
-  b != 0
+  return b != 0
 }
 
 def IStream.readUByte(): Int {
   var b = this.read()
   if (b < 0) throw(ERR_IO, "End of stream")
-  b
+  return b
 }
 
 def IStream.readByte(): Byte {
   var b = this.read()
   if (b < 0) throw(ERR_IO, "End of stream")
-  b.cast(Byte)
+  return b
 }
 
 def IStream.readUShort(): Int {
   var b1 = this.read()
   var b2 = this.read()
   if (b2 < 0) throw(ERR_IO, "End of stream")
-  ;(b1 << 8) | b2
+  return (b1 << 8) | b2
 }
 
 def IStream.readShort(): Short {
   var b1 = this.read()
   var b2 = this.read()
   if (b2 < 0) throw(ERR_IO, "End of stream")
-  ;((b1 << 8) | b2).cast(Short)
+  return (b1 << 8) | b2
 }
 
 def IStream.readInt(): Int {
@@ -43,26 +43,26 @@ def IStream.readInt(): Int {
   var b3 = this.read()
   var b4 = this.read()
   if (b4 < 0) throw(ERR_IO, "End of stream")
-  ;(b1 << 24) | (b2 << 16) | (b3 << 8) | b4
+  return (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
 }
 
 def IStream.readLong(): Long {
   var buf = new [Byte](8)
-  if (this.readArray(buf, 0, 8) < 8)
+  if (this.readArray(buf) < 8)
     throw(ERR_IO, "End of stream")
-  var l = 0l
-  for (var i=0, i<8, i+=1) {
+  var l = 0L
+  for (var i in 0..7) {
     l = (l << 8) | (buf[i] & 0xff)
   }
-  l
+  return l
 }
 
 def IStream.readFloat(): Float {
-  ibits2f(this.readInt())
+  return ibits2f(this.readInt())
 }
 
 def IStream.readDouble(): Double {
-  lbits2d(this.readLong())
+  return lbits2d(this.readLong())
 }
 
 def IStream.readUTF(): String {
@@ -70,7 +70,7 @@ def IStream.readUTF(): String {
   var buf = new [Byte](len)
   if (len > 0 && this.readArray(buf, 0, len) < len)
     throw(ERR_IO, "End of stream")
-  ba2utf(buf)
+  return ba2utf(buf)
 }
 
 def readBool(): Bool = stdin().readBool()
@@ -116,11 +116,11 @@ def OStream.writeLong(l: Long) {
 }
 
 def OStream.writeFloat(f: Float) {
-  this.writeint(f2ibits(f))
+  this.writeInt(f2ibits(f))
 }
 
 def OStream.writeDouble(d: Double) {
-  this.writelong(d2lbits(d))
+  this.writeLong(d2lbits(d))
 }
 
 def OStream.writeUTF(str: String) {

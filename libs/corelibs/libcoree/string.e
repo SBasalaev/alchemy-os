@@ -2,6 +2,6 @@
 
 def Bool.tostr(): String = if (this) "true" else "false"
 
-def String.toint(): Int = String.tointbase(10)
-def String.tolong(): Long = String.tolongbase(10)
-def String.endswith(suffix: String): Bool = this.startswith(suffix, -suffix.len())
+def String.toint(): Int = this.tointbase(10)
+def String.tolong(): Long = this.tolongbase(10)
+def String.endsWith(suffix: String): Bool = this.startsWith(suffix, -suffix.len())
