@@ -626,21 +626,21 @@ public class Parser {
 			}
 			case Token.IF: {
 				expect('(');
-				IfStatement stat = new IfStatement();
-				stat.condition = cast(parseExpr(scope), BuiltinType.BOOL);
+				Expr condition = cast(parseExpr(scope), BuiltinType.BOOL);
 				expect(')');
-				stat.ifstat = parseStatement(scope);
-				if (stat.ifstat.kind == Statement.STAT_EMPTY)
+				Statement ifstat = parseStatement(scope);
+				Statement elsestat;
+				if (ifstat.kind == Statement.STAT_EMPTY)
 					warn(CompilerEnv.W_EMPTY, "Empty statement after 'if'");
 				if (t.nextToken() == Token.ELSE) {
-					stat.elsestat = parseStatement(scope);
-					if (stat.elsestat.kind == Statement.STAT_EMPTY)
+					elsestat = parseStatement(scope);
+					if (elsestat.kind == Statement.STAT_EMPTY)
 						warn(CompilerEnv.W_EMPTY, "Empty statement after 'else'");
 				} else {
 					t.pushBack();
-					stat.elsestat = new EmptyStatement();
+					elsestat = new EmptyStatement();
 				}
-				return stat;
+				return new IfStatement(condition, ifstat, elsestat);
 			}
 			case Token.RETURN: {
 				Type rettype = scope.enclosingFunction().type.returnType;
@@ -759,6 +759,8 @@ public class Parser {
 			}
 			case Token.FOR:
 				return parseForLoop(scope);
+			case Token.SWITCH:
+				return parseSwitch(scope);
 			case Token.THROW: {
 				expect('(');
 				Expr errCode;
@@ -962,6 +964,144 @@ public class Parser {
 			}
 			default:
 				throw new ParseException("Type " + collType + " is not iterable");
+		}
+	}
+
+	private Statement parseSwitch(Scope scope) throws IOException, ParseException {
+		expect('(');
+		Expr keyExpr = parseExpr(scope);
+		Type keyType = keyExpr.returnType();
+		boolean intSwitch;
+		if (keyType == BuiltinType.STRING) {
+			intSwitch = false;
+		} else if (keyType == BuiltinType.INT || keyType == BuiltinType.BYTE
+		        || keyType == BuiltinType.CHAR || keyType == BuiltinType.SHORT) {
+			intSwitch = true;
+			keyExpr = cast(keyExpr, BuiltinType.INT);
+			keyType = BuiltinType.INT;
+		} else {
+			throw new ParseException("Switch over " + keyType + " values is not supported");
+		}
+		expect(')');
+		ArrayList keys = new ArrayList();
+		ArrayList keySets = new ArrayList();
+		ArrayList statements = new ArrayList();
+		Statement elseStat = null;
+		expect('{');
+		while (t.nextToken() != '}') {
+			// reading possible else branch
+			if (t.ttype == Token.ELSE) {
+				expect(':');
+				if (elseStat != null)
+					warn(CompilerEnv.W_ERROR, "Duplicate else case");
+				elseStat = parseStatement(scope);
+				continue;
+			}
+
+			// reading set of keys
+			ArrayList set = new ArrayList();
+			boolean first = true;
+			do {
+				t.pushBack();
+				if (first) first = false;
+				else expect(',');
+				Expr caseExpr = parseExpr(scope);
+				if (intSwitch && caseExpr.kind == Expr.EXPR_RANGE) {
+					Expr case1 = (Expr) cast(((RangeExpr)caseExpr).fromExpr, BuiltinType.INT).accept(constOptimizer, scope);
+					Expr case2 = (Expr) cast(((RangeExpr)caseExpr).toExpr, BuiltinType.INT).accept(constOptimizer, scope);
+					if (case1.kind != Expr.EXPR_CONST || case2.kind != Expr.EXPR_CONST)
+						throw new ParseException("Constant expression expected");
+					int from = ((Int32)((ConstExpr)case1).value).value;
+					int to = ((Int32)((ConstExpr)case1).value).value;
+					if (from > to)
+						warn(CompilerEnv.W_ERROR, "Invalid range " + from + ".." + to);
+					for (int i=from; i<=to; i++) {
+						Int32 I = Int32.toInt32(i);
+						if (keys.contains(I)) warn(CompilerEnv.W_ERROR, "Duplicate switch case " + i);
+						keys.add(I);
+						set.add(I);
+					}
+				} else {
+					caseExpr = (Expr) cast(caseExpr, keyType).accept(constOptimizer, scope);
+					if (caseExpr.kind != Expr.EXPR_CONST)
+						throw new ParseException("Constant expression expected");
+					Object key = ((ConstExpr)caseExpr).value;
+					if (keys.contains(key)) warn(CompilerEnv.W_ERROR, "Duplicate switch case " + key);
+					keys.add(key);
+					set.add(key);
+				}
+			} while (t.nextToken() != ':');
+			// reading branch
+			keySets.add(set);
+			statements.add(parseStatement(scope));
+		}
+		if (elseStat == null) elseStat = new EmptyStatement();
+		// return switch
+		if (intSwitch) {
+			int branchCount = statements.size();
+			Statement[] statArray = new Statement[branchCount];
+			statements.copyInto(statArray);
+			int[][] keySetArray = new int[branchCount][];
+			for (int i=0; i<branchCount; i++) {
+				ArrayList set = (ArrayList) keySets.get(i);
+				keySetArray[i] = new int[set.size()];
+				set.copyInto(keySetArray[i]);
+			}
+			return new SwitchStatement(keyExpr, keySetArray, statArray, elseStat);
+		} else {
+			// string switch we implement as two consequent switches
+			// first is switch over hashcodes which returns branch number
+			BlockStatement switchBlock = new BlockStatement(scope);
+			Var strVar = new Var("#string", BuiltinType.STRING);
+			strVar.hits = 1;
+			strVar.isConstant = true;
+			Var indexVar = new Var("#index", BuiltinType.INT);
+			indexVar.hits = 1;
+			switchBlock.addVar(strVar);
+			switchBlock.addVar(indexVar);
+			switchBlock.statements.add(new AssignStatement(strVar, keyExpr));
+			switchBlock.statements.add(new AssignStatement(indexVar, new ConstExpr(-1, BuiltinType.INT, Int32.M_ONE)));
+			// create first switch
+			Expr strExpr = new VarExpr(-1, strVar);
+			ArrayList hashes = new ArrayList();
+			ArrayList checkStatements = new ArrayList();
+			for (int branchIndex = 0; branchIndex < keySets.size(); branchIndex++) {
+				ArrayList set = (ArrayList) keySets.get(branchIndex);
+				for (int keyIdx=0; keyIdx < set.size(); keyIdx++) {
+					String key = (String) set.get(keyIdx);
+					Int32 hash = Int32.toInt32(key.hashCode());
+					int hashIdx = hashes.indexOf(hash);
+					if (hashIdx < 0) {
+						hashIdx = hashes.size();
+						hashes.add(hash);
+						checkStatements.add(new EmptyStatement());
+					}
+					Statement checkStat = (Statement) checkStatements.get(hashIdx);
+					checkStat = new IfStatement(
+							new ComparisonExpr(strExpr, Token.EQEQ, new ConstExpr(-1, BuiltinType.STRING, key)),
+							new AssignStatement(indexVar, new ConstExpr(-1, BuiltinType.INT, Int32.toInt32(branchIndex))),
+							checkStat);
+					strVar.hits++;
+					checkStatements.set(hashIdx, checkStat);
+				}
+			}
+			int[][] keySetArray = new int[hashes.size()][];
+			for (int i=0; i<keySetArray.length; i++) {
+				keySetArray[i] = new int[] { ((Int32)hashes.get(i)).value };
+			}
+			Statement[] statArray = new Statement[hashes.size()];
+			checkStatements.copyInto(statArray);
+			Expr getHash = new CallExpr(-1, unit.getFunction("String.hash"), new Expr[] { strExpr });
+			switchBlock.statements.add(new SwitchStatement(getHash, keySetArray, statArray, new EmptyStatement()));
+			// create second switch
+			keySetArray = new int[statements.size()][];
+			for (int i=0; i<keySetArray.length; i++) {
+				keySetArray[i] = new int[] { i };
+			}
+			statArray = new Statement[statements.size()];
+			statements.copyInto(statArray);
+			switchBlock.statements.add(new SwitchStatement(new VarExpr(-1, indexVar), keySetArray, statArray, elseStat));
+			return switchBlock;
 		}
 	}
 

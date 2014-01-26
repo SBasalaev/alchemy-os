@@ -35,8 +35,11 @@ public final class IfStatement extends Statement {
 	public Statement ifstat;
 	public Statement elsestat;
 
-	public IfStatement() {
+	public IfStatement(Expr condition, Statement ifstat, Statement elsestat) {
 		super(STAT_IF);
+		this.condition = condition;
+		this.ifstat = ifstat;
+		this.elsestat = elsestat;
 	}
 
 	public int lineNumber() {

@@ -1082,7 +1082,7 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 					jumps[set[i]-min] = branches[setIndex];
 				}
 			}
-			writer.visitTableSwitch(min, max, defaultBranch, branches);
+			writer.visitTableSwitch(min, max, defaultBranch, jumps);
 		} else {
 			// LOOKUPSWITCH
 			int[] keys = new int[count];

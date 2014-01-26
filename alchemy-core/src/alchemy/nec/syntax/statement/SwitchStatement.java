@@ -39,10 +39,14 @@ public final class SwitchStatement extends Statement {
 	public int[][] keySets;
 	public Statement[] statements;
 
-	public Statement elseStat = new EmptyStatement();
+	public Statement elseStat;
 
-	public SwitchStatement() {
+	public SwitchStatement(Expr keyExpr, int[][] keySets, Statement[] statements, Statement elseStat) {
 		super(STAT_SWITCH);
+		this.keyExpr = keyExpr;
+		this.keySets = keySets;
+		this.statements = statements;
+		this.elseStat = elseStat;
 	}
 
 	public int lineNumber() {
