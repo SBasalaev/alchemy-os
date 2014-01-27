@@ -72,7 +72,7 @@ public class Terminal extends NativeApp {
 			Process child = new Process(p, childCmd, childArgs);
 			child.stdin = frame.in;
 			child.stdout = frame.out;
-			child.stderr = frame.out;
+			child.stderr = frame.err;
 			frame.setVisible(true);
 			child.start();
 			while (child.getState() != Process.ENDED) {
