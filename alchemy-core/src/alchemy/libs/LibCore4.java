@@ -511,8 +511,11 @@ public final class LibCore4 extends NativeLibrary {
 				return ((HashMap)args[0]).keys();
 
 			/* == Header: list.eh == */
-			case 151: // List.new(): List
-				return new ArrayList();
+			case 151: { // List.new(a: Array = null): List
+				ArrayList list = new ArrayList();
+				if (args[0] != null) list.addFrom(args[0], 0, -1);
+				return list;
+			}
 			case 152: // List.len(): Int
 				return Ival(((ArrayList)args[0]).size());
 			case 153: // List.get(at: Int): Any

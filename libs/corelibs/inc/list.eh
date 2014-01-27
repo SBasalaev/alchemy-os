@@ -2,7 +2,7 @@
 
 type List < Any;
 
-def List.new(): List;
+def List.new(a: Array = null);
 def List.len(): Int;
 def List.get(at: Int): Any;
 def List.set(at: Int, val: Any);
