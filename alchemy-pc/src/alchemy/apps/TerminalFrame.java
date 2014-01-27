@@ -63,14 +63,13 @@ public final class TerminalFrame extends JFrame {
 		output = new JEditorPane();
 		output.setEditable(false);
 		output.setContentType("text/html");
-		//output.setLineWrap(true);
-		//output.setWrapStyleWord(true);
 		JScrollPane outputPane = new JScrollPane(output, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		outputPane.setPreferredSize(new Dimension(600, 480));
 
 		prompt = new JLabel();
 
 		input = new JTextField();
+		input.setEditable(false);
 		input.addKeyListener(new KeyAdapter() {
 			@Override public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -94,11 +93,10 @@ public final class TerminalFrame extends JFrame {
 		add(outputPane, BorderLayout.CENTER);
 		add(inputBox, BorderLayout.SOUTH);
 		pack();
-		inputBox.setVisible(false);
 	}
 
 	private String waitForInput() {
-		inputBox.setVisible(true);
+		input.setEditable(true);
 		input.requestFocus();
 		synchronized (sync) {
 			try {
@@ -108,7 +106,7 @@ public final class TerminalFrame extends JFrame {
 				flushText();
 			}
 		}
-		inputBox.setVisible(false);
+		input.setEditable(false);
 		String newInput = input.getText() + '\n';
 		append("<b>");
 		appendEscaped(prompt.getText());
