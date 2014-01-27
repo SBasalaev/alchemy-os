@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@ package alchemy.apps;
 
 import alchemy.io.IO;
 import alchemy.system.NativeApp;
+import alchemy.system.Process;
+import alchemy.system.ProcessKilledException;
+import java.util.ArrayList;
 
 /**
  * Terminal emulation for PC version.
@@ -28,58 +31,63 @@ import alchemy.system.NativeApp;
  */
 public class Terminal extends NativeApp {
 
-	private static final String HELP = "Usage: terminal [-k] <command> <args>...\n";
-	private static final String VERSION = "PC terminal v1.2\n";
+	private static final String HELP =
+			"terminal - run command in the new terminal\n" +
+			"Usage: terminal [-k] <command> <args>...";
+	private static final String VERSION = "PC terminal v2.0";
 
 	public Terminal() { }
 
 	@Override
-	public int main(alchemy.system.Process p, String[] args) {
-		if (args.length == 0) {
-			args = new String[] {"sh"};
-		}
-		if (args[0].equals("-v")) {
-			IO.println(p.stdout, VERSION);
-			return 0;
-		}
-		if (args[0].equals("-h")) {
-			IO.println(p.stdout, "terminal - run command in the new terminal");
-			IO.println(p.stdout, HELP);
-			return 0;
-		}
+	public int main(Process p, String[] args) throws Exception {
+		// parse arguments
 		boolean keep = false;
-		if (args[0].equals("-k")) {
-			keep = true;
-			if (args.length == 1) {
-				IO.println(p.stderr, "terminal: no command given");
-				IO.println(p.stderr, HELP);
+		String childCmd = null;
+		ArrayList<String> cmdArgs = new ArrayList<String>();
+		boolean readArgs = false;
+		for (String arg : args) {
+			if (readArgs) {
+				cmdArgs.add(arg);
+			} else if (arg.equals("-v")) {
+				IO.println(p.stdout, VERSION);
+				return 0;
+			} else if (arg.equals("-h")) {
+				IO.println(p.stdout, HELP);
+				return 0;
+			} else if (arg.equals("-k")) {
+				keep = true;
+			} else if (arg.startsWith("-")) {
+				IO.println(p.stderr, "Unknown option " + arg);
 				return 1;
+			} else {
+				childCmd = arg;
+				readArgs = true;
 			}
 		}
+		if (childCmd == null) childCmd = "sh";
+		String[] childArgs = cmdArgs.toArray(new String[0]);
+		// show terminal and start subprocess
+		TerminalFrame frame = new TerminalFrame(childCmd + " - Terminal");
 		try {
-			String[] childArgs = null;
-			String childCmd;
+			Process child = new Process(p, childCmd, childArgs);
+			child.stdin = frame.in;
+			child.stdout = frame.out;
+			child.stderr = frame.out;
+			frame.setVisible(true);
+			child.start();
+			while (child.getState() != Process.ENDED) {
+				Thread.sleep(100);
+				if (p.killed || !frame.isVisible())
+					throw new ProcessKilledException();
+			}
 			if (keep) {
-				childCmd = args[1];
-				if (args.length > 2) {
-					childArgs = new String[args.length-2];
-					System.arraycopy(args, 2, childArgs, 0, args.length-2);
-				}
-			} else  {
-				childCmd = args[0];
-				childArgs = new String[args.length-1];
-				if (args.length > 1) {
-					System.arraycopy(args, 1, childArgs, 0, args.length-1);
+				while (frame.isVisible()) {
+					Thread.sleep(100);
 				}
 			}
-			alchemy.system.Process child = new alchemy.system.Process(p, childCmd, childArgs);
-			child.stdin = new TerminalInputStream();
-			child.stdout = System.out;
-			child.stderr = System.err;
-			return child.start().waitFor();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 1;
+			return child.getExitCode();
+		} finally {
+			frame.dispose();
 		}
 	}
 }
