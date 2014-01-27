@@ -2,6 +2,9 @@ use "/inc/io.eh"
 use "/inc/bufferio.eh"
 use "connection.eh"
 
+const fopen_r = fread;
+const fopen_w = fwrite;
+const fopen_a = fappend;
 const `IStream.readarray` = `IStream.readArray`;
 const `IStream.readfully` = `IStream.readFully`;
 const `OStream.writearray` = `OStream.writeArray`;

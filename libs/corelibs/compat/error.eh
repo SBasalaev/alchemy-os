@@ -1,1 +1,2 @@
-const error = throw;
+const error = `throw`;
+

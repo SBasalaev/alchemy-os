@@ -19,4 +19,4 @@ def Error.traceLen(): Int;
 def Error.traceName(index: Int): String;
 def Error.traceDbg(index: Int): String;
 
-def throw(code: Int = FAIL, msg: String = null);
+def `throw`(code: Int = FAIL, msg: String = null);
