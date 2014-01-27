@@ -138,11 +138,7 @@ public class NEC extends NativeApp {
 		Unit unit = null;
 		unit = parser.parseUnit(p.toFile(fname));
 		if (env.getErrorCount() > 0) return 1;
-		// running analyzers
-		new FlowAnalyzer(env).visitUnit(unit);
-		if (env.getErrorCount() > 0) return 1;
 		// optimizing
-		if (env.hasOption(CompilerEnv.F_COMPAT21)) optlevel = 0;
 		if (optlevel > 0) {
 			new ConstOptimizer(env).visitUnit(unit);
 		}

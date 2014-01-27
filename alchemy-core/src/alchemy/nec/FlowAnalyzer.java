@@ -19,17 +19,14 @@
 package alchemy.nec;
 
 import alchemy.nec.syntax.Function;
-import alchemy.nec.syntax.Null;
-import alchemy.nec.syntax.Unit;
 import alchemy.nec.syntax.expr.ConstExpr;
 import alchemy.nec.syntax.expr.Expr;
 import alchemy.nec.syntax.statement.*;
-import alchemy.nec.syntax.type.BuiltinType;
-import alchemy.util.ArrayList;
 
 /**
- * Checks the control flow.
- * Arguments are not used.
+ * Returns flow status of the statement.
+ * Prints errors if statement defines erroneous flow.
+ * Argument is Boolean value.
  * @author Sergey Basalaev
  */
 public final class FlowAnalyzer implements StatementVisitor {
@@ -48,54 +45,9 @@ public final class FlowAnalyzer implements StatementVisitor {
 	private final CompilerEnv env;
 
 	private Function function;
-	private int loopcount;
 
 	public FlowAnalyzer(CompilerEnv env) {
 		this.env = env;
-	}
-
-	public void visitUnit(Unit u) {
-		ArrayList funcs = u.implementedFunctions;
-		try {
-			for (int i=0; i<funcs.size(); i++) {
-				Function f = (Function)funcs.get(i);
-				visitFunction(f);
-			}
-		} catch (Exception e) {
-			env.exceptionHappened("FlowAnalyzer", "Function: " + function.signature, e);
-		}
-	}
-
-	public void visitFunction(Function f) {
-		if (f.body == null) return;
-		this.function = f;
-		this.loopcount = 0;
-		Object result = f.body.accept(this, null);
-		if (result != RETURN && result != THROW) {
-			if (f.type.returnType == BuiltinType.NONE) {
-				BlockStatement block = new BlockStatement(f);
-				block.statements.add(f.body);
-				block.statements.add(new ReturnStatement(new ConstExpr(-1, BuiltinType.NULL, Null.NULL)));
-				f.body = block;
-				return;
-			}
-			if (env.hasOption(CompilerEnv.F_COMPAT21) && f.body.kind == Statement.STAT_BLOCK) {
-				BlockStatement block = (BlockStatement) f.body;
-				if (block.statements.size() > 0) {
-					Statement last = (Statement) block.statements.last();
-					if (last.kind == Statement.STAT_EXPR) {
-						Expr expr = ((ExprStatement)last).expr;
-						if (expr.returnType().safeToCastTo(f.type.returnType)) {
-							env.warn(f.source, expr.lineNumber(), CompilerEnv.W_DEPRECATED,
-									"In Ether 2.2 'return' keyword should be used to return function result");
-							block.statements.set(block.statements.size()-1, new ReturnStatement(expr));
-							return;
-						}
-					}
-				}
-			}
-			env.warn(f.source, f.body.lineNumber(), CompilerEnv.W_ERROR, "Missing return statement");
-		}
 	}
 
 	private Object common(Object flow1, Object flow2) {
@@ -110,15 +62,15 @@ public final class FlowAnalyzer implements StatementVisitor {
 		}
 	}
 
-	public Object visitArraySetStatement(ArraySetStatement stat, Object args) {
+	public Object visitArraySetStatement(ArraySetStatement stat, Object inLoop) {
 		return NEXT;
 	}
 
-	public Object visitAssignStatement(AssignStatement assign, Object args) {
+	public Object visitAssignStatement(AssignStatement assign, Object inLoop) {
 		return NEXT;
 	}
 
-	public Object visitBlockStatement(BlockStatement block, Object args) {
+	public Object visitBlockStatement(BlockStatement block, Object inLoop) {
 		Object result = NEXT;
 		for (int i=0; i<block.statements.size(); i++) {
 			Statement stat = (Statement) block.statements.get(i);
@@ -126,42 +78,40 @@ public final class FlowAnalyzer implements StatementVisitor {
 				env.warn(function.source, stat.lineNumber(), CompilerEnv.W_ERROR, "Unreachable statement");
 				return result;
 			}
-			result = stat.accept(this, args);
+			result = stat.accept(this, inLoop);
 		}
 		return result;
 	}
 
-	public Object visitBreakStatement(BreakStatement brk, Object args) {
-		if (loopcount == 0) {
+	public Object visitBreakStatement(BreakStatement brk, Object inLoop) {
+		if (inLoop != Boolean.TRUE) {
 			env.warn(function.source, brk.lineNumber(), CompilerEnv.W_ERROR, "'break' outside of loop");
 		}
 		return BREAK;
 	}
 
-	public Object visitCompoundAssignStatement(CompoundAssignStatement stat, Object args) {
+	public Object visitCompoundAssignStatement(CompoundAssignStatement stat, Object inLoop) {
 		return NEXT;
 	}
 
-	public Object visitContinueStatement(ContinueStatement cnt, Object args) {
-		if (loopcount == 0) {
+	public Object visitContinueStatement(ContinueStatement cnt, Object inLoop) {
+		if (inLoop != Boolean.TRUE) {
 			env.warn(function.source, cnt.lineNumber(), CompilerEnv.W_ERROR, "'continue' outside of loop");
 		}
 		return BREAK;
 	}
 
-	public Object visitEmptyStatement(EmptyStatement stat, Object args) {
+	public Object visitEmptyStatement(EmptyStatement stat, Object inLoop) {
 		return NEXT;
 	}
 
-	public Object visitExprStatement(ExprStatement stat, Object args) {
+	public Object visitExprStatement(ExprStatement stat, Object inLoop) {
 		return NEXT;
 	}
 
-	public Object visitForLoopStatement(ForLoopStatement stat, Object args) {
-		loopcount++;
-		Object incrResult = stat.increment.accept(this, args);
-		Object bodyResult = stat.body.accept(this, args);
-		loopcount--;
+	public Object visitForLoopStatement(ForLoopStatement stat, Object inLoop) {
+		Object incrResult = stat.increment.accept(this, Boolean.TRUE);
+		Object bodyResult = stat.body.accept(this, Boolean.TRUE);
 		if (incrResult == RETURN && bodyResult == RETURN) {
 			return RETURN;
 		} else if (incrResult == THROW && bodyResult == THROW) {
@@ -180,17 +130,15 @@ public final class FlowAnalyzer implements StatementVisitor {
 		}
 	}
 
-	public Object visitIfStatement(IfStatement stat, Object args) {
-		Object ifResult = stat.ifstat.accept(this, args);
-		Object elseResult = stat.elsestat.accept(this, args);
+	public Object visitIfStatement(IfStatement stat, Object inLoop) {
+		Object ifResult = stat.ifstat.accept(this, inLoop);
+		Object elseResult = stat.elsestat.accept(this, inLoop);
 		return common(ifResult, elseResult);
 	}
 
-	public Object visitLoopStatement(LoopStatement stat, Object args) {
-		loopcount++;
-		Object preResult = stat.preBody.accept(this, args);
-		Object postResult = stat.postBody.accept(this, args);
-		loopcount--;
+	public Object visitLoopStatement(LoopStatement stat, Object inLoop) {
+		Object preResult = stat.preBody.accept(this, Boolean.TRUE);
+		Object postResult = stat.postBody.accept(this, Boolean.TRUE);
 		if (preResult == RETURN && postResult == RETURN) {
 			return RETURN;
 		} else if (preResult == THROW && postResult == THROW) {
@@ -209,25 +157,25 @@ public final class FlowAnalyzer implements StatementVisitor {
 		}
 	}
 
-	public Object visitReturnStatement(ReturnStatement stat, Object args) {
+	public Object visitReturnStatement(ReturnStatement stat, Object inLoop) {
 		return RETURN;
 	}
 
-	public Object visitSwitchStatement(SwitchStatement stat, Object args) {
-		Object result = stat.elseStat.accept(this, args);
+	public Object visitSwitchStatement(SwitchStatement stat, Object inLoop) {
+		Object result = stat.elseStat.accept(this, inLoop);
 		for (int i=0; i<stat.statements.length; i++) {
-			result = common(result, stat.statements[i].accept(this, args));
+			result = common(result, stat.statements[i].accept(this, inLoop));
 		}
 		return result;
 	}
 
-	public Object visitThrowStatement(ThrowStatement stat, Object args) {
+	public Object visitThrowStatement(ThrowStatement stat, Object inLoop) {
 		return THROW;
 	}
 
-	public Object visitTryCatchStatement(TryCatchStatement stat, Object args) {
-		Object tryResult = stat.tryStat.accept(this, args);
-		Object catchResult = stat.catchStat.accept(this, args);
+	public Object visitTryCatchStatement(TryCatchStatement stat, Object inLoop) {
+		Object tryResult = stat.tryStat.accept(this, inLoop);
+		Object catchResult = stat.catchStat.accept(this, inLoop);
 		if (tryResult == THROW) {
 			return catchResult;
 		}

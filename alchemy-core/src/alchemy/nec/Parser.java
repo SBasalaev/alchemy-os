@@ -40,6 +40,7 @@ public class Parser {
 
 	private final CompilerEnv env;
 	private final ConstOptimizer constOptimizer;
+	private final FlowAnalyzer flowAnalyzer;
 	private Unit unit;
 
 	/** Set of all files that were already parsed. */
@@ -52,6 +53,7 @@ public class Parser {
 	public Parser(CompilerEnv env) {
 		this.env = env;
 		this.constOptimizer = new ConstOptimizer(env);
+		this.flowAnalyzer = new FlowAnalyzer(env);
 	}
 
 	public Unit parseUnit(String file) {
@@ -218,6 +220,13 @@ public class Parser {
 							initFunc.hits++;
 							func.body = generateConstructor((ObjectType)owner, func, initFunc);
 							initFunc.body = parseInitBody(owner, initFunc);
+							// add return if missing
+							if (initFunc.body.accept(flowAnalyzer, Boolean.FALSE) == flowAnalyzer.NEXT) {
+								BlockStatement block = new BlockStatement(initFunc);
+								block.statements.add(initFunc.body);
+								block.statements.add(new ReturnStatement(
+										new ConstExpr(t.lineNumber(), BuiltinType.NULL, Null.NULL)));
+							}
 						}
 					} else {
 						// parse body
@@ -230,6 +239,30 @@ public class Parser {
 							func.hits++;
 							func.source = (String) files.last();
 							unit.implementedFunctions.add(func);
+							// add return if missing
+							if (func.body.accept(flowAnalyzer, Boolean.FALSE) == flowAnalyzer.NEXT) {
+								if (func.type.returnType == BuiltinType.NONE) {
+									BlockStatement block = new BlockStatement(func);
+									block.statements.add(func.body);
+									block.statements.add(new ReturnStatement(
+											new ConstExpr(t.lineNumber(), BuiltinType.NULL, Null.NULL)));
+									func.body = block;
+								} else if (func.body.kind == Statement.STAT_BLOCK) {
+									BlockStatement block = (BlockStatement) func.body;
+									if (block.statements.size() > 0) {
+										Statement last = (Statement) block.statements.last();
+										if (last.kind == Statement.STAT_EXPR) {
+											Expr expr = cast(((ExprStatement)last).expr, func.type.returnType);
+											if (!env.hasOption(CompilerEnv.F_COMPAT21)) {
+												warn(CompilerEnv.W_RETURN, "'return' is not stated explicitely");
+											}
+											block.statements.set(block.statements.size()-1, new ReturnStatement(expr));
+										}
+									}
+								} else {
+									warn(CompilerEnv.W_ERROR, "Missing return statement");
+								}
+							}
 						}
 					}
 					break;
@@ -489,13 +522,13 @@ public class Parser {
 			String methodname = sig.substring(sig.lastIndexOf('.')+1);
 			if (methodname.equals("eq") &&
 					(rettype != BuiltinType.BOOL || args.length != 2 || !ftype.argtypes[1].equals(owner)))
-				warn(CompilerEnv.W_OPERATORS, "Method " + sig + " cannot be used as override for equality operators");
+				warn(CompilerEnv.W_OVERRIDES, "Method " + sig + " cannot be used as override for equality operators");
 			else if (methodname.equals("cmp") &&
 					(rettype != BuiltinType.INT || args.length != 2 || !ftype.argtypes[1].equals(owner)))
-				warn(CompilerEnv.W_OPERATORS, "Method " + sig + " cannot be used as override for comparison operators");
+				warn(CompilerEnv.W_OVERRIDES, "Method " + sig + " cannot be used as override for comparison operators");
 			else if (methodname.equals("tostr") &&
 					(rettype != BuiltinType.STRING || args.length != 1))
-				warn(CompilerEnv.W_OPERATORS, "Method " + sig + " cannot be used for conversion to a String");
+				warn(CompilerEnv.W_OVERRIDES, "Method " + sig + " cannot be used for conversion to a String");
 		}
 
 		return func;
@@ -734,17 +767,12 @@ public class Parser {
 					}
 				} else {
 					t.pushBack();
-					if (env.hasOption(CompilerEnv.F_COMPAT21)) {
-						warn(CompilerEnv.W_DEPRECATED, "In Ether 2.2 local variables must be explicitly initialized");
-						if (vartype == null)
-							vartype = BuiltinType.ANY;
-						if (varvalue == null) {
-							Object dflt = defaultValue(vartype);
-							if (dflt == null) dflt = Null.NULL;
-							varvalue = new ConstExpr(t.lineNumber(), vartype, dflt);
-						}
-					} else {
-						throw new ParseException("Variable " + varname + " is not initialized");
+					if (vartype == null)
+						vartype = BuiltinType.ANY;
+					if (varvalue == null) {
+						Object dflt = defaultValue(vartype);
+						if (dflt == null) dflt = Null.NULL;
+						varvalue = new ConstExpr(t.lineNumber(), vartype, dflt);
 					}
 				}
 				if (vartype == BuiltinType.NULL)
@@ -1465,12 +1493,12 @@ public class Parser {
 					ArrayType fromarray = (ArrayType)args[0].returnType();
 					if (toarray.elementType.safeToCastTo(fromarray.elementType)
 						&& !toarray.elementType.equals(fromarray.elementType)) {
-						warn(CompilerEnv.W_TYPESAFE, "Unsafe type cast when copying from "+fromarray+" to "+toarray);
+						warn(CompilerEnv.W_TYPECAST, "Unsafe type cast when copying from "+fromarray+" to "+toarray);
 					} else if (!toarray.elementType.safeToCastTo(fromarray.elementType)) {
 						warn(CompilerEnv.W_ERROR, "Cast to the incompatible type when copying from "+fromarray+" to "+toarray);
 					}
 				} else if (toarray.elementType != BuiltinType.ANY) {
-					warn(CompilerEnv.W_TYPESAFE, "Unsafe type cast when copying from Array to "+toarray);
+					warn(CompilerEnv.W_TYPECAST, "Unsafe type cast when copying from Array to "+toarray);
 				}
 			} else if (f.signature.equals("StrBuf.append") && args[1].returnType() == BuiltinType.CHAR) {
 				f.hits--;
@@ -1514,10 +1542,7 @@ public class Parser {
 				warn(CompilerEnv.W_CAST, "Unnecessary cast from " + fromType + " to " + toType);
 				return expr;
 			}
-			if (toType.safeToCastTo(fromType)) {
-				return new CastExpr(expr, toType);
-			}
-			return cast(expr, toType);
+			return cast(expr, toType, true);
 		}
 
 		if (t.ttype != Token.WORD)
@@ -2310,7 +2335,12 @@ public class Parser {
 	}
 
 	private Expr cast(Expr expr, Type toType) throws ParseException {
+		return cast(expr, toType, false);
+	}
+
+	private Expr cast(Expr expr, Type toType, boolean silent) throws ParseException {
 		Type fromType = expr.returnType();
+		// safe casts
 		if (fromType.equals(toType)) {
 			return expr;
 		}
@@ -2324,6 +2354,18 @@ public class Parser {
 			return new CastExpr(expr, toType);
 		}
 		if (fromType.isNumeric() && toType.isNumeric()) {
+			return new CastExpr(expr, toType);
+		}
+		if (fromType == BuiltinType.NULL && !toType.isNumeric() && toType.kind != Type.TYPE_BOOL) {
+			return new CastExpr(expr, toType);
+		}
+
+		// unsafe casts
+		if (toType.safeToCastTo(fromType) || fromType == BuiltinType.ANY) {
+			if (!silent) {
+				warn(CompilerEnv.W_TYPECAST, "Unsafe type cast from " + fromType + " to " + toType +
+					"\n Use explicit cast() to suppress this message");
+			}
 			return new CastExpr(expr, toType);
 		}
 

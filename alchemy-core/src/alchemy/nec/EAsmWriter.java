@@ -86,6 +86,10 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		}
 	}
 
+	private boolean flowContinues(Statement stat) {
+		return stat.accept(flow, (loopStart != null) ? Boolean.TRUE : Boolean.FALSE) == flow.NEXT;
+	}
+
 	public void writeTo(Unit unit, OutputStream out) throws IOException {
 		this.unit = unit;
 		UnitWriter uw = new UnitWriter();
@@ -1074,7 +1078,7 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		Label afterIf = new Label();
 		visitCondition(stat.condition, elseBranch, false);
 		stat.ifstat.accept(this, args);
-		if (stat.elsestat.kind != Statement.STAT_EMPTY && stat.elsestat.accept(flow, null) == flow.NEXT) {
+		if (stat.elsestat.kind != Statement.STAT_EMPTY && flowContinues(stat)) {
 			writer.visitJumpInsn(Opcodes.GOTO, afterIf);
 		}
 		writer.visitLabel(elseBranch);
@@ -1129,9 +1133,8 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			Statement stat = switchStat.statements[i];
 			writer.visitLabel(branches[i]);
 			stat.accept(this, args);
-			// write jump if execution continues and we are not the last branch
-			if (stat.accept(flow, null) == flow.NEXT
-			      && (i+1 < branches.length || switchStat.elseStat.kind != Statement.STAT_EMPTY)) {
+			// write jump if execution continues and it is not the last branch
+			if (flowContinues(stat) && (i+1 < branches.length || switchStat.elseStat.kind != Statement.STAT_EMPTY)) {
 				writer.visitJumpInsn(Opcodes.GOTO, afterSwitch);
 			}
 		}
@@ -1154,7 +1157,7 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		Label afterTry = new Label();
 		writer.visitLabel(tryStart);
 		trycatch.tryStat.accept(this, args);
-		if (trycatch.tryStat.accept(flow, null) == flow.NEXT) {
+		if (flowContinues(trycatch.tryStat)) {
 			writer.visitJumpInsn(Opcodes.GOTO, afterTry);
 		}
 		writer.visitLabel(tryEnd);

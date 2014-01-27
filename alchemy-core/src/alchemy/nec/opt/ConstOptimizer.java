@@ -179,8 +179,14 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 							return binary.lhs;
 						}
 						case '/':
-						case '%': // refuse to optimize integer division by zero
+						case '%': {
+							env.warn(
+									((Scope)scope).enclosingFunction().source,
+									binary.rhs.lineNumber(),
+									CompilerEnv.W_DIVZERO,
+									"Integer division by zero");
 							return binary;
+						}
 					}
 				} else if (cnst.equals(Int32.ONE)) {
 					switch (binary.operator) {

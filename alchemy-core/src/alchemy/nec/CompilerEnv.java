@@ -39,12 +39,13 @@ public final class CompilerEnv {
 	public static final String[] WARNING_STRINGS = {
 		"deprecated",
 		"main",
-		"operators",
-		"included",
+		"overrides",
 		"empty",
-		"typesafe",
+		"typecast",
 		"cast",
 		"hidden",
+		"divzero",
+		"return",
 	};
 
 	/**
@@ -53,14 +54,24 @@ public final class CompilerEnv {
 	 * method increases error counter.
 	 */
 	public static final int W_ERROR = -1;
+	/** Warn about use of deprecated items. */
 	public static final int W_DEPRECATED = 0;
+	/** Warn about incorrect semantic of main function. */
 	public static final int W_MAIN = 1;
-	public static final int W_OPERATORS = 2;
-	public static final int W_INCLUDED = 3;
-	public static final int W_EMPTY = 4;
-	public static final int W_TYPESAFE = 5;
-	public static final int W_CAST = 6;
-	public static final int W_HIDDEN = 7;
+	/** Warn about possible problems with overriding methods. */
+	public static final int W_OVERRIDES = 2;
+	/** Warn about empty body of conditional and loop statements. */
+	public static final int W_EMPTY = 3;
+	/** Warn about potentially unsafe type casts. */
+	public static final int W_TYPECAST = 4;
+	/** Warn about unnecessary casts. */
+	public static final int W_CAST = 5;
+	/** Warn if item hides another item with the same name on the outer level. */
+	public static final int W_HIDDEN = 6;
+	/** Warn about division by constant integer zero. */
+	public static final int W_DIVZERO = 7;
+	/** Warn if return statement is not given explicitely. */
+	public static final int W_RETURN = 8;
 
 	/** Bit-mask of enabled option flags. */
 	private final int options;
