@@ -644,11 +644,14 @@ public class Parser {
 			}
 			case Token.RETURN: {
 				Type rettype = scope.enclosingFunction().type.returnType;
+				Expr returnExpr;
 				if (rettype.kind == Type.TYPE_NONE) {
-					return new ReturnStatement(new ConstExpr(t.lineNumber(), BuiltinType.NULL, Null.NULL));
+					returnExpr = new ConstExpr(t.lineNumber(), BuiltinType.NULL, Null.NULL);
 				} else {
-					return new ReturnStatement(cast(parseExpr(scope), rettype));
+					returnExpr = cast(parseExpr(scope), rettype);
 				}
+				if (t.nextToken() != ';') t.pushBack();
+				return new ReturnStatement(returnExpr);
 			}
 			case Token.DO: {
 				Statement body = parseStatement(scope);
@@ -760,7 +763,7 @@ public class Parser {
 			case Token.FOR:
 				return parseForLoop(scope);
 			case Token.SWITCH:
-				return parseSwitch(scope);
+				return parseSwitchStatement(scope);
 			case Token.THROW: {
 				expect('(');
 				Expr errCode;
@@ -779,6 +782,7 @@ public class Parser {
 					}
 					expect(')');
 				}
+				if (t.nextToken() != ';') t.pushBack();
 				return new ThrowStatement(errCode, errMsg);
 			}
 			default: {
@@ -967,7 +971,7 @@ public class Parser {
 		}
 	}
 
-	private Statement parseSwitch(Scope scope) throws IOException, ParseException {
+	private Statement parseSwitchStatement(Scope scope) throws IOException, ParseException {
 		expect('(');
 		Expr keyExpr = parseExpr(scope);
 		Type keyType = keyExpr.returnType();
@@ -1105,6 +1109,152 @@ public class Parser {
 		}
 	}
 
+	private Expr parseSwitchExpr(Scope scope) throws IOException, ParseException {
+		expect('(');
+		Expr keyExpr = parseExpr(scope);
+		Type keyType = keyExpr.returnType();
+		boolean intSwitch;
+		if (keyType == BuiltinType.STRING) {
+			intSwitch = false;
+		} else if (keyType == BuiltinType.INT || keyType == BuiltinType.BYTE
+		        || keyType == BuiltinType.CHAR || keyType == BuiltinType.SHORT) {
+			intSwitch = true;
+			keyExpr = cast(keyExpr, BuiltinType.INT);
+			keyType = BuiltinType.INT;
+		} else {
+			throw new ParseException("Switch over " + keyType + " values is not supported");
+		}
+		expect(')');
+		ArrayList keys = new ArrayList();
+		ArrayList keySets = new ArrayList();
+		ArrayList exprs = new ArrayList();
+		Expr elseExpr = null;
+		expect('{');
+		while (t.nextToken() != '}') {
+			// reading possible else branch
+			if (t.ttype == Token.ELSE) {
+				expect(':');
+				if (elseExpr != null)
+					warn(CompilerEnv.W_ERROR, "Duplicate else case");
+				elseExpr = parseExpr(scope);
+				if (t.nextToken() != ';') t.pushBack();
+				continue;
+			}
+
+			// reading set of keys
+			ArrayList set = new ArrayList();
+			boolean first = true;
+			do {
+				t.pushBack();
+				if (first) first = false;
+				else expect(',');
+				Expr caseExpr = parseExpr(scope);
+				if (intSwitch && caseExpr.kind == Expr.EXPR_RANGE) {
+					Expr case1 = (Expr) cast(((RangeExpr)caseExpr).fromExpr, BuiltinType.INT).accept(constOptimizer, scope);
+					Expr case2 = (Expr) cast(((RangeExpr)caseExpr).toExpr, BuiltinType.INT).accept(constOptimizer, scope);
+					if (case1.kind != Expr.EXPR_CONST || case2.kind != Expr.EXPR_CONST)
+						throw new ParseException("Constant expression expected");
+					int from = ((Int32)((ConstExpr)case1).value).value;
+					int to = ((Int32)((ConstExpr)case1).value).value;
+					if (from > to)
+						warn(CompilerEnv.W_ERROR, "Invalid range " + from + ".." + to);
+					for (int i=from; i<=to; i++) {
+						Int32 I = Int32.toInt32(i);
+						if (keys.contains(I)) warn(CompilerEnv.W_ERROR, "Duplicate switch case " + i);
+						keys.add(I);
+						set.add(I);
+					}
+				} else {
+					caseExpr = (Expr) cast(caseExpr, keyType).accept(constOptimizer, scope);
+					if (caseExpr.kind != Expr.EXPR_CONST)
+						throw new ParseException("Constant expression expected");
+					Object key = ((ConstExpr)caseExpr).value;
+					if (keys.contains(key)) warn(CompilerEnv.W_ERROR, "Duplicate switch case " + key);
+					keys.add(key);
+					set.add(key);
+				}
+			} while (t.nextToken() != ':');
+			// reading branch
+			keySets.add(set);
+			exprs.add(parseExpr(scope));
+			if (t.nextToken() != ';') t.pushBack();
+		}
+
+		// calculating return type
+		if (elseExpr == null) {
+			throw new ParseException("Missing else branch");
+		}
+		Type rettype = elseExpr.returnType();
+		for (int i=exprs.size()-1; i>=0; i--) {
+			rettype = binaryCastType(rettype, ((Expr)exprs.get(i)).returnType());
+		}
+		elseExpr = cast(elseExpr, rettype);
+		for (int i=exprs.size()-1; i>=0; i--) {
+			exprs.set(i, cast((Expr)exprs.get(i), rettype));
+		}
+
+		// return switch
+		if (intSwitch) {
+			int branchCount = exprs.size();
+			Expr[] exprArray = new Expr[branchCount];
+			exprs.copyInto(exprArray);
+			int[][] keySetArray = new int[branchCount][];
+			for (int i=0; i<branchCount; i++) {
+				ArrayList set = (ArrayList) keySets.get(i);
+				keySetArray[i] = new int[set.size()];
+				set.copyInto(keySetArray[i]);
+			}
+			return new SwitchExpr(keyExpr, keySetArray, exprArray, elseExpr);
+		} else {
+			// string switch we implement as two consequent switches
+			// first is switch over hashcodes which returns branch number
+			Var strVar = new Var("#string", BuiltinType.STRING);
+			strVar.hits = 1;
+			strVar.isConstant = true;
+			// create first switch
+			Expr strExpr = new VarExpr(-1, strVar);
+			ArrayList hashes = new ArrayList();
+			ArrayList checkExprs = new ArrayList();
+			for (int branchIndex = 0; branchIndex < keySets.size(); branchIndex++) {
+				ArrayList set = (ArrayList) keySets.get(branchIndex);
+				for (int keyIdx=0; keyIdx < set.size(); keyIdx++) {
+					String key = (String) set.get(keyIdx);
+					Int32 hash = Int32.toInt32(key.hashCode());
+					int hashIdx = hashes.indexOf(hash);
+					if (hashIdx < 0) {
+						hashIdx = hashes.size();
+						hashes.add(hash);
+						checkExprs.add(new ConstExpr(-1, BuiltinType.INT, Int32.M_ONE));
+					}
+					Expr checkExpr = (Expr) checkExprs.get(hashIdx);
+					checkExpr = new IfElseExpr(
+							new ComparisonExpr(strExpr, Token.EQEQ, new ConstExpr(-1, BuiltinType.STRING, key)),
+							new ConstExpr(-1, BuiltinType.INT, Int32.toInt32(branchIndex)),
+							checkExpr);
+					strVar.hits++;
+					checkExprs.set(hashIdx, checkExpr);
+				}
+			}
+			int[][] keySetArray = new int[hashes.size()][];
+			for (int i=0; i<keySetArray.length; i++) {
+				keySetArray[i] = new int[] { ((Int32)hashes.get(i)).value };
+			}
+			Expr[] exprArray = new Expr[hashes.size()];
+			checkExprs.copyInto(exprArray);
+			Expr getHash = new CallExpr(-1, unit.getFunction("String.hash"), new Expr[] { strExpr });
+			Expr innerSwitch = new SwitchExpr(getHash, keySetArray, exprArray, new ConstExpr(-1, BuiltinType.INT, Int32.M_ONE));
+			// create second switch
+			keySetArray = new int[exprs.size()][];
+			for (int i=0; i<keySetArray.length; i++) {
+				keySetArray[i] = new int[] { i };
+			}
+			exprArray = new Expr[exprs.size()];
+			exprs.copyInto(exprArray);
+			Expr outerSwitch = new SwitchExpr(innerSwitch, keySetArray, exprArray, elseExpr);
+			return new SequentialExpr(new Var[] { strVar }, new Expr[] { keyExpr }, outerSwitch);
+		}
+	}
+
 	/** Parses assignments and expression statements. */
 	private Statement parseExprStatement(Scope scope) throws IOException, ParseException {
 		Expr expr = parseExpr(scope);
@@ -1138,7 +1288,7 @@ public class Parser {
 					int idxsize = lhs.indexExprs.length;
 					Expr[] setterArgs = new Expr[idxsize + 2];
 					setterArgs[0] = lhs.objectExpr;
-					setterArgs[idxsize+1] = cast(rhs, lhs.setter.type.argtypes[idxsize]);
+					setterArgs[idxsize+1] = cast(rhs, lhs.setter.type.argtypes[idxsize+1]);
 					for (int i=0; i<idxsize; i++) {
 						setterArgs[i+1] = cast(lhs.indexExprs[i], lhs.setter.type.argtypes[i+1]);
 					}
@@ -1881,6 +2031,9 @@ public class Parser {
 				trueExpr = cast(trueExpr, binaryType);
 				falseExpr = cast(falseExpr, binaryType);
 				return new IfElseExpr(condition, trueExpr, falseExpr);
+			}
+			case Token.SWITCH: {
+				return parseSwitchExpr(scope);
 			}
 			default:
 				throw new ParseException(t.toString() + " unexpected here");
