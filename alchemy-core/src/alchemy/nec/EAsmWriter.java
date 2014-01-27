@@ -1129,7 +1129,11 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			Statement stat = switchStat.statements[i];
 			writer.visitLabel(branches[i]);
 			stat.accept(this, args);
-			writer.visitJumpInsn(Opcodes.GOTO, afterSwitch);
+			// write jump if execution continues and we are not the last branch
+			if (stat.accept(flow, null) == flow.NEXT
+			      && (i+1 < branches.length || switchStat.elseStat.kind != Statement.STAT_EMPTY)) {
+				writer.visitJumpInsn(Opcodes.GOTO, afterSwitch);
+			}
 		}
 		writer.visitLabel(defaultBranch);
 		switchStat.elseStat.accept(this, args);
