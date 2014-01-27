@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2013-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,13 @@ package alchemy.pc;
 
 import alchemy.fs.Filesystem;
 import alchemy.platform.Installer;
+import alchemy.system.Process;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import javax.swing.JOptionPane;
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
 
 /**
  * Main entry point for PC.
@@ -29,16 +34,22 @@ import java.io.IOException;
  */
 public class Main {
 
+	private static final String ROOT_DIR = "root";
+
 	private Main() { }
 
 	public static void main(String[] args) {
 		try {
-			File root = new File("./root");
+			File root = new File(ROOT_DIR);
 			if (!root.exists()) root.mkdirs();
 			checkInstall();
 			run();
 		} catch (Exception e) {
-			System.err.println("!!! Alchemy OS crashed !!!");
+			StringWriter str = new StringWriter();
+			PrintWriter message = new PrintWriter(str);
+			message.print("Alchemy OS crashed. Please report this to developers.\n\n");
+			e.printStackTrace(message);
+			JOptionPane.showMessageDialog(null, str.toString(), "Alchemy OS", ERROR_MESSAGE);
 			e.printStackTrace();
 		}
 	}
@@ -46,19 +57,22 @@ public class Main {
 	public static void checkInstall() throws IOException {
 		Installer installer = new Installer();
 		if (!installer.isInstalled()) {
-			System.out.println("Installing Alchemy OS...");
-			installer.install("pc", "./root");
+			WaitFrame w = new WaitFrame("Installing Alchemy OS...");
+			w.setVisible(true);
+			installer.install("pc", ROOT_DIR);
+			w.dispose();
 		} else if (installer.isUpdateNeeded()) {
-			System.out.println("Updating Alchemy OS...");
+			WaitFrame w = new WaitFrame("Installing Alchemy OS...");
+			w.setVisible(true);
 			installer.update();
+			w.dispose();
 		}
 	}
 
 	public static void run() throws IOException, InstantiationException, InterruptedException {
-		Filesystem.mount("", "pc", "./root");
+		Filesystem.mount("", "pc", ROOT_DIR);
 		Filesystem.mount("/dev", "devfs", "");
-		System.out.println("Welcome!");
-		alchemy.system.Process ps = new alchemy.system.Process("terminal", new String[0]);
+		Process ps = new Process("terminal", new String[0]);
 		ps.setEnv("PATH", "/bin");
 		ps.setEnv("LIBPATH", "/lib");
 		ps.setEnv("INCPATH", "/inc");
