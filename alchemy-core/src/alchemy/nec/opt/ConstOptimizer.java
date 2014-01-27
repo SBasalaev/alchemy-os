@@ -764,6 +764,31 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 	/**
 	 * <pre>
 	 * DCE:
+	 *   switch (const) returns branch
+	 * </pre>
+	 */
+	public Object visitSwitch(SwitchExpr switchExpr, Object scope) {
+		switchExpr.keyExpr = (Expr) switchExpr.keyExpr.accept(this, scope);
+		for (int i=0; i<switchExpr.exprs.length; i++) {
+			switchExpr.exprs[i] = (Expr) switchExpr.exprs[i].accept(this, scope);
+		}
+		switchExpr.elseExpr = (Expr) switchExpr.elseExpr.accept(this, scope);
+		if (switchExpr.keyExpr.kind == Expr.EXPR_CONST) {
+			int key = ((Int32)((ConstExpr)switchExpr.keyExpr).value).value;
+			for (int branchIndex = 0; branchIndex < switchExpr.keySets.length; branchIndex++) {
+				int[] keySet = switchExpr.keySets[branchIndex];
+				for (int keyIndex = 0; keyIndex < keySet.length; keyIndex++) {
+					if (keySet[keyIndex] == key) return switchExpr.exprs[branchIndex];
+				}
+			}
+			return switchExpr.elseExpr;
+		}
+		return switchExpr;
+	}
+
+	/**
+	 * <pre>
+	 * DCE:
 	 *   try const catch ...  =&gt;  const
 	 *   try var   catch ...  =&gt;  const
 	 * </pre>

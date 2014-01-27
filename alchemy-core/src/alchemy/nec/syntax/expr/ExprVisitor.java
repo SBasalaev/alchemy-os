@@ -37,6 +37,7 @@ public interface ExprVisitor {
 	Object visitNewArrayInit(NewArrayInitExpr expr, Object args);
 	Object visitRange(RangeExpr expr, Object args);
 	Object visitSequential(SequentialExpr expr, Object args);
+	Object visitSwitch(SwitchExpr expr, Object args);
 	Object visitTryCatch(TryCatchExpr expr, Object args);
 	Object visitUnary(UnaryExpr expr, Object args);
 	Object visitVar(VarExpr expr, Object args);

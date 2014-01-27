@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2013-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,45 +15,50 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package alchemy.nec.syntax.statement;
 
-import alchemy.nec.syntax.expr.Expr;
+package alchemy.nec.syntax.expr;
+
+import alchemy.nec.syntax.type.Type;
 
 /**
- * Switch statement.
+ * Switch expression.
  * <pre>
  * <b>switch</b> (keyExpr) {
- *   keySets[0]: statements[0]
+ *   keySets[0]: exprs[0]
  *   ...
- *   keySets[N]: statements[N]
- *   <b>else</b>: elseStat
+ *   keySets[N]: exprs[N]
+ *   <b>else</b>: elseExpr
  * }
  * </pre>
  *
  * @author Sergey Basalaev
  */
-public final class SwitchStatement extends Statement {
+public final class SwitchExpr extends Expr {
 
 	public Expr keyExpr;
 
 	public int[][] keySets;
-	public Statement[] statements;
+	public Expr[] exprs;
 
-	public Statement elseStat;
+	public Expr elseExpr;
 
-	public SwitchStatement(Expr keyExpr, int[][] keySets, Statement[] statements, Statement elseStat) {
-		super(STAT_SWITCH);
+	public SwitchExpr(Expr keyExpr, int[][] keySets, Expr[] exprs, Expr elseExpr) {
+		super(EXPR_SWITCH);
 		this.keyExpr = keyExpr;
 		this.keySets = keySets;
-		this.statements = statements;
-		this.elseStat = elseStat;
+		this.exprs = exprs;
+		this.elseExpr = elseExpr;
 	}
 
 	public int lineNumber() {
 		return keyExpr.lineNumber();
 	}
 
-	public Object accept(StatementVisitor v, Object args) {
-		return v.visitSwitchStatement(this, args);
+	public Type returnType() {
+		return elseExpr.returnType();
+	}
+
+	public Object accept(ExprVisitor v, Object args) {
+		return v.visitSwitch(this, args);
 	}
 }
