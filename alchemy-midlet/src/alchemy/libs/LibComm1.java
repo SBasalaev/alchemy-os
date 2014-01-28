@@ -46,7 +46,7 @@ public class LibComm1 extends NativeLibrary {
 				return IO.split(ports, ',');
 			}
 			case 1: { // new_comm(port: String, cfg: CommCfg): Comm
-				StringBuffer url = new StringBuffer("comm://");
+				StringBuffer url = new StringBuffer("comm:");
 				url.append((String)args[0]);
 				Object[] params = (Object[])args[1];
 				if (params[0] != Int.ZERO) url.append(";baudrate=").append(ival(params[0]));
