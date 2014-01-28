@@ -39,6 +39,9 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import static javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+import static javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
+
 /**
  * Terminal window.
  * @author Sergey Basalaev
@@ -50,6 +53,7 @@ public final class TerminalFrame extends JFrame {
 	private final JTextField input;
 	private final Box inputBox;
 	private final Object sync = new Object();
+	private final JButton enter;
 
 	private StringBuilder outputContents = new StringBuilder();
 
@@ -63,13 +67,14 @@ public final class TerminalFrame extends JFrame {
 		output = new JEditorPane();
 		output.setEditable(false);
 		output.setContentType("text/html");
-		JScrollPane outputPane = new JScrollPane(output, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		outputPane.setPreferredSize(new Dimension(600, 480));
+		JScrollPane outputPane = new JScrollPane(output, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		outputPane.setPreferredSize(new Dimension(640, 480));
 
 		prompt = new JLabel();
 
 		input = new JTextField();
 		input.setEditable(false);
+		input.setText("Running...");
 		input.addKeyListener(new KeyAdapter() {
 			@Override public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -78,7 +83,7 @@ public final class TerminalFrame extends JFrame {
 			}
 		});
 
-		JButton enter = new JButton("Enter");
+		enter = new JButton("Enter");
 		enter.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 				synchronized (sync) {  sync.notify(); }
@@ -96,7 +101,9 @@ public final class TerminalFrame extends JFrame {
 	}
 
 	private String waitForInput() {
+		input.setText(null);
 		input.setEditable(true);
+		enter.setVisible(true);
 		input.requestFocus();
 		synchronized (sync) {
 			try {
@@ -108,12 +115,13 @@ public final class TerminalFrame extends JFrame {
 		}
 		input.setEditable(false);
 		String newInput = input.getText() + '\n';
+		input.setText("Running...");
+		enter.setVisible(false);
 		append("<b>");
 		appendEscaped(prompt.getText());
 		append("</b> ");
 		appendEscaped(newInput);
 		flushText();
-		input.setText(null);
 		return newInput;
 	}
 
@@ -136,6 +144,18 @@ public final class TerminalFrame extends JFrame {
 
 	private void flushText() {
 		output.setText(outputContents.toString());
+	}
+
+	void end(String name) {
+		input.setEditable(false);
+		input.setText("Process '" + name + "' ended.");
+		enter.setText("Close");
+		enter.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				TerminalFrame.this.setVisible(false);
+			}
+		});
+		enter.setVisible(true);
 	}
 
 	private class TerminalInputStream extends InputStream implements TerminalInput {

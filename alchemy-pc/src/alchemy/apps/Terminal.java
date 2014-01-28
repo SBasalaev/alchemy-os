@@ -81,6 +81,7 @@ public class Terminal extends NativeApp {
 					throw new ProcessKilledException();
 			}
 			if (keep) {
+				frame.end(p.getName());
 				while (frame.isVisible()) {
 					Thread.sleep(100);
 				}
