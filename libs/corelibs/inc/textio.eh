@@ -15,8 +15,7 @@ def Reader.close();
 
 type Writer < Any;
 
-def new_writer(out: OStream, enc: (OStream,Int)): Writer;
-const `Writer.new` = new_writer;
+def Writer.new(out: OStream, enc: (OStream,Int)): Writer;
 
 def Writer.write(ch: Int);
 def Writer.writeArray(buf: [Char], ofs: Int, len: Int);
