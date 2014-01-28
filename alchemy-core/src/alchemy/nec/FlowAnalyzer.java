@@ -50,6 +50,13 @@ public final class FlowAnalyzer implements StatementVisitor {
 		this.env = env;
 	}
 
+	public Object visitFunction(Function f) {
+		this.function = f;
+		Object status = f.body.accept(this, Boolean.FALSE);
+		this.function = null;
+		return status;
+	}
+
 	private Object common(Object flow1, Object flow2) {
 		if (flow1 == NEXT || flow2 == NEXT) {
 			return NEXT;
@@ -74,7 +81,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 		Object result = NEXT;
 		for (int i=0; i<block.statements.size(); i++) {
 			Statement stat = (Statement) block.statements.get(i);
-			if (result != NEXT) {
+			if (result != NEXT && function != null) {
 				env.warn(function.source, stat.lineNumber(), CompilerEnv.W_ERROR, "Unreachable statement");
 				return result;
 			}
@@ -84,7 +91,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 	}
 
 	public Object visitBreakStatement(BreakStatement brk, Object inLoop) {
-		if (inLoop != Boolean.TRUE) {
+		if (inLoop != Boolean.TRUE && function != null) {
 			env.warn(function.source, brk.lineNumber(), CompilerEnv.W_ERROR, "'break' outside of loop");
 		}
 		return BREAK;
@@ -95,7 +102,7 @@ public final class FlowAnalyzer implements StatementVisitor {
 	}
 
 	public Object visitContinueStatement(ContinueStatement cnt, Object inLoop) {
-		if (inLoop != Boolean.TRUE) {
+		if (inLoop != Boolean.TRUE && function != null) {
 			env.warn(function.source, cnt.lineNumber(), CompilerEnv.W_ERROR, "'continue' outside of loop");
 		}
 		return BREAK;

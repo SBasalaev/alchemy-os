@@ -213,7 +213,7 @@ public class Parser {
 								throw new ParseException("Function " + func.signature + " is already implemented");
 							if (!(owner instanceof ObjectType))
 								throw new ParseException("Cannot create constructor of " + owner);
-							initFunc.source = func.source = (String)files.last();
+							initFunc.source = func.source = Filesystem.fileName((String)files.last());
 							unit.implementedFunctions.add(func);
 							unit.implementedFunctions.add(initFunc);
 							func.hits++;
@@ -221,11 +221,12 @@ public class Parser {
 							func.body = generateConstructor((ObjectType)owner, func, initFunc);
 							initFunc.body = parseInitBody(owner, initFunc);
 							// add return if missing
-							if (initFunc.body.accept(flowAnalyzer, Boolean.FALSE) == flowAnalyzer.NEXT) {
+							if (flowAnalyzer.visitFunction(initFunc) == flowAnalyzer.NEXT) {
 								BlockStatement block = new BlockStatement(initFunc);
 								block.statements.add(initFunc.body);
 								block.statements.add(new ReturnStatement(
 										new ConstExpr(t.lineNumber(), BuiltinType.NULL, Null.NULL)));
+								initFunc.body = block;
 							}
 						}
 					} else {
@@ -237,10 +238,10 @@ public class Parser {
 								throw new ParseException("Function " + func.signature + " is already implemented");
 							func.body = parseFunctionBody(func);
 							func.hits++;
-							func.source = (String) files.last();
+							func.source = Filesystem.fileName((String)files.last());
 							unit.implementedFunctions.add(func);
 							// add return if missing
-							if (func.body.accept(flowAnalyzer, Boolean.FALSE) == flowAnalyzer.NEXT) {
+							if (flowAnalyzer.visitFunction(func) == flowAnalyzer.NEXT) {
 								if (func.type.returnType == BuiltinType.NONE) {
 									BlockStatement block = new BlockStatement(func);
 									block.statements.add(func.body);
@@ -2351,7 +2352,7 @@ public class Parser {
 			return expr;
 		}
 		if (toType == BuiltinType.ANY) {
-			return new CastExpr(expr, toType);
+			return expr;
 		}
 		if (fromType.isNumeric() && toType.isNumeric()) {
 			return new CastExpr(expr, toType);
