@@ -19,7 +19,7 @@
 package alchemy.libs;
 
 import alchemy.core.Process;
-import alchemy.nlib.NativeFunction;
+import alchemy.fs.FSManager;
 import alchemy.nlib.NativeLibrary;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,6 +68,17 @@ public class LibMedia1 extends NativeLibrary {
 				return null;
 			case 10: // get_supported_ctypes(): [String]
 				return Manager.getSupportedContentTypes(null);
+			case 11: { // create_player(file: String, ctype: String): Player
+				String fileName = (String) args[0];
+				String url = FSManager.fs().getNativeURL(p.toFile(fileName));
+				if (url != null) {
+					return Manager.createPlayer(url);
+				} else {
+					InputStream input = FSManager.fs().read(p.toFile(fileName));
+					p.addStream(input);
+					return Manager.createPlayer(input, (String)args[1]);
+				}
+			}
 			default:
 				return null;
 		}
