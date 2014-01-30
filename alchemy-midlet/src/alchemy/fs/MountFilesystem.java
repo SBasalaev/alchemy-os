@@ -160,4 +160,10 @@ class MountFilesystem extends Filesystem {
 		Mount mount = FSManager.findMount(nfile);
 		return mount.fs.spaceUsed(npath(mount, nfile));
 	}
+
+	public String getNativeURL(String file) {
+		String nfile = FSManager.normalize(file);
+		Mount mount = FSManager.findMount(nfile);
+		return mount.fs.getNativeURL(npath(mount, nfile));
+	}
 }

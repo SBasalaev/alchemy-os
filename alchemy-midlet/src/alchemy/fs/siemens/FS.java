@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,16 +63,13 @@ public class FS extends Filesystem implements Initable {
 		this.root = "file://"+rootpath;
 	}
 	
-	/**
-	 * Converts file path to native path.
-	 */
-	private String pathFor(String file) {
+	public String getNativeURL(String file) {
 		if (isSysRoot && file.length() == 0) return root+'/';
 		else return root+file;
 	}
 
 	public OutputStream append(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ_WRITE);
 		try {
 			if (!fc.exists()) fc.create();
 			return fc.openOutputStream(fc.fileSize());
@@ -82,7 +79,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public OutputStream write(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ_WRITE);
 		try {
 			if (!fc.exists()) fc.create();
 			fc.truncate(0);
@@ -93,7 +90,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public InputStream read(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ);
 		try {
 			return fc.openInputStream();
 		} finally {
@@ -108,7 +105,7 @@ public class FS extends Filesystem implements Initable {
 	public boolean canRead(String file) {
 		if (file.length() == 0) return true;
 		try {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ);
 			try {
 				return fc.canRead();
 			} finally {
@@ -122,7 +119,7 @@ public class FS extends Filesystem implements Initable {
 	public boolean canWrite(String file) {
 		if (file.length() == 0) return true;
 		try {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ);
 			try {
 				return fc.canWrite();
 			} finally {
@@ -134,7 +131,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public void create(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.WRITE);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.WRITE);
 		try {
 			fc.create();
 		} finally {
@@ -143,7 +140,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public void mkdir(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file)+'/', Connector.READ_WRITE);
 		try {
 			fc.mkdir();
 		} finally {
@@ -153,7 +150,7 @@ public class FS extends Filesystem implements Initable {
 
 	public void remove(String file) throws IOException {
 		if (file.length() == 0) throw new IOException("Cannot remove mounted directory.");
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ_WRITE);
 		try {
 			if (fc.exists()) fc.delete();
 		} finally {
@@ -164,7 +161,7 @@ public class FS extends Filesystem implements Initable {
 	public boolean exists(String file) {
 		if (file.length() == 0) return true;
 		try {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ);
 			try {
 				return fc.exists();
 			} finally {
@@ -178,7 +175,7 @@ public class FS extends Filesystem implements Initable {
 	public boolean isDirectory(String file) {
 		if (file.length() == 0) return true;
 		try {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ);
 			try {
 				return fc.isDirectory();
 			} finally {
@@ -190,7 +187,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public long size(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ);
 		try {
 			if (fc.isDirectory()) return 0l;
 			else return fc.fileSize();
@@ -200,7 +197,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public long lastModified(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ);
 		try {
 			return fc.lastModified();
 		} finally {
@@ -209,7 +206,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public String[] list(String file) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file)+'/', Connector.READ);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file)+'/', Connector.READ);
 		try {
 			Enumeration e = fc.list("*", true);
 			Vector v = new Vector();
@@ -230,7 +227,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public void setRead(String file, boolean on) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ_WRITE);
 		try {
 			fc.setReadable(on);
 		} finally {
@@ -239,7 +236,7 @@ public class FS extends Filesystem implements Initable {
 	}
 
 	public void setWrite(String file, boolean on) throws IOException {
-		FileConnection fc = (FileConnection)Connector.open(pathFor(file), Connector.READ_WRITE);
+		FileConnection fc = (FileConnection)Connector.open(getNativeURL(file), Connector.READ_WRITE);
 		try {
 			fc.setWritable(on);
 		} finally {
@@ -253,7 +250,7 @@ public class FS extends Filesystem implements Initable {
 		String sparent = fparent(source);
 		String dparent = fparent(dest);
 		if (sparent.equals(dparent)) {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(source), Connector.READ_WRITE);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(source), Connector.READ_WRITE);
 			try {
 				fc.rename(fname(dest));
 			} finally {
@@ -266,7 +263,7 @@ public class FS extends Filesystem implements Initable {
 
 	public long spaceFree(String rootdir) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(rootdir)+'/', Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(rootdir)+'/', Connector.READ);
 			try {
 				return fc.availableSize();
 			} finally {
@@ -279,7 +276,7 @@ public class FS extends Filesystem implements Initable {
 
 	public long spaceTotal(String rootdir) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(rootdir)+'/', Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(rootdir)+'/', Connector.READ);
 			try {
 				return fc.totalSize();
 			} finally {
@@ -292,7 +289,7 @@ public class FS extends Filesystem implements Initable {
 
 	public long spaceUsed(String rootdir) {
 		try {
-			FileConnection fc = (FileConnection)Connector.open(pathFor(rootdir)+'/', Connector.READ);
+			FileConnection fc = (FileConnection)Connector.open(getNativeURL(rootdir)+'/', Connector.READ);
 			try {
 				return fc.usedSize();
 			} finally {

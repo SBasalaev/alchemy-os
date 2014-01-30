@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -374,4 +374,12 @@ public abstract class Filesystem {
 	 *   if application is not granted access to the file system
 	 */
 	public abstract long spaceUsed(String root);
+
+	/**
+	 * If this file can also be accessed natively, return
+	 * corresponding URL to the native resource.
+	 */
+	public String getNativeURL(String file) {
+		return null;
+	}
 }
