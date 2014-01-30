@@ -36,8 +36,10 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 
 	private final Command cmdQuit = new Command("Quit", Command.EXIT, 1);
 	private Art runtime;
+	public static AlchemyMIDlet instance;
 
 	public AlchemyMIDlet() {
+		instance = this;
 		UIServer.setDisplay(Display.getDisplay(this));
 		try {
 			if (!InstallInfo.exists()) {

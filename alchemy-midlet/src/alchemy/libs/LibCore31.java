@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import alchemy.fs.FSManager;
 import alchemy.fs.Filesystem;
 import alchemy.libs.core.PartiallyAppliedFunction;
 import alchemy.libs.core.Pipe;
+import alchemy.midlet.AlchemyMIDlet;
 import alchemy.nlib.NativeLibrary;
 import alchemy.util.IO;
 import java.io.ByteArrayInputStream;
@@ -879,6 +880,8 @@ public class LibCore31 extends NativeLibrary {
 			case 178: // StrBuf.chars(from: Int, to: Int, buf: [Char], ofs: Int)
 				((StringBuffer)args[0]).getChars(ival(args[1]), ival(args[2]), (char[])(args[3]), ival(args[4]));
 				return null;
+			case 179: // platformRequest(url: String): Bool
+				return Ival(AlchemyMIDlet.instance.platformRequest((String)args[0]));
 			default:
 				return null;
 		}
