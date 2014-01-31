@@ -36,6 +36,8 @@ public class Function implements Scope {
 	public FunctionType type;
 	/** Whether this function is a .new method. */
 	public boolean isConstructor;
+	/** Whether this function is public. */
+	public boolean isPublic;
 	/** Function arguments. */
 	public Var[] args;
 	/** Usage count of a function. */

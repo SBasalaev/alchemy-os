@@ -440,6 +440,7 @@ public class Parser {
 			t.pushBack();
 		}
 		Function func = new Function(scope, sig);
+		func.isPublic = true;
 		func.isConstructor = isConstructor;
 
 		// parse argument list
@@ -1348,12 +1349,12 @@ public class Parser {
 				case Expr.EXPR_ARRAY_ELEMENT: {
 					// var #lvalue = arrayExpr
 					// var #0 = indexExpr
-					// #lvalue[#0] = #lvalue[#0] * rhs
+					// #array[#index] = #array[#index] * rhs
 					ArrayElementExpr lhs = (ArrayElementExpr) expr;
-					Var arrVar = new Var("#lvalue", lhs.arrayExpr.returnType());
+					Var arrVar = new Var("#array", lhs.arrayExpr.returnType());
 					arrVar.hits = 2;
 					arrVar.isConstant = true;
-					Var idxVar = new Var("#0", lhs.indexExpr.returnType());
+					Var idxVar = new Var("#index", lhs.indexExpr.returnType());
 					idxVar.hits = 2;
 					idxVar.isConstant = true;
 					Expr arrExpr = new VarExpr(-1, arrVar);
@@ -1371,10 +1372,10 @@ public class Parser {
 					return block;
 				}
 				case Expr.EXPR_PROPERTY: {
-					// var #lvalue = objectExpr
-					// setter (#lvalue, getter(#lvalue) * rhs)
+					// var #object = objectExpr
+					// setter (#object, getter(#object) * rhs)
 					PropertyLvalue lhs = (PropertyLvalue) expr;
-					Var objVar = new Var("#lvalue", lhs.objectExpr.returnType());
+					Var objVar = new Var("#object", lhs.objectExpr.returnType());
 					objVar.isConstant = true;
 					objVar.hits = 2;
 					Expr objExpr = new VarExpr(-1, objVar);
@@ -1387,19 +1388,20 @@ public class Parser {
 							new Var[] { objVar }, new Expr[] { lhs.objectExpr }, setterCall));
 				}
 				case Expr.EXPR_ARRAYLIKE: {
-					// var #lvalue = objectExpr
-					// var #0 = indexExprs[0]
+					// var #object = objectExpr
+					// var #index0 = indexExprs[0]
 					// ...
-					// setter (#lvalue, #0...#N , getter(#lvalue, #0...#N) * rhs)
+					// var #indexN = indexExprs[N]
+					// setter (#object, #0...#N , getter(#object, #0...#N) * rhs)
 					ArrayLikePropertyLvalue lhs = (ArrayLikePropertyLvalue) expr;
 					int idxsize = lhs.indexExprs.length;
 					Var[] seqVars = new Var[idxsize+1];
 					Expr[] seqExprs = new Expr[idxsize+1];
-					seqVars[0] = new Var("#lvalue", lhs.objectExpr.returnType());
+					seqVars[0] = new Var("#object", lhs.objectExpr.returnType());
 					seqVars[0].hits  = 2;
 					seqExprs[0] = lhs.objectExpr;
 					for (int i=0; i<idxsize; i++) {
-						seqVars[i+1] = new Var("#" + i, lhs.indexExprs[i].returnType());
+						seqVars[i+1] = new Var("#index" + i, lhs.indexExprs[i].returnType());
 						seqVars[i+1].isConstant = true;
 						seqVars[i+1].hits = 2;
 						seqExprs[i+1] = lhs.indexExprs[i];
@@ -2061,6 +2063,36 @@ public class Parser {
 			case Token.SWITCH: {
 				return parseSwitchExpr(scope);
 			}
+			case Token.CAST: {
+				if (env.hasOption(CompilerEnv.F_COMPAT21)) {
+					warn(CompilerEnv.W_DEPRECATED, "In Ether 2.2 you should use syntax (expr).cast(type)");
+				} else {
+					warn(CompilerEnv.W_ERROR, "Use (expr).cast(type) for type cast");
+				}
+				expect('(');
+				Type toType = parseType(scope);
+				expect(')');
+				return cast(parseExprAtom(scope), toType, true);
+			}
+			case Token.SUPER: {
+				Var thisVar = scope.getVar("this");
+				Expr superExpr = new VarExpr(line, thisVar);
+				if (thisVar == null)
+					warn(CompilerEnv.W_ERROR, "'this' outside of method");
+				Type superType = thisVar.type.superType();
+				if (superType == null) {
+					warn(CompilerEnv.W_ERROR, "Type " + thisVar.type + " does not have a parent type");
+				} else {
+					superExpr = new CastExpr(superExpr, superType);
+				}
+				return superExpr;
+			}
+			case Token.TRY: {
+				Expr tryExpr = parseExpr(scope);
+				expect(Token.CATCH);
+				Expr catchExpr = parseExpr(scope);
+				return new TryCatchExpr(tryExpr, catchExpr);
+			}
 			default:
 				throw new ParseException(t.toString() + " unexpected here");
 		}
@@ -2150,15 +2182,15 @@ public class Parser {
 					Function eqmethod = findMethod(ltype, "eq");
 					if (eqmethod != null && eqmethod.type.returnType == BuiltinType.BOOL &&
 							eqmethod.type.argtypes.length == 2 && rtype.safeToCastTo(eqmethod.type.argtypes[1])) {
-						// var #0 = left
-						// var #1 = right
+						// var #left = left
+						// var #right = right
 						// /* for == */
-						// if (#0 == null) #1 == null else ( if (#1 == null) false else #0.eq(#1) )
+						// if (#left == null) #right == null else ( if (#right == null) false else #left.eq(#right) )
 						Var[] seqVars = new Var[2];
-						seqVars[0] = new Var("#0", left.returnType());
+						seqVars[0] = new Var("#left", left.returnType());
 						seqVars[0].isConstant = true;
 						seqVars[0].hits = 2;
-						seqVars[1] = new Var("#1", right.returnType());
+						seqVars[1] = new Var("#right", right.returnType());
 						seqVars[1].isConstant = true;
 						seqVars[1].hits = 3;
 						Expr[] seqExprs = new Expr[] { left, right };
@@ -2231,7 +2263,7 @@ public class Parser {
 			case Token.IN: {
 				if (rtype == BuiltinType.INTRANGE || rtype == BuiltinType.LONGRANGE) {
 					left = cast(left, rtype == BuiltinType.INTRANGE ? BuiltinType.INT : BuiltinType.LONG);
-					Var[] seqVars = new Var[] { new Var("#0", BuiltinType.INT) };
+					Var[] seqVars = new Var[] { new Var("#value", BuiltinType.INT) };
 					seqVars[0].isConstant = true;
 					seqVars[0].hits = 2;
 					Expr[] seqExprs = new Expr[] { left };
@@ -2246,7 +2278,7 @@ public class Parser {
 				if (method != null && method.type.argtypes.length == 2) {
 					// using sequential since order of arguments is reversed,
 					// i. e. 'A in B' becomes 'B.contains(A)'
-					Var[] seqVars = new Var[] {	new Var("#0", ltype), new Var("#1", rtype)};
+					Var[] seqVars = new Var[] {	new Var("#item", ltype), new Var("#object", rtype)};
 					Expr[] seqExprs = new Expr[] { left, right };
 					VarExpr objExpr = new VarExpr(-1, seqVars[1]);
 					VarExpr itemExpr = new VarExpr(-1, seqVars[0]);
