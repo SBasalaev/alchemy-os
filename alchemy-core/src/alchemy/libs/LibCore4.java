@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -770,7 +770,7 @@ public final class LibCore4 extends NativeLibrary {
 				return null;
 			case 206: // sysProperty(str: String): String
 				return System.getProperty((String)args[0]);
-			case 207: // platformRequest(url: Bool)
+			case 207: // platformRequest(url: String): Bool
 				return Ival(Platform.getPlatform().getCore().platformRequest((String)args[0]));
 
 			/* == Header: term.eh == */
