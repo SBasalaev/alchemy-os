@@ -29,6 +29,7 @@ import alchemy.nec.syntax.statement.*;
 import alchemy.nec.syntax.type.*;
 import alchemy.types.*;
 import alchemy.util.ArrayList;
+import alchemy.util.HashMap;
 import alchemy.util.Strings;
 import java.io.IOException;
 
@@ -446,8 +447,10 @@ public class Parser {
 		// parse argument list
 		expect('(');
 		ArrayList arglist = new ArrayList();
+		ArrayList names = new ArrayList();
 		if (owner != null && !isConstructor) {
 			arglist.add(new Var("this", owner));
+			names.add("this");
 		}
 		boolean first = true;
 		boolean defaults = false;
@@ -458,6 +461,9 @@ public class Parser {
 			if (t.nextToken() != Token.WORD)
 				throw new ParseException("Variable name expected, got "+t);
 			String varname = t.svalue;
+			if (names.contains(varname))
+				warn(CompilerEnv.W_ERROR, "Variable " + varname + " is already defined");
+			names.add(varname);
 			expect(':');
 			Type vartype = parseType(func);
 			Var var = new Var(varname, vartype);
@@ -2093,6 +2099,87 @@ public class Parser {
 				Expr catchExpr = parseExpr(scope);
 				return new TryCatchExpr(tryExpr, catchExpr);
 			}
+			case Token.DEF: {
+				// anonymous function
+				Function lambda = new Function(unit, "#lambda");
+				// parse argument list
+				expect('(');
+				ArrayList args = new ArrayList();
+				ArrayList names = new ArrayList();
+				boolean first = true;
+				while (t.nextToken() != ')') {
+					t.pushBack();
+					if (first) first = false;
+					else expect(',');
+					if (t.nextToken() != Token.WORD)
+						throw new ParseException("Argument name expected, got " + t);
+					String argname = t.svalue;
+					if (names.contains(argname))
+						warn(CompilerEnv.W_ERROR, "Variable " + argname + " is already defined");
+					names.add(argname);
+					expect(':');
+					Type argtype = parseType(lambda);
+					Var arg = new Var(argname, argtype);
+					args.add(arg);
+					if (t.nextToken() == '=') {
+						Expr defValue = (Expr) cast(parseExpr(lambda), argtype).accept(constOptimizer, lambda);
+						if (defValue.kind != Expr.EXPR_CONST)
+							throw new ParseException("Constant expression expected");
+						arg.defaultValue = ((ConstExpr)defValue).value;
+					} else {
+						t.pushBack();
+					}
+				}
+				lambda.args = new Var[args.size()];
+				args.copyInto(lambda.args);
+				Type returnType = null;
+				if (t.nextToken() == ':') {
+					returnType = parseType(lambda);
+				} else {
+					t.pushBack();
+				}
+				// parse function body
+				expect('=');
+				ClosureScope closure = new ClosureScope(lambda, scope);
+				Expr body = parseExpr(closure);
+				if (returnType == null) {
+					returnType = body.returnType();
+				} else {
+					body = cast(body, returnType);
+				}
+				lambda.body = new ReturnStatement(body);
+				// add closure variables
+				int argsCount = lambda.args.length;
+				int addedVarsCount = closure.enclosedVars.size();
+				if (addedVarsCount > 0) {
+					Var[] newArgs = new Var[argsCount + addedVarsCount];
+					System.arraycopy(lambda.args, 0, newArgs, 0, argsCount);
+					Object[] newVarNames = closure.enclosedVars.keys();
+					for (int i=0; i<addedVarsCount; i++) {
+						newArgs[argsCount + i] = (Var) closure.enclosedVars.get(newVarNames[i]);
+					}
+					lambda.args = newArgs;
+				}
+				// fill remaining function fields
+				lambda.hits = 1;
+				lambda.source = files.last().toString();
+				Type[] argTypes = new Type[lambda.args.length];
+				for (int i=0; i<argTypes.length; i++) {
+					argTypes[i] = lambda.args[i].type;
+				}
+				lambda.type = new FunctionType(returnType, argTypes);
+				unit.implementedFunctions.add(lambda);
+				// return value
+				Expr lambdaLoad = new ConstExpr(line, lambda.type, lambda);
+				if (addedVarsCount > 0) {
+					Expr[] varLoaders = new Expr[addedVarsCount];
+					for (int i=0; i < addedVarsCount; i++) {
+						varLoaders[i] = new VarExpr(line, scope.getVar(lambda.args[argsCount + i].name));
+					}
+					lambdaLoad = new ApplyExpr(lambdaLoad, varLoaders);
+				}
+				return lambdaLoad;
+			}
 			default:
 				throw new ParseException(t.toString() + " unexpected here");
 		}
@@ -2434,5 +2521,40 @@ public class Parser {
 
 	private void warn(int category, String message) {
 		env.warn((String)files.last(), t.lineNumber(), category, message);
+	}
+
+	private class ClosureScope implements Scope {
+		private Scope parent;
+		private Function lambda;
+
+		public HashMap enclosedVars = new HashMap();
+
+		public ClosureScope(Function lambda, Scope parent) {
+			this.parent = parent;
+			this.lambda = lambda;
+		}
+
+		public Function enclosingFunction() {
+			return lambda;
+		}
+
+		public Type getType(String name) {
+			return lambda.getType(name);
+		}
+
+		public Var getVar(String name) {
+			Var var = lambda.getVar(name);
+			if (var == null) {
+				var = (Var) enclosedVars.get(name);
+			}
+			if (var == null) {
+				var = parent.getVar(name);
+				if (var != null && unit.getVar(name) != var && !var.isConstant)
+					warn(CompilerEnv.W_ERROR, "Variable " + name + " is not constant");
+				var = new Var(var.name, var.type);
+				enclosedVars.set(name, var);
+			}
+			return var;
+		}
 	}
 }
