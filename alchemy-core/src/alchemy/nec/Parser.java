@@ -2101,7 +2101,7 @@ public class Parser {
 			}
 			case Token.DEF: {
 				// anonymous function
-				Function lambda = new Function(unit, "#lambda");
+				Function lambda = new Function(unit, "#lambda" + unit.implementedFunctions.size());
 				// parse argument list
 				expect('(');
 				ArrayList args = new ArrayList();
@@ -2480,6 +2480,16 @@ public class Parser {
 		}
 		if (fromType == BuiltinType.NULL && !toType.isNumeric() && toType.kind != Type.TYPE_BOOL) {
 			return new CastExpr(expr, toType);
+		}
+
+		// array transformations
+		if (expr.kind == Expr.EXPR_NEWARRAY_INIT && fromType.kind == Type.TYPE_ARRAY && toType.kind == Type.TYPE_ARRAY) {
+			NewArrayInitExpr newarray = (NewArrayInitExpr) expr;
+			Type elementTo = ((ArrayType)toType).elementType;
+			for (int i=0; i<newarray.initializers.length; i++) {
+				newarray.initializers[i] = cast(newarray.initializers[i], elementTo);
+			}
+			return new NewArrayInitExpr(newarray.lineNumber(), toType, newarray.initializers);
 		}
 
 		// unsafe casts

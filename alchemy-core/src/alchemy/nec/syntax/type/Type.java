@@ -95,7 +95,7 @@ public abstract class Type {
 		while (t2 != null && !t1.safeToCastTo(t2)) {
 			t2 = t2.superType();
 		}
-		return t2;
+		return (t2 != null) ? t2 : BuiltinType.ANY;
 	}
 
 	public final boolean isNumeric() {
