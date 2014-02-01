@@ -2153,11 +2153,11 @@ public class Parser {
 				int addedVarsCount = closure.enclosedVars.size();
 				if (addedVarsCount > 0) {
 					Var[] newArgs = new Var[argsCount + addedVarsCount];
-					System.arraycopy(lambda.args, 0, newArgs, 0, argsCount);
 					Object[] newVarNames = closure.enclosedVars.keys();
 					for (int i=0; i<addedVarsCount; i++) {
-						newArgs[argsCount + i] = (Var) closure.enclosedVars.get(newVarNames[i]);
+						newArgs[i] = (Var) closure.enclosedVars.get(newVarNames[i]);
 					}
+					System.arraycopy(lambda.args, 0, newArgs, addedVarsCount, argsCount);
 					lambda.args = newArgs;
 				}
 				// fill remaining function fields
@@ -2174,7 +2174,9 @@ public class Parser {
 				if (addedVarsCount > 0) {
 					Expr[] varLoaders = new Expr[addedVarsCount];
 					for (int i=0; i < addedVarsCount; i++) {
-						varLoaders[i] = new VarExpr(line, scope.getVar(lambda.args[argsCount + i].name));
+						Var var = scope.getVar(lambda.args[i].name);
+						var.hits++;
+						varLoaders[i] = new VarExpr(line, var);
 					}
 					lambdaLoad = new ApplyExpr(lambdaLoad, varLoaders);
 				}
@@ -2543,16 +2545,22 @@ public class Parser {
 		}
 
 		public Var getVar(String name) {
+			// trying local/global var
 			Var var = lambda.getVar(name);
-			if (var == null) {
-				var = (Var) enclosedVars.get(name);
-			}
-			if (var == null) {
-				var = parent.getVar(name);
-				if (var != null && unit.getVar(name) != var && !var.isConstant)
+			if (var != null) return var;
+			// trying closure var
+			var = (Var) enclosedVars.get(name);
+			if (var != null) return var;
+			// enclosing var from parent scope
+			var = parent.getVar(name);
+			if (var != null) {
+				if (!var.isConstant)
 					warn(CompilerEnv.W_ERROR, "Variable " + name + " is not constant");
-				var = new Var(var.name, var.type);
-				enclosedVars.set(name, var);
+				Var newVar = new Var(var.name, var.type);
+				newVar.isConstant = true;
+				newVar.defaultValue = var.defaultValue;
+				enclosedVars.set(name, newVar);
+				return newVar;
 			}
 			return var;
 		}
