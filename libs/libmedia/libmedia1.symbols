@@ -9,3 +9,4 @@ Player.start
 Player.stop
 Player.close
 get_supported_ctypes
+create_player

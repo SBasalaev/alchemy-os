@@ -16,3 +16,5 @@ def Player.set_time(time: Long);
 def Player.start();
 def Player.stop();
 def Player.close();
+
+def create_player(file: String, ctype: String): Player;
