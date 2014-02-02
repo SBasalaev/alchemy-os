@@ -1,3 +1,4 @@
+use "io.eh"
 use "/inc/dataio.eh"
 
 const `IStream.readbool` = `IStream.readBool`;

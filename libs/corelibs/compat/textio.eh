@@ -1,3 +1,4 @@
+use "io.eh"
 use "/inc/textio.eh"
 
 const new_reader = `Reader.new`;
