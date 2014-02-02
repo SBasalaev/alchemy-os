@@ -124,7 +124,7 @@ File: mount_2.1.pkg
 Package: navigator
 Version: 0.4.1
 Section: gui
-Depends: coreutils, edit, fileinfo, imgview, libcore3, libfiletype1, libui1
+Depends: coreutils, edit, fileinfo, imgview, libcore3, libdialog1, libfiletype1, libui1
 Summary: file manager for Alchemy OS
 File: navigator_0.4.1.pkg
 
