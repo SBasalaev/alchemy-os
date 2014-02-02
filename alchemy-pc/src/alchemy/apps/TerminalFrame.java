@@ -33,10 +33,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import static javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED;
@@ -48,25 +48,23 @@ import static javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
  */
 public final class TerminalFrame extends JFrame {
 
-	private final JEditorPane output;
+	private final JTextArea output;
 	private final JLabel prompt;
 	private final JTextField input;
 	private final Box inputBox;
 	private final Object sync = new Object();
 	private final JButton enter;
 
-	private StringBuilder outputContents = new StringBuilder();
-
 	final TerminalInputStream in = new TerminalInputStream();
-	final TerminalOutputStream out = new TerminalOutputStream(false);
-	final TerminalOutputStream err = new TerminalOutputStream(true);
+	final TerminalOutputStream out = new TerminalOutputStream();
+	final TerminalOutputStream err = out;
 
 	public TerminalFrame(String title) {
 		super(title);
 
-		output = new JEditorPane();
+		output = new JTextArea();
 		output.setEditable(false);
-		output.setContentType("text/html");
+		output.setLineWrap(true);
 		JScrollPane outputPane = new JScrollPane(output, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		outputPane.setPreferredSize(new Dimension(640, 480));
 
@@ -109,41 +107,19 @@ public final class TerminalFrame extends JFrame {
 			try {
 				sync.wait();
 			} catch (InterruptedException ie) {
-				append("interrupted");
-				flushText();
+				output.append("interrupted\n");
 			}
 		}
 		input.setEditable(false);
 		String newInput = input.getText() + '\n';
 		input.setText("Running...");
 		enter.setVisible(false);
-		append("<b>");
-		appendEscaped(prompt.getText());
-		append("</b> ");
-		appendEscaped(newInput);
-		flushText();
-		return newInput;
-	}
-
-	private synchronized void append(String str) {
-		outputContents.append(str);
-	}
-
-	private synchronized void appendEscaped(String str) {
-		StringBuilder sb = outputContents;
-		for (int i=0; i<str.length(); i++) {
-			char ch = str.charAt(i);
-			switch (ch) {
-				case '<':  sb.append("&lt;"); break;
-				case '>':  sb.append("&gt;"); break;
-				case '\n': sb.append("<br>"); break;
-				default:   sb.append(ch);     break;
-			}
+		synchronized (output) {
+			output.append(prompt.getText());
+			output.append(" ");
+			output.append(newInput);
 		}
-	}
-
-	private void flushText() {
-		output.setText(outputContents.toString());
+		return newInput;
 	}
 
 	void end(String name) {
@@ -182,10 +158,9 @@ public final class TerminalFrame extends JFrame {
 
 		@Override
 		public void clear() {
-			synchronized (TerminalFrame.this) {
-				outputContents = new StringBuilder();
+			synchronized (output) {
+				output.setText(null);
 			}
-			flushText();
 		}
 
 		@Override
@@ -202,11 +177,9 @@ public final class TerminalFrame extends JFrame {
 	private class TerminalOutputStream extends OutputStream {
 
 		private ByteArrayOutputStream buf;
-		private final boolean errColored;
 
-		public TerminalOutputStream(boolean errColored) {
+		public TerminalOutputStream() {
 			buf = new ByteArrayOutputStream();
-			this.errColored = errColored;
 		}
 
 		@Override
@@ -235,10 +208,9 @@ public final class TerminalFrame extends JFrame {
 		public synchronized void flush() throws IOException {
 			byte[] data = buf.toByteArray();
 			buf.reset();
-			if (errColored) append("<font color=\"red\">");
-			appendEscaped(Strings.utfDecode(data));
-			if (errColored) append("</font>");
-			flushText();
+			synchronized (output) {
+				output.append(Strings.utfDecode(data));
+			}
 		}
 	}
 }
