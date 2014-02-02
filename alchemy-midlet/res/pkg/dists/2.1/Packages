@@ -81,6 +81,13 @@ Section: libs
 Summary: standard library which is used by all programs
 File: libcore3_3.1.4build2.pkg
 
+Package: libdialog1
+Version: 1.0
+Section: libs
+Depends: libcore3, libui1
+Summary: common dialogs - runtime library
+File: libdialog1_1.0.pkg
+
 Package: libfiletype1
 Version: 1.1.3
 Section: libs
