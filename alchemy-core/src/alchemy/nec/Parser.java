@@ -256,9 +256,11 @@ public class Parser {
 										if (last.kind == Statement.STAT_EXPR) {
 											Expr expr = cast(((ExprStatement)last).expr, func.type.returnType);
 											if (!env.hasOption(CompilerEnv.F_COMPAT21)) {
-												warn(CompilerEnv.W_RETURN, "'return' is not stated explicitely");
+												warn(CompilerEnv.W_RETURN, "'return' is not stated explicitly");
 											}
 											block.statements.set(block.statements.size()-1, new ReturnStatement(expr));
+										} else {
+											warn(CompilerEnv.W_ERROR, "Missing return statement");
 										}
 									}
 								} else {
@@ -923,9 +925,21 @@ public class Parser {
 				toVar.isConstant = true;
 				toVar.hits = 1; // in comparison
 				forBlock.addVar(toVar);
+				boolean includingHigh = true;
 				if (collection.kind == Expr.EXPR_RANGE) {
 					forBlock.statements.add(new AssignStatement(loopVar, cast(((RangeExpr)collection).fromExpr, vartype)));
-					forBlock.statements.add(new AssignStatement(toVar, cast(((RangeExpr)collection).toExpr, vartype)));
+					Expr high = ((RangeExpr)collection).toExpr;
+					if (high.kind == Expr.EXPR_BINARY) {
+						BinaryExpr binary = (BinaryExpr) high;
+						if (binary.operator == '-' && binary.rhs.kind == Expr.EXPR_CONST) {
+							Object cnst = ((ConstExpr)binary.rhs).value;
+							if (cnst.equals(Int32.ONE) || cnst.equals(new Int64(1))) {
+								high = binary.lhs;
+								includingHigh = false;
+							}
+						}
+					}
+					forBlock.statements.add(new AssignStatement(toVar, cast(high, vartype)));
 				} else {
 					Var rangeVar = new Var("#range", collType);
 					rangeVar.isConstant = true;
@@ -943,8 +957,8 @@ public class Parser {
 				}
 				Expr loadVar = new VarExpr(-1, loopVar);
 				Expr loadTo = new VarExpr(-1, toVar);
-				// condition is 'var <= toConst'
-				Expr condition  = new ComparisonExpr(loadVar, Token.LTEQ, loadTo);
+				// condition is 'var <= toConst' or 'var < toConst'
+				Expr condition  = new ComparisonExpr(loadVar, includingHigh ? Token.LTEQ : '<', loadTo);
 				// increment is 'var += 1'
 				Expr plusOne;
 				switch (vartype.kind) {
