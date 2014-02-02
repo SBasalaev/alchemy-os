@@ -177,3 +177,4 @@ sys_property
 String.replace
 buildlibrary
 StrBuf.chars
+platformRequest
