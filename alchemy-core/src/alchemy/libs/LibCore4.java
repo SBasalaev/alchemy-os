@@ -612,7 +612,9 @@ public final class LibCore4 extends NativeLibrary {
 				ArrayList oldList = (ArrayList)args[0];
 				Object[] data = new Object[oldList.size()];
 				oldList.copyInto(data);
-				Arrays.qsort(data, 0, data.length, p, (Function)args[1]);
+				if (data.length > 0) {
+					Arrays.qsort(data, 0, data.length-1, p, (Function)args[1]);
+				}
 				ArrayList newList = new ArrayList(data.length);
 				newList.addFrom(data, 0, data.length);
 				return newList;
@@ -621,7 +623,9 @@ public final class LibCore4 extends NativeLibrary {
 				ArrayList list = (ArrayList)args[0];
 				Object[] data = new Object[list.size()];
 				list.copyInto(data);
-				Arrays.qsort(data, 0, data.length, p, (Function)args[1]);
+				if (data.length > 0) {
+					Arrays.qsort(data, 0, data.length-1, p, (Function)args[1]);
+				}
 				list.clear();
 				list.addFrom(data, 0, data.length);
 				return null;
