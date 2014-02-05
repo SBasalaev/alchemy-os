@@ -109,7 +109,7 @@ public final class Installer {
 	}
 
 	/**
-	 * Creates base directories and unpacks installer.
+	 * Unpacks installer.
 	 * This method mounts root file system, unpacks base files
 	 * and then unmounts it.
 	 */
@@ -138,11 +138,6 @@ public final class Installer {
 	 * File system must be mounted before this method.
 	 */
 	private void unpackBaseSystem() throws IOException {
-		String[] dirs = {"/bin", "/lib", "/res", "/dev", "/cfg", "/home", "/tmp"};
-		for (int i=0; i<dirs.length; i++) {
-			String dir = dirs[i];
-			if (!Filesystem.exists(dir)) Filesystem.mkdir(dir);
-		}
 		String[] archives = Strings.split(getSetupCfg().get("install.archives").toString(), ' ', true);
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
