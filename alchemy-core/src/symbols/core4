@@ -210,3 +210,11 @@ isTerm
 TermIStream.clear
 TermIStream.getPrompt
 TermIStream.setPrompt
+[Byte].sort
+[Char].sort
+[Short].sort
+[Int].sort
+[Long].sort
+[Float].sort
+[Double].sort
+[Any].sort

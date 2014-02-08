@@ -788,6 +788,72 @@ public final class LibCore4 extends NativeLibrary {
 			case 211: // TermIStream.setPrompt(prompt: String)
 				((TerminalInput)args[0]).setPrompt((String)args[1]);
 				return null;
+
+			/* == Added to builtin: == */
+			case 212: { // [Byte].sort(from: Int = 0, to: Int = -1)
+				byte[] array = (byte[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1);
+				return null;
+			}
+			case 213: { // [Char].sort(from: Int = 0, to: Int = -1)
+				char[] array = (char[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1);
+				return null;
+			}
+			case 214: { // [Short].sort(from: Int = 0, to: Int = -1)
+				short[] array = (short[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1);
+				return null;
+			}
+			case 215: { // [Int].sort(from: Int = 0, to: Int = -1)
+				int[] array = (int[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1);
+				return null;
+			}
+			case 216: { // [Long].sort(from: Int = 0, to: Int = -1)
+				long[] array = (long[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1);
+				return null;
+			}
+			case 217: { // [Float].sort(from: Int = 0, to: Int = -1)
+				float[] array = (float[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1);
+				return null;
+			}
+			case 218: { // [Double].sort(from: Int = 0, to: Int = -1)
+				double[] array = (double[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1);
+				return null;
+			}
+			case 219: { // [Any].sort(from: Int = 0, to: Int = -1, f: (Any,Any):Int)
+				Object[] array = (Object[]) args[0];
+				int from = ival(args[1]);
+				int to = ival(args[2]);
+				if (to < 0) to = array.length-from;
+				Arrays.qsort(array, from, to-1, p, (Function)args[3]);
+				return null;
+			}
 			default:
 				return null;
 		}
