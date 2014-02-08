@@ -546,6 +546,9 @@ public final class Process {
 				((Connection)connections.get(i)).close();
 			} catch (IOException ioe) { }
 		}
+		for (int i=listeners.size()-1; i >= 0; i--) {
+			((ProcessListener)listeners.get(i)).processEnded(this);
+		}
 	}
 
 	/** Main function of the interpreter script. */
