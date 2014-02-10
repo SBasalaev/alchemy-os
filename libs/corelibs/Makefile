@@ -6,4 +6,4 @@ clean:
 
 install:
  make -C libcoree install
- install inc lib ${DESTDIR}
+ install inc lib ${DESTDIR}/

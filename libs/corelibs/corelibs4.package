@@ -21,8 +21,8 @@ Files:
 
 Package: corelibs4-compat-dev
 Section: libdevel
-Summary: compatibility headers to port from previous releases
-Depends: ${libdeps}, corelibs-dev
+Summary: compatibility headers to port programs from previous releases
+Depends: ${libdeps}, corelibs4-dev
 Files:
  compat /inc
 
