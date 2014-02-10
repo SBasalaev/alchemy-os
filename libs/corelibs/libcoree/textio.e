@@ -3,7 +3,7 @@
  * Licensed under GPL v3 with linkage exception
  */
 
-use "io"
+use "textio"
 use "strbuf"
 
 type Reader {
@@ -181,3 +181,42 @@ def writech_utf16(out: OStream, ch: Int) {
 
 def utf16reader(inp: IStream): Reader = new Reader(inp, readch_utf16)
 def utf16writer(out: OStream): Writer = new Writer(out, writech_utf16)
+
+/* String reader/writer. */
+
+type StringReader < Reader {
+  pos: Int = 0
+}
+
+def StringReader.readFrom(str: String, dummy: IStream): Int {
+  var n = this.pos
+  if (n >= str.len()) return -1
+  var ch = str[n]
+  this.pos = n+1
+  return ch
+}
+
+def StringReader.new(str: String) {
+  super(null, this.readFrom.apply(str))
+}
+
+type StringWriter < Writer {
+  buf: StrBuf
+}
+
+def StringWriter.writeChar(dummy: OStream, ch: Int) {
+  this.buf.addch(ch.cast(Char))
+}
+
+def StringWriter.new() {
+  super(null, this.writeChar)
+  this.reset()
+}
+
+def StringWriter.tostr(): String {
+  return this.buf.tostr()
+}
+
+def StringWriter.reset() {
+  this.buf = new StrBuf()
+}

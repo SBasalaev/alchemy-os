@@ -36,3 +36,13 @@ def latin1writer(out: OStream): Writer;
 /* UTF-16 encoding */
 def utf16reader(input: IStream): Reader;
 def utf16writer(out: OStream): Writer;
+
+/* Reader from string. */
+type StringReader < Reader;
+def StringReader.new(str: String);
+
+/* Writer to string. */
+type StringWriter < Writer;
+def StringWriter.new();
+def StringWriter.tostr(): String;
+def StringWriter.reset();
