@@ -1585,9 +1585,9 @@ public class Parser {
 			case Type.TYPE_LONGRANGE: {
 				Type itemType = (type.kind == Type.TYPE_INTRANGE) ? BuiltinType.INT : BuiltinType.LONG;
 				if (member.equals("from")) {
-					return new ArrayElementExpr(expr, new ConstExpr(lnum, BuiltinType.INT, Int32.ZERO), type);
+					return new ArrayElementExpr(expr, new ConstExpr(lnum, BuiltinType.INT, Int32.ZERO), itemType);
 				} else if (member.equals("to")) {
-					return new ArrayElementExpr(expr, new ConstExpr(lnum, BuiltinType.INT, Int32.ONE), type);
+					return new ArrayElementExpr(expr, new ConstExpr(lnum, BuiltinType.INT, Int32.ONE), itemType);
 				}
 				break;
 			}
@@ -1600,6 +1600,7 @@ public class Parser {
 					ArrayList args = new ArrayList();
 					boolean first = true;
 					while (t.nextToken() != ')') {
+						t.pushBack();
 						if (first) first = false;
 						else expect(',');
 						args.add(parseExpr(scope));
@@ -2206,6 +2207,9 @@ public class Parser {
 		switch (t.nextToken()) {
 			case Token.WORD: { // scalar type
 				Type type = scope.getType(t.svalue);
+				if (type == null) {
+					throw new ParseException("Type " + t.svalue + " is not defined");
+				}
 				return type;
 			}
 			case '(': { // function type
@@ -2487,7 +2491,8 @@ public class Parser {
 			return expr;
 		}
 		if (toType == BuiltinType.ANY) {
-			return expr;
+			if (fromType.isNumeric() || fromType.kind == Type.TYPE_BOOL) return new CastExpr(expr, toType);
+			else return expr;
 		}
 		if (fromType.isNumeric() && toType.isNumeric()) {
 			return new CastExpr(expr, toType);
