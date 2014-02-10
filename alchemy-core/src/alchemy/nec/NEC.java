@@ -108,7 +108,7 @@ public class NEC extends NativeApp {
 						warnmask |= (1 << j);
 				}
 			} else if (arg.startsWith("-I") && arg.length() > 2) {
-				p.setEnv("INCPATH", p.getEnv("INCPATH")+':'+arg.substring(2));
+				p.setEnv("INCPATH", arg.substring(2) + ':' + p.getEnv("INCPATH"));
 			} else if (arg.charAt(0) == '-') {
 				IO.println(p.stderr, "Unknown argument: "+arg);
 				IO.println(p.stderr, HELP);

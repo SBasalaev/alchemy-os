@@ -203,6 +203,7 @@ public class Parser {
 							unit.addVar(initVar);
 						} else {
 							initFunc = (Function) initVar.defaultValue;
+							System.arraycopy(func.args, 0, initFunc.args, 1, func.args.length);
 						}
 
 						// parse body
@@ -2381,6 +2382,40 @@ public class Parser {
 							new ComparisonExpr(leftVar, Token.LTEQ, ((RangeExpr)right).toExpr));
 					return new SequentialExpr(seqVars, seqExprs, comparison);
 				}
+				if (rtype.kind == Type.TYPE_ARRAY) {
+					Type elementType = ((ArrayType)rtype).elementType;
+					Var[] seqVars = new Var[2];
+					seqVars[0] = new Var("#item", elementType);
+					seqVars[1] = new Var("#array", rtype);
+					Expr[] seqExprs = new Expr[2];
+					seqExprs[0] = cast(left, elementType);
+					seqExprs[1] = right;
+					Expr call;
+					if (elementType.isNumeric() || elementType.kind == Type.TYPE_BOOL) {
+						Function contains = unit.getFunction(rtype.toString() + ".contains");
+						call = new CallExpr(-1, contains, new Expr[] {
+							new VarExpr(-1, seqVars[1]),
+							new VarExpr(-1, seqVars[0])
+						});
+					} else {
+						Function contains = unit.getFunction("[Any].contains");
+						Function eqfunc = findMethod(elementType, "eq");
+						if (eqfunc == null || eqfunc.args.length != 2) {
+							call = new CallExpr(-1, contains, new Expr[] {
+								new VarExpr(-1, seqVars[1]),
+								new VarExpr(-1, seqVars[0]),
+								new ConstExpr(-1, BuiltinType.FUNCTION, Null.NULL)
+							});
+						} else {
+							call = new CallExpr(-1, contains, new Expr[] {
+								new VarExpr(-1, seqVars[1]),
+								cast(new VarExpr(-1, seqVars[0]), eqfunc.type.argtypes[1]),
+								new ConstExpr(-1, eqfunc.type, eqfunc)
+							});
+						}
+					}
+					return new SequentialExpr(seqVars, seqExprs, call);
+				}
 				Function method = findMethod(rtype, "contains");
 				if (method != null && method.type.argtypes.length == 2) {
 					// using sequential since order of arguments is reversed,
@@ -2461,7 +2496,7 @@ public class Parser {
 	private Function findMethod(Type ownertype, String name) throws ParseException {
 		Type stype = ownertype;
 		while (stype != null) {
-			Var mvar = unit.getVar(stype.toString()+'.'+name);
+			Var mvar = unit.getVar(stype.name+'.'+name);
 			if (mvar != null) {
 				if (mvar.isConstant && mvar.type.kind == Type.TYPE_FUNCTION) {
 					return (Function) mvar.defaultValue;
