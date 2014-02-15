@@ -83,7 +83,7 @@ public final class EtherLoader {
 		Library lib;
 		//reading format version
 		int ver = data.readUnsignedShort();
-		if ((ver|0xff) != (VERSION|0xff)  ||  (ver&0xff) > (VERSION&0xff))
+		if ((ver | 0xff) != (VERSION | 0xff)  ||  (ver & 0xff) > (VERSION & 0xff))
 			throw new InstantiationException("Incompatible executable format: "+ver);
 		//reading object type
 		int lflags = data.readUnsignedByte();

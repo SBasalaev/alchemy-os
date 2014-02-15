@@ -35,7 +35,7 @@ public class PartiallyAppliedFunction extends Function {
 	private final Function f;
 	
 	public PartiallyAppliedFunction(Function f, Object[] args) {
-		super(f.name+".apply[" + args.length + ']');
+		super(null, f.name+".apply[" + args.length + ']');
 		this.fixedArgs = args;
 		this.f = f;
 	}

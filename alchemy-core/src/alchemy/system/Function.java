@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -80,15 +80,17 @@ public abstract class Function {
 	/** Function signature. */
 	public final String name;
 	/** Owner of this function. */
-	Library library;
+	public final Library library;
 
 	/**
-	 * Constructor for subclasses
-	 * @param name    function name
+	 * Constructor for subclasses.
+	 * @param library  owner library, may be null if this function is generated in runtime
+	 * @param name     function name
 	 */
-	protected Function(String name) {
+	protected Function(Library library, String name) {
 		if (name == null) throw new NullPointerException();
 		this.name = name;
+		this.library = library;
 	}
 
 	/**
@@ -109,6 +111,6 @@ public abstract class Function {
 	 * </pre>
 	 */
 	public final String toString() {
-		return ((library != null) ? library.name : "<dynamic>") + ':' + name;
+		return ((library != null && library.name != null) ? library.name : "<dynamic>") + ':' + name;
 	}
 }

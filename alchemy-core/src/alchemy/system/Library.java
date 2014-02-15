@@ -58,8 +58,7 @@ public class Library {
 
 	/** Puts public function in this library. */
 	public void putFunction(Function f) {
-		if (f.library != null) throw new IllegalArgumentException();
-		f.library = this;
+		if (f.library != this) throw new IllegalArgumentException();
 		functions.set(f.name, f);
 	}
 

@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,9 +55,9 @@ import java.io.IOException;
  * @author Sergey Basalaev
  */
 public abstract class NativeLibrary extends Library {
-	
+
 	protected NativeLibrary() { }
-	
+
 	/** Loads native function names from named resource. */
 	public final void load(String symbols) throws IOException {
 		UTFReader r = new UTFReader(getClass().getResourceAsStream(symbols));

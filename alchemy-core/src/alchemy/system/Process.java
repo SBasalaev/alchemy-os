@@ -309,7 +309,7 @@ public final class Process {
 					System.arraycopy(intargs, 1, intargs, 0, intargs.length-1);
 					intargs[intargs.length-1] = libfile;
 					lib = new Library();
-					lib.putFunction(new InterpreterMain(intcmd, intargs));
+					lib.putFunction(new InterpreterMain(lib, intcmd, intargs));
 					break;
 				}
 				case MAGIC_ETHER:
@@ -556,8 +556,8 @@ public final class Process {
 		private final String intcmd;
 		private final String[] intargs;
 
-		public InterpreterMain(String command, String[] args) {
-			super("main");
+		public InterpreterMain(Library owner, String command, String[] args) {
+			super(owner, "main");
 			this.intcmd = command;
 			this.intargs = args;
 		}

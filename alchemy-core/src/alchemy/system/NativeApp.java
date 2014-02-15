@@ -40,7 +40,7 @@ public abstract class NativeApp extends Library {
 	private class MainFunction extends Function {
 
 		public MainFunction() {
-			super("main");
+			super(NativeApp.this, "main");
 		}
 
 		public Object invoke(Process c, Object[] args) throws AlchemyException {

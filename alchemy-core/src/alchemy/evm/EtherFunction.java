@@ -35,7 +35,6 @@ import alchemy.util.Arrays;
  */
 final class EtherFunction extends Function {
 
-	private final Library owner;
 	private final int stacksize;
 	private final int localsize;
 	private final byte[] bcode;
@@ -44,8 +43,7 @@ final class EtherFunction extends Function {
 	private final Object[] cpool;
 
 	EtherFunction(Library owner, String funcname, Object[] cpool, int stacksize, int localsize, byte[] code, char[] dbgtable, char[] errtable) {
-		super(funcname);
-		this.owner = owner;
+		super(owner, funcname);
 		this.stacksize = stacksize;
 		this.localsize = localsize;
 		this.bcode = code;
@@ -454,16 +452,16 @@ final class EtherFunction extends Function {
 			
 			//GLOBALS LOADERS AND SAVERS
 				case Opcodes.GETGLOBAL: {
-					stack[head] = p.getGlobal(owner, (String)stack[head], null);
+					stack[head] = p.getGlobal(library, (String)stack[head], null);
 					break;
 				}
 				case Opcodes.GETGLOBALDEF: {
 					head--;
-					stack[head] = p.getGlobal(owner, (String)stack[head], stack[head+1]);
+					stack[head] = p.getGlobal(library, (String)stack[head], stack[head+1]);
 					break;
 				}
 				case Opcodes.SETGLOBAL: {
-					p.setGlobal(owner, (String)stack[head-1], stack[head]);
+					p.setGlobal(library, (String)stack[head-1], stack[head]);
 					head -= 2;
 					break;
 				}
