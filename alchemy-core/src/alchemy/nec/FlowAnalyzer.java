@@ -123,15 +123,6 @@ public final class FlowAnalyzer implements StatementVisitor {
 			return RETURN;
 		} else if (incrResult == THROW && bodyResult == THROW) {
 			return THROW;
-		} else if (stat.condition.kind == Expr.EXPR_CONST
-		           && ((ConstExpr)stat.condition).value == Boolean.TRUE
-		           && incrResult != BREAK && bodyResult != BREAK) {
-			// unconditional loop
-			if (incrResult == THROW || bodyResult == THROW) {
-				return THROW;
-			} else {
-				return RETURN;
-			}
 		} else {
 			return NEXT;
 		}
@@ -150,15 +141,6 @@ public final class FlowAnalyzer implements StatementVisitor {
 			return RETURN;
 		} else if (preResult == THROW && postResult == THROW) {
 			return THROW;
-		} else if (stat.condition.kind == Expr.EXPR_CONST
-		           && ((ConstExpr)stat.condition).value == Boolean.TRUE
-		           && preResult != BREAK && postResult != BREAK) {
-			// unconditional loop
-			if (preResult == THROW || postResult == THROW) {
-				return THROW;
-			} else {
-				return RETURN;
-			}
 		} else {
 			return NEXT;
 		}

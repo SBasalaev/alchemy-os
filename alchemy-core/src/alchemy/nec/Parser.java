@@ -663,9 +663,11 @@ public class Parser {
 				return block;
 			}
 			case Token.BREAK: {
+				if (t.nextToken() != ';') t.pushBack();
 				return new BreakStatement(t.lineNumber());
 			}
 			case Token.CONTINUE: {
+				if (t.nextToken() != ';') t.pushBack();
 				return new ContinueStatement(t.lineNumber());
 			}
 			case Token.IF: {
@@ -708,7 +710,7 @@ public class Parser {
 			case Token.WHILE: {
 				expect('(');
 				Expr condition;
-				Statement prestat = parseStatement(scope);
+				Statement prestat = parseExprStatement(scope);
 				if (t.nextToken() == ',') {
 					condition = cast(parseExpr(scope), BuiltinType.BOOL);
 				} else {
