@@ -189,6 +189,7 @@ public class Parser {
 						Var initVar = unit.getVar(initName);
 						if (initVar == null) {
 							initFunc = new Function(unit, owner + ".<init>");
+							initFunc.isPublic = true;
 							initFunc.args = new Var[func.args.length+1];
 							initFunc.args[0] = new Var("this", owner);
 							System.arraycopy(func.args, 0, initFunc.args, 1, func.args.length);
