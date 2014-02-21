@@ -281,6 +281,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 		switch (operator) {
 			case '+':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.IADD;
 					case Type.TYPE_LONG: return Opcodes.LADD;
 					case Type.TYPE_FLOAT: return Opcodes.FADD;
@@ -289,6 +292,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case '-':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.ISUB;
 					case Type.TYPE_LONG: return Opcodes.LSUB;
 					case Type.TYPE_FLOAT: return Opcodes.FSUB;
@@ -297,6 +303,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case '*':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.IMUL;
 					case Type.TYPE_LONG: return Opcodes.LMUL;
 					case Type.TYPE_FLOAT: return Opcodes.FMUL;
@@ -305,6 +314,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case '/':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.IDIV;
 					case Type.TYPE_LONG: return Opcodes.LDIV;
 					case Type.TYPE_FLOAT: return Opcodes.FDIV;
@@ -313,6 +325,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case '%':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.IMOD;
 					case Type.TYPE_LONG: return Opcodes.LMOD;
 					case Type.TYPE_FLOAT: return Opcodes.FMOD;
@@ -321,6 +336,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case '&':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT:
 					case Type.TYPE_BOOL: return Opcodes.IAND;
 					case Type.TYPE_LONG: return Opcodes.LAND;
@@ -328,6 +346,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case '|':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT:
 					case Type.TYPE_BOOL: return Opcodes.IOR;
 					case Type.TYPE_LONG: return Opcodes.LOR;
@@ -335,6 +356,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case '^':
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT:
 					case Type.TYPE_BOOL: return Opcodes.IXOR;
 					case Type.TYPE_LONG: return Opcodes.LXOR;
@@ -342,24 +366,33 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 				break;
 			case Token.LTLT:
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.ISHL;
 					case Type.TYPE_LONG: return Opcodes.LSHL;
 				}
 				break;
 			case Token.GTGT:
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.ISHR;
 					case Type.TYPE_LONG: return Opcodes.LSHR;
 				}
 				break;
 			case Token.GTGTGT:
 				switch (kind) {
+					case Type.TYPE_BYTE:
+					case Type.TYPE_CHAR:
+					case Type.TYPE_SHORT:
 					case Type.TYPE_INT: return Opcodes.IUSHR;
 					case Type.TYPE_LONG: return Opcodes.LUSHR;
 				}
 				break;
 		}
-		return Opcodes.NOP;
+		throw new IllegalArgumentException();
 	}
 
 	private void writeSwitchInsn(int[][] keySets, Label[] branches, Label defaultBranch) {
