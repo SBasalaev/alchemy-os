@@ -422,9 +422,10 @@ public final class Process {
 	 */
 	public Object getGlobal(Library lib, String name, Object dflt) {
 		if (globals == null) return dflt;
-		Object ret = ((HashMap)globals.get(lib)).get(name);
-		if (ret == null) return dflt;
-		return ret;
+		HashMap libKeys = (HashMap)globals.get(lib);
+		if (libKeys == null) return dflt;
+		Object ret = libKeys.get(name);
+		return (ret != null) ? ret : dflt;
 	}
 
 	/**
