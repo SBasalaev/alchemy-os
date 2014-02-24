@@ -414,8 +414,9 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 			count += set.length;
 		}
 		// we choose switch instruction which is shorter
-		int tableSize = 4 + 4 + 2*(max-min+1);
 		int lookupSize = 2 + count*6;
+		int tableSize = 4 + 4 + 2*(max-min+1);
+		if (tableSize < 10) tableSize = Integer.MAX_VALUE; // overflow
 		if (tableSize <= lookupSize) {
 			// TABLESWITCH
 			Label[] jumps = new Label[max-min+1];
