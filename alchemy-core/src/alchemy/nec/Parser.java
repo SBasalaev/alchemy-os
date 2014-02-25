@@ -757,8 +757,38 @@ public class Parser {
 				// while can define variables in prestat, enclose it in block
 				BlockStatement whileBlock = new BlockStatement(scope);
 				expect('(');
+				Statement prestat;
+				if (t.nextToken() == Token.VAR) {
+					if (t.nextToken() != Token.WORD)
+						throw new ParseException("Variable name expected, got " + t);
+					String varname = t.svalue;
+					Type vartype = null;
+					Expr varvalue = null;
+					if (t.nextToken() == ':') {
+						vartype = parseType(scope);
+					} else {
+						t.pushBack();
+					}
+					expect('=');
+					varvalue = parseExpr(scope);
+					if (vartype == null) {
+						vartype = varvalue.returnType();
+					} else {
+						varvalue = cast(varvalue, vartype);
+					}
+					if (vartype == BuiltinType.NULL)
+						vartype = BuiltinType.ANY;
+					else if (vartype == BuiltinType.NONE)
+						throw new ParseException("Cannot create variable of type <none>");
+					Var var = new Var(varname, vartype);
+					if (whileBlock.addVar(var))
+						warn(CompilerEnv.W_HIDDEN, "Variable " + varname + " hides another variable with the same name");
+					prestat = new AssignStatement(var, varvalue);
+				} else {
+					t.pushBack();
+					prestat = parseExprStatement(whileBlock);
+				}
 				Expr condition;
-				Statement prestat = parseStatement(whileBlock);
 				if (t.nextToken() == ',') {
 					condition = cast(parseExpr(whileBlock), BuiltinType.BOOL);
 				} else {
