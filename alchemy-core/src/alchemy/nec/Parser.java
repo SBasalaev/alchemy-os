@@ -657,8 +657,53 @@ public class Parser {
 			case '{': {
 				BlockStatement block = new BlockStatement(scope);
 				while (t.nextToken() != '}') {
-					t.pushBack();
-					block.statements.add(parseStatement(block));
+					if (t.ttype == Token.VAR || t.ttype == Token.CONST) {
+						boolean isConst = t.ttype == Token.CONST;
+						if (t.nextToken() != Token.WORD)
+							throw new ParseException("Variable name expected, got " + t);
+						String varname = t.svalue;
+						if (block.vars.get(varname) != null)
+							warn(CompilerEnv.W_ERROR, "Variable " + varname + " is already defined");
+						Type vartype = null;
+						Expr varvalue = null;
+						if (t.nextToken() == ':') {
+							vartype = parseType(scope);
+						} else {
+							t.pushBack();
+						}
+						if (t.nextToken() == '=') {
+							varvalue = parseExpr(scope);
+							if (vartype == null) {
+								vartype = varvalue.returnType();
+							} else {
+								varvalue = cast(varvalue, vartype);
+							}
+						} else {
+							t.pushBack();
+							if (vartype == null)
+								vartype = BuiltinType.ANY;
+							if (varvalue == null) {
+								Object dflt = defaultValue(vartype);
+								if (dflt == null) dflt = Null.NULL;
+								varvalue = new ConstExpr(t.lineNumber(), vartype, dflt);
+							}
+						}
+						if (vartype == BuiltinType.NULL)
+							vartype = BuiltinType.ANY;
+						else if (vartype == BuiltinType.NONE)
+							throw new ParseException("Cannot create variable of type <none>");
+						Var var = new Var(varname, vartype);
+						var.isConstant = isConst;
+						if (varvalue.kind == Expr.EXPR_CONST) {
+							var.defaultValue = ((ConstExpr)varvalue).value;
+						}
+						if (block.addVar(var))
+							warn(CompilerEnv.W_HIDDEN, "Variable " + varname + " hides another variable with the same name");
+						block.statements.add(new AssignStatement(var, varvalue));
+					} else {
+						t.pushBack();
+						block.statements.add(parseStatement(block));
+					}
 				}
 				if (block.statements.isEmpty()) return new EmptyStatement();
 				return block;
@@ -676,9 +721,9 @@ public class Parser {
 				Expr condition = cast(parseExpr(scope), BuiltinType.BOOL);
 				expect(')');
 				Statement ifstat = parseStatement(scope);
-				Statement elsestat;
 				if (ifstat.kind == Statement.STAT_EMPTY)
 					warn(CompilerEnv.W_EMPTY, "Empty statement after 'if'");
+				Statement elsestat;
 				if (t.nextToken() == Token.ELSE) {
 					elsestat = parseStatement(scope);
 					if (elsestat.kind == Statement.STAT_EMPTY)
@@ -758,52 +803,7 @@ public class Parser {
 			}
 			case Token.VAR:
 			case Token.CONST: {
-				if (!(scope instanceof BlockStatement)) {
-					scope = new BlockStatement(scope);
-				}
-				BlockStatement block = (BlockStatement) scope;
-				boolean isConst = t.ttype == Token.CONST;
-				if (t.nextToken() != Token.WORD)
-					throw new ParseException("Variable name expected, got " + t);
-				String varname = t.svalue;
-				if (block.vars.get(varname) != null)
-					warn(CompilerEnv.W_ERROR, "Variable " + varname + " is already defined");
-				Type vartype = null;
-				Expr varvalue = null;
-				if (t.nextToken() == ':') {
-					vartype = parseType(scope);
-				} else {
-					t.pushBack();
-				}
-				if (t.nextToken() == '=') {
-					varvalue = parseExpr(scope);
-					if (vartype == null) {
-						vartype = varvalue.returnType();
-					} else {
-						varvalue = cast(varvalue, vartype);
-					}
-				} else {
-					t.pushBack();
-					if (vartype == null)
-						vartype = BuiltinType.ANY;
-					if (varvalue == null) {
-						Object dflt = defaultValue(vartype);
-						if (dflt == null) dflt = Null.NULL;
-						varvalue = new ConstExpr(t.lineNumber(), vartype, dflt);
-					}
-				}
-				if (vartype == BuiltinType.NULL)
-					vartype = BuiltinType.ANY;
-				else if (vartype == BuiltinType.NONE)
-					throw new ParseException("Cannot create variable of type <none>");
-				Var var = new Var(varname, vartype);
-				var.isConstant = isConst;
-				if (varvalue.kind == Expr.EXPR_CONST) {
-					var.defaultValue = ((ConstExpr)varvalue).value;
-				}
-				if (block.addVar(var))
-					warn(CompilerEnv.W_HIDDEN, "Variable " + varname + " hides another variable with the same name");
-				return new AssignStatement(var, varvalue);
+				throw new ParseException(t.toString() + " not allowed here");
 			}
 			case Token.FOR:
 				return parseForLoop(scope);
