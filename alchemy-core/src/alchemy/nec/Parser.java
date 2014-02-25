@@ -709,11 +709,13 @@ public class Parser {
 				return new LoopStatement(body, condition, new EmptyStatement());
 			}
 			case Token.WHILE: {
+				// while can define variables in prestat, enclose it in block
+				BlockStatement whileBlock = new BlockStatement(scope);
 				expect('(');
 				Expr condition;
-				Statement prestat = parseExprStatement(scope);
+				Statement prestat = parseStatement(whileBlock);
 				if (t.nextToken() == ',') {
-					condition = cast(parseExpr(scope), BuiltinType.BOOL);
+					condition = cast(parseExpr(whileBlock), BuiltinType.BOOL);
 				} else {
 					t.pushBack();
 					if (prestat.kind != Statement.STAT_EXPR)
@@ -722,7 +724,8 @@ public class Parser {
 					prestat = new EmptyStatement();
 				}
 				expect(')');
-				return new LoopStatement(prestat, condition, parseStatement(scope));
+				whileBlock.statements.add(new LoopStatement(prestat, condition, parseStatement(whileBlock)));
+				return whileBlock;
 			}
 			case Token.TRY: {
 				Statement tryStat = parseStatement(scope);

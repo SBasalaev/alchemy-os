@@ -979,9 +979,13 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 			}
 		}
 		switch (statements.size()) {
-			case 0:  return new EmptyStatement();
-			case 1:  return statements.get(0);
-			default: return block;
+			case 0:
+				return new EmptyStatement();
+			case 1:
+				if (block.vars.size() == 0)
+					return statements.get(0);
+			default: // yes, fallthrough
+				return block;
 		}
 	}
 
