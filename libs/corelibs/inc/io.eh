@@ -25,7 +25,7 @@ type OStream < Connection;
 def OStream.write(b: Int);
 def OStream.writeArray(buf: [Byte], ofs: Int = 0, len: Int = -1);
 def OStream.print(a: Any);
-def OStream.println(a: Any);
+def OStream.println(a: Any = "");
 def OStream.flush();
 def OStream.printf(fmt: String, args: [Any]);
 def OStream.writeAll(input: IStream);
@@ -33,7 +33,7 @@ def OStream.writeAll(input: IStream);
 def write(b: Int);
 def writeArray(buf: [Byte], ofs: Int = 0, len: Int = -1);
 def print(a: Any);
-def println(a: Any);
+def println(a: Any = "");
 def flush();
 def printf(fmt: String, args: [Any]);
 
