@@ -667,12 +667,12 @@ public class Parser {
 						Type vartype = null;
 						Expr varvalue = null;
 						if (t.nextToken() == ':') {
-							vartype = parseType(scope);
+							vartype = parseType(block);
 						} else {
 							t.pushBack();
 						}
 						if (t.nextToken() == '=') {
-							varvalue = parseExpr(scope);
+							varvalue = parseExpr(block);
 							if (vartype == null) {
 								vartype = varvalue.returnType();
 							} else {
@@ -765,12 +765,12 @@ public class Parser {
 					Type vartype = null;
 					Expr varvalue = null;
 					if (t.nextToken() == ':') {
-						vartype = parseType(scope);
+						vartype = parseType(whileBlock);
 					} else {
 						t.pushBack();
 					}
 					expect('=');
-					varvalue = parseExpr(scope);
+					varvalue = parseExpr(whileBlock);
 					if (vartype == null) {
 						vartype = varvalue.returnType();
 					} else {
