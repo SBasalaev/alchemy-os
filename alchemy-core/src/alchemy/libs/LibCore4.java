@@ -769,7 +769,7 @@ public final class LibCore4 extends NativeLibrary {
 			case 204: // setenv(key: String, val: String)
 				p.setEnv((String)args[0], (String)args[1]);
 				return null;
-			case 205: // sleep(millis: Int)
+			case 205: // sleep(millis: Long)
 				Thread.sleep(lval(args[0]));
 				return null;
 			case 206: // sysProperty(str: String): String

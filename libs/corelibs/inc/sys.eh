@@ -5,7 +5,7 @@ def systime(): Long;
 def getenv(key: String): String;
 def setenv(key: String, val: String);
 
-def sleep(millis: Int);
+def sleep(millis: Long);
 
 def execWait(prog: String, args: [String]): Int;
 def exec(prog: String, args: [String]);
