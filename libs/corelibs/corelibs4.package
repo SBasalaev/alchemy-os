@@ -1,7 +1,7 @@
 Source: corelibs4
 Section: libs
-Version: 2.2
-Copyright: (c) 2011-2013 Sergey Basalaev
+Version: 2.2~noui1~nomedia1
+Copyright: (c) 2011-2014 Sergey Basalaev
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3+exception
 Build-Depends: make
@@ -9,30 +9,31 @@ Build-Depends: make
 Package: corelibs4-dev
 Section: libdevel
 Summary: headers for standard libraries
-Depends: ${libdeps}, corelibs4
+Depends: corelibs4 == ${version}
 Files:
  /lib/libcore.so
  /lib/libcoree.so
- /lib/libui.so
+# /lib/libui.so
  /lib/libnet.so
- /lib/libmedia.so
+# /lib/libmedia.so
  /lib/libcomm.so
- /inc
+ /inc/net
+ /inc/*.eh
 
 Package: corelibs4-compat-dev
 Section: libdevel
 Summary: compatibility headers to port programs from previous releases
-Depends: ${libdeps}, corelibs4-dev
+Depends: corelibs4-dev
 Files:
- compat /inc
+ /inc/compat
 
 Package: corelibs4
 Summary: system libraries which are used by all programs
 Depends: ${libdeps}
 Files:
- /lib/libcore.4.*
- /lib/libcoree.4.*
- /lib/libui.2.*
- /lib/libnet.2.*
- /lib/libmedia.2.*
- /lib/libcomm.2.*
+ /lib/libcore.4.so
+ /lib/libcoree.4.so
+# /lib/libui.2.so
+ /lib/libnet.2.so
+# /lib/libmedia.2.so
+ /lib/libcomm.2.so
