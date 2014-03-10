@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1594,6 +1594,8 @@ public class Parser {
 		Type ltype = left.rettype();
 		Type rtype = right.rettype();
 		Type btype = binaryCastType(ltype, rtype);
+		if (btype == BuiltinType.NONE)
+			throw new ParseException("Operator "+opstring(op)+" cannot be applied to "+ltype+","+rtype);
 		// if built-in operators apply, return them
 		switch (op) {
 			case Token.GTGT:
