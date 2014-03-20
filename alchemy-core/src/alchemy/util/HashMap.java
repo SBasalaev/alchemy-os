@@ -52,9 +52,11 @@ public final class HashMap {
 
 	/** Sets new value to given key. */
 	public void set(Object key, Object value) {
-		if (value == null)
-			throw new NullPointerException();
-		
+		if (value == null) {
+			this.remove(key);
+			return;
+		}
+
 		// search existing entry
 		HashMapEntry[] table = entries;
 		int hash = key.hashCode();
