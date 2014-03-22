@@ -30,11 +30,12 @@ import javax.microedition.media.Player;
 
 /**
  * Basic media library for Alchemy OS.
- * 
+ * This is j2me implementation.
+ *
  * @author Sergey Basalaev
  * @version 2.0
  */
-public class LibMedia2 extends NativeLibrary {
+public final class LibMedia2 extends NativeLibrary {
 
 	public LibMedia2() throws IOException {
 		load("/symbols/media2");

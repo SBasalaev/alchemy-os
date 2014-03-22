@@ -24,36 +24,7 @@ import alchemy.system.Process;
 import alchemy.system.ProcessListener;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.microedition.m3g.AnimationController;
-import javax.microedition.m3g.AnimationTrack;
-import javax.microedition.m3g.Appearance;
-import javax.microedition.m3g.Background;
-import javax.microedition.m3g.Camera;
-import javax.microedition.m3g.CompositingMode;
-import javax.microedition.m3g.Fog;
-import javax.microedition.m3g.Graphics3D;
-import javax.microedition.m3g.Group;
-import javax.microedition.m3g.Image2D;
-import javax.microedition.m3g.IndexBuffer;
-import javax.microedition.m3g.KeyframeSequence;
-import javax.microedition.m3g.Light;
-import javax.microedition.m3g.Loader;
-import javax.microedition.m3g.Material;
-import javax.microedition.m3g.Mesh;
-import javax.microedition.m3g.MorphingMesh;
-import javax.microedition.m3g.Node;
-import javax.microedition.m3g.Object3D;
-import javax.microedition.m3g.PolygonMode;
-import javax.microedition.m3g.RayIntersection;
-import javax.microedition.m3g.SkinnedMesh;
-import javax.microedition.m3g.Sprite3D;
-import javax.microedition.m3g.Texture2D;
-import javax.microedition.m3g.Transform;
-import javax.microedition.m3g.Transformable;
-import javax.microedition.m3g.TriangleStripArray;
-import javax.microedition.m3g.VertexArray;
-import javax.microedition.m3g.VertexBuffer;
-import javax.microedition.m3g.World;
+import javax.microedition.m3g.*;
 
 /**
  * Bindings to M3G (JSR-184).
@@ -61,7 +32,7 @@ import javax.microedition.m3g.World;
  * @author Sergey Basalaev
  * @version 1.0
  */
-public class LibM3G extends NativeLibrary {
+public final class LibM3G extends NativeLibrary {
 	
 	public LibM3G() throws IOException {
 		load("/symbols/m3g-10");

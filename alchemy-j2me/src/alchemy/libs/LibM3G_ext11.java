@@ -35,7 +35,7 @@ import javax.microedition.m3g.VertexArray;
  *
  * @author Sergey Basalaev
  */
-public class LibM3G_ext11 extends NativeLibrary {
+public final class LibM3G_ext11 extends NativeLibrary {
 
 	public LibM3G_ext11() throws IOException {
 		load("/symbols/m3g-11");
