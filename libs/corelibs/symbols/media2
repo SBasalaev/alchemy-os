@@ -1,0 +1,12 @@
+playTone
+getSupportedCtypes
+streamPlayer
+filePlayer
+Player.getCtype
+Player.setLoops
+Player.getDuration
+Player.getTime
+Player.setTime
+Player.start
+Player.stop
+Player.close
