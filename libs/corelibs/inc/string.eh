@@ -32,12 +32,10 @@ def String.utfbytes(): [Byte]
 def String.startsWith(prefix: String, from: Int = 0): Bool
 def String.endsWith(suffix: String): Bool
 def String.replace(oldch: Char, newch: Char): String
-def String.hash(): Int
 
 def ca2str(ca: [Char]): String
 def ba2utf(ba: [Byte]): String
 
-const chstr = `Char.tostr`
 const `String.ch` = `String.get`
 const `String.substr` = `String.range`
 const `String.add` = `String.concat`
