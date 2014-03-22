@@ -1,12 +1,12 @@
 use "io"
 
-type BufferIStream < IStream;
+type BufferIStream < IStream
 
-def BufferIStream.new(buf: [Byte]);
+def BufferIStream.new(buf: [Byte])
 
-type BufferOStream < OStream;
+type BufferOStream < OStream
 
-def BufferOStream.new();
-def BufferOStream.len(): Int;
-def BufferOStream.getBytes(): [Byte];
-def BufferOStream.reset();
+def BufferOStream.new()
+def BufferOStream.len(): Int
+def BufferOStream.getBytes(): [Byte]
+def BufferOStream.reset()

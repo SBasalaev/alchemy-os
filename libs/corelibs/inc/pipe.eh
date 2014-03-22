@@ -1,5 +1,5 @@
 use "io"
 
-type Pipe < StreamConnection;
+type Pipe < StreamConnection
 
-def Pipe.new();
+def Pipe.new()

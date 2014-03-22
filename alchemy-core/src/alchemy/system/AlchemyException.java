@@ -125,34 +125,10 @@ public final class AlchemyException extends Exception {
 		return (String) infos.get(index);
 	}
 
-	public String toString() {
-		String msg = getMessage();
-		StringBuffer sb = new StringBuffer();
-		// print description of error type
-		switch (errcode) {
-			case ERR_SYSTEM: sb.append("System error"); break;
-			case ERR_NULL: sb.append("null value"); break;
-			case ERR_IO: sb.append("I/O error"); break;
-			case ERR_RANGE: sb.append("Out of range"); break;
-			case ERR_NEGARRSIZE: sb.append("Negative array size"); break;
-			case ERR_SECURITY: sb.append("Permission denied"); break;
-			case ERR_ILLARG: sb.append("Illegal argument"); break;
-			case ERR_ILLSTATE: sb.append("Illegal state"); break;
-			case ERR_CLASSCAST: sb.append("Type mismatch"); break;
-			case ERR_DIVBYZERO: sb.append("Divizion by zero"); break;
-			case ERR_INTERRUPT: sb.append("Process interrupted"); break;
-			case ERR_MEDIA: sb.append("Media error"); break;
-			default:
-				if (msg == null || msg.length() == 0) {
-					sb.append("Unknown or user defined error");
-				}
-		}
-		// print detail message
-		if (msg != null && msg.length() != 0) {
-			if (sb.length() != 0) sb.append(": ");
-			sb.append(msg);
-		}
+	/** Returns stack trace as string. */
+	public String trace() {
 		// print stack trace
+		StringBuffer sb = new StringBuffer();
 		int size = names.size();
 		for (int i=0; i < size; i++) {
 			sb.append('\n')
@@ -163,5 +139,32 @@ public final class AlchemyException extends Exception {
 			.append(')');
 		}
 		return sb.toString();
+	}
+
+	public static String errstring(int code) {
+		switch (code) {
+			case ERR_SYSTEM: return "System error";
+			case ERR_NULL: return "null value";
+			case ERR_IO: return "Input/output failure";
+			case ERR_RANGE: return "Out of range";
+			case ERR_NEGARRSIZE: return "Negative array size";
+			case ERR_SECURITY: return "Permission denied";
+			case ERR_ILLARG: return "Illegal argument";
+			case ERR_ILLSTATE: return "Illegal state";
+			case ERR_CLASSCAST: return "Type mismatch";
+			case ERR_DIVBYZERO: return "Divizion by zero";
+			case ERR_INTERRUPT: return "Process interrupted";
+			case ERR_MEDIA: return "Media error";
+			default: return "Error";
+		}
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer(errstring(errcode));
+		String msg = getMessage();
+		if (msg != null || msg.length() != 0) {
+			sb.append(": ").append(msg);
+		}
+		return sb.append(trace()).toString();
 	}
 }

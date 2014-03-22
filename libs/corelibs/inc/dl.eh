@@ -2,8 +2,8 @@
 
 use "io"
 
-type Library < Any;
+type Library < Any
 
-def loadlibrary(libname: String): Library;
-def buildlibrary(in: IStream): Library;
-def Library.getFunction(sig: String): Function;
+def loadlibrary(libname: String): Library
+def buildlibrary(in: IStream): Library
+def Library.getFunction(sig: String): Function

@@ -1,17 +1,17 @@
-type Thread < Any;
+type Thread < Any
 
-def currentThread(): Thread;
+def currentThread(): Thread
 
-def Thread.new(run: ());
-def Thread.start();
-def Thread.isAlive(): Bool;
-def Thread.interrupt();
-def Thread.isInterrupted(): Bool;
-def Thread.join();
+def Thread.new(run: ())
+def Thread.start()
+def Thread.isAlive(): Bool
+def Thread.interrupt()
+def Thread.isInterrupted(): Bool
+def Thread.join()
 
-def Lock < Any;
+def Lock < Any
 
-def Lock.new();
-def Lock.lock();
-def Lock.tryLock(): Bool;
-def Lock.unlock();
+def Lock.new()
+def Lock.lock()
+def Lock.tryLock(): Bool
+def Lock.unlock()

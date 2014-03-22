@@ -1,6 +1,7 @@
 acopy
 Function.apply
 throw
+Any.hash
 Any.tostr
 Char.tostr
 Int.tobin
@@ -29,7 +30,6 @@ String.chars
 String.utfbytes
 String.startsWith
 String.replace
-String.hash
 ca2str
 ba2utf
 Error.code
@@ -37,6 +37,8 @@ Error.msg
 Error.traceLen
 Error.traceName
 Error.traceDbg
+Error.trace
+errstring
 abs
 sin
 cos

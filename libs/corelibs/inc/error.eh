@@ -13,10 +13,13 @@ const ERR_DIV_BY_ZERO = 109
 const ERR_INTERRUPT = 110
 const ERR_MEDIA = 111
 
-def Error.code(): Int;
-def Error.msg(): String;
-def Error.traceLen(): Int;
-def Error.traceName(index: Int): String;
-def Error.traceDbg(index: Int): String;
+def errstring(code: Int): String
 
-def `throw`(code: Int = FAIL, msg: String = null);
+def Error.code(): Int
+def Error.msg(): String
+def Error.traceLen(): Int
+def Error.traceName(index: Int): String
+def Error.traceDbg(index: Int): String
+def Error.trace(): String
+
+def `throw`(code: Int = FAIL, msg: String = null)
