@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,19 +23,21 @@ package alchemy.types;
  * @author Sergey Basalaev
  */
 public final class Float64 {
-	
+
 	public final double value;
-	
+
 	public Float64(double val) {
-		this.value = val;
+		if (Double.isNaN(val)) this.value = Double.NaN;
+		else if (val == 0.0) this.value = 0.0;
+		else this.value = val;
 	}
-	
+
 	public boolean equals(Object other) {
 		if (other == null) return false;
 		if (!(other instanceof Float64)) return false;
 		return ((Float64)other).value == this.value;
 	}
-	
+
 	public int hashCode() {
 		long d = Double.doubleToLongBits(value);
 		return (int)(d ^ (d >>> 32));
