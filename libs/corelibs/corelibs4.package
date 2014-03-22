@@ -1,6 +1,6 @@
 Source: corelibs4
 Section: libs
-Version: 2.2~noui1~nomedia1
+Version: 2.2~noui1
 Copyright: (c) 2011-2014 Sergey Basalaev
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3+exception
@@ -10,12 +10,13 @@ Package: corelibs4-dev
 Section: libdevel
 Summary: headers for standard libraries
 Depends: corelibs4 == ${version}
+Conflicts: libcomm-dev, libcore-dev, libnet-dev, libmedia-dev, libui-dev
 Files:
  /lib/libcore.so
  /lib/libcoree.so
 # /lib/libui.so
  /lib/libnet.so
-# /lib/libmedia.so
+ /lib/libmedia.so
  /lib/libcomm.so
  /inc/net
  /inc/*.eh
@@ -35,5 +36,5 @@ Files:
  /lib/libcoree.4.so
 # /lib/libui.2.so
  /lib/libnet.2.so
-# /lib/libmedia.2.so
+ /lib/libmedia.2.so
  /lib/libcomm.2.so
