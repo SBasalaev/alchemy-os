@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -145,14 +145,14 @@ public final class AlchemyException extends Exception {
 		switch (code) {
 			case ERR_SYSTEM: return "System error";
 			case ERR_NULL: return "null value";
-			case ERR_IO: return "Input/output failure";
+			case ERR_IO: return "Input/output error";
 			case ERR_RANGE: return "Out of range";
 			case ERR_NEGARRSIZE: return "Negative array size";
 			case ERR_SECURITY: return "Permission denied";
 			case ERR_ILLARG: return "Illegal argument";
 			case ERR_ILLSTATE: return "Illegal state";
 			case ERR_CLASSCAST: return "Type mismatch";
-			case ERR_DIVBYZERO: return "Divizion by zero";
+			case ERR_DIVBYZERO: return "Division by zero";
 			case ERR_INTERRUPT: return "Process interrupted";
 			case ERR_MEDIA: return "Media error";
 			default: return "Error";

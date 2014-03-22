@@ -1182,7 +1182,7 @@ public class Parser {
 			}
 			Statement[] statArray = new Statement[hashes.size()];
 			checkStatements.copyInto(statArray);
-			Expr getHash = new CallExpr(-1, unit.getFunction("String.hash"), new Expr[] { strExpr });
+			Expr getHash = new CallExpr(-1, unit.getFunction("Any.hash"), new Expr[] { strExpr });
 			switchBlock.statements.add(new SwitchStatement(getHash, keySetArray, statArray, new EmptyStatement()));
 			// create second switch
 			keySetArray = new int[statements.size()][];
@@ -1328,7 +1328,7 @@ public class Parser {
 			}
 			Expr[] exprArray = new Expr[hashes.size()];
 			checkExprs.copyInto(exprArray);
-			Expr getHash = new CallExpr(-1, unit.getFunction("String.hash"), new Expr[] { strExpr });
+			Expr getHash = new CallExpr(-1, unit.getFunction("Any.hash"), new Expr[] { strExpr });
 			Expr innerSwitch = new SwitchExpr(getHash, keySetArray, exprArray, new ConstExpr(-1, BuiltinType.INT, Int32.M_ONE));
 			// create second switch
 			keySetArray = new int[exprs.size()][];
