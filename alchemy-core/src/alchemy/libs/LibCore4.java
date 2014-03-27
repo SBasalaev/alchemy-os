@@ -66,6 +66,9 @@ public final class LibCore4 extends NativeLibrary {
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
 			/* == Header: builtin.eh == */
+			case 0: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
+				Arrays.arrayCopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
+				return null;
 			case 1: // Function.apply(args: [Any]): Function
 				return new PartiallyAppliedFunction((Function)args[0], (Object[])args[1]);
 			case 2: // throw(code: Int = FAIL, msg: String = null)
@@ -381,15 +384,15 @@ public final class LibCore4 extends NativeLibrary {
 
 			/* == Header: bufferio.eh == */
 			case 116: // BufferIStream.new(buf: [Byte])
-				return new ConnectionInputStream(new ByteArrayInputStream((byte[])args[0]));
+				return new BufferIStream((byte[])args[0]);
 			case 117: // BufferOStream.new()
-				return new ConnectionOutputStream(new ByteArrayOutputStream());
+				return new BufferOStream();
 			case 118: // BufferOStream.len(): Int
-				return Ival(((ByteArrayOutputStream)args[0]).size());
+				return Ival(((BufferOStream)args[0]).size());
 			case 119: // BufferOStream.getBytes(): [Byte]
-				return ((ByteArrayOutputStream)args[0]).toByteArray();
+				return ((BufferOStream)args[0]).toByteArray();
 			case 120: // BufferOStream.reset()
-				((ByteArrayOutputStream)args[0]).reset();
+				((BufferOStream)args[0]).reset();
 				return null;
 
 			/* == Header: pipe.eh == */
@@ -791,9 +794,6 @@ public final class LibCore4 extends NativeLibrary {
 				return null;
 
 			/* == Header: array.eh == */
-			case 0: // acopy(src: Array, sofs: Int, dest: Array, dofs: Int, len: Int)
-				Arrays.arrayCopy(args[0], ival(args[1]), args[2], ival(args[3]), ival(args[4]));
-				return null;
 			case 214: { // [Byte].sort(from: Int = 0, to: Int = -1)
 				byte[] array = (byte[]) args[0];
 				int from = ival(args[1]);
@@ -861,5 +861,12 @@ public final class LibCore4 extends NativeLibrary {
 			default:
 				return null;
 		}
+	}
+
+	private static final class BufferOStream extends ByteArrayOutputStream implements Connection {
+	}
+
+	private static final class BufferIStream extends ByteArrayInputStream implements Connection {
+		public BufferIStream(byte[] buf) { super(buf); }
 	}
 }
