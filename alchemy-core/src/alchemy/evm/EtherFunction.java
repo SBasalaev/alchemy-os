@@ -32,6 +32,8 @@ import alchemy.util.Strings;
 
 /**
  * Ether Virtual Machine.
+ * TODO: switch to the register based machine already.
+ *
  * @author Sergey Basalaev
  */
 final class EtherFunction extends Function {
@@ -611,6 +613,32 @@ final class EtherFunction extends Function {
 					if ((instr & 8) != 0) head--;
 					break;
 				}
+				case Opcodes.CALLC_0:
+				case Opcodes.CALLC_1:
+				case Opcodes.CALLC_2:
+				case Opcodes.CALLC_3:
+				case Opcodes.CALLC_4:
+				case Opcodes.CALLC_5:
+				case Opcodes.CALLC_6:
+				case Opcodes.CALLC_7:
+				case Opcodes.CALVC_0:
+				case Opcodes.CALVC_1:
+				case Opcodes.CALVC_2:
+				case Opcodes.CALVC_3:
+				case Opcodes.CALVC_4:
+				case Opcodes.CALVC_5:
+				case Opcodes.CALVC_6:
+				case Opcodes.CALVC_7: { // cal?c_? <ushort>
+					int paramlen = instr & 7;
+					Object[] params = new Object[paramlen];
+					head -= paramlen-1;
+					System.arraycopy(stack, head, params, 0, paramlen);
+					Function f = (Function) cpool[((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff)];
+					ct += 2;
+					stack[head] = f.invoke(p, params);
+					if ((instr & 8) != 0) head--;
+					break;
+				}
 				case Opcodes.CALL: {//call <ubyte>
 					int paramlen = code[ct] & 0xff;
 					ct++;
@@ -627,6 +655,29 @@ final class EtherFunction extends Function {
 					head -= paramlen;
 					System.arraycopy(stack, head+1, params, 0, paramlen);
 					((Function)stack[head]).invoke(p, params);
+					head--;
+					break;
+				}
+				case Opcodes.CALLC: {// callc <ubyte> <ushort>
+					int paramlen = code[ct] & 0xff;
+					ct++;
+					Object[] params = new Object[paramlen];
+					head -= paramlen-1;
+					System.arraycopy(stack, head, params, 0, paramlen);
+					Function f = (Function) cpool[((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff)];
+					ct += 2;
+					stack[head] = f.invoke(p, params);
+					break;
+				}
+				case Opcodes.CALVC: {// calvc <ubyte> <ushort>
+					int paramlen = code[ct] & 0xff;
+					ct++;
+					Object[] params = new Object[paramlen];
+					head -= paramlen-1;
+					System.arraycopy(stack, head, params, 0, paramlen);
+					Function f = (Function) cpool[((code[ct] & 0xff) << 8) | (code[ct+1] & 0xff)];
+					ct += 2;
+					stack[head] = f.invoke(p, params);
 					head--;
 					break;
 				}
@@ -886,7 +937,7 @@ final class EtherFunction extends Function {
 					break;
 				}
 			//OTHERS
-				case Opcodes.CONCAT: {
+				case Opcodes.CONCAT: { // concat <ubyte>
 					int n = code[ct] & 0xff;
 					ct++;
 					head -= n-1;
