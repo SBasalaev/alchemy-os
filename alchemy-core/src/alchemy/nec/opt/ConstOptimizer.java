@@ -374,11 +374,11 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 
 	/**
 	 * <pre>
-	 * CF:
-	 *   const.tostr()  =&gt;  "const"
-	 *
 	 * ST:
 	 *   func.apply(a1, ..., ak)(a[k+1], ..., aN)  =&gt;  func(a1, ..., aN)
+	 *
+	 * CF:
+	 *   const.tostr()  =&gt;  "const"
 	 * </pre>
 	 */
 	public Object visitCall(CallExpr fcall, Object scope) {
@@ -394,18 +394,28 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 			fcall.fload = appliedLoad.funcExpr;
 			fcall.args = newargs;
 		}
-		if (fcall.fload.kind == Expr.EXPR_CONST) {
+		if (fcall.fload.kind == Expr.EXPR_CONST && fcall.args.length == 1
+				&& fcall.args[0].kind == Expr.EXPR_CONST) {
 			Function f = (Function)((ConstExpr)fcall.fload).value;
-			if (f.signature.equals("Any.tostr") && fcall.args[0].kind == Expr.EXPR_CONST) {
-				f.hits--;
+			String sig = f.signature;
+			if (sig.equals("Any.tostr") || sig.equals("Bool.tostr") || sig.equals("Char.tostr")) {
 				Object cnst = ((ConstExpr)fcall.args[0]).value;
 				if (!(cnst instanceof Function)) {
+					f.hits--;
 					int line = fcall.lineNumber();
-					if (fcall.args[0].returnType() == BuiltinType.CHAR) {
-						return new ConstExpr(line, BuiltinType.STRING, String.valueOf((char) ((Int32)cnst).value));
-					} else {
-						return new ConstExpr(line, BuiltinType.STRING, String.valueOf(cnst));
+					String str;
+					switch (fcall.args[0].returnType().kind) {
+						case Type.TYPE_BOOL:
+							str = (Int32.ZERO.equals(cnst)) ? "false" : "true";
+							break;
+						case Type.TYPE_CHAR:
+							str = String.valueOf((char) ((Int32)cnst).value);
+							break;
+						default:
+							str = String.valueOf(cnst);
+							break;
 					}
+					return new ConstExpr(line, BuiltinType.STRING, str);
 				}
 			}
 		}
@@ -653,16 +663,14 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 		for (int i=0; i<oldexprs.size(); i++) {
 			Expr e = (Expr) ((Expr)oldexprs.get(i)).accept(this, scope);
 			if (e.kind == Expr.EXPR_CONST && e.returnType().kind != Type.TYPE_FUNCTION) {
-				boolean isChar = e.returnType().kind == Type.TYPE_CHAR;
-				Object cnst = ((ConstExpr)e).value;
-				String append = (isChar) ? String.valueOf((char) ((Int32)cnst).value) : cnst.toString();
+				String append = ((ConstExpr)e).value.toString();
 				if (append.equals("")) {
 					// ignore empty string
 				} else if (lastLiteral == null) {
 					lastLiteral = append;
 					lastLiteralLine = e.lineNumber();
 				} else {
-					lastLiteral += cnst.toString();
+					lastLiteral += append.toString();
 				}
 			} else {
 				if (lastLiteral != null) {
@@ -680,6 +688,7 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 		} else if (newexprs.size() == 1) {
 			return newexprs.get(0);
 		} else {
+			concat.exprs = newexprs;
 			return concat;
 		}
 	}
