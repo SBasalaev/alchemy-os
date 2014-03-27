@@ -1490,24 +1490,7 @@ public class Parser {
 	 * Parses expression part after '(' (function call).
 	 *
 	 * <p>
-	 * Does special type checks and type casts for some functions.
-	 * <dl>
-	 * <dt>{@code Function.curry}</dt>
-	 * <dd>checks if argument is acceptable, computes returned type</dd>
-	 *
-	 * <dt>{@code acopy}</dt>
-	 * <dd>checks if array elements are assignment compatible</dd>
-	 *
-	 * <dt>{@code StrBuf.append(Char)}</dt>
-	 * <dd>replaces by StrBuf.addch(Char)</dd>
-	 *
-	 * <dt>{@code StrBuf.insert(at, Char)}</dt>
-	 * <dd>replaces by StrBuf.insch(at, Char)</dd>
-	 *
-	 * <dt>{@code print(obj)}, {@code println(obj)}, {@code OStream.print(obj)}, {@code OStream.println(obj)}</dt>
-	 * <dd>replaces argument by {@code obj.tostr()}</dd>
-	 *
-	 * </dl>
+	 * Performs additional type checks for acopy() arguments.
 	 */
 	private Expr parseFunctionCall(Scope scope, Expr fload, Expr firstarg) throws IOException, ParseException {
 		if (fload.returnType().kind != Type.TYPE_FUNCTION)
@@ -1544,7 +1527,7 @@ public class Parser {
 		for (int i=0; i<args.length; i++) {
 			args[i] = cast((Expr)vargs.get(i), ftype.argtypes[i]);
 		}
-		// special processing for some functions
+		// special processing for acopy
 		if (fload.kind == Expr.EXPR_CONST) {
 			Function f = (Function) ((ConstExpr)fload).value;
 			if (f.signature.equals("acopy") && args[2].returnType().kind == Type.TYPE_ARRAY) {
@@ -1560,26 +1543,6 @@ public class Parser {
 				} else if (toarray.elementType != BuiltinType.ANY) {
 					warn(CompilerEnv.W_TYPECAST, "Unsafe type cast when copying from Array to "+toarray);
 				}
-			} else if (f.signature.equals("StrBuf.append") && args[1].returnType() == BuiltinType.CHAR) {
-				f.hits--;
-				Function addch = unit.getFunction("StrBuf.addch");
-				addch.hits++;
-				return new CallExpr(fload.lineNumber(), addch, args);
-			} else if (f.signature.equals("StrBuf.insert") && args[2].returnType() == BuiltinType.CHAR) {
-				f.hits--;
-				Function insch = unit.getFunction("StrBuf.insch");
-				insch.hits++;
-				return new CallExpr(fload.lineNumber(), insch, args);
-			} else if ((f.signature.equals("print") || f.signature.equals("println")) &&
-					args[0].returnType() != BuiltinType.STRING) {
-				Function tostr = findMethod(args[0].returnType(), "tostr");
-				tostr.hits++;
-				args[0] = new CallExpr(fload.lineNumber(), tostr, new Expr[] { args[0] });
-			} else if ((f.signature.equals("OStream.print") || f.signature.equals("OStream.println")) &&
-					args[1].returnType() != BuiltinType.STRING) {
-				Function tostr = findMethod(args[0].returnType(), "tostr");
-				tostr.hits++;
-				args[1] = new CallExpr(fload.lineNumber(), tostr, new Expr[] { args[1] });
 			}
 		}
 		return new CallExpr(fload, args);
@@ -2371,23 +2334,23 @@ public class Parser {
 			case '/':
 			case '%':
 				if (ltype == BuiltinType.STRING && op == '+' && rtype != BuiltinType.NONE) {
-					// if type defines overriden tostr(), use it
-					if (rtype != BuiltinType.CHAR) {
-						Function tostr = findMethod(rtype, "tostr");
-						if (!tostr.signature.equals("Any.tostr") && tostr.type.returnType == BuiltinType.STRING && tostr.type.argtypes.length == 1) {
-							tostr.hits++;
-							right = new CallExpr(left.lineNumber(), tostr, new Expr[] { right });
-						}
-					}
+					right = cast(right, BuiltinType.STRING);
+					ConcatExpr cexpr;
 					if (left.kind == Expr.EXPR_CONCAT) {
-						((ConcatExpr)left).exprs.add(right);
-						return left;
+						cexpr = (ConcatExpr) left;
 					} else {
-						ConcatExpr cexpr = new ConcatExpr();
+						cexpr = new ConcatExpr();
 						cexpr.exprs.add(left);
-						cexpr.exprs.add(right);
-						return cexpr;
 					}
+					if (right.kind == Expr.EXPR_CONCAT) {
+						ArrayList exprs = ((ConcatExpr)right).exprs;
+						for (int i=0; i<exprs.size(); i++) {
+							cexpr.exprs.add(exprs.get(i));
+						}
+					} else {
+						cexpr.exprs.add(right);
+					}
+					return cexpr;
 				} else if (btype.isNumeric()) {
 					return new BinaryExpr(cast(left,btype), op, cast(right,btype));
 				}
@@ -2496,8 +2459,12 @@ public class Parser {
 	 * Computes type to which operands of binary operator should be cast.
 	 */
 	private Type binaryCastType(Type ltype, Type rtype) {
-		if (ltype == BuiltinType.NULL) return rtype;
-		if (rtype == BuiltinType.NULL) return ltype;
+		if (ltype == BuiltinType.NONE || rtype == BuiltinType.NONE)
+			return BuiltinType.NONE;
+		if (ltype == BuiltinType.NULL)
+			return rtype;
+		if (rtype == BuiltinType.NULL)
+			return ltype;
 		if (ltype.isNumeric() && rtype.isNumeric()) {
 			Type ctype = BuiltinType.INT;
 			if (ltype == BuiltinType.DOUBLE || rtype == BuiltinType.DOUBLE)
@@ -2551,6 +2518,7 @@ public class Parser {
 
 	private Expr cast(Expr expr, Type toType, boolean silent) throws ParseException {
 		Type fromType = expr.returnType();
+
 		// safe casts
 		if (fromType.equals(toType)) {
 			return expr;
@@ -2570,6 +2538,15 @@ public class Parser {
 		}
 		if (fromType == BuiltinType.NULL && !toType.isNumeric() && toType.kind != Type.TYPE_BOOL) {
 			return new CastExpr(expr, toType);
+		}
+
+		// conversion to string
+		if (toType == BuiltinType.STRING) {
+			Function tostr = findMethod(fromType, "tostr");
+			if (tostr.args.length != 1 || tostr.type.returnType != BuiltinType.STRING) {
+				tostr = findMethod(BuiltinType.ANY, "tostr");
+			}
+			return new CallExpr(expr.lineNumber(), tostr, new Expr[] { expr });
 		}
 
 		// array transformations
