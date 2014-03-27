@@ -24,18 +24,18 @@ type OStream < Connection
 
 def OStream.write(b: Int)
 def OStream.writeArray(buf: [Byte], ofs: Int = 0, len: Int = -1)
-def OStream.print(a: Any)
-def OStream.println(a: Any = "")
+def OStream.print(str: String)
+def OStream.println(str: String = "")
 def OStream.flush()
-def OStream.printf(fmt: String, args: [Any])
+def OStream.printf(fmt: String, args: [String])
 def OStream.writeAll(input: IStream)
 
 def write(b: Int)
 def writeArray(buf: [Byte], ofs: Int = 0, len: Int = -1)
-def print(a: Any)
-def println(a: Any = "")
+def print(str: String)
+def println(str: String = "")
 def flush()
-def printf(fmt: String, args: [Any])
+def printf(fmt: String, args: [String])
 
 type StreamConnection < Connection
 
