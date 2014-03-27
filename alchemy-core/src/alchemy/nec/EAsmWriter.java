@@ -521,14 +521,19 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 	}
 
 	public Object visitCall(CallExpr fcall, Object args) {
-		fcall.fload.accept(this, args);
+		boolean knownFunc = fcall.fload.kind == Expr.EXPR_CONST;
+		if (!knownFunc) {
+			fcall.fload.accept(this, args);
+		}
 		for (int i=0; i<fcall.args.length; i++) {
 			fcall.args[i].accept(this, args);
 		}
-		if (fcall.returnType().kind == Type.TYPE_NONE) {
-			writer.visitCallInsn(Opcodes.CALV, fcall.args.length);
+		boolean voidResult = fcall.returnType().kind == Type.TYPE_NONE;
+		if (knownFunc) {
+			String sig = ((Function)((ConstExpr)fcall.fload).value).signature;
+			writer.visitCallConstInsn(voidResult ? Opcodes.CALVC : Opcodes.CALLC, fcall.args.length, sig);
 		} else {
-			writer.visitCallInsn(Opcodes.CALL, fcall.args.length);
+			writer.visitCallInsn(voidResult ? Opcodes.CALV : Opcodes.CALL, fcall.args.length);
 		}
 		return null;
 	}

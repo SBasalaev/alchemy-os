@@ -217,6 +217,28 @@ public class FunctionWriter implements Opcodes {
 		visitStack(opcode == CALL ? -arglen : -arglen-1);
 	}
 
+	/** Visit CALLC or CALVC instruction. */
+	public void visitCallConstInsn(int opcode, int arglen, String signature) {
+		if (arglen < 0 || arglen > 255) throw new IllegalArgumentException();
+		if (arglen < 8) {
+			if (opcode == CALLC) data.write(CALLC_0 + arglen);
+			else data.write(CALVC_0 + arglen);
+		} else {
+			data.write(opcode);
+			data.write(arglen);
+		}
+		FuncObject f = new FuncObject(signature);
+		int index = objects.indexOf(f);
+		if (index < 0) {
+			index = objects.size();
+			objects.add(f);
+		}
+		relocdata.append((char)data.size());
+		data.write(index >> 8);
+		data.write(index);
+		visitStack(opcode == CALLC ? -arglen+1 : -arglen);
+	}
+
 	/** Visit LOAD or STORE instruction. */
 	public void visitVarInsn(int opcode, int var) {
 		if (var < 0 || var > 255) throw new IllegalArgumentException();
