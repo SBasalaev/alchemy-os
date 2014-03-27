@@ -248,6 +248,13 @@ public class FunctionWriter implements Opcodes {
 		visitStack(dimension-1);
 	}
 
+	public void visitConcat(int n) {
+		if (n < 0 || n > 255) throw new IllegalArgumentException();
+		data.write(CONCAT);
+		data.write(n);
+		visitStack(-n+1);
+	}
+
 	public void visitLdFunc(String name) {
 		visitLdcInsn(new FuncObject(name));
 	}

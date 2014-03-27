@@ -166,6 +166,7 @@ public interface Opcodes {
 	byte CALV_6      = (byte)0x7E;
 	byte CALV_7      = (byte)0x7F;
 
+	byte CONCAT      = (byte)0xCD;
 	byte NEWMULTIARRAY = (byte)0xCE;
 	byte SETGLOBAL   = (byte)0xCF;
 	byte GETGLOBAL   = (byte)0xD0;

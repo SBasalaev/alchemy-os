@@ -699,26 +699,11 @@ public final class EAsmWriter implements ExprVisitor, StatementVisitor {
 	}
 
 	public Object visitConcat(ConcatExpr concat, Object args) {
-		if (concat.exprs.size() == 1) {
-			Expr str1 = (Expr)concat.exprs.get(0);
-			str1.accept(this, args);
-		} else {
-			writer.visitLdFunc("Any.tostr");
-			writer.visitLdFunc("StrBuf.new");
-			writer.visitCallInsn(Opcodes.CALL, 0);
-			for (int i=0; i<concat.exprs.size(); i++) {
-				Expr expr = (Expr)concat.exprs.get(i);
-				if (expr.returnType().kind == Type.TYPE_CHAR) {
-					writer.visitLdFunc("StrBuf.addch");
-				} else {
-					writer.visitLdFunc("StrBuf.append");
-				}
-				writer.visitInsn(Opcodes.SWAP);
-				expr.accept(this, args);
-				writer.visitCallInsn(Opcodes.CALL, 2);
-			}
-			writer.visitCallInsn(Opcodes.CALL, 1);
+		int n  = concat.exprs.size();
+		for (int i = 0; i < n; i++) {
+			((Expr)concat.exprs.get(i)).accept(this, args);
 		}
+		writer.visitConcat(n);
 		return null;
 	}
 

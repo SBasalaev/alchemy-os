@@ -74,7 +74,7 @@ public final class EtherLoader {
 	 *  Variable instructions: iinc
 	 *
 	 * New in format 2.2
-	 *  Instructions: throw getglobal setglobal newmultiarray
+	 *  Instructions: throw getglobal setglobal newmultiarray concat
 	 */
 
 	/** Loads Ether library from given input stream. */

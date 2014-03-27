@@ -162,7 +162,7 @@ public final class AlchemyException extends Exception {
 	public String toString() {
 		StringBuffer sb = new StringBuffer(errstring(errcode));
 		String msg = getMessage();
-		if (msg != null || msg.length() != 0) {
+		if (msg != null && msg.length() != 0) {
 			sb.append(": ").append(msg);
 		}
 		return sb.append(trace()).toString();

@@ -28,6 +28,7 @@ import alchemy.types.Float64;
 import alchemy.types.Int32;
 import alchemy.types.Int64;
 import alchemy.util.Arrays;
+import alchemy.util.Strings;
 
 /**
  * Ether Virtual Machine.
@@ -885,6 +886,17 @@ final class EtherFunction extends Function {
 					break;
 				}
 			//OTHERS
+				case Opcodes.CONCAT: {
+					int n = code[ct] & 0xff;
+					ct++;
+					head -= n-1;
+					StringBuffer sb = new StringBuffer();
+					for (int i = 0; i < n; i++) {
+						sb.append(Strings.toString(stack[head+i]));
+					}
+					stack[head] = sb.toString();
+					break;
+				}
 				case Opcodes.ACMP: {
 					head--;
 					boolean eq = (stack[head] == null) ? stack[head+1] == null : stack[head].equals(stack[head+1]);
