@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,15 +28,22 @@ import java.io.IOException;
 public final class Platform {
 
 	private final Core core;
+	private final UI ui;
 
-	private Platform() throws IOException {
-		String name = (String) Installer.getSetupCfg().get("platform");
-		core = (Core) load(name, "Core");
+	private Platform() {
+		try {
+			String name = (String) Installer.getSetupCfg().get("platform");
+			core = (Core) load(name, "Core");
+			ui   = (UI)   load(name, "UI");
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			throw new RuntimeException(ioe.toString());
+		}
 	}
 
 	private static Platform instance;
 
-	public static Platform getPlatform() throws IOException {
+	public static Platform getPlatform() {
 		if (instance == null) instance = new Platform();
 		return instance;
 	}
@@ -52,5 +59,9 @@ public final class Platform {
 
 	public Core getCore() {
 		return core;
+	}
+
+	public UI getUI() {
+		return ui;
 	}
 }
