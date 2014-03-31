@@ -53,6 +53,7 @@ import javax.microedition.lcdui.TextField;
  * Native UI library for Alchemy.
  * @author Sergey Basalaev
  * @version 1.0
+ * @deprecated Use {@link LibUI2} instead
  */
 public class LibUI1 extends NativeLibrary {
 	

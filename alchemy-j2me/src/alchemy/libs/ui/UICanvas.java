@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package alchemy.libs.ui;
 
+import alchemy.system.UIServer;
 import alchemy.types.Int32;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Graphics;
@@ -51,31 +52,31 @@ public class UICanvas extends Canvas {
 
 	/** Generates key event. */
 	protected void keyPressed(int keyCode) {
-		UIServer.pushEvent(this, UIServer.EVENT_KEY_PRESS, Int32.toInt32(keyCode));
+		UIServer.pushEvent(UIServer.EVENT_KEY_PRESS, this, Int32.toInt32(keyCode));
 	}
 
 	/** Generates key release event. */
 	protected void keyReleased(int keyCode) {
-		UIServer.pushEvent(this, UIServer.EVENT_KEY_RELEASE, Int32.toInt32(keyCode));
+		UIServer.pushEvent(UIServer.EVENT_KEY_RELEASE, this, Int32.toInt32(keyCode));
 	}
 
 	/** Generates key hold event. */
 	protected void keyRepeated(int keyCode) {
-		UIServer.pushEvent(this, UIServer.EVENT_KEY_HOLD, Int32.toInt32(keyCode));
+		UIServer.pushEvent(UIServer.EVENT_KEY_HOLD, this, Int32.toInt32(keyCode));
 	}
 
 	/** Generates pointer press event. */
 	protected void pointerPressed(int x, int y) {
-		UIServer.pushEvent(this, UIServer.EVENT_PTR_PRESS, new Object[] {Int32.toInt32(x), Int32.toInt32(y)});
+		UIServer.pushEvent(UIServer.EVENT_PTR_PRESS, this, new Object[] {Int32.toInt32(x), Int32.toInt32(y)});
 	}
 	
 	/** Generates pointer release event. */
 	protected void pointerReleased(int x, int y) {
-		UIServer.pushEvent(this, UIServer.EVENT_PTR_RELEASE, new Object[] {Int32.toInt32(x), Int32.toInt32(y)});
+		UIServer.pushEvent(UIServer.EVENT_PTR_RELEASE, this, new Object[] {Int32.toInt32(x), Int32.toInt32(y)});
 	}
 
 	/** Generates pointer drag event. */
 	protected void pointerDragged(int x, int y) {
-		UIServer.pushEvent(this, UIServer.EVENT_PTR_DRAG, new Object[] {Int32.toInt32(x), Int32.toInt32(y)});
+		UIServer.pushEvent(UIServer.EVENT_PTR_DRAG, this, new Object[] {Int32.toInt32(x), Int32.toInt32(y)});
 	}
 }

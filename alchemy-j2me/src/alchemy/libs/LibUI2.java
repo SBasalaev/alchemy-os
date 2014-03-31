@@ -20,11 +20,17 @@ package alchemy.libs;
 
 import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
+import alchemy.libs.ui.UICanvas;
+import alchemy.platform.Platform;
+import alchemy.platform.UI;
 import alchemy.system.Cache;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
+import alchemy.system.UIServer;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
@@ -32,6 +38,34 @@ import javax.microedition.lcdui.Image;
 /**
  * User interface library for Alchemy OS.
  * This is j2me implementation.
+ *
+ * Classes are mapped as follows:
+ * <table border="1">
+ * <tr>
+ * <th>Ether type</th>
+ * <th>Java class</th>
+ * </tr>
+ * <tr>
+ * <td><code>Graphics</code></td>
+ * <td><code>javax.microedition.lcdui.Graphics</code></td>
+ * </tr>
+ * <tr>
+ * <td><code>Image</code></td>
+ * <td><code>javax.microedition.lcdui.Image</code></td>
+ * </tr>
+ * <tr>
+ * <td><code>Menu</code></td>
+ * <td><code>javax.microedition.lcdui.Command</code></td>
+ * </tr>
+ * <tr>
+ * <td><code>Screen</code></td>
+ * <td><code>javax.microedition.lcdui.Displayable</code></td>
+ * </tr>
+ * <tr>
+ * <td><code>Canvas</code></td>
+ * <td><code>alchemy.libs.ui.UICanvas</code></td>
+ * </tr>
+ * </table>
  *
  * @author Sergey Basalaev
  */
@@ -41,6 +75,8 @@ public final class LibUI2 extends NativeLibrary {
 		load("/symbols/ui2");
 		name = "libui.2.so";
 	}
+
+	private final UI ui = Platform.getPlatform().getUI();
 
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
@@ -149,6 +185,88 @@ public final class LibUI2 extends NativeLibrary {
 				return Ival(((Image)args[0]).getHeight());
 			case 32: // Image.isMutable(): Bool
 				return Ival(((Image)args[0]).isMutable());
+
+			/*  == Header: ui.eh == */
+			case 33: // Menu.new(text: String, priority: Int, mtype: Int = MT_SCREEN): Menu
+				return new Command((String)args[0], ival(args[1]), ival(args[2]));
+			case 34: // Menu.getText(): String
+				return ((Command)args[0]).getLabel();
+			case 35: // Menu.getPriority(): Int
+				return Ival(((Command)args[0]).getPriority());
+			case 36: // Menu.getType(): Int
+				return Ival(((Command)args[0]).getCommandType());
+			case 37: // Screen.isShown(): Bool
+				return Ival(((Displayable)args[0]).isShown());
+			case 38: // Screen.getHeight(): Int
+				return Ival(((Displayable)args[0]).getHeight());
+			case 39: // Screen.getWidth(): Int
+				return Ival(((Displayable)args[0]).getWidth());
+			case 40: // Screen.getTitle(): String
+				return ((Displayable)args[0]).getTitle();
+			case 41: { // Screen.setTitle(title: String)
+				Displayable screen = (Displayable) args[0];
+				String title = (String) args[1];
+				screen.setTitle(title);
+				ui.screenTitleChanged(screen, title);
+				return null;
+			}
+			case 42: { // Screen.addMenu(menu: Menu)
+				Displayable screen = (Displayable) args[0];
+				Command menu = (Command) args[1];
+				screen.addCommand(menu);
+				ui.screenMenuAdded(screen, menu);
+				return null;
+			}
+			case 43: { // Screen.removeMenu(menu: Menu)
+				Displayable screen = (Displayable) args[0];
+				Command menu = (Command) args[1];
+				screen.removeCommand(menu);
+				ui.screenMenuRemoved(screen, menu);
+				return null;
+			}
+			case 44: // uiReadEvent(): UIEvent
+				return UIServer.readEvent(p, false);
+			case 45: // uiWaitEvent(): UIEvent
+				return UIServer.readEvent(p, true);
+			case 46: // uiVibrate(millis: Int): Bool
+				return Ival(ui.vibrate(ival(args[0])));
+			case 47: // uiFlash(millis: Int): Bool
+				return Ival(ui.flash(ival(args[0])));
+			case 48: // uiGetScreen(): Screen
+				return UIServer.getScreen(p);
+			case 49: // uiSetScreen(scr: Screen)
+				UIServer.setScreen(p, args[0]);
+				return null;
+			case 50: // uiSetDefaultTitle(title: String)
+				p.setGlobal(null, "ui.title", (String)args[0]);
+				return null;
+			case 51: { // uiSetIcon(icon: Image)
+				p.setGlobal(null, "ui.icon", (Image)args[0]);
+				UIServer.displayCurrent();
+				return null;
+			}
+
+			/* == Header: canvas.eh == */
+			case 52: // Canvas.new(full: Bool = false): Canvas
+				return new UICanvas(bval(args[0]));
+			case 53: // Canvas.graphics(): Graphics
+				return ((UICanvas)args[0]).getGraphics();
+			case 54: // Canvas.repaint(x: Int, y: Int, w: Int, h: Int)
+				((UICanvas)args[0]).repaint(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]));
+				return null;
+			case 55: // Canvas.refresh()
+				((UICanvas)args[0]).repaint();
+				return null;
+			case 56: // Canvas.actionCode(key: Int): Int
+				return Ival(((UICanvas)args[0]).getGameAction(ival(args[1])));
+			case 57: // Canvas.keyName(key: Int): String
+				return ((UICanvas)args[0]).getKeyName(ival(args[1]));
+			case 58: // Canvas.hasPtrEvents(): Bool
+				return Ival(((UICanvas)args[0]).hasPointerEvents());
+			case 59: // Canvas.hasPtrDragEvent(): Bool
+				return Ival(((UICanvas)args[0]).hasPointerMotionEvents());
+			case 60: // Canvas.hasHoldEvent(): Bool
+				return Ival(((UICanvas)args[0]).hasRepeatEvents());
 
 			default:
 				return null;

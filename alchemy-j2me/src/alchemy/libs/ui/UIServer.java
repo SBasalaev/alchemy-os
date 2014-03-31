@@ -50,6 +50,7 @@ import javax.microedition.lcdui.List;
  * <code>UIServer</code> holds queue of events for each mapped process.
  * 
  * @author Sergey Basalaev
+ * @deprecated Use {@link alchemy.system.UIServer} instead.
  */
 public final class UIServer {
 	/** Event type for gaining focus. */
