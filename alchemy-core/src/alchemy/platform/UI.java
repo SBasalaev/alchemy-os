@@ -31,21 +31,43 @@ public interface UI {
 	Object getCurrentScreen();
 
 	/**
-	 * Sets given object as currently displayed screen.
+	 * Sets given object as the currently displayed screen.
 	 */
 	void setCurrentScreen(Object screen);
+
+	/**
+	 * Sets given object as the icon of the currently displayed screen.
+	 */
+	void setIcon(Object icon);
+
+	/**
+	 * Informs platform UI that screen title has changed.
+	 * If the screen is the current one, application title
+	 * should change accordingly.
+	 */
+	void screenTitleChanged(Object screen, String title);
+
+	/**
+	 * Informs platform UI that screen menu is attached.
+	 */
+	void screenMenuAdded(Object screen, Object menu);
+
+	/**
+	 * Informs platform UI that screen menu is detached.
+	 */
+	void screenMenuRemoved(Object screen, Object menu);
 
 	/**
 	 * Vibrates device for specified amount of time.
 	 * Zero as argument stops vibrating.
 	 * Returns false if feature is not supported.
 	 */
-	boolean vibrate(long millis);
+	boolean vibrate(int millis);
 
 	/**
 	 * Flashes device backlight for specified amount of time.
 	 * Zero as argument stops flashing.
 	 * Returns false if feature is not supported.
 	 */
-	boolean flash(long millis);
+	boolean flash(int millis);
 }
