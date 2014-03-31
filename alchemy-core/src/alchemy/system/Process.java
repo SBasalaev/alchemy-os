@@ -422,7 +422,7 @@ public final class Process {
 	 */
 	public Object getGlobal(Library lib, String name, Object dflt) {
 		if (globals == null) return dflt;
-		HashMap libKeys = (HashMap)globals.get(lib);
+		HashMap libKeys = (HashMap)globals.get(lib == null ? Process.class : (Object)lib);
 		if (libKeys == null) return dflt;
 		Object ret = libKeys.get(name);
 		return (ret != null) ? ret : dflt;
@@ -433,10 +433,10 @@ public final class Process {
 	 */
 	public void setGlobal(Library lib, String name, Object value) {
 		if (globals == null) globals = new HashMap();
-		HashMap vars = (HashMap)globals.get(lib);
+		HashMap vars = (HashMap)globals.get(lib == null ? Process.class : (Object)lib);
 		if (vars == null) {
 			vars = new HashMap();
-			globals.set(lib, vars);
+			globals.set(lib == null ? Process.class : (Object)lib, vars);
 		}
 		vars.set(name, value);
 	}
