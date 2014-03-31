@@ -1,6 +1,7 @@
 use "graphics.eh"
+use "ui.eh"
 
-type Canvas < Screen;
+type Canvas < Screen
 
 // common key codes
 const KEY_0 = '0'
@@ -27,12 +28,12 @@ const ACT_B = 10
 const ACT_C = 11
 const ACT_D = 12
 
-def new_canvas(full: Bool = false): Canvas;
-const `Canvas.new` = new_canvas;
-def Canvas.graphics(): Graphics;
-def Canvas.read_key(): Int;
-def Canvas.refresh();
-def Canvas.action_code(key: Int): Int;
-def Canvas.has_ptr_events(): Bool;
-def Canvas.has_ptrdrag_event(): Bool;
-def Canvas.has_hold_event(): Bool;
+def Canvas.new(full: Bool = false): Canvas
+def Canvas.graphics(): Graphics
+def Canvas.repaint(x: Int, y: Int, w: Int, h: Int)
+def Canvas.refresh()
+def Canvas.actionCode(key: Int): Int
+def Canvas.keyName(key: Int): String
+def Canvas.hasPtrEvents(): Bool
+def Canvas.hasPtrDragEvent(): Bool
+def Canvas.hasHoldEvent(): Bool
