@@ -993,7 +993,9 @@ public class ConstOptimizer implements ExprVisitor, StatementVisitor {
 			case 1:
 				if (block.vars.size() == 0)
 					return statements.get(0);
-			default: // yes, fallthrough
+				else
+					return block;
+			default:
 				return block;
 		}
 	}
