@@ -16,7 +16,6 @@
  */
 package alchemy.libs.ui;
 
-import alchemy.types.Int32;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -49,21 +48,22 @@ public final class FontManager {
 	public static final int IMPL_MEDIUM = 11;
 	public static final int IMPL_LARGE = 13;
 
+	public static final int DEFAULT_FONT = FACE_SYSTEM | SIZE_MEDIUM | STYLE_PLAIN;
+
 	private FontManager() { }
 
-	private static HashMap<Int32, FontMetrics> fonts = new HashMap<Int32, FontMetrics>();
+	private static HashMap<Integer, FontMetrics> fonts = new HashMap<Integer, FontMetrics>();
 
 	/** Graphics to acquire font metrics. */
 	private final static Graphics graphics = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).getGraphics();
 
-	public static FontMetrics getFontMetrics(Int32 fontmask) {
-		int mask = fontmask.value;
+	public static FontMetrics getFontMetrics(int mask) {
 		if ((mask & (FACE_MONOSPACE | FACE_PROPORTIONAL)) == (FACE_MONOSPACE | FACE_PROPORTIONAL))
 			throw new IllegalArgumentException("Bad font face specifier");
 		if ((mask & (SIZE_SMALL | SIZE_LARGE)) == (SIZE_SMALL | SIZE_LARGE))
 			throw new IllegalArgumentException("Bad font size specifier");
 
-		FontMetrics fm = fonts.get(fontmask);
+		FontMetrics fm = fonts.get(mask);
 		if (fm == null) {
 			String name = IMPL_SYSTEM;
 			if ((mask & FACE_MONOSPACE) != 0) {
@@ -90,12 +90,16 @@ public final class FontManager {
 
 			Font font = new Font(name, style, size);
 			fm = graphics.getFontMetrics(font);
-			fonts.put(fontmask, fm);
+			fonts.put(mask, fm);
 		}
 		return fm;
 	}
 
-	public static Int32 getFontMask(Font f) {
+	public static Font getFont(int mask) {
+		return getFontMetrics(mask).getFont();
+	}
+
+	public static int getFontMask(Font f) {
 		int mask = 0;
 		if (f.isBold()) mask |= STYLE_BOLD;
 		if (f.isItalic()) mask |= STYLE_ITALIC;
@@ -106,6 +110,6 @@ public final class FontManager {
 
 		if (f.getName().contains("Mono")) mask |= FACE_MONOSPACE;
 
-		return Int32.toInt32(mask);
+		return mask;
 	}
 }

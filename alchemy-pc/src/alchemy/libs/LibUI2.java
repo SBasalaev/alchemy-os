@@ -20,10 +20,15 @@ import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
 import alchemy.io.IO;
 import alchemy.libs.ui.FontManager;
-import alchemy.libs.ui.ImageImpl;
+import alchemy.libs.ui.UiImage;
+import alchemy.libs.ui.UiMenu;
+import alchemy.libs.ui.UiScreen;
+import alchemy.platform.Platform;
+import alchemy.platform.UI;
 import alchemy.system.Cache;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
+import alchemy.system.UIServer;
 import alchemy.types.Int32;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -85,6 +90,8 @@ public final class LibUI2 extends NativeLibrary {
 		name = "libui.2.so";
 	}
 
+	private final UI ui = Platform.getPlatform().getUI();
+
 	private HashMap<Int32, Color> colorCache = new HashMap<Int32, Color>();
 
 	private Color color(Int32 rgb) {
@@ -111,11 +118,11 @@ public final class LibUI2 extends NativeLibrary {
 		switch (index) {
 			/* == Header: font.eh == */
 			case 0: // stringWidth(font: Int, str: String): Int
-				return Ival(FontManager.getFontMetrics((Int32)args[0]).stringWidth((String)args[1]));
+				return Ival(FontManager.getFontMetrics(ival(args[0])).stringWidth((String)args[1]));
 			case 1: // fontHeight(font: Int): Int
-				return Ival(FontManager.getFontMetrics((Int32)args[0]).getHeight());
+				return Ival(FontManager.getFontMetrics(ival(args[0])).getHeight());
 			case 2: // fontBaseline(font: Int): Int
-				return Ival(FontManager.getFontMetrics((Int32)args[0]).getAscent());
+				return Ival(FontManager.getFontMetrics(ival(args[0])).getAscent());
 
 			/* == Header: graphics.eh == */
 			case 3: // Graphics.getColor(): Int
@@ -131,7 +138,7 @@ public final class LibUI2 extends NativeLibrary {
 			case 7: // Graphics.getFont(): Int
 				return FontManager.getFontMask(((Graphics2D)args[0]).getFont());
 			case 8: // Graphics.setFont(font: Int)
-				((Graphics2D)args[0]).setFont(FontManager.getFontMetrics((Int32)args[1]).getFont());
+				((Graphics2D)args[0]).setFont(FontManager.getFont(ival(args[1])));
 				return null;
 			case 9: // Graphics.drawLine(x1: Int, y1: Int, x2: Int, y2: Int)
 				((Graphics2D)args[0]).drawLine(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]));
@@ -168,7 +175,7 @@ public final class LibUI2 extends NativeLibrary {
 				return null;
 			}
 			case 18: // Graphics.drawImage(im: Image, x: Int, y: Int)
-				((Graphics2D)args[0]).drawImage(((ImageImpl)args[1]).image, ival(args[2]), ival(args[3]), null);
+				((Graphics2D)args[0]).drawImage(((UiImage)args[1]).image, ival(args[2]), ival(args[3]), null);
 				return null;
 			case 19: // Graphics.drawRGB(rgb: [Int], ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int, alpha: Bool)
 				drawRGB(((Graphics2D)args[0]), (int[])args[1], ival(args[2]), ival(args[3]), ival(args[4]), ival(args[5]), ival(args[6]), ival(args[7]), bval(args[8]));
@@ -188,7 +195,7 @@ public final class LibUI2 extends NativeLibrary {
 
 				// read arguments
 				Graphics2D g = (Graphics2D) args[0];
-				Image img = ((ImageImpl)args[1]).image;
+				Image img = ((UiImage)args[1]).image;
 				int x_src = ival(args[2]);
 				int y_src = ival(args[3]);
 				int width = ival(args[4]);
@@ -268,9 +275,9 @@ public final class LibUI2 extends NativeLibrary {
 
 			/* == Header: image.eh == */
 			case 22: // Image.new(w: Int, h: Int)
-				return new ImageImpl(ival(args[0]), ival(args[1]));
+				return new UiImage(ival(args[0]), ival(args[1]));
 			case 23: // Image.graphics(): Graphics
-				return ((ImageImpl)args[0]).getGraphics();
+				return ((UiImage)args[0]).getGraphics();
 			case 24: { // imageFromARGB(argb: [Int], w: Int, h: Int, alpha: Bool): Image
 				int[] data = (int[]) args[0];
 				int w = ival(args[1]);
@@ -278,23 +285,23 @@ public final class LibUI2 extends NativeLibrary {
 				boolean alpha = bval(args[3]);
 				BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 				drawRGB(img.createGraphics(), data, 0, w, 0, 0, w, h, alpha);
-				return new ImageImpl(img);
+				return new UiImage(img);
 			}
 			case 25: { // imageFromFile(file: String): Image
 				String filename = p.toFile((String)args[0]);
 				long tstamp = Filesystem.lastModified(filename);
-				ImageImpl img = (ImageImpl) Cache.get(filename, tstamp);
+				UiImage img = (UiImage) Cache.get(filename, tstamp);
 				if (img == null) {
 					String url = Filesystem.getNativeURL(filename);
 					if (url != null) {
-						img = new ImageImpl(Toolkit.getDefaultToolkit().createImage(new URL(url)));
+						img = new UiImage(Toolkit.getDefaultToolkit().createImage(new URL(url)));
 					} else {
 						ConnectionInputStream in = new ConnectionInputStream(Filesystem.read(filename));
 						p.addConnection(in);
 						byte[] buf = IO.readFully(in);
 						in.close();
 						p.removeConnection(in);
-						img = new ImageImpl(Toolkit.getDefaultToolkit().createImage(buf));
+						img = new UiImage(Toolkit.getDefaultToolkit().createImage(buf));
 					}
 					Cache.put(filename, tstamp, img);
 				}
@@ -302,34 +309,94 @@ public final class LibUI2 extends NativeLibrary {
 			}
 			case 26: { // imageFromStream(input: IStream): Image
 				byte[] buf = IO.readFully((InputStream) args[0]);
-				return new ImageImpl(Toolkit.getDefaultToolkit().createImage(buf));
+				return new UiImage(Toolkit.getDefaultToolkit().createImage(buf));
 			}
 			case 27: { // imageFromData(data: [Byte], ofs: Int = 0, len: Int = -1): Image
 				final byte[] buf = (byte[])args[0];
 				int ofs = ival(args[1]);
 				int len = ival(args[2]);
 				if (len < 0) len = buf.length - ofs;
-				return new ImageImpl(Toolkit.getDefaultToolkit().createImage(buf, ofs, len));
+				return new UiImage(Toolkit.getDefaultToolkit().createImage(buf, ofs, len));
 			}
 			case 28: { // imageFromImage(im: Image, x: Int, y: Int, w: Int, h: Int): Image
-				ImageImpl img = (ImageImpl) args[0];
+				UiImage img = (UiImage) args[0];
 				int x = ival(args[1]);
 				int y = ival(args[2]);
 				int w = ival(args[3]);
 				int h = ival(args[4]);
 				BufferedImage newimg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 				newimg.getGraphics().drawImage(img.image, x, y, null);
-				return new ImageImpl(newimg);
+				return new UiImage(newimg);
 			}
 			case 29: // Image.getARGB(argb: [Int], ofs: Int, scanlen: Int, x: Int, y: Int, w: Int, h: Int)
-				new PixelGrabber(((ImageImpl)args[0]).image, ival(args[4]), ival(args[5]), ival(args[6]), ival(args[7]), (int[])args[1], ival(args[2]), ival(args[3])).grabPixels();	
+				new PixelGrabber(((UiImage)args[0]).image, ival(args[4]), ival(args[5]), ival(args[6]), ival(args[7]), (int[])args[1], ival(args[2]), ival(args[3])).grabPixels();	
 				return null;
 			case 30: // Image.getWidth(): Int
-				return Ival(((ImageImpl)args[0]).image.getWidth(null));
+				return Ival(((UiImage)args[0]).image.getWidth(null));
 			case 31: // Image.getHeight(): Int
-				return Ival(((ImageImpl)args[0]).image.getHeight(null));
+				return Ival(((UiImage)args[0]).image.getHeight(null));
 			case 32: // Image.isMutable(): Bool
-				return Ival(((ImageImpl)args[0]).isMutable);
+				return Ival(((UiImage)args[0]).isMutable);
+
+			/*  == Header: ui.eh == */
+			case 33: // Menu.new(text: String, priority: Int, mtype: Int = MT_SCREEN): Menu
+				return new UiMenu((String)args[0], ival(args[1]), ival(args[2]));
+			case 34: // Menu.getLabel(): String
+				return ((UiMenu)args[0]).getLabel();
+			case 35: // Menu.getPriority(): Int
+				return Ival(((UiMenu)args[0]).getPriority());
+			case 36: // Menu.getType(): Int
+				return Ival(((UiMenu)args[0]).getType());
+			case 37: // Screen.isShown(): Bool
+				return Ival(args[0] == ui.getCurrentScreen());
+			case 38: // Screen.getHeight(): Int
+				return Ival(((UiScreen)args[0]).getHeight());
+			case 39: // Screen.getWidth(): Int
+				return Ival(((UiScreen)args[0]).getWidth());
+			case 40: // Screen.getTitle(): String
+				return ((UiScreen)args[0]).getTitle();
+			case 41: { // Screen.setTitle(title: String)
+				UiScreen screen = (UiScreen) args[0];
+				String title = (String) args[1];
+				screen.setTitle(title);
+				ui.screenTitleChanged(screen, title);
+				return null;
+			}
+			case 42: { // Screen.addMenu(menu: Menu)
+				UiScreen screen = (UiScreen) args[0];
+				UiMenu menu = (UiMenu) args[1];
+				screen.addMenu(menu);
+				ui.screenMenuAdded(screen, menu);
+				return null;
+			}
+			case 43: { // Screen.removeMenu(menu: Menu)
+				UiScreen screen = (UiScreen) args[0];
+				UiMenu menu = (UiMenu) args[1];
+				screen.removeMenu(menu);
+				ui.screenMenuRemoved(screen, menu);
+				return null;
+			}
+			case 44: // uiReadEvent(): UIEvent
+				return UIServer.readEvent(p, false);
+			case 45: // uiWaitEvent(): UIEvent
+				return UIServer.readEvent(p, true);
+			case 46: // uiVibrate(millis: Int): Bool
+				return Ival(ui.vibrate(ival(args[0])));
+			case 47: // uiFlash(millis: Int): Bool
+				return Ival(ui.flash(ival(args[0])));
+			case 48: // uiGetScreen(): Screen
+				return UIServer.getScreen(p);
+			case 49: // uiSetScreen(scr: Screen)
+				UIServer.setScreen(p, args[0]);
+				return null;
+			case 50: // uiSetDefaultTitle(title: String)
+				p.setGlobal(null, "ui.title", (String)args[0]);
+				return null;
+			case 51: { // uiSetIcon(icon: Image)
+				p.setGlobal(null, "ui.icon", (UiImage)args[0]);
+				UIServer.displayCurrent();
+				return null;
+			}
 
 			default:
 				throw new RuntimeException("Not implemented");

@@ -16,7 +16,7 @@
  */
 package alchemy.libs.ui;
 
-import alchemy.types.Int32;
+import alchemy.libs.LibUI2;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -24,25 +24,25 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
 /**
- * Implementation of j2me image abstraction.
+ * Implementation of image abstraction.
  * @author Sergey Basalaev
  */
-public final class ImageImpl {
+public final class UiImage {
 
 	public final Image image;
 	public final boolean isMutable;
 
-	public ImageImpl(int width, int height) {
+	public UiImage(int width, int height) {
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		image = img;
 		Graphics2D graphics = img.createGraphics();
 		graphics.setColor(Color.BLACK);
-		graphics.setFont(FontManager.getFontMetrics(Int32.ZERO).getFont());
-		graphics.setStroke(null);
+		graphics.setFont(FontManager.getFont(FontManager.DEFAULT_FONT));
+		graphics.setStroke(LibUI2.SOLID);
 		isMutable = true;
 	}
 
-	public ImageImpl(Image img) {
+	public UiImage(Image img) {
 		while (!Toolkit.getDefaultToolkit().prepareImage(img, -1, -1, null)) {
 			Thread.yield();
 		}
