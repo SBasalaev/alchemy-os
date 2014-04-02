@@ -1,26 +1,25 @@
 /*
- * This file is a part of Alchemy OS project.
- *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
+ * Copyright (C) 2014 Sergey Basalaev
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package alchemy.apps;
 
 import alchemy.io.TerminalInput;
+import alchemy.libs.ui.UiPlatform;
+import alchemy.libs.ui.UiScreen;
 import alchemy.util.Strings;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,7 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JFrame;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -43,11 +42,12 @@ import static javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
 
 /**
- * Terminal window.
+ * Terminal screen.
  * @author Sergey Basalaev
  */
-public final class TerminalFrame extends JFrame {
+public class TerminalScreen extends UiScreen {
 
+	private final Box widget;
 	private final JTextArea output;
 	private final JLabel prompt;
 	private final JTextField input;
@@ -59,8 +59,8 @@ public final class TerminalFrame extends JFrame {
 	final TerminalOutputStream out = new TerminalOutputStream();
 	final TerminalOutputStream err = out;
 
-	public TerminalFrame(String title) {
-		super(title);
+	public TerminalScreen() {
+		widget = Box.createVerticalBox();
 
 		output = new JTextArea();
 		output.setEditable(false);
@@ -93,9 +93,8 @@ public final class TerminalFrame extends JFrame {
 		inputBox.add(input);
 		inputBox.add(enter);
 
-		add(outputPane, BorderLayout.CENTER);
-		add(inputBox, BorderLayout.SOUTH);
-		pack();
+		widget.add(outputPane);
+		widget.add(inputBox);
 	}
 
 	private String waitForInput() {
@@ -122,16 +121,8 @@ public final class TerminalFrame extends JFrame {
 		return newInput;
 	}
 
-	void end(String name) {
-		input.setEditable(false);
-		input.setText("Process '" + name + "' ended.");
-		enter.setText("Close");
-		enter.addActionListener(new ActionListener() {
-			@Override public void actionPerformed(ActionEvent e) {
-				TerminalFrame.this.setVisible(false);
-			}
-		});
-		enter.setVisible(true);
+	@Override public JComponent getWidget() {
+		return widget;
 	}
 
 	private class TerminalInputStream extends InputStream implements TerminalInput {
@@ -172,6 +163,19 @@ public final class TerminalFrame extends JFrame {
 		public void setPrompt(String text) {
 			prompt.setText(text);
 		}
+	}
+
+	void end(String name) throws InterruptedException {
+		input.setEditable(false);
+		input.setText("Process '" + name + "' ended.");
+		enter.setText("Close");
+		enter.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				synchronized (sync) { sync.notify(); }
+			}
+		});
+		enter.setVisible(true);
+		synchronized (sync) { sync.wait(); }
 	}
 
 	private class TerminalOutputStream extends OutputStream {

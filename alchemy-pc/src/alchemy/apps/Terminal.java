@@ -22,6 +22,7 @@ import alchemy.io.IO;
 import alchemy.system.NativeApp;
 import alchemy.system.Process;
 import alchemy.system.ProcessKilledException;
+import alchemy.system.UIServer;
 import java.util.ArrayList;
 
 /**
@@ -34,7 +35,7 @@ public class Terminal extends NativeApp {
 	private static final String HELP =
 			"terminal - run command in the new terminal\n" +
 			"Usage: terminal [-k] <command> <args>...";
-	private static final String VERSION = "PC terminal v2.0";
+	private static final String VERSION = "PC terminal v2.1";
 
 	public Terminal() { }
 
@@ -67,28 +68,21 @@ public class Terminal extends NativeApp {
 		if (childCmd == null) childCmd = "sh";
 		String[] childArgs = cmdArgs.toArray(new String[0]);
 		// show terminal and start subprocess
-		TerminalFrame frame = new TerminalFrame(childCmd + " - Terminal");
-		try {
-			Process child = new Process(p, childCmd, childArgs);
-			child.stdin = frame.in;
-			child.stdout = frame.out;
-			child.stderr = frame.err;
-			frame.setVisible(true);
-			child.start();
-			while (child.getState() != Process.ENDED) {
-				Thread.sleep(100);
-				if (p.killed || !frame.isVisible())
-					throw new ProcessKilledException();
-			}
-			if (keep) {
-				frame.end(p.getName());
-				while (frame.isVisible()) {
-					Thread.sleep(100);
-				}
-			}
-			return child.getExitCode();
-		} finally {
-			frame.dispose();
+		TerminalScreen screen = new TerminalScreen();
+		screen.setTitle(childCmd + " - Terminal");
+		Process child = new Process(p, childCmd, childArgs);
+		child.stdin = screen.in;
+		child.stdout = screen.out;
+		child.stderr = screen.err;
+		UIServer.setScreen(p, screen);
+		child.start();
+		while (child.getState() != Process.ENDED) {
+			Thread.sleep(100);
+			if (p.killed) throw new ProcessKilledException();
 		}
+		if (keep) {
+			screen.end(p.getName());
+		}
+		return child.getExitCode();
 	}
 }
