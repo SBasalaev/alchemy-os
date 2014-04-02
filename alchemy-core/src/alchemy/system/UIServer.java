@@ -93,6 +93,10 @@ public final class UIServer {
 
 	/** Shows screen that is currently on top of the stack and pushes SHOW/HIDE events. */
 	public static void displayCurrent() {
+		if (frameStack.isEmpty()) {
+			ui.setCurrentScreen(null);
+			return;
+		}
 		UIFrame frame = ((UIFrame)frameStack.last());
 		Object oldScreen = ui.getCurrentScreen();
 		Object newScreen = frame.screen;
@@ -173,6 +177,7 @@ public final class UIServer {
 					frameStack.remove(idx);
 				}
 			}
+			displayCurrent();
 		}
 	}
 
