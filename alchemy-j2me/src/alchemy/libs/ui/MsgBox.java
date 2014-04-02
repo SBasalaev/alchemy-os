@@ -18,6 +18,7 @@
 
 package alchemy.libs.ui;
 
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.ImageItem;
@@ -58,5 +59,13 @@ public class MsgBox extends Form {
 	
 	public Image getImage() {
 		return image.getImage();
+	}
+
+	public void setFont(Font font) {
+		this.text.setFont(font);
+	}
+
+	public Font getFont() {
+		return text.getFont();
 	}
 }

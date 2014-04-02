@@ -82,5 +82,7 @@ ListBox.set
 ListBox.delete
 ListBox.getString
 ListBox.getImage
+ListBox.getFont
+ListBox.setFont
 ListBox.clear
 ListBox.len

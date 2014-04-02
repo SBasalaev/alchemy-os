@@ -20,6 +20,7 @@ package alchemy.libs;
 
 import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
+import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UICanvas;
 import alchemy.platform.Platform;
 import alchemy.platform.UI;
@@ -27,6 +28,7 @@ import alchemy.system.Cache;
 import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
 import alchemy.system.UIServer;
+import alchemy.types.Int32;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.microedition.lcdui.Command;
@@ -34,6 +36,8 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.TextBox;
 
 /**
  * User interface library for Alchemy OS.
@@ -82,11 +86,11 @@ public final class LibUI2 extends NativeLibrary {
 		switch (index) {
 			/* == Header: font.eh == */
 			case 0: // stringWidth(font: Int, str: String): Int
-				return Ival(int2font(ival(args[0])).stringWidth((String)args[1]));
+				return Ival(int2font((Int32)args[0]).stringWidth((String)args[1]));
 			case 1: // fontHeight(font: Int): Int
-				return Ival(int2font(ival(args[0])).getHeight());
+				return Ival(int2font((Int32)args[0]).getHeight());
 			case 2: // fontBaseline(font: Int): Int
-				return Ival(int2font(ival(args[0])).getBaselinePosition());
+				return Ival(int2font((Int32)args[0]).getBaselinePosition());
 
 			/* == Header: graphics.eh == */
 			case 3: // Graphics.getColor(): Int
@@ -100,9 +104,9 @@ public final class LibUI2 extends NativeLibrary {
 				((Graphics)args[0]).setStrokeStyle(ival(args[1]));
 				return null;
 			case 7: // Graphics.getFont(): Int
-				return Ival(font2int(((Graphics)args[0]).getFont()));
+				return font2int(((Graphics)args[0]).getFont());
 			case 8: // Graphics.setFont(font: Int)
-				((Graphics)args[0]).setFont(int2font(ival(args[1])));
+				((Graphics)args[0]).setFont(int2font((Int32)args[1]));
 				return null;
 			case 9: // Graphics.drawLine(x1: Int, y1: Int, x2: Int, y2: Int)
 				((Graphics)args[0]).drawLine(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]));
@@ -268,16 +272,103 @@ public final class LibUI2 extends NativeLibrary {
 			case 60: // Canvas.hasHoldEvent(): Bool
 				return Ival(((UICanvas)args[0]).hasRepeatEvents());
 
+			/* == Header: msgbox.eh == */
+			case 61: // MsgBox.new(text: String = "", image: Image = null)
+				return new MsgBox((String)p.getGlobal(null, "ui.title", p.getName()), (String)args[0], (Image)args[1]);
+			case 62: // MsgBox.getText(): String
+				return ((MsgBox)args[0]).getString();
+			case 63: // MsgBox.setText(text: String)
+				((MsgBox)args[0]).setString((String)args[1]);
+				return null;
+			case 64: // MsgBox.getImage(): Image
+				return ((MsgBox)args[0]).getImage();
+			case 65: // MsgBox.setImage(img: Image)
+				((MsgBox)args[0]).setImage((Image)args[1]);
+				return null;
+			case 66: // MsgBox.getFont(): Int
+				return font2int(((MsgBox)args[0]).getFont());
+			case 67: // MsgBox.setFont(font: Int)
+				((MsgBox)args[0]).setFont(int2font((Int32)args[1]));
+				return null;
+
+			/* == Header: editbox.eh == */
+			case 68: // EditBox.new(mode: Int = EDIT_ANY): EditBox
+				return new TextBox((String)p.getGlobal(null, "ui.title", p.getName()), (String)args[1], Short.MAX_VALUE, ival(args[0]));
+			case 69: // EditBox.getText(): String
+				return ((TextBox)args[0]).getString();
+			case 70: // EditBox.setText(text: String)
+				((TextBox)args[0]).setString((String)args[1]);
+				return null;
+			case 71: // EditBox.getMaxSize(): Int
+				return Ival(((TextBox)args[0]).getMaxSize());
+			case 72: // EditBox.setMaxSize(size: Int)
+				((TextBox)args[0]).setMaxSize(ival(args[1]));
+				return null;
+			case 73: // EditBox.getSize(): Int
+				return Ival(((TextBox)args[0]).size());
+			case 74: // EditBox.getCaret(): Int
+				return Ival(((TextBox)args[0]).getCaretPosition());
+
+			/* == Header: listbox.eh == */
+			case 75: { // ListBox.new(strings: [String], images: [Image], select: Menu): ListBox
+				Object[] objStrings = (Object[])args[0];
+				String[] strings = null;
+				if (objStrings != null) {
+					strings = new String[objStrings.length];
+					System.arraycopy(objStrings, 0, strings, 0, objStrings.length);
+				}
+				Object[] objImages = (Object[])args[1];
+				Image[] images = null;
+				if (objImages != null) {
+					images = new Image[objImages.length];
+					System.arraycopy(objImages, 0, images, 0, objImages.length);
+				}
+				List list = new List((String)p.getGlobal(null, "ui.title", p.getName()), List.IMPLICIT, strings, images);
+				list.setSelectCommand((Command)args[2]);
+				return list;
+			}
+			case 76: // ListBox.getIndex(): Int
+				return Ival(((List)args[0]).getSelectedIndex());
+			case 77: // ListBox.setIndex(index: Int)
+				((List)args[0]).setSelectedIndex(ival(args[1]), true);
+				return null;
+			case 78: // ListBox.add(str: String, img: Image = null)
+				((List)args[0]).append((String)args[1], (Image)args[2]);
+				return null;
+			case 79: // ListBox.insert(at: Int, str: String, img: Image = null)
+				((List)args[0]).insert(ival(args[1]), (String)args[2], (Image)args[3]);
+				return null;
+			case 80: // ListBox.set(at: Int, str: String, img: Image = null)
+				((List)args[0]).set(ival(args[1]), (String)args[2], (Image)args[3]);
+				return null;
+			case 81: // ListBox.delete(at: Int)
+				((List)args[0]).delete(ival(args[1]));
+				return null;
+			case 82: // ListBox.getString(at: Int): String
+				return ((List)args[0]).getString(ival(args[1]));
+			case 83: // ListBox.getImage(at: Int): Image
+				return ((List)args[0]).getImage(ival(args[1]));
+			case 84: // ListBox.getFont(at: Int): Font
+				return font2int(((List)args[0]).getFont(ival(args[1])));
+			case 85: // ListBox.setFont(at: Int, font: Int)
+				((List)args[0]).setFont(ival(args[1]), int2font((Int32)args[2]));
+				return null;
+			case 86: // ListBox.clear()
+				((List)args[0]).deleteAll();
+				return null;
+			case 87: // ListBox.len(): Int
+				return Ival(((List)args[0]).size());
+
 			default:
 				return null;
 		}
 	}
 
-	private static int font2int(Font f) {
-		return f.getFace() | f.getSize() | f.getStyle();
+	private static Int32 font2int(Font f) {
+		return Int32.toInt32(f.getFace() | f.getSize() | f.getStyle());
 	}
 	
-	private static Font int2font(int mask) {
-		return Font.getFont(mask & 0x60, mask & 0x7, mask & 0x18);
+	private static Font int2font(Int32 mask) {
+		return Font.getFont(mask.value & 0x60, mask.value & 0x7, mask.value & 0x18);
 	}
 }
