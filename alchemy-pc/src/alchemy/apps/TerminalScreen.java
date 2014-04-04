@@ -17,9 +17,9 @@
 package alchemy.apps;
 
 import alchemy.io.TerminalInput;
-import alchemy.libs.ui.UiPlatform;
 import alchemy.libs.ui.UiScreen;
 import alchemy.util.Strings;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,12 +34,13 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import static javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-import static javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
+import static javax.swing.JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED;
 
 /**
  * Terminal screen.
@@ -47,7 +48,7 @@ import static javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
  */
 public class TerminalScreen extends UiScreen {
 
-	private final Box widget;
+	private final JPanel widget;
 	private final JTextArea output;
 	private final JLabel prompt;
 	private final JTextField input;
@@ -59,13 +60,14 @@ public class TerminalScreen extends UiScreen {
 	final TerminalOutputStream out = new TerminalOutputStream();
 	final TerminalOutputStream err = out;
 
-	public TerminalScreen() {
-		widget = Box.createVerticalBox();
+	public TerminalScreen(String title) {
+		super(title);
+		widget = new JPanel(new BorderLayout());
 
 		output = new JTextArea();
 		output.setEditable(false);
 		output.setLineWrap(true);
-		JScrollPane outputPane = new JScrollPane(output, VERTICAL_SCROLLBAR_ALWAYS, HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane outputPane = new JScrollPane(output, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		outputPane.setPreferredSize(new Dimension(640, 480));
 
 		prompt = new JLabel();
@@ -93,8 +95,8 @@ public class TerminalScreen extends UiScreen {
 		inputBox.add(input);
 		inputBox.add(enter);
 
-		widget.add(outputPane);
-		widget.add(inputBox);
+		widget.add(outputPane, BorderLayout.CENTER);
+		widget.add(inputBox, BorderLayout.SOUTH);
 	}
 
 	private String waitForInput() {

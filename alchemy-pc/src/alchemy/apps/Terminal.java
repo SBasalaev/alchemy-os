@@ -68,8 +68,7 @@ public class Terminal extends NativeApp {
 		if (childCmd == null) childCmd = "sh";
 		String[] childArgs = cmdArgs.toArray(new String[0]);
 		// show terminal and start subprocess
-		TerminalScreen screen = new TerminalScreen();
-		screen.setTitle(childCmd + " - Terminal");
+		TerminalScreen screen = new TerminalScreen(childCmd + " - Terminal");
 		Process child = new Process(p, childCmd, childArgs);
 		child.stdin = screen.in;
 		child.stdout = screen.out;
