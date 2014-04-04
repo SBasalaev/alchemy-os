@@ -29,6 +29,7 @@ public final class UiCanvas extends UiScreen {
 	private final CanvasImpl impl;
 
 	public UiCanvas(boolean fullscreen) {
+		super(null);
 		impl = new CanvasImpl(this, UiPlatform.DEFAULT_WIDTH, UiPlatform.DEFAULT_HEIGHT);
 	}
 

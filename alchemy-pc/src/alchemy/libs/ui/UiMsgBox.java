@@ -16,7 +16,6 @@
  */
 package alchemy.libs.ui;
 
-import java.awt.Dimension;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -35,8 +34,8 @@ public final class UiMsgBox extends UiScreen {
 	private UiImage image;
 	private int font;
 
-	public UiMsgBox() {
-		image = null;
+	public UiMsgBox(String title, String text, UiImage image) {
+		super(title);
 		font = FontManager.DEFAULT_FONT;
 
 		imageLabel = new JLabel();
@@ -46,6 +45,9 @@ public final class UiMsgBox extends UiScreen {
 		widget = Box.createVerticalBox();
 		widget.add(imageLabel);
 		widget.add(textLabel);
+
+		setText(text);
+		setImage(image);
 	}
 
 	public String getText() {

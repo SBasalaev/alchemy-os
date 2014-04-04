@@ -30,7 +30,8 @@ public abstract class UiScreen {
 	private String title;
 	private Set<UiMenu> menus;
 
-	protected UiScreen() {
+	protected UiScreen(String title) {
+		this.title = title;
 		this.menus = new HashSet<UiMenu>();
 	}
 

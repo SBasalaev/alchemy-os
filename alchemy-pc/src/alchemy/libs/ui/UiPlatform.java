@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 <copyright-holder>
+ * Copyright (C) 2014 Sergey Basalaev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package alchemy.libs.ui;
 import alchemy.platform.UI;
 import alchemy.system.UIServer;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -46,11 +47,11 @@ public class UiPlatform implements UI {
 	private JMenuBar menuBar = new JMenuBar();
 
 	public UiPlatform() {
-		UiMsgBox msgbox = new UiMsgBox();
-		msgbox.setText("Nothing to display");
-		noscreen = msgbox;
+		noscreen = new UiMsgBox("Alchemy OS", "Nothing to display", null);
 
 		frame = new JFrame();
+		frame.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(menuBar, BorderLayout.SOUTH);
 		current = noscreen;
@@ -68,7 +69,7 @@ public class UiPlatform implements UI {
 
 		frame.remove(current.getWidget());
 		current = (UiScreen) screen;
-		frame.setTitle(current.getTitle() + " - Alchemy OS");
+		frame.setTitle(current.getTitle());
 		frame.add(current.getWidget(), BorderLayout.CENTER);
 
 		rebuildMenu(current.getMenus());
@@ -76,7 +77,7 @@ public class UiPlatform implements UI {
 	}
 
 	@Override public void setIcon(Object icon) {
-		
+		frame.setIconImage(((UiImage)icon).image);
 	}
 
 	@Override public boolean vibrate(int millis) {
@@ -91,7 +92,7 @@ public class UiPlatform implements UI {
 
 	@Override public void screenTitleChanged(Object screen, String title) {
 		if (screen == current) {
-			frame.setTitle(title + " - Alchemy OS");
+			frame.setTitle(title);
 		}
 	}
 
