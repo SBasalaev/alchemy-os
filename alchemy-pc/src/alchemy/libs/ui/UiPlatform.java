@@ -77,7 +77,7 @@ public class UiPlatform implements UI {
 	}
 
 	@Override public void setIcon(Object icon) {
-		frame.setIconImage(((UiImage)icon).image);
+		frame.setIconImage(icon == null ? null : ((UiImage)icon).image);
 	}
 
 	@Override public boolean vibrate(int millis) {

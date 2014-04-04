@@ -64,7 +64,7 @@ public final class UiMsgBox extends UiScreen {
 
 	public void setImage(UiImage image) {
 		this.image = image;
-		this.imageLabel.setIcon(new ImageIcon(image.image));
+		this.imageLabel.setIcon(image == null ? null : new ImageIcon(image.image));
 	}
 
 	public int getFont() {
