@@ -2,7 +2,7 @@ use "ui"
 
 type ListBox < Screen
 
-def ListBox.new(strings: [String], images: [Image], select: Menu): ListBox
+def ListBox.new(title: String, strings: [String], images: [Image], select: Menu): ListBox
 def ListBox.getIndex(): Int
 def ListBox.setIndex(index: Int)
 def ListBox.add(str: String, img: Image = null)

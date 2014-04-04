@@ -38,6 +38,7 @@ import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextBox;
+import javax.microedition.lcdui.TextField;
 
 /**
  * User interface library for Alchemy OS.
@@ -273,8 +274,8 @@ public final class LibUI2 extends NativeLibrary {
 				return Ival(((UICanvas)args[0]).hasRepeatEvents());
 
 			/* == Header: msgbox.eh == */
-			case 61: // MsgBox.new(text: String = "", image: Image = null)
-				return new MsgBox((String)p.getGlobal(null, "ui.title", p.getName()), (String)args[0], (Image)args[1]);
+			case 61: // MsgBox.new(title: String, text: String = null, image: Image = null)
+				return new MsgBox((String)args[0], (String)args[1], (Image)args[2]);
 			case 62: // MsgBox.getText(): String
 				return ((MsgBox)args[0]).getString();
 			case 63: // MsgBox.setText(text: String)
@@ -292,8 +293,8 @@ public final class LibUI2 extends NativeLibrary {
 				return null;
 
 			/* == Header: editbox.eh == */
-			case 68: // EditBox.new(mode: Int = EDIT_ANY): EditBox
-				return new TextBox((String)p.getGlobal(null, "ui.title", p.getName()), (String)args[1], Short.MAX_VALUE, ival(args[0]));
+			case 68: // EditBox.new(title: String, text: String = null): EditBox
+				return new TextBox((String)args[0], (String)args[1], Short.MAX_VALUE, TextField.ANY);
 			case 69: // EditBox.getText(): String
 				return ((TextBox)args[0]).getString();
 			case 70: // EditBox.setText(text: String)
@@ -310,21 +311,21 @@ public final class LibUI2 extends NativeLibrary {
 				return Ival(((TextBox)args[0]).getCaretPosition());
 
 			/* == Header: listbox.eh == */
-			case 75: { // ListBox.new(strings: [String], images: [Image], select: Menu): ListBox
-				Object[] objStrings = (Object[])args[0];
+			case 75: { // ListBox.new(title: String, strings: [String], images: [Image], select: Menu): ListBox
+				Object[] objStrings = (Object[])args[1];
 				String[] strings = null;
 				if (objStrings != null) {
 					strings = new String[objStrings.length];
 					System.arraycopy(objStrings, 0, strings, 0, objStrings.length);
 				}
-				Object[] objImages = (Object[])args[1];
+				Object[] objImages = (Object[])args[2];
 				Image[] images = null;
 				if (objImages != null) {
 					images = new Image[objImages.length];
 					System.arraycopy(objImages, 0, images, 0, objImages.length);
 				}
-				List list = new List((String)p.getGlobal(null, "ui.title", p.getName()), List.IMPLICIT, strings, images);
-				list.setSelectCommand((Command)args[2]);
+				List list = new List((String)args[0], List.IMPLICIT, strings, images);
+				list.setSelectCommand((Command)args[3]);
 				return list;
 			}
 			case 76: // ListBox.getIndex(): Int

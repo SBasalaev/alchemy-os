@@ -2,7 +2,7 @@ use "ui"
 
 type MsgBox < Screen
 
-def MsgBox.new(text: String = "", image: Image = null)
+def MsgBox.new(title: String = null, text: String = null, image: Image = null)
 def MsgBox.getText(): String
 def MsgBox.setText(text: String)
 def MsgBox.getImage(): Image
