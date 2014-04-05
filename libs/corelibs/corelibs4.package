@@ -1,6 +1,6 @@
 Source: corelibs4
 Section: libs
-Version: 2.2~noui1
+Version: 2.2.0
 Copyright: (c) 2011-2014 Sergey Basalaev
 Author: Sergey Basalaev <sbasalaev@gmail.com>
 License: GPL-3+exception
@@ -14,7 +14,7 @@ Conflicts: libcomm-dev, libcore-dev, libnet-dev, libmedia-dev, libui-dev
 Files:
  /lib/libcore.so
  /lib/libcoree.so
-# /lib/libui.so
+ /lib/libui.so
  /lib/libnet.so
  /lib/libmedia.so
  /lib/libcomm.so
@@ -34,7 +34,7 @@ Depends: ${libdeps}
 Files:
  /lib/libcore.4.so
  /lib/libcoree.4.so
-# /lib/libui.2.so
+ /lib/libui.2.so
  /lib/libnet.2.so
  /lib/libmedia.2.so
  /lib/libcomm.2.so
