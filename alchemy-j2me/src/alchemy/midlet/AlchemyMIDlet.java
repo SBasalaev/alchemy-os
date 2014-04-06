@@ -19,9 +19,10 @@
 package alchemy.midlet;
 
 import alchemy.fs.Filesystem;
-import alchemy.libs.ui.UIServer;
+import alchemy.platform.Platform;
 import alchemy.system.Process;
 import alchemy.system.ProcessListener;
+import alchemy.system.UIServer;
 import alchemy.util.Properties;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
@@ -40,7 +41,6 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 
 	public AlchemyMIDlet() {
 		instance = this;
-		UIServer.setDisplay(Display.getDisplay(this));
 		try {
 			if (!InstallInfo.exists()) {
 				kernelPanic("Alchemy is not installed.");
@@ -78,12 +78,14 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
-		UIServer.pushEvent(UIServer.currentScreen(), UIServer.EVENT_SHOW, null);
+		Object screen = Platform.getPlatform().getUI().getCurrentScreen();
+		UIServer.pushEvent(UIServer.EVENT_SHOW, screen, null);
 		UIServer.displayCurrent();
 	}
 
 	protected void pauseApp() {
-		UIServer.pushEvent(UIServer.currentScreen(), UIServer.EVENT_HIDE, null);
+		Object screen = Platform.getPlatform().getUI().getCurrentScreen();
+		UIServer.pushEvent(UIServer.EVENT_HIDE, screen, null);
 	}
 
 	protected void destroyApp(boolean unconditional) {

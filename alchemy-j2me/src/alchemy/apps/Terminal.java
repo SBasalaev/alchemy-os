@@ -18,10 +18,10 @@
 
 package alchemy.apps;
 
-import alchemy.libs.ui.UIServer;
 import alchemy.io.IO;
 import alchemy.system.NativeApp;
 import alchemy.system.Process;
+import alchemy.system.UIServer;
 import javax.microedition.lcdui.Command;
 
 /**
@@ -85,7 +85,7 @@ public class Terminal extends NativeApp {
 			child.stderr = form.out;
 			child.start();
 			while (child.getState() != Process.ENDED) {
-				Object[] event = (Object[])UIServer.readEvent(p, false);
+				Object[] event = UIServer.readEvent(p, false);
 				if (event != null && event[2] == cmdInput) synchronized (form) {
 					form.notify();
 				}
@@ -95,7 +95,7 @@ public class Terminal extends NativeApp {
 				form.addCommand(cmdClose);
 				Object[] event;
 				do {
-					event = (Object[])UIServer.readEvent(p, true);
+					event = UIServer.readEvent(p, true);
 				} while (event[2] != cmdClose);
 			}
 			return child.getExitCode();
