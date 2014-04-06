@@ -55,6 +55,8 @@ def EditItem.getText(): String
 def EditItem.setText(text: String)
 def EditItem.getMaxSize(): Int
 def EditItem.setMaxSize(size: Int)
+def EditItem.getEditable(): Bool
+def EditItem.setEditable(on: Bool)
 def EditItem.getSize(): Int
 def EditItem.getCaret(): Int
 
@@ -70,11 +72,15 @@ def GaugeItem.setValue(val: Int)
 def GaugeItem.getMaxValue(): Int
 def GaugeItem.setMaxValue(val: Int)
 
-type ProgressItem < GaugeItem
+type ProgressItem < Item
 
 const PROGRESS_INDEF = -1
 
 def ProgressItem.new(label: String, max: Int, init: Int)
+def GaugeItem.getValue(): Int
+def GaugeItem.setValue(val: Int)
+def GaugeItem.getMaxValue(): Int
+def GaugeItem.setMaxValue(val: Int)
 
 type DateItem <  Item
 

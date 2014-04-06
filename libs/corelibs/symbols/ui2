@@ -113,6 +113,8 @@ EditItem.getText
 EditItem.setText
 EditItem.getMaxSize
 EditItem.setMaxSize
+EditItem.getEditable
+EditItem.setEditable
 EditItem.getSize
 EditItem.getCaret
 PasswordItem.new
@@ -122,6 +124,10 @@ GaugeItem.setValue
 GaugeItem.getMaxValue
 GaugeItem.setMaxValue
 ProgressItem.new
+ProgressItem.getValue
+ProgressItem.setValue
+ProgressItem.getMaxValue
+ProgressItem.setMaxValue
 DateItem.new
 DateItem.getDate
 DateItem.setDate
