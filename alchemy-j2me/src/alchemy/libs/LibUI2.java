@@ -22,6 +22,7 @@ import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
 import alchemy.libs.ui.MsgBox;
 import alchemy.libs.ui.UICanvas;
+import alchemy.libs.ui.UIForm;
 import alchemy.platform.Platform;
 import alchemy.platform.UI;
 import alchemy.system.Cache;
@@ -29,14 +30,23 @@ import alchemy.system.NativeLibrary;
 import alchemy.system.Process;
 import alchemy.system.UIServer;
 import alchemy.types.Int32;
+import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import javax.microedition.lcdui.Choice;
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.DateField;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Gauge;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.ImageItem;
+import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextBox;
 import javax.microedition.lcdui.TextField;
 
@@ -82,6 +92,9 @@ public final class LibUI2 extends NativeLibrary {
 	}
 
 	private final UI ui = Platform.getPlatform().getUI();
+
+	/** Command for hyperlinks. */
+	private final Command hyperCommand = new Command("Go", Command.ITEM, 1);
 
 	protected Object invokeNative(int index, Process p, Object[] args) throws Exception {
 		switch (index) {
@@ -359,6 +372,217 @@ public final class LibUI2 extends NativeLibrary {
 				return null;
 			case 87: // ListBox.len(): Int
 				return Ival(((List)args[0]).size());
+
+			/* == Header: form.eh == */
+			case 88: // Form.new(title: String = null)
+				return new UIForm((String)args[0]);
+			case 89: // Item.getLabel(): String
+				return ((Item)args[0]).getLabel();
+			case 90: // Item.setLabel(label: String)
+				((Item)args[0]).setLabel((String)args[1]);
+				return null;
+			case 91: { // Form.add(item: Item)
+				((UIForm)args[0]).append((Item)args[1]);
+				return null;
+			}
+			case 92: // Form.get(at: Int): Item
+				return ((UIForm)args[0]).get(ival(args[1]));
+			case 93: // Form.set(at: Int, item: Item)
+				((UIForm)args[0]).set(ival(args[1]), (Item)args[2]);
+				return null;
+			case 94: // Form.insert(at: Int, item: Item)
+				((UIForm)args[0]).insert(ival(args[1]), (Item)args[2]);
+				return null;
+			case 95: // Form.remove(at: Int)
+				((UIForm)args[0]).delete(ival(args[1]));
+				return null;
+			case 96: // Form.size(): Int
+				return Ival(((UIForm)args[0]).size());
+			case 97: // Form.clear()
+				((UIForm)args[0]).deleteAll();
+				return null;
+			case 98: // TextItem.new(label: String, text: String)
+				return new StringItem((String)args[0], Strings.toString(args[1]) + '\n');
+			case 99: // TextItem.getText(): String
+				return ((StringItem)args[0]).getText();
+			case 100: // TextItem.setText(text: String)
+				((StringItem)args[0]).setText(Strings.toString(args[1]) + '\n');
+				return null;
+			case 101: // TextItem.getFont(): Int
+				return font2int(((StringItem)args[0]).getFont());
+			case 102: // TextItem.setFont(font: Int)
+				((StringItem)args[0]).setFont(int2font((Int32)args[1]));
+				return null;
+			case 103: { // HyperlinkItem.new(label: String, text: String)
+				Item item = new StringItem((String)args[0], (String)args[1], Item.HYPERLINK);
+				item.addCommand(hyperCommand);
+				return item;
+			}
+			case 104: // ImageItem.new(label: String, img: Image)
+				return new ImageItem((String)args[0], (Image)args[1], Item.LAYOUT_NEWLINE_AFTER, null);
+			case 105: // ImageItem.getImage(): Image
+				return ((ImageItem)args[0]).getImage();
+			case 106: // ImageItem.setImage(img: Image)
+				((ImageItem)args[0]).setImage((Image)args[1]);
+				return null;
+			case 107: // ImageItem.getAltText(): String
+				return ((ImageItem)args[0]).getAltText();
+			case 108: // ImageItem.setAltText(text: String)
+				((ImageItem)args[0]).setAltText((String)args[1]);
+				return null;
+			case 109: { // HyperimageItem.new(label: String, img: Image)
+				Item item = new ImageItem((String)args[0], (Image)args[1], Item.LAYOUT_NEWLINE_AFTER, null, Item.HYPERLINK);
+				item.addCommand(hyperCommand);
+				return item;
+			}
+			case 110: { // EditItem.new(label: String, text: String = "", mode: Int = EDIT_ANY, maxsize: Int = 50)
+				int mode = ival(args[2]);
+				if (mode < 0 || mode > 5) throw new IllegalArgumentException("invalid mode");
+				return new TextField((String)args[0], (String)args[1], ival(args[3]), mode);
+			}
+			case 111: // EditItem.getText(): String
+				return ((TextField)args[0]).getString();
+			case 112: // EditItem.setText(text: String)
+				((TextField)args[0]).setString((String)args[1]);
+				return null;
+			case 113: // EditItem.getMaxSize(): Int
+				return Ival(((TextField)args[0]).getMaxSize());
+			case 114: // EditItem.setMaxSize(size: Int)
+				((TextField)args[0]).setMaxSize(ival(args[1]));
+				return null;
+			case 115: // EditItem.getEditable(): Bool
+				return Ival((((TextField)args[0]).getConstraints() & TextField.UNEDITABLE) == 0);
+			case 116: { // EditItem.setEditable(on: Bool)
+				TextField editItem = (TextField) args[0];
+				int constraints = editItem.getConstraints();
+				if (bval(args[1])) {
+					constraints &= ~TextField.UNEDITABLE;
+				} else {
+					constraints |= TextField.UNEDITABLE;
+				}
+				editItem.setConstraints(constraints);
+				return null;
+			}
+			case 117: // EditItem.getSize(): Int
+				return Ival(((TextField)args[0]).size());
+			case 118: // EditItem.getCaret(): Int
+				return Ival(((TextField)args[0]).getCaretPosition());
+			case 119: // PasswordItem.new(label: String, text: String = "", maxsize: Int = 50)
+				return new TextField((String)args[0], (String)args[1], ival(args[2]), TextField.PASSWORD);
+			case 120: // GaugeItem.new(label: String, max: Int, init: Int)
+				return new Gauge((String)args[0], true, ival(args[0]), ival(args[1]));
+			case 121: // GaugeItem.getValue(): Int
+				return Ival(((Gauge)args[0]).getValue());
+			case 122: // GaugeItem.setValue(val: Int)
+				((Gauge)args[0]).setValue(ival(args[1]));
+				return null;
+			case 123: // GaugeItem.getMaxValue(): Int
+				return Ival(((Gauge)args[0]).getMaxValue());
+			case 124: // GaugeItem.setMaxValue(val: Int)
+				((Gauge)args[0]).setMaxValue(ival(args[1]));
+				return null;
+			case 125: { // ProgressItem.new(label: String, max: Int, init: Int)
+				int maxValue = ival(args[1]);
+				int initValue = ival(args[2]);
+				if (maxValue == Gauge.INDEFINITE) initValue = Gauge.CONTINUOUS_RUNNING;
+				return new Gauge((String)args[0], false, maxValue, initValue);
+			}
+			case 126: { // ProgressItem.getValue(): Int
+				Gauge g = (Gauge) args[0];
+				int value;
+				if (g.getMaxValue() == Gauge.INDEFINITE) {
+					value = 0;
+				} else {
+					value = g.getValue();
+				}
+				return Ival(value);
+			}
+			case 127: { // ProgressItem.setValue(val: Int)
+				Gauge g = (Gauge) args[0];
+				if (g.getMaxValue() != Gauge.INDEFINITE) {
+					g.setValue(ival(args[1]));
+				}
+				return null;
+			}
+			case 128: // ProgressItem.getMaxValue(): Int
+				return Ival(((Gauge)args[0]).getMaxValue());
+			case 129: { // ProgressItem.setMaxValue(val: Int)
+				Gauge g = (Gauge) args[0];
+				int maxValue = ival(args[1]);
+				g.setMaxValue(maxValue);
+				if (maxValue == Gauge.INDEFINITE) {
+					g.setValue(Gauge.CONTINUOUS_RUNNING);
+				}
+				return null;
+			}
+			case 130: // DateItem.new(label: String, mode: Int = DATE_ONLY)
+				return new DateField((String)args[0], ival(args[1]));
+			case 131: { // DateItem.getDate(): Long
+				Date date = ((DateField)args[0]).getDate();
+				return Lval(date == null ? 0L : date.getTime());
+			}
+			case 132: // DateItem.setDate(date: Long)
+				((DateField)args[0]).setDate(new Date(lval(args[1])));
+				return null;
+			case 133: { // CheckItem.new(label: String, text: String, checked: Bool)
+				ChoiceGroup check = new ChoiceGroup((String)args[0], Choice.MULTIPLE);
+				check.append((String)args[1], null);
+				check.setSelectedIndex(0, bval(args[2]));
+				return check;
+			}
+			case 134: { // CheckItem.getChecked(): Bool
+				boolean[] checked = new boolean[1];
+				((ChoiceGroup)args[0]).getSelectedFlags(checked);
+				return Ival(checked[0]);
+			}
+			case 135: // CheckItem.setChecked(checked: Bool)
+				((ChoiceGroup)args[0]).setSelectedIndex(0, bval(args[1]));
+				return null;
+			case 136: // CheckItem.getText(): String
+				return ((ChoiceGroup)args[0]).getString(0);
+			case 137: // CheckItem.setText(text: String)
+				((ChoiceGroup)args[0]).set(0, (String)args[1], null);
+				return null;
+			case 138: { // RadioItem.new(label: String, strings: [String])
+				Object[] array = (Object[])args[1];
+				String[] strings = new String[(array != null) ? array.length : 0];
+				if (array != null) {
+					System.arraycopy(array, 0, strings, 0, array.length);
+				}
+				return new ChoiceGroup((String)args[0], Choice.EXCLUSIVE, strings, null);
+			}
+			case 139: // RadioItem.getIndex(): Int
+				return Ival(((ChoiceGroup)args[0]).getSelectedIndex());
+			case 140: // RadioItem.setIndex(index: Int)
+				((ChoiceGroup)args[0]).setSelectedIndex(ival(args[1]), true);
+				return null;
+			case 141: // RadioItem.add(str: String)
+				((ChoiceGroup)args[0]).append((String)args[1], null);
+				return null;
+			case 142: // RadioItem.insert(at: Int, str: String)
+				((ChoiceGroup)args[0]).insert(ival(args[1]), (String)args[2], null);
+				return null;
+			case 143: // RadioItem.set(at: Int, str: String)
+				((ChoiceGroup)args[0]).set(ival(args[1]), (String)args[2], null);
+				return null;
+			case 144: // RadioItem.delete(at: Int)
+				((ChoiceGroup)args[0]).delete(ival(args[1]));
+				return null;
+			case 145: // RadioItem.get(at: Int): String
+				return ((ChoiceGroup)args[0]).getString(ival(args[1]));
+			case 146: // RadioItem.clear()
+				((ChoiceGroup)args[0]).deleteAll();
+				return null;
+			case 147: // RadioItem.len(): Int
+				return Ival(((ChoiceGroup)args[0]).size());
+			case 148: { // PopupItem.new(label: String, strings: [String]): PopupItem
+				Object[] array = (Object[])args[1];
+				String[] strings = new String[(array != null) ? array.length : 0];
+				if (array != null) {
+					System.arraycopy(array, 0, strings, 0, array.length);
+				}
+				return new ChoiceGroup((String)args[0], Choice.POPUP, strings, null);
+			}
 
 			default:
 				return null;
