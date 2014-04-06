@@ -31,6 +31,7 @@ import alchemy.types.*;
 import alchemy.util.ArrayList;
 import alchemy.util.HashMap;
 import alchemy.util.Strings;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
@@ -143,8 +144,14 @@ public class Parser {
 		String olddir = env.io.getCurrentDirectory();
 		files.add(file);
 		env.io.setCurrentDirectory(Filesystem.fileParent(file));
-		ConnectionInputStream in = new ConnectionInputStream(Filesystem.read(file));
-		env.io.addConnection(in);
+
+		//read file
+		ConnectionInputStream filein = new ConnectionInputStream(Filesystem.read(file));
+		env.io.addConnection(filein);
+		ByteArrayInputStream in = new ByteArrayInputStream(IO.readFully(filein));
+		filein.close();
+		env.io.removeConnection(filein);
+
 		t = new Tokenizer(env, file, new UTFReader(in));
 
 		// do parsing
@@ -328,12 +335,11 @@ public class Parser {
 		}
 
 		// pop file from stack and revert fields
+		in.close();
 		t = oldt;
 		env.io.setCurrentDirectory(olddir);
 		finishedFiles.add(files.last());
 		files.remove(-1);
-		in.close();
-		env.io.removeConnection(in);
 	}
 
 	private void parseTypeDef() throws IOException, ParseException {
