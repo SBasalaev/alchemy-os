@@ -46,7 +46,7 @@ public final class UIServer {
 	/** Event type for on-screen menu. */
 	public static final Int32 EVENT_MENU = Int32.ONE;
 	/** Event type for on-item menu. */
-	public static final Int32 EVENT_ITEM_MENU = Int32.toInt32(2);
+	public static final Int32 EVENT_HYPERLINK = Int32.toInt32(2);
 	/** Event type for canvas key press. */
 	public static final Int32 EVENT_KEY_PRESS = Int32.toInt32(3);
 	/** Event type for canvas key hold. */
@@ -151,7 +151,7 @@ public final class UIServer {
 	 * @throws IllegalStateException  if process is not mapped to a screen
 	 * @throws InterruptedException  if process was interrupted
 	 */
-	public static Object readEvent(Process p, boolean wait) throws IllegalStateException, InterruptedException {
+	public static Object[] readEvent(Process p, boolean wait) throws IllegalStateException, InterruptedException {
 		UIFrame frame = null;
 		synchronized (UIServer.class) {
 			int idx = frameIndex(p);
@@ -159,7 +159,7 @@ public final class UIServer {
 		}
 		if (frame == null) throw new IllegalStateException("Screen is not set");
 		synchronized (frame) {
-			Object e = frame.pop();
+			Object[] e = frame.pop();
 			if (e == null && wait) {
 				frame.wait();
 				e = frame.pop();
