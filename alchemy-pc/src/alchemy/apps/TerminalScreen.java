@@ -60,6 +60,8 @@ public class TerminalScreen extends UiScreen {
 	final TerminalOutputStream out = new TerminalOutputStream();
 	final TerminalOutputStream err = out;
 
+	private boolean withEOF = false;
+
 	public TerminalScreen(String title) {
 		super(title);
 		widget = new JPanel(new BorderLayout());
@@ -127,6 +129,10 @@ public class TerminalScreen extends UiScreen {
 		return widget;
 	}
 
+	public void sendEOF() {
+		withEOF = true;
+	}
+
 	private class TerminalInputStream extends InputStream implements TerminalInput {
 
 		private ByteArrayInputStream buf = new ByteArrayInputStream(new byte[0]);
@@ -142,6 +148,10 @@ public class TerminalScreen extends UiScreen {
 		public int read() throws IOException {
 			int b = buf.read();
 			if (b == -1) {
+				if (withEOF) {
+					withEOF = false;
+					return -1;
+				}
 				String data = waitForInput();
 				buf = new ByteArrayInputStream(Strings.utfEncode(data));
 				b = buf.read();
