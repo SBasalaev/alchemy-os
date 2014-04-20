@@ -45,15 +45,19 @@ public class UiPlatform implements UI {
 	private final UiScreen noscreen;
 
 	private JMenuBar menuBar = new JMenuBar();
+	private JMenu popup = new JMenu("Menu");
 
 	public UiPlatform() {
 		noscreen = new UiMsgBox("Alchemy OS", "Nothing to display", null);
+
+		menuBar.add(popup);
 
 		frame = new JFrame();
 		frame.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(menuBar, BorderLayout.SOUTH);
+		frame.add(menuBar, BorderLayout.NORTH);
+
 		current = noscreen;
 		setCurrentScreen(null);
 		frame.setVisible(true);
@@ -115,9 +119,9 @@ public class UiPlatform implements UI {
 				return m2.getPriority() - m1.getPriority();
 			}
 		});
-		menuBar.removeAll();
+		popup.removeAll();
 		for (UiMenu menu : list) {
-			menuBar.add(new JMenu(new MenuButtonAction(menu)));
+			popup.add(new MenuButtonAction(menu));
 		}
 	}
 

@@ -20,8 +20,12 @@ import alchemy.fs.Filesystem;
 import alchemy.io.ConnectionInputStream;
 import alchemy.io.IO;
 import alchemy.libs.ui.FontManager;
+import alchemy.libs.ui.UiCanvas;
+import alchemy.libs.ui.UiEditBox;
 import alchemy.libs.ui.UiImage;
+import alchemy.libs.ui.UiListBox;
 import alchemy.libs.ui.UiMenu;
+import alchemy.libs.ui.UiMsgBox;
 import alchemy.libs.ui.UiScreen;
 import alchemy.platform.Platform;
 import alchemy.platform.UI;
@@ -397,6 +401,113 @@ public final class LibUI2 extends NativeLibrary {
 				UIServer.displayCurrent();
 				return null;
 			}
+
+			/* == Header: canvas.eh == */
+			case 52: // Canvas.new(full: Bool = false): Canvas
+				return new UiCanvas(bval(args[0]));
+			case 53: // Canvas.graphics(): Graphics
+				return ((UiCanvas)args[0]).getGraphics();
+			case 54: // Canvas.repaint(x: Int, y: Int, w: Int, h: Int)
+				((UiCanvas)args[0]).repaint(ival(args[1]), ival(args[2]), ival(args[3]), ival(args[4]));
+				return null;
+			case 55: // Canvas.refresh()
+				((UiCanvas)args[0]).refresh();
+				return null;
+			case 56: // Canvas.actionCode(key: Int): Int
+				return Ival(((UiCanvas)args[0]).actionCode(ival(args[1])));
+			case 57: // Canvas.keyName(key: Int): String
+				return ((UiCanvas)args[0]).keyName(ival(args[1]));
+			case 58: // Canvas.hasPtrEvents(): Bool
+				return Ival(((UiCanvas)args[0]).hasPtrEvents());
+			case 59: // Canvas.hasPtrDragEvent(): Bool
+				return Ival(((UiCanvas)args[0]).hasPtrDragEvent());
+			case 60: // Canvas.hasHoldEvent(): Bool
+				return Ival(((UiCanvas)args[0]).hasHoldEvent());
+
+			/* == Header: msgbox.eh == */
+			case 61: // MsgBox.new(title: String, text: String = null, image: Image = null)
+				return new UiMsgBox((String)args[0], (String)args[1], (UiImage)args[2]);
+			case 62: // MsgBox.getText(): String
+				return ((UiMsgBox)args[0]).getText();
+			case 63: // MsgBox.setText(text: String)
+				((UiMsgBox)args[0]).setText((String)args[1]);
+				return null;
+			case 64: // MsgBox.getImage(): Image
+				return ((UiMsgBox)args[0]).getImage();
+			case 65: // MsgBox.setImage(img: Image)
+				((UiMsgBox)args[0]).setImage((UiImage)args[1]);
+				return null;
+			case 66: // MsgBox.getFont(): Int
+				return Ival(((UiMsgBox)args[0]).getFont());
+			case 67: // MsgBox.setFont(font: Int)
+				((UiMsgBox)args[0]).setFont(ival(args[1]));
+				return null;
+
+			/* == Header: editbox.eh == */
+			case 68: // EditBox.new(title: String, text: String = null): EditBox
+				return new UiEditBox((String)args[0], (String)args[1]);
+			case 69: // EditBox.getText(): String
+				return ((UiEditBox)args[0]).getText();
+			case 70: // EditBox.setText(text: String)
+				((UiEditBox)args[0]).setText((String)args[1]);
+				return null;
+			case 71: // EditBox.getMaxSize(): Int
+				return Ival(((UiEditBox)args[0]).getMaxSize());
+			case 72: // EditBox.setMaxSize(size: Int)
+				((UiEditBox)args[0]).setMaxSize(ival(args[1]));
+				return null;
+			case 73: // EditBox.getSize(): Int
+				return Ival(((UiEditBox)args[0]).getSize());
+			case 74: // EditBox.getCaret(): Int
+				return Ival(((UiEditBox)args[0]).getCaret());
+
+			/* == Header: listbox.eh == */
+			case 75: { // ListBox.new(title: String, strings: [String], images: [Image], select: Menu): ListBox
+				Object[] objStrings = (Object[])args[1];
+				String[] strings = null;
+				if (objStrings != null) {
+					strings = new String[objStrings.length];
+					System.arraycopy(objStrings, 0, strings, 0, objStrings.length);
+				}
+				Object[] objImages = (Object[])args[2];
+				UiImage[] images = null;
+				if (objImages != null) {
+					images = new UiImage[objImages.length];
+					System.arraycopy(objImages, 0, images, 0, objImages.length);
+				}
+				return new UiListBox((String)args[0], strings, images, (UiMenu)args[3]);
+			}
+			case 76: // ListBox.getIndex(): Int
+				return Ival(((UiListBox)args[0]).getIndex());
+			case 77: // ListBox.setIndex(index: Int)
+				((UiListBox)args[0]).setIndex(ival(args[1]));
+				return null;
+			case 78: // ListBox.add(str: String, img: Image = null)
+				((UiListBox)args[0]).add((String)args[1], (UiImage)args[2]);
+				return null;
+			case 79: // ListBox.insert(at: Int, str: String, img: Image = null)
+				((UiListBox)args[0]).insert(ival(args[1]), (String)args[2], (UiImage)args[3]);
+				return null;
+			case 80: // ListBox.set(at: Int, str: String, img: Image = null)
+				((UiListBox)args[0]).set(ival(args[1]), (String)args[2], (UiImage)args[3]);
+				return null;
+			case 81: // ListBox.delete(at: Int)
+				((UiListBox)args[0]).delete(ival(args[1]));
+				return null;
+			case 82: // ListBox.getString(at: Int): String
+				return ((UiListBox)args[0]).getString(ival(args[1]));
+			case 83: // ListBox.getImage(at: Int): Image
+				return ((UiListBox)args[0]).getImage(ival(args[1]));
+			case 84: // ListBox.getFont(at: Int): Font
+				return FontManager.getFontMask(((UiListBox)args[0]).getFont(ival(args[1])));
+			case 85: // ListBox.setFont(at: Int, font: Int)
+				((UiListBox)args[0]).setFont(ival(args[1]), FontManager.getFont(ival(args[2])));
+				return null;
+			case 86: // ListBox.clear()
+				((UiListBox)args[0]).clear();
+				return null;
+			case 87: // ListBox.len(): Int
+				return Ival(((UiListBox)args[0]).size());
 
 			default:
 				throw new RuntimeException("Not implemented");
