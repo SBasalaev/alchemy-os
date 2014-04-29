@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -348,9 +348,9 @@ class Tokenizer {
 					}
 					return nextToken();
 				}
-			} else {
-				nextch = ch2;
 			}
+			// to this point second character is a separate token
+			nextch = ch2;
 		}
 
 		return ttype = ch;
