@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,28 +18,24 @@
 
 package alchemy.platform;
 
+import alchemy.util.HashMap;
 import java.io.IOException;
 
 /**
- * Information about current installation.
- * Implementations of this interface load and store installation
- * information in platform-dependent manner.
+ * Current installation configuration.
+ * Implementations of this interface load and store
+ * installation information in platform-dependent
+ * manner. The HashMap returned by getConfig() should
+ * be used to read/write configuration and then save()
+ * should be called.
  *
  * @author Sergey Basalaev
  */
-public interface InstallInfo {
+public interface InstallCfg {
 	/** Tests if install information exists. */
 	boolean exists();
-	/** Returns name of the driver of the root filesystem. */
-	String getFilesystemDriver();
-	/** Returns options passed to the driver of the root filesystem. */
-	String getFilesystemOptions();
-	/** Writes filesystem info in the installation config. */
-	void setFilesystem(String driver, String options) throws IOException;
-	/** Returns version of the installed system. */
-	String getInstalledVersion();
-	/** Assigns new version to the installed system. */
-	void setInstalledVersion(String version);
+	/** Returns install configuration to read/write. */
+	HashMap getConfig();
 	/** Flushes changes to the installation config. */
 	void save() throws IOException;
 	/** Removes install information. */

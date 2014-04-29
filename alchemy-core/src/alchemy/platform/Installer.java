@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,40 +29,122 @@ import java.io.OutputStream;
 
 /**
  * Common installation routines.
+ * This class is used to acquire configuration
+ * and make necessary preparations for boot,
+ * install and update.
+ *
+ * <h4>Setup configuration</h4>
+ *
+ * Setup configuration is embedded in the program bundle
+ * in file /setup.cfg and stores information about platform.
+ * The following keys are defined in it:
+ * <table border="1">
+ * <tr>
+ * <th>Key</th>
+ * <th>Value</th>
+ * </tr>
+ * <tr>
+ * <td><code>version</code></td>
+ * <td>Version of Alchemy OS bundle.</td>
+ * </tr>
+ * <tr>
+ * <td><code>platform</code></td>
+ * <td>Target platform for this bundle. Possible values
+ * are <code>pc</code>, <code>j2me</code>, <code>android</code>.</td>
+ * </tr>
+ * <tr>
+ * <td><code>install.archives</code></td>
+ * <td>List of bundled archives to unpack on install/update.</td>
+ * </tr>
+ * <tr>
+ * <td><code>install.fs.*.name</code></td>
+ * <td>Name of the file system driver for the installer.</td>
+ * </tr>
+ * <tr>
+ * <td><code>install.fs.*.init</code></td>
+ * <td>Initial options for the file system driver.</td>
+ * </tr>
+ * <tr>
+ * <td>install.fs.*.test</td>
+ * <td>Name of the required class for the driver.</td>
+ * </tr>
+ * <tr>
+ * <td>install.fs.*.nav</td>
+ * <td>If set to true, the file system is navigable.</td>
+ * </tr>
+ * </table>
+ *
+ * <h4>Installation configuration</h4>
+ *
+ * Installation configuration is written when Alchemy OS
+ * is being installed/updated. It contains the following
+ * keys:
+ *
+ * <table border="1">
+ * <tr>
+ * <th>Key</th>
+ * <th>Value</th>
+ * </tr>
+ * <tr>
+ * <td><code>version</code></td>
+ * <td>Installed version of Alchemy OS.</td>
+ * </tr>
+ * <tr>
+ * <td><code>fs.driver</code></td>
+ * <td>The name of the driver used to mount root file system.</td>
+ * </tr>
+ * <tr>
+ * <td><code>fs.options</code></td>
+ * <td>The options to mount root file system.</td>
+ * </tr>
+ * </table>
  *
  * @author Sergey Basalaev
  */
 public final class Installer {
 
+	/** Configuration field that contains current version. */
+	public static final String VERSION = "version";
+	/** Configuration field that contains target platform. */
+	public static final String PLATFORM = "platform";
+	/** Configuration field that contains list of archives to unpack. */
+	public static final String ARCHIVES = "install.archives";
+	/** Configuration field that contains driver name for the root file system. */
+	public static final String FS_DRIVER = "fs.driver";
+	/** Configuration field that contains options for the root file system. */
+	public static final String FS_OPTIONS = "fs.options";
+
 	/** Configuration of installer. */
 	private final HashMap setupCfg;
 	/** Platform dependent config methods. */
-	private final InstallInfo info;
+	private final InstallCfg instCfg;
 
 	public Installer() throws IOException {
-		this.setupCfg = getSetupCfg();
-		String platform = setupCfg.get("platform").toString();
-		try {
-			Class infoClz = Class.forName("alchemy.platform." + platform + ".InstallInfo");
-			this.info = (InstallInfo) infoClz.newInstance();
-		} catch (ClassNotFoundException cnfe) {
-			throw new IOException("No InstallInfo for platform " + platform);
-		} catch (Exception e) {
-			throw new IOException(e.getMessage());
-		}
+		setupCfg = getSetupCfg();
+		instCfg = Platform.getPlatform().installCfg();
+	}
+
+	/** Returns configuration embedded in the current bundle. */
+	public HashMap getSetupConfig() {
+		return setupCfg;
+	}
+
+	/** Returns configuration stored on platform. */
+	public HashMap getInstalledConfig() {
+		return instCfg.getConfig();
 	}
 
 	/** Reads setup.cfg embedded in the jar. */
 	static HashMap getSetupCfg() throws IOException {
 		InputStream cfgin = Installer.class.getResourceAsStream("/setup.cfg");
 		if (cfgin == null) throw new IOException("setup.cfg not found");
-		HashMap map = readConfig(cfgin);
+		HashMap map = parseConfig(cfgin);
 		cfgin.close();
 		return map;
 	}
 
 	/** Parses configuration and returns it as key-value pairs. */
-	private static HashMap readConfig(InputStream input) throws IOException {
+	public static HashMap parseConfig(InputStream input) throws IOException {
 		HashMap map = new HashMap();
 		UTFReader r = new UTFReader(input);
 		String line;
@@ -76,7 +158,7 @@ public final class Installer {
 	}
 
 	/** Compares version strings. */
-	private int compareVersions(String v1, String v2) {
+	public static int compareVersions(String v1, String v2) {
 		String[] v1parts = Strings.split(v1, '.', false);
 		String[] v2parts = Strings.split(v2, '.', false);
 		int index = 0;
@@ -97,7 +179,7 @@ public final class Installer {
 
 	/** Returns true if Alchemy OS is installed. */
 	public boolean isInstalled() {
-		return info.exists();
+		return instCfg.exists();
 	}
 
 	/**
@@ -105,32 +187,36 @@ public final class Installer {
 	 * version is older then the current.
 	 */
 	public boolean isUpdateNeeded() {
-		return info.exists() && compareVersions(info.getInstalledVersion(), setupCfg.get("version").toString()) < 0;
+		return instCfg.exists() &&
+				compareVersions(instCfg.getConfig().get(VERSION).toString(), setupCfg.get(VERSION).toString()) < 0;
 	}
 
 	/**
 	 * Unpacks installer.
-	 * This method mounts root file system, unpacks base files
-	 * and then unmounts it.
+	 * This method mounts root file system, unpacks base
+	 * files, unmounts it and writes install configuration.
 	 */
 	public void install(String fsdriver, String fsoptions) throws IOException {
 		Filesystem.mount("", fsdriver, fsoptions);
 		unpackBaseSystem();
 		Filesystem.unmount("");
-		info.setInstalledVersion(setupCfg.get("version").toString());
-		info.setFilesystem(fsdriver, fsoptions);
-		info.save();
+		HashMap cfg = instCfg.getConfig();
+		cfg.set(VERSION, setupCfg.get(VERSION));
+		cfg.set(FS_DRIVER, fsdriver);
+		cfg.set(FS_OPTIONS, fsoptions);
+		instCfg.save();
 	}
 
 	/**
 	 * Unpacks installer and updates configuration.
 	 */
 	public void update() throws IOException {
-		Filesystem.mount("", info.getFilesystemDriver(), info.getFilesystemOptions());
+		HashMap cfg = instCfg.getConfig();
+		Filesystem.mount("", cfg.get(FS_DRIVER).toString(), cfg.get(FS_OPTIONS).toString());
 		unpackBaseSystem();
 		Filesystem.unmount("");
-		info.setInstalledVersion(setupCfg.get("version").toString());
-		info.save();
+		cfg.set(VERSION, setupCfg.get(VERSION));
+		instCfg.save();
 	}
 
 	/**
@@ -138,7 +224,7 @@ public final class Installer {
 	 * File system must be mounted before this method.
 	 */
 	private void unpackBaseSystem() throws IOException {
-		String[] archives = Strings.split(getSetupCfg().get("install.archives").toString(), ' ', true);
+		String[] archives = Strings.split(getSetupCfg().get(ARCHIVES).toString(), ' ', true);
 		for (int i=0; i<archives.length; i++) {
 			String arh = archives[i];
 			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));

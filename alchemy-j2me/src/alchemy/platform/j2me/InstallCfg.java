@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
 package alchemy.platform.j2me;
 
 import alchemy.io.IO;
-import alchemy.io.UTFReader;
+import alchemy.platform.Installer;
+import alchemy.util.HashMap;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,7 +45,7 @@ import javax.microedition.rms.RecordStoreNotFoundException;
  * </dl>
  * @author Sergey Basalaev
  */
-public final class InstallInfo implements alchemy.platform.InstallInfo {
+public final class InstallCfg implements alchemy.platform.InstallCfg {
 
 	private static final String INSTALLINFO = "installinfo";
 	/** Key for the installed version number. */
@@ -56,80 +57,48 @@ public final class InstallInfo implements alchemy.platform.InstallInfo {
 	/** Key for the current name of the record store used as emulated FS. */
 	private static final String RMS_NAME = "rms.name";
 
-	private String version;
-	private String fsdriver;
-	private String fsoptions;
+	private HashMap config;
+	private boolean isInstalled;
 
-	public InstallInfo() throws IOException {
+	public InstallCfg() throws IOException {
 		try {
 			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, false);
 			try {
-				byte[] b = rs.getRecord(1);
-				UTFReader r = new UTFReader(new ByteArrayInputStream(b));
-				String line;
-				while ((line = r.readLine()) != null) {
-					int eq = line.indexOf('=');
-					if (eq < 0) continue;
-					String key = line.substring(0, eq);
-					String value = line.substring(eq+1);
-					if (key.equals(INST_VERSION)) version = value;
-					else if (key.equals(FS_DRIVER)) fsdriver = value;
-					else if (key.equals(FS_OPTIONS)) fsoptions = value;
-				}
-				r.close();
+				config = Installer.parseConfig(new ByteArrayInputStream(rs.getRecord(1)));
 			} finally {
 				rs.closeRecordStore();
 			}
+			isInstalled = true;
 		} catch (RecordStoreNotFoundException rsnfe) {
 			// ok, not installed
+			config = new HashMap();
+			isInstalled = false;
 		} catch (Exception e) {
 			throw new IOException(e.toString());
 		}
 	}
 
 	public boolean exists() {
-		try {
-			RecordStore.openRecordStore(INSTALLINFO, false).closeRecordStore();
-			return true;
-		} catch (RecordStoreNotFoundException rsnfe) {
-			return false;
-		} catch (Exception e) {
-			throw new RuntimeException(e.toString());
-		}
+		return isInstalled;
 	}
 
-	public String getFilesystemDriver() {
-		return fsdriver;
-	}
-
-	public String getFilesystemOptions() {
-		return fsoptions;
-	}
-
-	public String getInstalledVersion() {
-		return version;
-	}
-
-	public void setFilesystem(String driver, String options) throws IOException {
-		fsdriver = driver;
-		fsoptions = options;
-	}
-
-	public void setInstalledVersion(String version) {
-		this.version = version;
+	public HashMap getConfig() {
+		return config;
 	}
 
 	public void save() throws IOException {
 		try {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			IO.println(out, INST_VERSION + '=' + version);
-			IO.println(out, FS_DRIVER + '=' + fsdriver);
-			IO.println(out, FS_OPTIONS + '=' + fsoptions);
+			Object[] keys = config.keys();
+			for (int i=0; i<keys.length; i++) {
+				IO.println(out, "" + keys[i] + '=' + config.get(keys[i]));
+			}
 			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, true);
 			if (rs.getNextRecordID() == 1) rs.addRecord(null, 0, 0);
 			byte[] data = out.toByteArray();
 			rs.setRecord(1, data, 0, data.length);
 			rs.closeRecordStore();
+			isInstalled = true;
 		} catch (Exception e) {
 			throw new RuntimeException(e.toString());
 		}
@@ -138,6 +107,7 @@ public final class InstallInfo implements alchemy.platform.InstallInfo {
 	public void remove() {
 		try {
 			RecordStore.deleteRecordStore(INSTALLINFO);
+			isInstalled = false;
 		} catch (RecordStoreNotFoundException rsnfe) {
 			// already removed
 		} catch (Exception e) {
