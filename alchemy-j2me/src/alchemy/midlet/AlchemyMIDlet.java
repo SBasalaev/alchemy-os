@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@
 package alchemy.midlet;
 
 import alchemy.fs.Filesystem;
+import alchemy.platform.Installer;
 import alchemy.platform.Platform;
 import alchemy.system.Process;
 import alchemy.system.ProcessListener;
 import alchemy.system.UIServer;
-import alchemy.util.Properties;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -42,13 +42,18 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 	public AlchemyMIDlet() {
 		instance = this;
 		try {
-			if (!InstallInfo.exists()) {
-				kernelPanic("Alchemy is not installed.");
+			Installer installer = new Installer();
+			if (!installer.isInstalled()) {
+				kernelPanic("Alchemy OS is not installed. Please, run Installer first.");
 				return;
 			}
-			Properties prop = InstallInfo.read();
-			Filesystem.mount("", prop.get(InstallInfo.FS_TYPE), prop.get(InstallInfo.FS_INIT));
-			//setting up environment
+			if (installer.isUpdateNeeded()) {
+				installer.update();
+			}
+			// setting up filesystem
+			Filesystem.mount("", installer.getFilesystemDriver(), installer.getFilesystemOptions());
+			Filesystem.mount("/dev", "devfs", "");
+			// setting up environment
 			root = new Process(null, "sh", new String[] {"/cfg/init"});
 			root.setEnv("PATH", "/bin");
 			root.setEnv("LIBPATH", "/lib");
@@ -102,7 +107,7 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 	}
 
 	public void processEnded(Process c) {
-			destroyApp(true);
+		destroyApp(true);
 	}
 
 	private void kernelPanic(String message) {

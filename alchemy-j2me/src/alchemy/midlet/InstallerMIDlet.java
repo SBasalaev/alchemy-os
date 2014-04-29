@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,11 +22,9 @@ import alchemy.fs.Filesystem;
 import alchemy.fs.FSDriver;
 import alchemy.fs.rms.Driver;
 import alchemy.io.IO;
-import alchemy.io.UTFReader;
+import alchemy.platform.Installer;
 import alchemy.util.ArrayList;
-import alchemy.util.Properties;
 import alchemy.util.Strings;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,51 +40,55 @@ import javax.microedition.rms.RecordStoreException;
  */
 public class InstallerMIDlet extends MIDlet implements CommandListener {
 
-	private static String ABOUT_TEXT;
+	private static final String ABOUT_TEXT =
+		"Alchemy OS %0" +
+		"\n\nCopyright (c) 2011-2014, Sergey Basalaev\n" +
+		"http://alchemy-os.org\n" +
+		"\n" +
+		"This program is free software and is licensed under GNU GPL version 3\n" +
+		"A copy of the GNU GPL may be found at http://www.gnu.org/licenses/\n";
+
 	private Displayable current;
 
 	private final Display display;
-	private final Form messages = new Form("Installer");
+	private final Form messages;
+	private final List menu;
 
-	/** Commands for main screen. */
-	private final Command cmdQuit = new Command("Quit", Command.SCREEN, 10);
-	private final Command cmdAbout = new Command("About", Command.SCREEN, 9);
-	private final Command cmdInstall = new Command("Install", Command.SCREEN, 1);
-	private final Command cmdUpdate = new Command("Update", Command.SCREEN, 2);
-	private final Command cmdUninstall = new Command("Uninstall", Command.SCREEN, 5);
-	private final Command cmdRebuild = new Command("Optimize FS", Command.SCREEN, 3);
-	
 	/** Dialog commands. */
-	private final Command cmdChoose = new Command("Choose", Command.OK, 1);
+	private final Command cmdMenu = new Command("Menu", Command.SCREEN, 1);
 
-//#if DEBUGLOG=="true"
-//# 	private final Command cmdShowLog = new Command("Show log", Command.SCREEN, 7);
-//# 	private final Command cmdClearLog = new Command("Clear log", Command.SCREEN, 8);
-//#endif
+	private static final int ACTION_INSTALL = 0;
+	private static final int ACTION_ABOUT = 1;
+	private static final int ACTION_QUIT = 2;
 	
-	private Properties setupCfg;
+	private Installer installer;
 
 	public InstallerMIDlet() {
-//#if DEBUGLOG=="true"
-//# 		Logger.log("Start: Installer");
-//#endif
+		// prepare screens
 		display = Display.getDisplay(this);
-		current = messages;
+
+		messages = new Form("Installer");
+		messages.addCommand(cmdMenu);
 		messages.setCommandListener(this);
+
+		menu = new List("Menu", List.IMPLICIT);
+		menu.setCommandListener(this);
+
+		current = messages;
+		display.setCurrent(current);
+
+		// prepare installer and menu
 		try {
-			setupCfg = Properties.readFrom(new UTFReader(getClass().getResourceAsStream("/setup.cfg")));
+			installer = new Installer();
 		} catch (Exception e) {
 			messages.append("Fatal error: "+"cannot read setup.cfg"+'\n'+e+'\n');
 			return;
 		}
-		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+
-			"\n\nCopyright (c) 2011-2013, Sergey Basalaev\n" +
-			"http://alchemy-os.org\n" +
-			"\n" +
-			"This MIDlet is free software and is licensed under GNU GPL version 3\n" +
-			"A copy of the GNU GPL may be found at http://www.gnu.org/licenses/\n";
+		menu.append(installer.isInstalled() ? "Uninstall" : "Install", null);
+		menu.append("About", null);
+		menu.append("Quit", null);
 
-		display.callSerially(new InstallerThread(0));
+//		display.callSerially(new InstallerThread(0));
 	}
 
 	protected void startApp() throws MIDletStateChangeException {
@@ -103,69 +105,11 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 	}
 
 	public void commandAction(Command c, Displayable d) {
-		if (c == cmdQuit) {
-			destroyApp(true);
-		} else if (c == cmdAbout) {
-			messages.deleteAll();
-			messages.append(ABOUT_TEXT);
-		//#if DEBUGLOG=="true"
-//# 		} else if (c == cmdShowLog) {
-//# 			messages.deleteAll();
-//# 			messages.append(Logger.getLog());
-//# 		} else if (c == cmdClearLog) {
-//# 			Logger.clearLog();
-		//#endif
-		} else if (c == cmdInstall) {
-			new InstallerThread(1).start();
-		} else if (c == cmdUninstall) {
-			new InstallerThread(2).start();
-		} else if (c == cmdUpdate) {
-			new InstallerThread(3).start();
-		} else if (c == cmdRebuild) {
-			new InstallerThread(4).start();
-		} else if (c == cmdChoose) {
-			synchronized (d) { d.notify(); }
-		}
-	}
-
-	private void check() {
-		if (InstallInfo.exists()) {
-			// fetching version
-			Properties instCfg = InstallInfo.read();
-			messages.append("Installed version: "+instCfg.get(InstallInfo.SYS_VERSION)+'\n');
-			messages.addCommand(cmdUninstall);
-			// testing whether update is needed
-			int vcmp = compareVersions(instCfg.get(InstallInfo.SYS_VERSION), setupCfg.get("alchemy.version"));
-			if (vcmp < 0) {
-				messages.append("Can be updated to "+setupCfg.get("alchemy.version")+'\n');
-				messages.addCommand(cmdUpdate);
-			}
-			// testing whether FS can be rebuilt
-			if (instCfg.get(InstallInfo.FS_TYPE).equals("rms")) {
-				messages.addCommand(cmdRebuild);
-			}
-		} else {
-			messages.append("Not installed"+'\n');
-			messages.addCommand(cmdInstall);
-		}
-	}
-	
-	private int compareVersions(String v1, String v2) {
-		String[] v1parts = Strings.split(v1, '.', false);
-		String[] v2parts = Strings.split(v2, '.', false);
-		int index = 0;
-		while (true) {
-			if (index < v1parts.length) {
-				int i1 = Integer.parseInt(v1parts[index]);
-				int i2 = (index < v2parts.length) ? Integer.parseInt(v2parts[index]) : 0;
-				if (i1 != i2) return i1-i2;
-			} else if (index < v2parts.length) {
-				int i2 = Integer.parseInt(v2parts[index]);
-				if (i2 != 0) return -i2;
-			} else {
-				return 0; // the two versions are equal
-			}
-			index++;
+		if (c == List.SELECT_COMMAND) {
+			new InstallerThread(menu.getSelectedIndex()).start();
+		} else if (c == cmdMenu) {
+			current = menu;
+			display.setCurrent(menu);
 		}
 	}
 
@@ -242,82 +186,11 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.append("Configuration removed"+'\n');
 		messages.addCommand(cmdInstall);
 	}
-
-	private void update() throws Exception {
-		messages.deleteAll();
-		//if filesystem is RMS, fill in needed field
-		Properties cfg = InstallInfo.read();
-		if ("rms".equals(cfg.get(InstallInfo.FS_TYPE)) && null == cfg.get(InstallInfo.RMS_NAME))
-			cfg.put(InstallInfo.RMS_NAME, cfg.get(InstallInfo.FS_INIT));
-		//installing new files
-		installFiles();
-		//writing configuration data
-		Properties instCfg = InstallInfo.read();
-		instCfg.put(InstallInfo.SYS_VERSION, setupCfg.get("alchemy.version"));
-		messages.append("Saving configuration..."+'\n');
-		InstallInfo.save();
-		messages.append("Launch Alchemy OS to finish update"+'\n');
-		messages.addCommand(cmdUninstall);
-	}
-
-	/**
-	 * Installs base system files and configuration in prepared file system.
-	 */
-	private void installFiles() throws Exception {
-		// open file system
-		Properties instCfg = InstallInfo.read();
-		Filesystem.mount("", instCfg.get(InstallInfo.FS_TYPE), instCfg.get(InstallInfo.FS_INIT));
-		// unpack base file archives
-		String[] archives = Strings.split(setupCfg.get("install.archives"), ' ', true);
-		for (int i=0; i<archives.length; i++) {
-			String arh = archives[i];
-			DataInputStream datastream = new DataInputStream(getClass().getResourceAsStream("/"+arh));
-			messages.append("Unpacking "+arh+'\n');
-			while (datastream.available() > 0) {
-				String fname = datastream.readUTF();
-				String f = '/'+fname;
-				datastream.skip(8); //timestamp
-				int attrs = datastream.readUnsignedByte();
-				if ((attrs & 16) != 0) { //directory
-					if (!Filesystem.exists(f)) Filesystem.mkdir(f);
-				} else {
-					if (!Filesystem.exists(f)) Filesystem.create(f);
-					byte[] data = new byte[datastream.readInt()];
-					datastream.readFully(data);
-					OutputStream out = Filesystem.write(f);
-					out.write(data);
-					out.flush();
-					out.close();
-				}
-				Filesystem.setRead(f, (attrs & 4) != 0);
-				Filesystem.setWrite(f, (attrs & 2) != 0);
-				Filesystem.setExec(f, (attrs & 1) != 0);
-			}
-			datastream.close();
-		}
-		Filesystem.remove("/PACKAGE");
-		// install /cfg/locale
-		if (!Filesystem.exists("/cfg/locale") || Filesystem.size("/cfg/locale") < 2) {
-			String property = System.getProperty("microedition.locale");
-			if (property == null) property = "en_US";
-			property = property.replace('-', '_');
-			OutputStream out = Filesystem.write("/cfg/locale");
-			out.write(Strings.utfEncode(property));
-			out.close();
-		}
-		// install /cfg/platform
-		OutputStream out = Filesystem.write("/cfg/platform");
-		out.write(Strings.utfEncode("Profiles: " + System.getProperty("microedition.profiles") + '\n'));
-		out.write(Strings.utfEncode("Configuration: " + System.getProperty("microedition.configuration") + '\n'));
-		out.close();
-		// close file system
-		Filesystem.unmount("");
-	}
 	
 	/** Should be only available when RMS file system is in use. */
 	private void rebuildFileSystem() throws Exception {
 		messages.deleteAll();
-		messages.append("Optimizing file system...\n");
+		messages.append("Optimizing RMS filesystem...\n");
 		// opening old FS
 		Properties cfg = InstallInfo.read();
 		String oldname = cfg.get(InstallInfo.RMS_NAME);
@@ -380,14 +253,6 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	private class InstallerThread extends Thread {
 
-		/**
-		 * Actions:
-		 *   0 - check
-		 *   1 - install
-		 *   2 - uninstall
-		 *   3 - update
-		 *   4 - rebuild FS
-		 */
 		private final int action;
 
 		public InstallerThread(int action) {
@@ -395,34 +260,27 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		}
 
 		public void run() {
-			messages.removeCommand(cmdQuit);
-			messages.removeCommand(cmdAbout);
-			messages.removeCommand(cmdInstall);
-			messages.removeCommand(cmdUninstall);
-			messages.removeCommand(cmdUpdate);
-			messages.removeCommand(cmdRebuild);
-//#if DEBUGLOG=="true"
-//# 			messages.removeCommand(cmdShowLog);
-//# 			messages.removeCommand(cmdClearLog);
-//#endif
+			display.setCurrent(messages);
 			try {
 				switch(action) {
-					case 0: check(); break;
-					case 1: install(); break;
-					case 2: uninstall(); break;
-					case 3: update(); break;
-					case 4: rebuildFileSystem();
+					case ACTION_INSTALL:
+						if (installer.isInstalled()) 
+							uninstall();
+						else
+							install();
+						break;
+					case ACTION_ABOUT:
+						messages.append(Strings.format(
+								ABOUT_TEXT,
+								new Object[] { installer.getSetupConfig().get("alchemy.version") }));
+						break;
+					case ACTION_QUIT:
+						destroyApp(true);
 				}
 			} catch (Throwable e) {
-				// e.printStackTrace();
+				e.printStackTrace();
 				messages.append("Fatal error: "+e.toString()+'\n');
 			}
-			messages.addCommand(cmdQuit);
-			messages.addCommand(cmdAbout);
-//#if DEBUGLOG=="true"
-//# 			messages.addCommand(cmdShowLog);
-//# 			messages.addCommand(cmdClearLog);
-//#endif
 		}
 	}
 }
