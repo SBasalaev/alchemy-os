@@ -29,12 +29,14 @@ public final class Platform {
 
 	private final Core core;
 	private final UI ui;
+	private final InstallCfg cfg;
 
 	private Platform() {
 		try {
 			String name = (String) Installer.getSetupCfg().get("platform");
-			core = (Core) load(name, "Core");
-			ui   = (UI)   load(name, "UI");
+			core = (Core)       load(name, "Core");
+			ui   = (UI)         load(name, "UI");
+			cfg  = (InstallCfg) load(name, "InstallCfg");
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 			throw new RuntimeException(ioe.toString());
@@ -63,5 +65,9 @@ public final class Platform {
 
 	public UI getUI() {
 		return ui;
+	}
+
+	public InstallCfg installCfg() {
+		return cfg;
 	}
 }

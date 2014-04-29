@@ -19,8 +19,6 @@
 package alchemy.nec;
 
 import alchemy.nec.syntax.Function;
-import alchemy.nec.syntax.expr.ConstExpr;
-import alchemy.nec.syntax.expr.Expr;
 import alchemy.nec.syntax.statement.*;
 
 /**
