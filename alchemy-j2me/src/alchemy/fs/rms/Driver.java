@@ -1,6 +1,6 @@
 /*
  * This file is a part of Alchemy OS project.
- *  Copyright (C) 2011-2013, Sergey Basalaev <sbasalaev@gmail.com>
+ *  Copyright (C) 2011-2014, Sergey Basalaev <sbasalaev@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,13 +20,12 @@ package alchemy.fs.rms;
 
 import alchemy.fs.FSDriver;
 import alchemy.fs.Filesystem;
-import alchemy.midlet.InstallInfo;
+import alchemy.util.HashMap;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Hashtable;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
 import javax.microedition.rms.RecordStoreFullException;
@@ -56,8 +55,8 @@ public final class Driver extends FSDriver {
 	 * Cache of file descriptors.
 	 * Maps file name to descriptor.
 	 */
-	private Hashtable fdCache = new Hashtable();
-	
+	private HashMap fdCache = new HashMap();
+
 	/**
 	 * Constructor to load through the reflection.
 	 * <code>init()</code> should be called before
@@ -70,8 +69,10 @@ public final class Driver extends FSDriver {
 		fd.record = 1;
 		fd.attrs = A_READ | A_WRITE | A_DIR;
 		rootFD = fd;
+	}
+
+	public void init(String name) throws IOException {
 		// initializing record store
-		String name = InstallInfo.read().get(InstallInfo.RMS_NAME);
 		RecordStore rs = null;
 		try {
 			try {
@@ -106,7 +107,7 @@ public final class Driver extends FSDriver {
 		dir.nodes[dir.count] = fd;
 		dir.count++;
 		dir.flush();
-		fdCache.put(file, fd);
+		fdCache.set(file, fd);
 	}
 
 	public synchronized void mkdir(String file) throws IOException {
@@ -124,7 +125,7 @@ public final class Driver extends FSDriver {
 		dir.nodes[dir.count] = fd;
 		dir.count++;
 		dir.flush();
-		fdCache.put(file, fd);
+		fdCache.set(file, fd);
 	}
 
 	public synchronized InputStream read(String file) throws IOException {
@@ -241,13 +242,13 @@ public final class Driver extends FSDriver {
 			if ((fd.attrs & A_READ) == 0) {
 				fd.attrs |= A_READ;
 				dir.flush();
-				fdCache.put(file, fd);
+				fdCache.set(file, fd);
 			}
 		} else {
 			if ((fd.attrs & A_READ) != 0) {
 				fd.attrs &= ~A_READ;
 				dir.flush();
-				fdCache.put(file, fd);
+				fdCache.set(file, fd);
 			}
 		}
 	}
@@ -265,13 +266,13 @@ public final class Driver extends FSDriver {
 			if ((fd.attrs & A_WRITE) == 0) {
 				fd.attrs |= A_WRITE;
 				dir.flush();
-				fdCache.put(file, fd);
+				fdCache.set(file, fd);
 			}
 		} else {
 			if ((fd.attrs & A_WRITE) != 0) {
 				fd.attrs &= ~A_WRITE;
 				dir.flush();
-				fdCache.put(file, fd);
+				fdCache.set(file, fd);
 			}
 		}
 	}
@@ -289,13 +290,13 @@ public final class Driver extends FSDriver {
 			if ((fd.attrs & A_EXEC) == 0) {
 				fd.attrs |= A_EXEC;
 				dir.flush();
-				fdCache.put(file, fd);
+				fdCache.set(file, fd);
 			}
 		} else {
 			if ((fd.attrs & A_EXEC) != 0) {
 				fd.attrs &= ~A_EXEC;
 				dir.flush();
-				fdCache.put(file, fd);
+				fdCache.set(file, fd);
 			}
 		}
 	}
@@ -315,7 +316,7 @@ public final class Driver extends FSDriver {
 			parentdir.flush();
 			// apply changes to cache
 			fdCache.remove(source);
-			fdCache.put(dest, destfd);
+			fdCache.set(dest, destfd);
 		} else {
 			// read both dirs
 			FD destdirfd = getFD(Filesystem.fileParent(dest));
@@ -335,7 +336,7 @@ public final class Driver extends FSDriver {
 			srcdir.flush();
 			// apply changes to cache
 			fdCache.remove(source);
-			fdCache.put(dest, destfd);
+			fdCache.set(dest, destfd);
 		}
 	}
 	
@@ -390,7 +391,7 @@ public final class Driver extends FSDriver {
 			int index = dir.getIndex(Filesystem.fileName(file));
 			if (index < 0) throw new IOException("File not found: "+file);
 			fd = dir.nodes[index];
-			fdCache.put(file, fd);
+			fdCache.set(file, fd);
 			return fd;
 		}
 	}
