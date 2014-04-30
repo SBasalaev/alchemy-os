@@ -79,7 +79,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			return;
 		}
 		ABOUT_TEXT = "Alchemy OS v"+setupCfg.get("alchemy.version")+
-			"\n\nCopyright (c) 2011-2013, Sergey Basalaev\n" +
+			"\n\nCopyright (c) 2011-2014, Sergey Basalaev\n" +
 			"http://alchemy-os.org\n" +
 			"\n" +
 			"This MIDlet is free software and is licensed under GNU GPL version 3\n" +
