@@ -25,6 +25,7 @@ import alchemy.fs.Filesystem;
 import alchemy.nec.tree.*;
 import alchemy.util.IO;
 import alchemy.util.UTFReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -36,7 +37,7 @@ import java.util.Vector;
  * @author Sergey Basalaev
  */
 public class Parser {
-	
+
 	// deprecated symbols
 	private static final Hashtable deprecated = new Hashtable();
 
@@ -164,8 +165,11 @@ public class Parser {
 		String olddir = p.getCurDir();
 		files.push(file);
 		p.setCurDir(Filesystem.fparent(file));
-		InputStream in = FSManager.fs().read(file);
-		p.addStream(in);
+		InputStream filein = FSManager.fs().read(file);
+		ByteArrayInputStream in = new ByteArrayInputStream(IO.readFully(filein));
+		p.addStream(filein);
+		filein.close();
+		p.removeStream(filein);
 		UTFReader fred = new UTFReader(in);
 		t = new Tokenizer(fred);
 		//parse
@@ -392,8 +396,6 @@ public class Parser {
 			}
 		}
 		//move file to parsed
-		in.close();
-		p.removeStream(in);
 		t = oldt;
 		p.setCurDir(olddir);
 		parsed.addElement(files.pop());
