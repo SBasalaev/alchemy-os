@@ -24,6 +24,7 @@ import alchemy.fs.rms.Driver;
 import alchemy.io.IO;
 import alchemy.platform.Installer;
 import alchemy.util.ArrayList;
+import alchemy.util.HashMap;
 import alchemy.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +57,11 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 
 	/** Dialog commands. */
 	private final Command cmdMenu = new Command("Menu", Command.SCREEN, 1);
+
+	private final Command cmdYes = new Command("Yes", Command.OK, 1);
+	private final Command cmdNo = new Command("No", Command.CANCEL, 2);
+
+	private Command selected;
 
 	private static final int ACTION_INSTALL = 0;
 	private static final int ACTION_ABOUT = 1;
@@ -110,19 +116,25 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		} else if (c == cmdMenu) {
 			current = menu;
 			display.setCurrent(menu);
+		} else {
+			selected = c;
+			synchronized (this) {
+				this.notify();
+			}
 		}
 	}
 
 	private void install() throws Exception {
 		messages.deleteAll();
-		Properties instCfg = InstallInfo.read();
-		instCfg.put(InstallInfo.RMS_NAME, "rsfiles");
+		HashMap instCfg = installer.getInstalledConfig();
+		HashMap setupCfg = installer.getSetupConfig();
+		instCfg.set("rms.name", "rsfiles");
 		//choosing filesystem
 		ArrayList filesystems = new ArrayList();
-		String[] fstypes = Strings.split(setupCfg.get("install.fs"), ' ', true);
+		String[] fstypes = Strings.split((String)setupCfg.get("install.fs"), ' ', true);
 		for (int i=0; i<fstypes.length; i++) {
 			try {
-				Class.forName(setupCfg.get("install.fs."+fstypes[i]+".test"));
+				Class.forName((String)setupCfg.get("install.fs." + fstypes[i] + ".test"));
 				filesystems.add(fstypes[i]);
 			} catch (ClassNotFoundException cnfe) {
 				// skip this file system
@@ -130,10 +142,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		}
 		final List fschoice = new List("Choose filesystem", Choice.IMPLICIT);
 		for (int i=0; i<filesystems.size(); i++) {
-			fschoice.append(setupCfg.get("install.fs."+filesystems.get(i)+".name"), null);
+			fschoice.append((String)setupCfg.get("install.fs." + filesystems.get(i) + ".name"), null);
 		}
-		fschoice.addCommand(cmdChoose);
-		fschoice.setSelectCommand(cmdChoose);
 		fschoice.setCommandListener(this);
 		display.setCurrent(fschoice);
 		synchronized (fschoice) {
@@ -142,11 +152,9 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		String selectedfs = filesystems.get(fschoice.getSelectedIndex()).toString();
 		messages.append("Selected filesystem: "+fschoice.getString(fschoice.getSelectedIndex())+'\n');
 		//choosing root path if needed
-		String fsinit = setupCfg.get("install.fs."+selectedfs+".init");
+		String fsinit = (String) setupCfg.get("install.fs." + selectedfs + ".init");
 		if (fsinit == null) fsinit = "";
-		String neednav = setupCfg.get("install.fs."+selectedfs+".nav");
-		instCfg.put(InstallInfo.FS_TYPE, selectedfs);
-		instCfg.put(InstallInfo.FS_INIT, fsinit);
+		String neednav = (String) setupCfg.get("install.fs." + selectedfs + ".nav");
 		if ("true".equals(neednav)) {
 			final FSNavigator navigator = new FSNavigator(display, selectedfs);
 			display.setCurrent(navigator);
@@ -155,36 +163,34 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 			}
 			String path = navigator.getCurrentDir();
 			if (path == null) throw new Exception("Installation aborted");
-			instCfg.put(InstallInfo.FS_INIT, path);
+			fsinit = path;
 			messages.append("Selected path: "+path+'\n');
 		}
 		display.setCurrent(messages);
 		//installing base files
-		installFiles();
-		//writing configuration data
-		instCfg.put(InstallInfo.SYS_VERSION, setupCfg.get("alchemy.version"));
+		installer.install(selectedfs, fsinit);
 		//writing install config
 		messages.append("Saving configuration..."+'\n');
-		InstallInfo.save();
+		installer.saveInstalledConfig();
 		messages.append("Launch Alchemy OS to finish installation"+'\n');
-		messages.addCommand(cmdUninstall);
 	}
 
 	private void uninstall() throws Exception {
 		messages.deleteAll();
 		messages.append("Uninstalling..."+'\n');
+		HashMap instCfg = installer.getInstalledConfig();
 		//purging filesystem
-		Properties instCfg = InstallInfo.read();
-		if (instCfg.get(InstallInfo.FS_TYPE).equals("rms")) {
-			try {
-				RecordStore.deleteRecordStore(instCfg.get(InstallInfo.RMS_NAME));
-				messages.append("Filesystem erased"+'\n');
-			} catch (RecordStoreException rse) { }
+		if (question("Do you want to erase internal file system?")) {
+			if (instCfg.get(Installer.FS_DRIVER).equals("rms")) {
+				try {
+					RecordStore.deleteRecordStore((String)instCfg.get("rms.name"));
+					messages.append("File system erased"+'\n');
+				} catch (RecordStoreException rse) { }
+			}
 		}
 		//removing config
-		InstallInfo.remove();
+		installer.removeInstalledConfig();
 		messages.append("Configuration removed"+'\n');
-		messages.addCommand(cmdInstall);
 	}
 	
 	/** Should be only available when RMS file system is in use. */
@@ -192,13 +198,13 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		messages.deleteAll();
 		messages.append("Optimizing RMS filesystem...\n");
 		// opening old FS
-		Properties cfg = InstallInfo.read();
-		String oldname = cfg.get(InstallInfo.RMS_NAME);
+		HashMap cfg = installer.getInstalledConfig();
+		String oldname = (String)cfg.get("rms.name");
 		Driver oldfs = new Driver();
 		long oldlen = oldfs.spaceUsed();
 		// creating new FS
 		String newname = (oldname.equals("rsfiles")) ? "rsfiles2" : "rsfiles";
-		cfg.put(InstallInfo.RMS_NAME, newname);
+		cfg.set("rms.name", newname);
 		try {
 			RecordStore.deleteRecordStore(newname);
 		} catch (RecordStoreException rse) { }
@@ -216,8 +222,8 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		newfs.close();
 		// writing configuration
 		messages.append("Saving configuration...\n");
-		cfg.put(InstallInfo.RMS_NAME, newname);
-		InstallInfo.save();
+		cfg.set("rms.name", newname);
+		installer.saveInstalledConfig();
 		// removing old FS
 		RecordStore.deleteRecordStore(oldname);
 		messages.append("Optimization complete.\n");
@@ -251,6 +257,23 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 		to.setRead(file, fRead);
 	}
 
+	private boolean question(String msg) {
+		final Alert alert = new Alert("Installer", msg, null, AlertType.WARNING);
+		alert.setTimeout(Alert.FOREVER);
+		alert.addCommand(cmdYes);
+		alert.addCommand(cmdNo);
+		alert.setCommandListener(this);
+		display.setCurrent(alert);
+		try {
+			synchronized (this) {
+				this.wait();
+			}
+			return selected == cmdYes;
+		} catch (InterruptedException ie) {
+			return false;
+		}
+	}
+
 	private class InstallerThread extends Thread {
 
 		private final int action;
@@ -272,7 +295,7 @@ public class InstallerMIDlet extends MIDlet implements CommandListener {
 					case ACTION_ABOUT:
 						messages.append(Strings.format(
 								ABOUT_TEXT,
-								new Object[] { installer.getSetupConfig().get("alchemy.version") }));
+								new Object[] { installer.getSetupConfig().get(Installer.VERSION) }));
 						break;
 					case ACTION_QUIT:
 						destroyApp(true);

@@ -24,6 +24,7 @@ import alchemy.platform.Platform;
 import alchemy.system.Process;
 import alchemy.system.ProcessListener;
 import alchemy.system.UIServer;
+import alchemy.util.HashMap;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -51,7 +52,8 @@ public class AlchemyMIDlet extends MIDlet implements CommandListener, ProcessLis
 				installer.update();
 			}
 			// setting up filesystem
-			Filesystem.mount("", installer.getFilesystemDriver(), installer.getFilesystemOptions());
+			HashMap cfg = installer.getInstalledConfig();
+			Filesystem.mount("", (String)cfg.get(Installer.FS_DRIVER), (String)cfg.get(Installer.FS_OPTIONS));
 			Filesystem.mount("/dev", "devfs", "");
 			// setting up environment
 			root = new Process(null, "sh", new String[] {"/cfg/init"});

@@ -48,14 +48,6 @@ import javax.microedition.rms.RecordStoreNotFoundException;
 public final class InstallCfg implements alchemy.platform.InstallCfg {
 
 	private static final String INSTALLINFO = "installinfo";
-	/** Key for the installed version number. */
-	private static final String INST_VERSION = "alchemy.version";
-	/** Key for the string used to initialize root file system. */
-	private static final String FS_DRIVER = "fs.type";
-	/** Key for the type of the root file system. */
-	private static final String FS_OPTIONS = "fs.init";
-	/** Key for the current name of the record store used as emulated FS. */
-	private static final String RMS_NAME = "rms.name";
 
 	private HashMap config;
 	private boolean isInstalled;
@@ -65,6 +57,11 @@ public final class InstallCfg implements alchemy.platform.InstallCfg {
 			RecordStore rs = RecordStore.openRecordStore(INSTALLINFO, false);
 			try {
 				config = Installer.parseConfig(new ByteArrayInputStream(rs.getRecord(1)));
+				// for compatibility with Release 2.1
+				if (config.get("alchemy.version") != null) {
+					config.set(Installer.VERSION, config.get("alchemy.version"));
+					config.remove("alchemy.version");
+				}
 			} finally {
 				rs.closeRecordStore();
 			}
@@ -106,6 +103,7 @@ public final class InstallCfg implements alchemy.platform.InstallCfg {
 
 	public void remove() {
 		try {
+			config.clear();
 			RecordStore.deleteRecordStore(INSTALLINFO);
 			isInstalled = false;
 		} catch (RecordStoreNotFoundException rsnfe) {
