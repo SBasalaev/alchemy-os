@@ -134,6 +134,16 @@ public final class Installer {
 		return instCfg.getConfig();
 	}
 
+	/** Writes configuration modifications. */
+	public void saveInstalledConfig() throws IOException {
+		instCfg.save();
+	}
+
+	/** Purges configuration turning Alchemy OS in uninstalled state. */
+	public void removeInstalledConfig() throws IOException {
+		instCfg.remove();
+	}
+
 	/** Reads setup.cfg embedded in the jar. */
 	static HashMap getSetupCfg() throws IOException {
 		InputStream cfgin = Installer.class.getResourceAsStream("/setup.cfg");
