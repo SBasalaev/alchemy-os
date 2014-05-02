@@ -465,9 +465,9 @@ class Tokenizer {
 					}
 					return nextToken();
 				}
-			} else {
-				nextch = ch2;
 			}
+			// to this point second character is separate token
+			nextch = ch2;
 		}
 
 		return ttype = ch;
